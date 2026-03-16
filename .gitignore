@@ -1,0 +1,63 @@
+# IDE and Editor files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node.js (if any tooling is added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log*
+
+# Environment and local config
+.env
+.env.local
+.env.*.local
+*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Python (if any scripts are added)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+ENV/
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Claude Code / AI artifacts (if any temp files are generated)
+.claude/
+*.ai.tmp
