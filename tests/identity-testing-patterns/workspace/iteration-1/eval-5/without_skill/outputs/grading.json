@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Test with role=admin claims asserts HttpStatusCode.NoContent (204)", "pass": true, "rationale": "Admin test asserts HttpStatusCode.NoContent"},
+    {"assertion": "Test with role=viewer claims asserts HttpStatusCode.Forbidden (403)", "pass": true, "rationale": "Viewer test asserts HttpStatusCode.Forbidden"},
+    {"assertion": "Test with no claims (unauthenticated) asserts HttpStatusCode.Unauthorized (401)", "pass": true, "rationale": "No-auth test sets Claims = null and asserts HttpStatusCode.Unauthorized"},
+    {"assertion": "Each test sets distinct claims via the TestClaimsProvider before making the request", "pass": false, "rationale": "Uses static FakeAuthHandler.Claims property, not a TestClaimsProvider interface"},
+    {"assertion": "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests", "pass": false, "rationale": "Creates a new TestFactory instance per test instead of using IClassFixture<T>"}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

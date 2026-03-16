@@ -1,0 +1,107 @@
+{
+  "skill_name": "identityserver-aspire",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have an Aspire AppHost with a SQL Server, an IdentityServer project, a Weather API, and a web app. Wire up the full dependency graph in Program.cs so that IdentityServer waits for the database, and both the API and web app wait for IdentityServer before starting.",
+      "expected_output": "A Program.cs with SQL Server + database resource, IdentityServer project with WithReference(identityDb) and WaitFor(sqlServer), and both API and web app projects with WithReference(identityServer) and WaitFor(identityServer).",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/AppHost.csproj"
+      ],
+      "assertions": [
+        "Program.cs calls builder.AddSqlServer() to create a SQL Server resource",
+        "Program.cs calls .AddDatabase() to create a database resource from the SQL Server",
+        "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource",
+        "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+        "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My web app needs the OIDC authority URL, client ID, and scopes passed from the AppHost. My API just needs the authority URL. Show me how to use WithEnvironment to pass Authentication__Authority, Authentication__ClientId, and scopes to the web app, and just the authority to the API. Use identityServer.GetEndpoint(\"https\") for the authority URL.",
+      "expected_output": "AppHost code using WithEnvironment to pass Authentication__Authority via GetEndpoint('https'), Authentication__ClientId, and Authentication__Scopes__0/1/2 to the web app, and Authentication__Authority to the API.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/AppHost.csproj"
+      ],
+      "assertions": [
+        "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+        "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+        "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+        "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+        "The code does NOT set IssuerUri unless explicitly needed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to add IdentityServer's OpenTelemetry trace sources and metrics to my Aspire service defaults project. Show me what source names to add for tracing and what meter name to add for metrics. Do NOT reference any Duende NuGet packages from the service defaults project.",
+      "expected_output": "Code adding string literal trace sources ('Duende.IdentityServer', 'Duende.IdentityServer.Cache', 'Duende.IdentityServer.Services', 'Duende.IdentityServer.Stores', 'Duende.IdentityServer.Validation') and the 'Duende.IdentityServer' meter.",
+      "files": [],
+      "assertions": [
+        "The tracing configuration includes .AddSource(\"Duende.IdentityServer\")",
+        "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)",
+        "The metrics configuration includes .AddMeter(\"Duende.IdentityServer\")",
+        "All source and meter names are string literals, not constants from any Duende package"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to run 3 replicas of IdentityServer in my Aspire AppHost. What do I need to configure for this to work correctly? Show me the AppHost code with WithReplicas and explain the shared state requirements.",
+      "expected_output": "AppHost code with .WithReplicas(3) and explanation that shared signing key store, shared data protection keys, shared operational store (persisted grants, sessions), and distributed cache are required across all replicas.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/AppHost.csproj"
+      ],
+      "assertions": [
+        "The code uses .WithReplicas(3) on the IdentityServer project resource",
+        "The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement",
+        "The response mentions shared ASP.NET Data Protection keys as a requirement",
+        "The response mentions shared operational store (persisted grants, device codes, or server-side sessions) as a requirement",
+        "The response warns against using file-based signing keys or in-memory stores with multiple replicas"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "My APIs are failing with 'IDX20803: Unable to obtain configuration from .well-known/openid-configuration' when starting in Aspire. How do I fix this?",
+      "expected_output": "The fix is to add both WithReference(identityServer) and WaitFor(identityServer) to the API project in the AppHost, and ensure IdentityServer has health checks configured so WaitFor can determine readiness.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "The response identifies the root cause as the API starting before IdentityServer is ready",
+        "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+        "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+        "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I want to use a dedicated migration runner project in Aspire so that database migrations complete before IdentityServer starts. Show me how to wire the dependency graph in the AppHost: SQL Server -> migration runner -> IdentityServer.",
+      "expected_output": "AppHost code where the migration runner project depends on SQL Server via WaitFor, and IdentityServer uses WaitFor(migrations) to wait for the migration runner to complete before starting.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/AppHost.csproj"
+      ],
+      "assertions": [
+        "The migration runner project has .WithReference() for the database resource",
+        "The migration runner project has .WaitFor() for the SQL Server or database resource",
+        "The IdentityServer project uses .WaitFor() referencing the migration runner project, not directly waiting for SQL Server",
+        "The IdentityServer project still has .WithReference() for the database resource so it gets the connection string"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Write an integration test fixture for an Aspire solution that includes IdentityServer. The fixture should start the AppHost, wait for IdentityServer to be healthy, and provide helper methods to get the authority URL and create an HttpClient for the weather API.",
+      "expected_output": "An xUnit IAsyncLifetime test fixture that creates a DistributedApplicationTestingBuilder, builds and starts the app, waits for the identity-server resource to be healthy, and exposes GetAuthorityUrl() and CreateApiClient() helper methods.",
+      "files": [],
+      "assertions": [
+        "The fixture class implements IAsyncLifetime with InitializeAsync and DisposeAsync methods",
+        "InitializeAsync uses DistributedApplicationTestingBuilder.CreateAsync to build the AppHost",
+        "The fixture calls WaitForResourceHealthyAsync(\"identity-server\") or equivalent to wait for IdentityServer readiness",
+        "The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent",
+        "DisposeAsync calls StopAsync and/or DisposeAsync on the DistributedApplication to clean up"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "skill_name": "identityserver4-migration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have an IdentityServer4 v4.1.2 project targeting netcoreapp3.1 with EF Core stores using SQL Server. I need to upgrade to Duende IdentityServer v7. What NuGet package changes do I need to make, and what target framework should I use?",
+      "expected_output": "Replace IdentityServer4 packages with Duende equivalents (Duende.IdentityServer, Duende.IdentityServer.EntityFramework, etc.), update IdentityModel to Duende.IdentityModel, update the target framework to net8.0 or net10.0, and update Microsoft.EntityFrameworkCore packages to match.",
+      "files": [
+        "files/begin-state/IdentityServerMigrationSample.csproj"
+      ],
+      "assertions": [
+        "Response replaces IdentityServer4.EntityFramework with Duende.IdentityServer.EntityFramework",
+        "Response specifies upgrading the target framework from netcoreapp3.1 to net8.0, net9.0 or net10.0 (or later)",
+        "Response updates Microsoft.EntityFrameworkCore.SqlServer to a version compatible with the new target framework (8.0+ or 9.0+)",
+        "Response mentions replacing IdentityModel with Duende.IdentityModel if used",
+        "Response mentions that Duende.IdentityServer requires a license key for production use"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Migrate this IdentityServer4 Startup.cs to Duende IdentityServer using the minimal hosting model. The project uses EF Core stores with SQL Server. Keep the same connection string and migration assembly configuration.",
+      "expected_output": "A Program.cs using WebApplication.CreateBuilder with Duende.IdentityServer namespaces, AddIdentityServer with AddConfigurationStore and AddOperationalStore, and the correct middleware pipeline order using minimal hosting APIs.",
+      "files": [
+        "files/begin-state/Startup.cs",
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServerMigrationSample.csproj"
+      ],
+      "assertions": [
+        "Output uses WebApplication.CreateBuilder (minimal hosting) instead of the Startup class pattern",
+        "Output calls builder.Services.AddIdentityServer() with Duende namespace instead of IdentityServer4",
+        "Output calls AddConfigurationStore and AddOperationalStore with UseSqlServer and MigrationsAssembly configuration",
+        "Output includes UseIdentityServer() in the middleware pipeline after UseRouting() and before UseAuthorization()",
+        "Output removes AddDeveloperSigningCredential() or replaces it with Duende key management"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm migrating from IdentityServer4 to Duende IdentityServer. What namespace changes do I need to make across my codebase? I have files with using statements for IdentityServer4, IdentityServer4.Models, IdentityServer4.Services, IdentityServer4.EntityFramework.DbContexts, IdentityServer4.EntityFramework.Mappers, and IdentityModel.",
+      "expected_output": "A complete mapping of old namespaces to new namespaces: IdentityServer4.* becomes Duende.IdentityServer.*, and IdentityModel becomes Duende.IdentityModel. Search and replace guidance.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/Config.cs"
+      ],
+      "assertions": [
+        "Response maps IdentityServer4 to Duende.IdentityServer",
+        "Response maps IdentityServer4.Models to Duende.IdentityServer.Models",
+        "Response maps IdentityServer4.EntityFramework.DbContexts to Duende.IdentityServer.EntityFramework.DbContexts",
+        "Response maps IdentityServer4.EntityFramework.Mappers to Duende.IdentityServer.EntityFramework.Mappers",
+        "Response maps IdentityModel to Duende.IdentityModel"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "After migrating from IdentityServer4 to Duende IdentityServer with EF Core stores, what database migrations do I need to create and apply? What new tables and columns are added by Duende IdentityServer v7 compared to IdentityServer4 v4?",
+      "expected_output": "Create migrations for both ConfigurationDbContext and PersistedGrantDbContext. New tables include Keys (automatic key management), ServerSideSessions, PushedAuthorizationRequests, and IdentityProviders. New columns on clients for DPoP and PAR support.",
+      "files": [
+        "files/begin-state/IdentityServerMigrationSample.csproj",
+        "files/begin-state/Startup.cs"
+      ],
+      "assertions": [
+        "Response includes dotnet ef migrations add commands for both ConfigurationDbContext and PersistedGrantDbContext",
+        "Response mentions the new Keys table for automatic key management",
+        "Response mentions the new ServerSideSessions table",
+        "Response mentions new client properties for DPoP (RequireDPoP) or PAR (RequirePushedAuthorization)",
+        "Response mentions the new IdentityProviders table for dynamic OIDC providers"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I'm on IdentityServer4 v3 and the ApiResource has Scopes defined as nested Scope objects. I need to migrate to v4 where scopes are independent top-level objects. How do I restructure my code, and what about the database migration?",
+      "expected_output": "Extract ApiScope definitions as independent objects, change ApiResource.Scopes to string references, register ApiScopes separately with AddInMemoryApiScopes. For database, warn about data loss with naive migrations and recommend using a custom delta SQL script.",
+      "files": [
+        "files/begin-state/Config.cs"
+      ],
+      "assertions": [
+        "Response shows ApiScope as a top-level independent object rather than nested under ApiResource",
+        "Response shows ApiResource.Scopes containing string scope names instead of Scope objects",
+        "Response includes registering API scopes separately via AddInMemoryApiScopes or equivalent",
+        "Response warns about data loss if using auto-generated EF Core migrations for the v3 to v4 ConfigurationDbContext schema change",
+        "Response mentions the table renames from v3 to v4 (e.g., ApiClaims to ApiResourceClaims, ApiProperties to ApiResourceProperties, or similar)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "My IdentityServer4 project uses AddDeveloperSigningCredential(). What should I do about signing keys when migrating to Duende IdentityServer? I have clients and APIs in production that are already validating tokens signed with the current key.",
+      "expected_output": "Remove AddDeveloperSigningCredential and use Duende's automatic key management (Business/Enterprise) or a static signing credential. For production transition, keep the old key available temporarily alongside the new key management to avoid breaking existing token validation.",
+      "files": [
+        "files/begin-state/Startup.cs"
+      ],
+      "assertions": [
+        "Response recommends removing AddDeveloperSigningCredential",
+        "Response mentions Duende's automatic key management as the recommended replacement",
+        "Response addresses the concern about existing tokens by suggesting a transitional period where the old key remains available for validation",
+        "Response suggests that if all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "After upgrading from IdentityServer4 on .NET 6 to Duende IdentityServer on .NET 8, my persisted grants can no longer be decrypted. What went wrong and how do I fix it?",
+      "expected_output": "The ASP.NET Core Data Protection default application discriminator changed between .NET versions, causing key isolation. Fix by setting an explicit SetApplicationName on AddDataProtection and ensuring old Data Protection keys are still available.",
+      "files": [
+        "files/begin-state/Startup.cs",
+        "files/begin-state/IdentityServerMigrationSample.csproj"
+      ],
+      "assertions": [
+        "Response identifies ASP.NET Core Data Protection as the root cause of the decryption failure",
+        "Response explains that the default application name (content root path discriminator) changed between .NET versions",
+        "Response recommends calling SetApplicationName() on AddDataProtection() with an explicit application name",
+        "Response mentions ensuring old Data Protection keys are still accessible (not deleted or rotated away)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Migrate this Config.cs from IdentityServer4 to Duende IdentityServer. Update all namespaces and ensure the client and resource definitions are compatible with Duende IdentityServer v7.",
+      "expected_output": "Updated Config.cs with Duende.IdentityServer.Models namespace, same resource and client definitions. The model types (Client, ApiScope, ApiResource, IdentityResource, Secret, GrantTypes) have the same names but live under Duende.IdentityServer.Models.",
+      "files": [
+        "files/begin-state/Config.cs"
+      ],
+      "assertions": [
+        "Output replaces 'using IdentityServer4.Models' with 'using Duende.IdentityServer.Models'",
+        "Output preserves the Client definitions with ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes intact",
+        "Output preserves the ApiScope, ApiResource, and IdentityResource definitions",
+        "Output maintains the Secret and GrantTypes usage (these types exist in Duende with the same API surface)"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I need to configure the Duende IdentityServer license key after migration. Where should I store it and how do I configure it? What happens if I don't provide a license key?",
+      "expected_output": "Configure via IdentityServerOptions.LicenseKey, load from configuration/secret manager. Without a license, IdentityServer runs in community/trial mode and logs a warning. Never store the license key in source-controlled appsettings.json.",
+      "files": [
+        "files/begin-state/Startup.cs"
+      ],
+      "assertions": [
+        "Response shows configuring the license key via options.LicenseKey inside AddIdentityServer",
+        "Response recommends loading the key from configuration, environment variables, or a secret manager rather than hardcoding",
+        "Response warns against storing the license key in source-controlled files like appsettings.json",
+        "Response explains that without a license key, IdentityServer runs in community or trial mode and logs a warning on startup"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Give me a complete step-by-step migration checklist for upgrading from IdentityServer4 v4.x to Duende IdentityServer v7. I use EF Core stores, ASP.NET Identity integration, and deploy behind a reverse proxy. What are the main steps and what order should I follow?",
+      "expected_output": "A comprehensive ordered checklist covering: update target framework, replace NuGet packages, update namespaces, remove AddDeveloperSigningCredential, configure license key, create and apply DB migrations, configure data protection, update UI templates, test discovery document and token issuance.",
+      "files": [
+        "files/begin-state/IdentityServerMigrationSample.csproj",
+        "files/begin-state/Startup.cs",
+        "files/begin-state/Config.cs"
+      ],
+      "assertions": [
+        "Response includes updating the .NET target framework as one of the first steps",
+        "Response includes replacing IdentityServer4 NuGet packages with Duende equivalents",
+        "Response includes updating namespaces from IdentityServer4 to Duende.IdentityServer",
+        "Response includes creating and applying EF Core database migrations for both ConfigurationDbContext and PersistedGrantDbContext",
+        "Response includes configuring a license key for Duende IdentityServer",
+        "Response includes verifying the deployment (e.g., checking discovery document, testing token issuance)"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "I'm running IdentityServer3 on .NET Framework 4.8 with OWIN/Katana. Can I use this migration guide to upgrade to Duende IdentityServer?",
+      "expected_output": "No — this guide covers IdentityServer4 only, not IdentityServer3. IdentityServer3 is a fundamentally different product (OWIN/Katana, .NET Framework). You must first port to IdentityServer4 on ASP.NET Core before migrating to Duende IdentityServer.",
+      "files": [],
+      "assertions": [
+        "Response clearly states that IdentityServer3 is NOT covered by this migration path",
+        "Response explains that IdentityServer3 is a different product based on OWIN/Katana and .NET Framework, not ASP.NET Core",
+        "Response advises migrating from IdentityServer3 to IdentityServer4 on ASP.NET Core first before upgrading to Duende IdentityServer",
+        "Response does not confuse IdentityServer3 with IdentityServer4 v3.x (they are different products)"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "My IdentityServer4 project has the Quickstart UI with MVC controllers (AccountController, ConsentController) and Razor views under Views/Account/ and Views/Consent/. I also have a _ViewImports.cshtml with '@using IdentityServer4'. What do I need to do with the UI when migrating to Duende IdentityServer?",
+      "expected_output": "Update @using directives in _ViewImports.cshtml and individual .cshtml files from IdentityServer4 to Duende.IdentityServer. Fix v4 API changes in controllers (e.g., request.Client.ClientId, ScopesValuesConsented). Consider starting fresh with Duende templates (dotnet new duende-is-ui) and porting customizations, since Duende now prefers Razor Pages over MVC controllers and includes new pages for device flow, CIBA, and dynamic providers.",
+      "files": [
+        "files/begin-state/Startup.cs",
+        "files/begin-state/Config.cs"
+      ],
+      "assertions": [
+        "Response mentions updating @using IdentityServer4 directives in .cshtml files or _ViewImports.cshtml to @using Duende.IdentityServer",
+        "Response mentions that Duende templates use Razor Pages instead of MVC controllers, or that the UI layout has changed significantly",
+        "Response recommends scaffolding fresh Duende UI templates (e.g., dotnet new duende-is-ui) as one approach for the UI migration",
+        "Response mentions that the existing MVC-based UI will still work after namespace updates but will miss newer UI flows like device flow, CIBA, or dynamic providers",
+        "Response mentions fixing API changes in controller or page model code (e.g., request.Client.ClientId instead of request.ClientId, or ScopesValuesConsented instead of ScopesConsented)"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "I'm planning to migrate my IdentityServer4 project to Duende IdentityServer. Before I start changing code, is there a way to analyze my current IdentityServer4 configuration and get migration recommendations? What kind of information would it give me?",
+      "expected_output": "Yes — Duende provides a Migration Analysis Tool (MigrationAnalysisController.cs) that you drop into your running IS4 project. It inspects .NET version, IS4 version, client counts (interactive vs non-interactive for licensing), issuer URI, signing credential store/key, data protection configuration, and authentication schemes. Navigate to /MigrationAnalysis to see the report.",
+      "files": [
+        "files/begin-state/Startup.cs",
+        "files/begin-state/IdentityServerMigrationSample.csproj"
+      ],
+      "assertions": [
+        "Response mentions a migration analysis tool or controller (MigrationAnalysisController) that can be added to the existing IS4 project",
+        "Response mentions that the tool inspects the running IdentityServer4 instance to provide recommendations",
+        "Response mentions that the tool checks client counts (interactive vs non-interactive) which helps determine the Duende license edition needed",
+        "Response mentions that the tool checks data protection configuration (application discriminator and/or key repository)",
+        "Response mentions that the tool checks authentication schemes for compatibility"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "My IdentityServer4 doesn't have an explicit IssuerUri configured — it's inferred from the request URL. I'm migrating to Duende IdentityServer and changing the hosting from IIS on Windows to Kestrel behind nginx on Linux. What do I need to watch out for regarding the issuer?",
+      "expected_output": "The issuer URI must remain identical after migration. If it changes, existing tokens become invalid and client trust relationships break. Check your current /.well-known/openid-configuration for the issuer value and explicitly set options.IssuerUri in the Duende configuration to match.",
+      "files": [
+        "files/begin-state/Startup.cs"
+      ],
+      "assertions": [
+        "Response warns that the issuer URI (iss claim) must remain the same after migration",
+        "Response explains that changing the issuer breaks existing tokens and/or client trust relationships",
+        "Response recommends setting options.IssuerUri explicitly in the Duende IdentityServer configuration",
+        "Response suggests checking the current /.well-known/openid-configuration discovery document to find the existing issuer value"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "My IdentityServer4 project has several external authentication providers configured: Google OAuth, a WS-Federation provider for Azure AD, and a custom SAML2P handler using Sustainsys.Saml2. Will these still work after migrating to Duende IdentityServer?",
+      "expected_output": "These authentication handlers need their NuGet packages updated to versions compatible with .NET 8+ / ASP.NET Core 8+. Google OAuth via Microsoft.AspNetCore.Authentication.Google needs a version matching the target framework. WS-Federation handler needs updating. Sustainsys.Saml2 needs a compatible version. Test all external login flows after migration.",
+      "files": [
+        "files/begin-state/Startup.cs"
+      ],
+      "assertions": [
+        "Response explains that third-party authentication handlers need NuGet package updates for the new .NET version",
+        "Response specifically mentions WS-Federation handler needing an update",
+        "Response mentions SAML2P handler (Sustainsys.Saml2 or equivalent) needing a compatible version for .NET 8+",
+        "Response recommends testing all external login flows end-to-end after migration"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "skill_name": "identityserver-api-protection",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a minimal ASP.NET Core Web API and I need to protect it with JWT bearer authentication. The IdentityServer authority is at https://identity.example.com and the API resource name is api1. Show me how to set it up securely.",
+      "expected_output": "Code that adds JWT bearer authentication with Authority, Audience, and ValidTypes set to [\"at+jwt\"]. Includes UseAuthentication and UseAuthorization middleware in the correct order. Mentions the Microsoft.AspNetCore.Authentication.JwtBearer package.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Calls AddJwtBearer with Authority set to 'https://identity.example.com'",
+        "Sets Audience to 'api1'",
+        "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks",
+        "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline",
+        "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our API receives reference tokens (opaque strings) from clients, not JWTs. How do I configure the API to validate these using token introspection? The API resource in IdentityServer is named 'invoicing' with secret 'invoicing_secret'. Authority is https://auth.mycompany.com.",
+      "expected_output": "Code that adds OAuth2 introspection with the correct authority, client ID, and client secret. Mentions the Duende package needed. Notes that the ApiResource in IdentityServer must have ApiSecrets configured.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Calls AddOAuth2Introspection with Authority set to 'https://auth.mycompany.com'",
+        "Sets ClientId to 'invoicing' and ClientSecret to 'invoicing_secret'",
+        "Mentions or adds the Duende.AspNetCore.Authentication.OAuth2Introspection or Duende.IdentityServer.AccessTokenValidation package",
+        "Warns that the ApiResource in IdentityServer must have ApiSecrets configured for introspection to work"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We need our API to accept both JWT access tokens and reference tokens. Some clients get JWTs, others get reference tokens. How do I handle both in a single API? Authority is https://identity.example.com, API resource is api1, secret is api1_secret.",
+      "expected_output": "Code that configures both AddJwtBearer and AddOAuth2Introspection, using ForwardReferenceToken from the Duende.AspNetCore.Authentication.JwtBearer package to route tokens to the correct handler based on whether they contain a dot.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Configures both AddJwtBearer and AddOAuth2Introspection handlers",
+        "Uses ForwardReferenceToken (via Selector.ForwardReferenceToken) to route reference tokens to the introspection handler",
+        "The scheme name passed to ForwardReferenceToken matches the scheme name used in AddOAuth2Introspection",
+        "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+        "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need scope-based authorization for my API. The /data GET endpoint should require 'api1.read' scope and the /data POST endpoint should require 'api1.write' scope. Also, our IdentityServer sometimes emits scopes as a space-delimited string. How do I handle that?",
+      "expected_output": "Code that defines authorization policies using RequireClaim for scope, applies them to endpoints with RequireAuthorization, and includes a custom IClaimsTransformation to normalize space-delimited scope claims into individual claims.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'",
+        "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization",
+        "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims",
+        "Registers the IClaimsTransformation implementation in the DI container"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to add DPoP (Demonstration of Proof-of-Possession) support to my API. The API uses JWT bearer auth with scheme name 'token', authority https://identity.example.com, audience api1. Show me the correct way to configure DPoP validation.",
+      "expected_output": "Code that calls ConfigureDPoPTokensForScheme on IServiceCollection (NOT inside AddJwtBearer lambda), registers a distributed cache for replay detection, and sets up JWT bearer authentication.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Calls ConfigureDPoPTokensForScheme on IServiceCollection (builder.Services), NOT inside the AddJwtBearer options lambda",
+        "Registers a distributed cache implementation (e.g., AddDistributedMemoryCache or Redis) for DPoP replay detection",
+        "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+        "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm hosting an API inside the same application as my IdentityServer. I don't want to go through network calls to validate tokens for this local API. How do I protect these local API endpoints?",
+      "expected_output": "Code that calls AddLocalApiAuthentication() and protects endpoints using IdentityServerConstants.LocalApi.PolicyName. Mentions that clients must include 'IdentityServerApi' in their allowed scopes. Warns that this only works when co-hosted with IdentityServer.",
+      "files": [],
+      "assertions": [
+        "Calls AddLocalApiAuthentication() to set up local API authentication",
+        "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+        "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+        "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I'm getting 401 Unauthorized when my API validates tokens but I can't figure out why. The JWT looks valid. What are common pitfalls with JWT bearer configuration in APIs protected by IdentityServer?",
+      "expected_output": "A troubleshooting guide covering audience mismatch between JwtBearerOptions.Audience and ApiResource name, missing ValidTypes for at+jwt, scope claim format inconsistency, and middleware ordering issues.",
+      "files": [],
+      "assertions": [
+        "Mentions audience mismatch as a common cause — Audience in JwtBearerOptions must match the ApiResource name in IdentityServer",
+        "Mentions the importance of ValidTypes = ['at+jwt'] and warns about JWT confusion attacks without it",
+        "Mentions scope claim format inconsistency — space-delimited vs array — as a cause of silent authorization failures",
+        "Mentions checking the middleware pipeline ordering (UseAuthentication before UseAuthorization)"
+      ]
+    }
+  ]
+}

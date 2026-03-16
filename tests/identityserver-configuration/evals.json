@@ -1,0 +1,121 @@
+{
+  "skill_name": "identityserver-configuration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a basic Duende IdentityServer host in Program.cs with in-memory stores. Define a single API scope called 'weatherapi' and the standard openid and profile identity resources. Enable all event types for diagnostics. No clients yet — just the resource definitions.",
+      "expected_output": "Program.cs registers IdentityServer with AddIdentityServer, configures event raising, adds in-memory identity resources (openid + profile), in-memory API scopes (weatherapi), and calls UseIdentityServer in the middleware pipeline.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output contains a call to builder.Services.AddIdentityServer with an options lambda",
+        "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true",
+        "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+        "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+        "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add a machine-to-machine client called 'batch-processor' that uses client credentials to access two API scopes: 'orders.read' and 'inventory.write'. Also add an interactive web application client called 'admin-portal' that uses authorization code flow with PKCE, supports refresh tokens, and can access the openid, profile, email scopes plus 'orders.read'. The admin portal's redirect URI is https://admin.example.com/signin-oidc and post-logout redirect is https://admin.example.com/signout-callback-oidc.",
+      "expected_output": "Two client definitions: one M2M client with ClientCredentials grant type and two API scopes, and one interactive client with Code grant type, PKCE, AllowOfflineAccess enabled, proper redirect URIs, and the correct scope list including openid.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials with AllowedScopes containing 'orders.read' and 'inventory.write'",
+        "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true (explicit or by noting default)",
+        "The admin-portal client has AllowOfflineAccess set to true to enable refresh tokens",
+        "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId (or 'openid') in its AllowedScopes",
+        "The admin-portal client has RedirectUris containing 'https://admin.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://admin.example.com/signout-callback-oidc'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have two separate microservices: a 'catalog-api' and an 'orders-api'. Both need a 'read' scope, and catalog-api also needs a 'write' scope. I want tokens issued for catalog-api to not be usable at orders-api and vice versa. How do I configure the API resources and scopes to achieve audience isolation? Show me the full resource and scope configuration.",
+      "expected_output": "Configuration uses both ApiScope and ApiResource. ApiScopes define 'read' and 'write'. Two ApiResource entries ('catalog-api' and 'orders-api') each list their allowed scopes. The ApiResource controls the 'aud' claim to isolate tokens per API.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output defines ApiScope entries for at least 'read' and 'write'",
+        "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes collection",
+        "Output defines an ApiResource with name 'orders-api' that includes 'read' in its Scopes collection but not 'write'",
+        "Output calls AddInMemoryApiResources to register the API resources with IdentityServer"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Configure automatic key management for a production IdentityServer deployment running behind a load balancer. Keys should rotate every 60 days, be announced 7 days before activation, and retained for 21 days after retirement. Also enable data protection for keys at rest. All instances share a network path at /mnt/shared/identity-keys for key storage.",
+      "expected_output": "IdentityServerOptions.KeyManagement configured with RotationInterval=60 days, PropagationTime=7 days, RetentionDuration=21 days, DataProtectKeys=true, and KeyPath set to the shared mount path.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)",
+        "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)",
+        "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)",
+        "Output sets options.KeyManagement.DataProtectKeys to true",
+        "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Enable server-side sessions on my IdentityServer and configure it so that expired sessions trigger back-channel logout notifications to clients. Expired sessions should be cleaned up every 5 minutes. Also coordinate client token lifetimes with the user session so that refresh tokens are revoked when a user's session ends.",
+      "expected_output": "Configuration calls AddServerSideSessions() on the builder, sets RemoveExpiredSessionsFrequency to 5 minutes, ExpiredSessionsTriggerBackchannelLogout to true, and CoordinateClientLifetimesWithUserSession to true.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output calls .AddServerSideSessions() on the IdentityServer builder (not as an option property)",
+        "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)",
+        "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true",
+        "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Define a custom identity resource called 'organization' that includes the claims 'org_id', 'org_name', and 'org_role'. It should be marked as required so it's not shown as optional on the consent screen. Also define the standard openid and profile identity resources alongside it.",
+      "expected_output": "An IdentityResource collection containing IdentityResources.OpenId(), IdentityResources.Profile(), and a custom IdentityResource with name 'organization', the three specified user claims, and Required=true.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output includes new IdentityResources.OpenId() in the identity resources collection",
+        "Output includes new IdentityResources.Profile() in the identity resources collection",
+        "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
+        "The custom 'organization' identity resource has Required set to true"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I'm deploying IdentityServer behind an Nginx reverse proxy at https://id.mycompany.com. Configure the IssuerUri correctly, set the authentication cookie lifetime to 8 hours with no sliding expiration, enable Pushed Authorization Requests (PAR) as required for all clients, and configure caching for client and resource stores with a 10-minute expiration.",
+      "expected_output": "IdentityServerOptions with IssuerUri set to the external URL, authentication cookie settings, PAR required, and caching configured.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output sets options.IssuerUri to 'https://id.mycompany.com'",
+        "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false",
+        "Output sets options.PushedAuthorization.Required to true",
+        "Output sets options.Caching.ClientStoreExpiration and options.Caching.ResourceStoreExpiration to TimeSpan.FromMinutes(10)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Review this client configuration and fix all the problems:\n\n```csharp\nnew Client\n{\n    ClientId = \"my-web-app\",\n    AllowedGrantTypes = GrantTypes.Code,\n    ClientSecrets = { new Secret(\"super-secret-password\") },\n    RedirectUris = { \"https://app.example.com/signin-oidc/\" },\n    AllowedScopes = { \"profile\", \"email\", \"api1\" },\n    AllowOfflineAccess = false\n}\n```\n\nThe app needs to authenticate users, read their profile and email, call api1, and use refresh tokens. Explain each issue.",
+      "expected_output": "Identifies and fixes: (1) missing .Sha256() on the secret, (2) trailing slash mismatch on redirect URI, (3) missing 'openid' scope, (4) AllowOfflineAccess should be true for refresh tokens. Ideally also flags the hardcoded secret as a security concern.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output identifies the missing .Sha256() call on the client secret and fixes it (e.g., new Secret(\"...\".Sha256()))",
+        "Output identifies the trailing slash on the redirect URI as a potential mismatch issue and removes it",
+        "Output identifies the missing 'openid' scope (IdentityServerConstants.StandardScopes.OpenId) and adds it to AllowedScopes",
+        "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+        "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault"
+      ]
+    }
+  ]
+}

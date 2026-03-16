@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)", "pass": true, "rationale": "Code explicitly sets options.KeyManagement.Enabled = true in the AddIdentityServer options lambda"},
+    {"assertion": "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)", "pass": true, "rationale": "Code calls idsvrBuilder.AddSigningCredential(signingKey, SecurityAlgorithms.RsaSha256) where signingKey = GetSigningKeyFromVault()"},
+    {"assertion": "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)", "pass": true, "rationale": "Code does not call AddValidationKey anywhere. Only AddSigningCredential is used for the static key."},
+    {"assertion": "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management", "pass": true, "rationale": "Code includes extensive comments: 'Phase 1: Migration from static to automatic key management' and explains the next steps for Phase 2"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

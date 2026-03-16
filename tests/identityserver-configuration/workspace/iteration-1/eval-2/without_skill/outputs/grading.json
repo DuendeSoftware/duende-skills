@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials with AllowedScopes containing 'orders.read' and 'inventory.write'",
+      "pass": true,
+      "rationale": "Response defines ClientId = \"batch-processor\" with AllowedGrantTypes = GrantTypes.ClientCredentials and AllowedScopes = { \"orders.read\", \"inventory.write\" }."
+    },
+    {
+      "assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true (explicit or by noting default)",
+      "pass": true,
+      "rationale": "Response defines ClientId = \"admin-portal\" with AllowedGrantTypes = GrantTypes.Code and RequirePkce = true."
+    },
+    {
+      "assertion": "The admin-portal client has AllowOfflineAccess set to true to enable refresh tokens",
+      "pass": true,
+      "rationale": "Response sets AllowOfflineAccess = true on the admin-portal client."
+    },
+    {
+      "assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId (or 'openid') in its AllowedScopes",
+      "pass": true,
+      "rationale": "Response includes 'openid' (string literal) in the admin-portal's AllowedScopes."
+    },
+    {
+      "assertion": "The admin-portal client has RedirectUris containing 'https://admin.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://admin.example.com/signout-callback-oidc'",
+      "pass": true,
+      "rationale": "Response sets the correct RedirectUris and PostLogoutRedirectUris."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

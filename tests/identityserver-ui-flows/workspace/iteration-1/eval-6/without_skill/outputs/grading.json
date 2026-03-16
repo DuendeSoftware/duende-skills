@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The login page checks context.IdP from GetAuthorizationContextAsync and bypasses the login UI when an IdP hint is present",
+      "pass": false,
+      "rationale": "The login page does not inject IIdentityServerInteractionService or check context.IdP for IdP hints."
+    },
+    {
+      "assertion": "The login page performs email-domain-based routing, sending @contoso.com users to the AAD provider",
+      "pass": true,
+      "rationale": "OnPost checks Email.EndsWith(\"@contoso.com\") and challenges AAD."
+    },
+    {
+      "assertion": "The spa.app client is configured with IdentityProviderRestrictions that includes 'Google' and excludes 'AAD'",
+      "pass": false,
+      "rationale": "No IdentityProviderRestrictions configuration is shown for any client."
+    },
+    {
+      "assertion": "The login page issues a Challenge to the appropriate external provider scheme when HRD determines the provider",
+      "pass": true,
+      "rationale": "The page calls Challenge(props, \"AAD\") when contoso.com domain is detected."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

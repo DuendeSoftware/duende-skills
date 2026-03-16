@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Calls ConfigureDPoPTokensForScheme on IServiceCollection (builder.Services), NOT inside the AddJwtBearer options lambda", "pass": true, "rationale": "Code shows builder.Services.ConfigureDPoPTokensForScheme(\"token\") called on IServiceCollection, with explicit warning about wrong placement inside AddJwtBearer"},
+    {"assertion": "Registers a distributed cache implementation (e.g., AddDistributedMemoryCache or Redis) for DPoP replay detection", "pass": true, "rationale": "Code shows builder.Services.AddDistributedMemoryCache() with explanation about production alternatives"},
+    {"assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler", "pass": true, "rationale": "Code shows options.TokenValidationParameters.ValidTypes = [\"at+jwt\"]"},
+    {"assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package", "pass": true, "rationale": "Includes dotnet add package Duende.AspNetCore.Authentication.JwtBearer"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The web.app client has RequirePkce = true and does not set it to false", "pass": true, "rationale": "Code sets RequirePkce = true"},
+    {"assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs", "pass": true, "rationale": "Uses exact URI https://app.example.com/signin-oidc"},
+    {"assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)", "pass": true, "rationale": "AllowedGrantTypes = GrantTypes.Code"},
+    {"assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)", "pass": false, "rationale": "AccessTokenLifetime = 3600 (1 hour), which exceeds the 900-second maximum"},
+    {"assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly", "pass": true, "rationale": "RefreshTokenUsage = TokenUsage.OneTimeOnly explicitly set"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

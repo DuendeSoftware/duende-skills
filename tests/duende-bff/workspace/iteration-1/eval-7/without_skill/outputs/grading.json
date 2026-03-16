@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Identifies Data Protection key ring as the root cause — each instance generates its own keys", "pass": true, "rationale": "Clearly identifies Data Protection keys as the root cause: 'each instance generates its own set of encryption keys'"},
+    {"assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)", "pass": true, "rationale": "Shows PersistKeysToDbContext, PersistKeysToAzureBlobStorage, and PersistKeysToStackExchangeRedis"},
+    {"assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions", "pass": false, "rationale": "Recommends distributed session storage generically (Redis, AddStackExchangeRedisCache, AddSession) but does NOT mention AddEntityFrameworkServerSideSessions which is the Duende BFF-specific API"},
+    {"assertion": "Shows code for AddDataProtection() with a persistent key store", "pass": true, "rationale": "Shows builder.Services.AddDataProtection().PersistKeysToDbContext<ApplicationDbContext>() with full code"}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

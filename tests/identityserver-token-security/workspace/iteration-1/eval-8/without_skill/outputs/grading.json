@@ -1,0 +1,13 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls AddClientCredentialsTokenManagement and AddClient with DPoPJsonWebKey set on the client options", "pass": true, "rationale": "Code calls AddClientCredentialsTokenManagement().AddClient(...) with client.DPoPJsonWebKey = dpopJwk."},
+    {"assertion": "Sets the TokenEndpoint to 'https://identity.example.com/connect/token'", "pass": true, "rationale": "Code sets client.TokenEndpoint = 'https://identity.example.com/connect/token'."},
+    {"assertion": "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256", "pass": true, "rationale": "Code shows new RsaSecurityKey(RSA.Create(2048)), JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey), and jsonWebKey.Alg = 'PS256'."},
+    {"assertion": "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security", "pass": false, "rationale": "The response does not include any warning about the DPoPJsonWebKey being a critical secret. It shows the code but doesn't mention the security implications of losing or leaking the key."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

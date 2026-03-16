@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response shows ApiScope as a top-level independent object rather than nested under ApiResource",
+      "pass": true,
+      "rationale": "Shows ApiScope as a top-level IEnumerable."
+    },
+    {
+      "assertion": "Response shows ApiResource.Scopes containing string scope names instead of Scope objects",
+      "pass": true,
+      "rationale": "Shows Scopes = { \"api1\" } as string."
+    },
+    {
+      "assertion": "Response includes registering API scopes separately via AddInMemoryApiScopes or equivalent",
+      "pass": true,
+      "rationale": "Shows AddInMemoryApiScopes registration."
+    },
+    {
+      "assertion": "Response warns about data loss if using auto-generated EF Core migrations for the v3 to v4 ConfigurationDbContext schema change",
+      "pass": false,
+      "rationale": "Only says 'be careful' and 'review before applying' but doesn't warn about data loss specifically."
+    },
+    {
+      "assertion": "Response mentions the table renames from v3 to v4 (e.g., ApiClaims to ApiResourceClaims, ApiProperties to ApiResourceProperties, or similar)",
+      "pass": false,
+      "rationale": "Does not mention any table renames."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

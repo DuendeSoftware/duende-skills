@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)", "pass": false, "rationale": "Calls both AddServerSideSessions() AND AddEntityFrameworkServerSideSessions — should use only AddEntityFrameworkServerSideSessions"},
+    {"assertion": "Configures UseSqlServer with the connection string from configuration", "pass": true, "rationale": "Shows UseSqlServer with GetConnectionString"},
+    {"assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))", "pass": true, "rationale": "Shows SessionCleanupInterval = TimeSpan.FromMinutes(10)"},
+    {"assertion": "Calls AddSessionCleanupBackgroundProcess()", "pass": false, "rationale": "Does not call AddSessionCleanupBackgroundProcess()"},
+    {"assertion": "Warns against or does NOT use in-memory sessions for production", "pass": true, "rationale": "Mentions it's important for production where sessions need to survive restarts"}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

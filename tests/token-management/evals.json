@@ -1,0 +1,171 @@
+{
+  "skill_name": "token-management",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a .NET 9 worker service (background service) that needs to call a catalog API at https://api.example.com/catalog/ using client credentials. The token endpoint is https://sts.example.com/connect/token, client ID is 'catalog-worker', client secret is 'worker-secret', and it needs the 'catalog:read' scope. Set up Duende.AccessTokenManagement with HttpClientFactory so the worker can call the API without manually managing tokens.",
+      "expected_output": "A Program.cs (or equivalent) that registers a client credentials client via AddClientCredentialsTokenManagement().AddClient(), then registers an HttpClient via AddClientCredentialsHttpClient() (or AddClientCredentialsTokenHandler()), and a BackgroundService that uses IHttpClientFactory to call the API with tokens attached automatically.",
+      "files": [
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+        "Output calls AddClient() with configuration including TokenEndpoint, ClientId, ClientSecret, and Scope",
+        "Output registers an HTTP client using AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler with the client name",
+        "Output shows a BackgroundService or worker class that uses IHttpClientFactory.CreateClient to make API calls without manual token code",
+        "Output uses v4 strongly-typed ClientCredentialsClientName.Parse() for the client name (not a raw string)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Configure user token management for an ASP.NET Core web app. The app should use cookie + OIDC authentication against https://sts.example.com, request the 'openid profile email invoice offline_access' scopes, and register a named HTTP client 'invoices' that automatically attaches the user's access token when calling https://api.example.com/invoices/. Make sure refresh tokens are properly revoked on sign-out.",
+      "expected_output": "A complete setup with AddAuthentication (cookie + OIDC), AddOpenIdConnectAccessTokenManagement(), AddUserAccessTokenHttpClient(), SaveTokens = true on the OIDC handler, offline_access in scopes, and RevokeRefreshTokenAsync in the cookie OnSigningOut event.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output sets SaveTokens = true on the OpenIdConnect handler options",
+        "Output includes 'offline_access' in the OIDC scope list to enable refresh tokens",
+        "Output wires up RevokeRefreshTokenAsync() in the cookie OnSigningOut event handler",
+        "Output calls AddOpenIdConnectAccessTokenManagement() to register user token management services",
+        "Output registers a named HTTP client using AddUserAccessTokenHttpClient with the user's access token"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm upgrading our token management code from Duende.AccessTokenManagement v3 to v4. Here's our current v3 code:\n\n```csharp\nservices.AddDistributedMemoryCache();\nservices.AddClientCredentialsTokenManagement()\n    .AddClient(\"api-client\", client =>\n    {\n        client.TokenEndpoint = \"https://sts.example.com/connect/token\";\n        client.ClientId = \"my-service\";\n        client.ClientSecret = \"my-secret\";\n        client.Scope = \"api1\";\n    });\n```\n\nAnd manual token retrieval:\n```csharp\npublic class MyService\n{\n    private readonly IClientCredentialsTokenManagementService _tokenService;\n    public async Task DoWork()\n    {\n        var token = await _tokenService.GetAccessTokenAsync(\"api-client\");\n        client.SetBearerToken(token.Value);\n    }\n}\n```\n\nUpdate this to v4 patterns.",
+      "expected_output": "Updated code using v4 APIs: IClientCredentialsTokenManager instead of IClientCredentialsTokenManagementService, ClientCredentialsClientName.Parse() for client names, TokenResult<ClientCredentialsToken> with .Succeeded/.GetToken() instead of .Value, removal of explicit AddDistributedMemoryCache() (v4 uses HybridCache), and strongly-typed property setters.",
+      "files": [],
+      "assertions": [
+        "Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager",
+        "Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string",
+        "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value",
+        "Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically",
+        "Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to add DPoP (Demonstrating Proof-of-Possession) support to our client credentials token management. We have a JWK stored in configuration at DPoP:JsonWebKey. Show me how to configure the client credentials client with DPoP and make sure the key isn't regenerated on every restart.",
+      "expected_output": "Code that loads the DPoP JWK from configuration (not generated ephemerally), sets DPoPJsonWebKey on the client credentials client options, and optionally mentions IDPoPKeyStore for dynamic key resolution.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup",
+        "Output sets the DPoPJsonWebKey property on the client credentials client configuration",
+        "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart",
+        "Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Our web application needs to call two different APIs: an invoice API using the logged-in user's access token, and a master data API using client credentials (machine-to-machine). Both should use HttpClientFactory. The invoice API is at https://api.example.com/invoices/ and the master data API is at https://api.example.com/masterdata/. Show me how to register both HTTP clients.",
+      "expected_output": "Code that registers two HTTP clients: one with AddUserAccessTokenHttpClient (or AddUserAccessTokenHandler) for the invoice API and one with AddClientAccessTokenHttpClient (or AddClientAccessTokenHandler) for the master data API, both within a web app that has OpenIdConnect token management configured.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler",
+        "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler",
+        "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management",
+        "Output sets distinct named or typed clients for each API with the correct BaseAddress"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm setting up token caching for a multi-instance production deployment using v4 of Duende.AccessTokenManagement. I want to use Redis as the distributed cache backend and configure a cache lifetime buffer of 120 seconds. Also, I want to encrypt cached tokens using Data Protection since the Redis instance is shared with other apps.",
+      "expected_output": "Code that registers AddStackExchangeRedisCache with the Redis connection string, configures AddClientCredentialsTokenManagement with CacheLifetimeBuffer = 120, and implements an IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector to encrypt/decrypt tokens in cache.",
+      "files": [
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier",
+        "Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options",
+        "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+        "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()",
+        "Output calls AddDataProtection() to enable the data protection provider"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review this token management code and identify all the problems:\n\n```csharp\nbuilder.Services.AddAuthentication()\n    .AddCookie(\"cookie\")\n    .AddOpenIdConnect(\"oidc\", options =>\n    {\n        options.Authority = \"https://sts.example.com\";\n        options.ClientId = \"webapp\";\n        options.ClientSecret = \"secret\";\n        options.ResponseType = \"code\";\n        options.Scope.Add(\"openid\");\n        options.Scope.Add(\"api1\");\n    });\n\nbuilder.Services.AddOpenIdConnectAccessTokenManagement();\n\nbuilder.Services.AddHttpClient<ApiClient>(c => c.BaseAddress = new Uri(\"https://api.example.com\"))\n    .AddClientCredentialsTokenHandler(\"catalog.client\");\n```\n\nAnd in a service:\n```csharp\nprivate string? _cachedToken;\npublic async Task<string> CallApi()\n{\n    if (_cachedToken != null) return _cachedToken;\n    var result = await _tokenManager.GetAccessTokenAsync(...);\n    var token = result.GetToken();\n    _cachedToken = token.AccessToken.ToString();\n    // ...\n}\n```",
+      "expected_output": "Identification of multiple issues: missing SaveTokens = true, missing offline_access scope, no refresh token revocation on sign-out, manual token caching alongside the library, calling .GetToken() without checking .Succeeded first, and missing AddDefaultAccessTokenResiliency() before AddClientCredentialsTokenHandler.",
+      "files": [],
+      "assertions": [
+        "Output identifies that SaveTokens = true is missing on the OIDC handler and explains it's required for user token management",
+        "Output identifies that offline_access scope is missing so no refresh tokens will be issued",
+        "Output identifies the manual _cachedToken field as incorrect double-caching that won't stay in sync with the library's cache",
+        "Output identifies that .GetToken() is called without first checking .Succeeded, which will throw InvalidOperationException on failure",
+        "Output identifies that AddClientCredentialsTokenHandler is used without AddDefaultAccessTokenResiliency(), meaning 401 responses won't be retried"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I have a gRPC service that needs to call a downstream gRPC endpoint at https://grpc.example.com using the current user's access token. Show me how to register the gRPC client with Duende.AccessTokenManagement so the token is attached automatically.",
+      "expected_output": "Code that registers a typed gRPC client using AddGrpcClient<T>() with AddUserAccessTokenHandler() to automatically attach the user's access token to gRPC calls.",
+      "files": [
+        "files/begin-state/WebApp.csproj"
+      ],
+      "assertions": [
+        "Output uses AddGrpcClient<T>() to register the typed gRPC client with the downstream endpoint address",
+        "Output chains .AddUserAccessTokenHandler() on the gRPC client registration to attach user tokens automatically",
+        "Output includes or references AddOpenIdConnectAccessTokenManagement() as prerequisite for user token management"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "We have a Blazor Server app. Users authenticate via OIDC but after a while, API calls start failing with 401s. I think the tokens are expiring. Someone mentioned we can't use HttpContext in Blazor circuits. What's going on and how do I fix it?",
+      "expected_output": "An explanation that Blazor Server circuits outlive the initial HTTP request so HttpContext is null after circuit establishment. The fix is to use AddBlazorServerAccessTokenManagement<T> with a custom IUserTokenStore, and capture tokens during the OnTokenValidated event.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj"
+      ],
+      "assertions": [
+        "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+        "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+        "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+        "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "I want to use client assertions (signed JWTs) instead of shared secrets for authenticating my client to the token endpoint. Show me how to implement IClientAssertionService. Make sure to get the audience right — I heard there was a CVE about this.",
+      "expected_output": "An IClientAssertionService implementation that creates a signed JWT with the audience set to the authorization server's issuer URL (NOT the token endpoint URL). Must reference CVE-2025-27370/CVE-2025-27371 and explain the security vulnerability.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj"
+      ],
+      "assertions": [
+        "Implements IClientAssertionService with a GetClientAssertionAsync method",
+        "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
+        "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
+        "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
+        "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "I have a multi-tenant SaaS app. Each tenant has a different API resource and required scopes. I need to customize the token request dynamically based on which tenant's API I'm calling. How can I do this with Duende.AccessTokenManagement v4?",
+      "expected_output": "An ITokenRequestCustomizer implementation that resolves the tenant from the outgoing HTTP request and modifies the TokenRequestParameters accordingly, registered via the Add*Handler methods.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj"
+      ],
+      "assertions": [
+        "Implements ITokenRequestCustomizer interface with a Customize method",
+        "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+        "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+        "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler"
+      ]
+    }
+  ]
+}

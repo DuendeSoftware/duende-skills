@@ -1,0 +1,66 @@
+{
+  "metadata": {"skill_name": "identity-testing-patterns", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 39, "passed": 39, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 39, "passed": 30, "failed": 9, "pass_rate": 76.9},
+    "delta": {"assertions_improved": 9, "delta_pass_rate": 23.1}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": ["Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test", "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized"]
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": ["The factory disables automatic key management via options.KeyManagement.Enabled = false", "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key"]
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": ["Each test sets distinct claims via the TestClaimsProvider before making the request", "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests"]
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Asserts the issuer (iss) claim matches the expected authority URL"]
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
+      "delta": 0.75,
+      "without_skill_failures": ["Recommends setting options.KeyManagement.Enabled = false in test configuration", "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes", "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests"]
+    }
+  ]
+}

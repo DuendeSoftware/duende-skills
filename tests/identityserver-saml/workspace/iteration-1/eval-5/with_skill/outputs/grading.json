@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Sets EncryptAssertions = true on the SamlServiceProvider", "pass": true, "rationale": "EncryptAssertions = true is set on the SamlServiceProvider."},
+    {"assertion": "Populates EncryptionCertificates with a certificate loaded from certs/sp-encryption.cer", "pass": true, "rationale": "EncryptionCertificates contains new X509Certificate2(\"certs/sp-encryption.cer\")."},
+    {"assertion": "Sets AllowIdpInitiated = true on the SamlServiceProvider", "pass": true, "rationale": "AllowIdpInitiated = true is set."},
+    {"assertion": "Mentions that the IdP-initiated SSO endpoint must be enabled via options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true", "pass": true, "rationale": "Explicitly shows options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true with explanation."},
+    {"assertion": "Does NOT set EncryptAssertions = true without providing EncryptionCertificates", "pass": true, "rationale": "EncryptionCertificates is always provided alongside EncryptAssertions = true."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

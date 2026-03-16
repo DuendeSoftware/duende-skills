@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim", "pass": true, "rationale": "Creates ClaimsPrincipal with ClaimsIdentity containing birthdate claim"},
+    {"assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource", "pass": true, "rationale": "Constructs AuthorizationHandlerContext with requirement, user, null"},
+    {"assertion": "Calls HandleAsync on the handler directly", "pass": true, "rationale": "Calls await _handler.HandleAsync(context)"},
+    {"assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement", "pass": true, "rationale": "Assert.True(context.HasSucceeded) for 1990-05-15 birthdate"},
+    {"assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement", "pass": true, "rationale": "Assert.False(context.HasSucceeded) for user born 10 years ago"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

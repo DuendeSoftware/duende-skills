@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The web_app client has AllowOfflineAccess = true", "pass": true, "rationale": "Code explicitly sets AllowOfflineAccess = true on the web_app client."},
+    {"assertion": "The web_app client AllowedScopes includes 'offline_access'", "pass": true, "rationale": "AllowedScopes includes 'offline_access' in the client configuration."},
+    {"assertion": "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)", "pass": true, "rationale": "AbsoluteRefreshTokenLifetime = 2592000 is explicitly set."},
+    {"assertion": "SlidingRefreshTokenLifetime is set to 86400 (1 day)", "pass": true, "rationale": "SlidingRefreshTokenLifetime = 86400 is explicitly set."},
+    {"assertion": "RefreshTokenExpiration is set to TokenExpiration.Sliding", "pass": true, "rationale": "RefreshTokenExpiration = TokenExpiration.Sliding is explicitly set."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

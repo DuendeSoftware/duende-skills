@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "No client uses GrantTypes.Implicit anywhere in the file", "pass": true, "rationale": "spa.legacy migrated to GrantTypes.Code; no GrantTypes.Implicit present"},
+    {"assertion": "The spa.legacy client uses GrantTypes.Code with RequirePkce = true", "pass": true, "rationale": "spa.legacy uses AllowedGrantTypes = GrantTypes.Code and RequirePkce = true"},
+    {"assertion": "The spa.legacy client does not have AllowAccessTokensViaBrowser = true", "pass": true, "rationale": "AllowAccessTokensViaBrowser is explicitly noted as removed, not present in code"},
+    {"assertion": "Client secrets are loaded from configuration (builder.Configuration, config[], or IConfiguration) rather than hardcoded string literals passed to Sha256()", "pass": true, "rationale": "Both web.app and background.worker use builder.Configuration[\"ClientSecrets:...\"].Sha256()"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

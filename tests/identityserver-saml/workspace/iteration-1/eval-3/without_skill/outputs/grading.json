@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Implements ISamlClaimsMapper interface", "pass": false, "rationale": "Uses 'IClaimsMapper' instead of the correct 'ISamlClaimsMapper' interface name."},
+    {"assertion": "The mapper returns SamlAttribute objects with custom Name values", "pass": true, "rationale": "Returns SamlAttribute objects with custom names like 'urn:custom:email'."},
+    {"assertion": "Warns that ISamlClaimsMapper completely replaces default claim mapping — DefaultClaimMappings are not applied", "pass": false, "rationale": "Does not warn that implementing the mapper replaces all default mappings."},
+    {"assertion": "Registers the custom mapper with dependency injection (e.g., AddTransient)", "pass": false, "rationale": "Registers with AddSingleton and uses wrong interface name IClaimsMapper, not AddTransient<ISamlClaimsMapper>."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

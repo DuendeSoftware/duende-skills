@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains a call to builder.Services.AddIdentityServer with an options lambda",
+      "pass": true,
+      "rationale": "Response contains 'builder.Services.AddIdentityServer(options =>' with a full options lambda."
+    },
+    {
+      "assertion": "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true",
+      "pass": true,
+      "rationale": "All four event types are explicitly set to true: options.Events.RaiseErrorEvents = true; options.Events.RaiseInformationEvents = true; options.Events.RaiseFailureEvents = true; options.Events.RaiseSuccessEvents = true."
+    },
+    {
+      "assertion": "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "Response calls .AddInMemoryIdentityResources with a list containing new IdentityResources.OpenId() and new IdentityResources.Profile()."
+    },
+    {
+      "assertion": "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "Response calls .AddInMemoryApiScopes with new ApiScope(\"weatherapi\", \"Weather API\")."
+    },
+    {
+      "assertion": "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()",
+      "pass": true,
+      "rationale": "Response calls app.UseIdentityServer() with a comment '// Includes UseAuthentication()' and does not call UseAuthentication() separately."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

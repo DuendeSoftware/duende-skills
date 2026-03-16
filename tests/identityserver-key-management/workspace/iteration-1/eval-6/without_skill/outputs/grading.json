@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'", "pass": false, "rationale": "Code does not set options.KeyManagement.Enabled = false. The AddIdentityServer call has no options lambda configuring KeyManagement at all."},
+    {"assertion": "Program.cs calls AddSigningCredential with the new key (from LoadNewKey()) and SecurityAlgorithms.RsaSha256", "pass": true, "rationale": "Code calls idsvrBuilder.AddSigningCredential(newKey, SecurityAlgorithms.RsaSha256) where newKey = LoadNewKey()"},
+    {"assertion": "Program.cs calls AddValidationKey with the old key (from LoadOldKey()) and SecurityAlgorithms.RsaSha256", "pass": true, "rationale": "Code calls idsvrBuilder.AddValidationKey(oldKey, SecurityAlgorithms.RsaSha256) where oldKey = LoadOldKey()"},
+    {"assertion": "AddSigningCredential is called with the NEW key (not the old key), and AddValidationKey is called with the OLD key (not the new key)", "pass": true, "rationale": "AddSigningCredential uses newKey from LoadNewKey(), AddValidationKey uses oldKey from LoadOldKey(). The assignment is correct."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

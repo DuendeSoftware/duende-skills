@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets options.IssuerUri to 'https://id.mycompany.com'",
+      "pass": true,
+      "rationale": "Response contains 'options.IssuerUri = \"https://id.mycompany.com\";'."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "Response contains 'options.Authentication.CookieLifetime = TimeSpan.FromHours(8);' and 'options.Authentication.CookieSlidingExpiration = false;'."
+    },
+    {
+      "assertion": "Output sets options.PushedAuthorization.Required to true",
+      "pass": false,
+      "rationale": "Response does NOT set options.PushedAuthorization.Required = true. Instead, it mentions setting RequirePushedAuthorization on individual client configurations, which is a different per-client property, not the global PushedAuthorization.Required option."
+    },
+    {
+      "assertion": "Output sets options.Caching.ClientStoreExpiration and options.Caching.ResourceStoreExpiration to TimeSpan.FromMinutes(10)",
+      "pass": false,
+      "rationale": "Response does NOT set options.Caching.ClientStoreExpiration or options.Caching.ResourceStoreExpiration. It vaguely mentions adding IDistributedCache and configuring caching middleware, but doesn't use the correct Duende IdentityServerOptions.Caching properties."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

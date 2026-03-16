@@ -1,0 +1,121 @@
+{
+  "skill_name": "identityserver-token-lifecycle",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My web_app client needs refresh tokens so users don't have to re-authenticate constantly. Configure it properly so the client gets refresh tokens with a 30-day absolute lifetime and 1-day sliding window. Keep the default ReUse rotation.",
+      "expected_output": "The web_app client should be updated with AllowOfflineAccess = true, offline_access added to AllowedScopes, RefreshTokenExpiration set to Sliding, AbsoluteRefreshTokenLifetime set to 2592000 (30 days in seconds), SlidingRefreshTokenLifetime set to 86400 (1 day in seconds), and RefreshTokenUsage set to ReUse.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "The web_app client has AllowOfflineAccess = true",
+        "The web_app client AllowedScopes includes 'offline_access'",
+        "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)",
+        "SlidingRefreshTokenLifetime is set to 86400 (1 day)",
+        "RefreshTokenExpiration is set to TokenExpiration.Sliding"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need the web_app client to use reference access tokens instead of JWTs so we can revoke them immediately if needed. Also make sure the API resource has a secret configured for introspection. Set the access token lifetime to 15 minutes.",
+      "expected_output": "The web_app client should have AccessTokenType set to AccessTokenType.Reference and AccessTokenLifetime set to 900. The ApiResource 'api1_resource' should have an ApiSecrets collection with a hashed secret for introspection validation.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "The web_app client has AccessTokenType = AccessTokenType.Reference",
+        "The web_app client has AccessTokenLifetime set to 900 (15 minutes)",
+        "The ApiResource api1_resource has ApiSecrets with at least one Secret configured",
+        "The Secret uses Sha256() hashing"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement a token exchange grant validator for RFC 8693 so our backend API (api_gateway client) can exchange user access tokens for downstream API calls using delegation (not impersonation). The new token should include an 'act' claim showing the call chain. Also create the api_gateway client with the token exchange grant type and access to the 'api1' scope.",
+      "expected_output": "A TokenExchangeGrantValidator class implementing IExtensionGrantValidator with GrantType set to the token exchange grant type constant. It should validate the subject token, extract sub and client_id, set an act claim with the requesting client's ID, and produce a GrantValidationResult. A new client 'api_gateway' should be configured with AllowedGrantTypes containing the token exchange grant type.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "A class implementing IExtensionGrantValidator is defined",
+        "The GrantType property returns OidcConstants.GrantTypes.TokenExchange or the equivalent string 'urn:ietf:params:oauth:grant-type:token-exchange'",
+        "The validator creates an 'act' claim using JwtClaimTypes.Actor containing the calling client's client_id for delegation",
+        "The validator calls ValidateAccessTokenAsync on the subject_token parameter",
+        "A client 'api_gateway' is configured with the token exchange grant type in AllowedGrantTypes"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a custom profile service that loads claims from a hypothetical database for user tokens, but only emits claims that are actually requested by the client's scopes. For token exchange flows, it should also pass through the 'act' claim. Register it in the DI container.",
+      "expected_output": "A class extending DefaultProfileService that overrides GetProfileDataAsync. It should load claims and use context.AddRequestedClaims() to emit only scope-requested claims. For token exchange authentication method, it should find and add the act claim. The service should be registered with AddProfileService<T>().",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "A class extending DefaultProfileService or implementing IProfileService is defined",
+        "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims",
+        "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present",
+        "The profile service is registered via AddProfileService<T>() on the IdentityServer builder"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Our mobile_app client uses one-time refresh tokens but we're seeing failures when the network drops during token refresh. Implement a resilient refresh token service that accepts consumed tokens within a 30-second grace period. Make sure the operational store is configured not to delete consumed tokens immediately.",
+      "expected_output": "A class extending DefaultRefreshTokenService that overrides AcceptConsumedTokenAsync. It should check if the token was consumed within the last 30 seconds and return true if so. The class should be registered in DI. PersistentGrantOptions.DeleteOneTimeOnlyRefreshTokensOnUse should be set to false.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "A class extending DefaultRefreshTokenService is defined",
+        "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime",
+        "The service is registered as IRefreshTokenService in the DI container",
+        "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly",
+        "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Add client claims to the m2m_client so that every access token it gets includes a 'tenant_id' claim with value '42' and a 'department' claim with value 'billing'. Remove the default 'client_' prefix so the claims appear without any prefix in the token.",
+      "expected_output": "The m2m_client should have Claims containing ClientClaim entries for tenant_id=42 and department=billing. ClientClaimsPrefix should be set to empty string. AlwaysSendClientClaims should remain false since this is a client_credentials client (client claims are sent by default for that flow).",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "The m2m_client has a Claims collection with a ClientClaim for 'tenant_id' with value '42'",
+        "The m2m_client has a Claims collection with a ClientClaim for 'department' with value 'billing'",
+        "The m2m_client has ClientClaimsPrefix set to an empty string"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I need an endpoint in our IdentityServer that can issue internal JWT tokens for calling a backend.api service. Create a /internal-token endpoint that uses IIdentityServerTools to issue a client JWT with a 10-minute lifetime, audience 'backend.api', and client_id 'internal_service'. The endpoint should require authorization.",
+      "expected_output": "A minimal API endpoint mapped to /internal-token that injects IIdentityServerTools and calls IssueClientJwtAsync with clientId='internal_service', lifetime=600, and audiences containing 'backend.api'. The endpoint should have RequireAuthorization() or equivalent.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "An endpoint is mapped to '/internal-token' or similar path",
+        "IIdentityServerTools is injected and IssueClientJwtAsync is called",
+        "The lifetime parameter is set to 600 (10 minutes)",
+        "The audiences parameter includes 'backend.api'",
+        "The endpoint has authorization required via RequireAuthorization() or [Authorize]"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Our JWT access tokens are currently set to 1 hour (3600s) which is way too long. Apply security best practices: set the web_app access token lifetime to 5 minutes, the m2m_client to 10 minutes, and the mobile_app to 5 minutes. Also configure token cleanup on the operational store to run every 30 minutes and clean up consumed tokens after a 5-minute delay.",
+      "expected_output": "All three clients should have shortened AccessTokenLifetime values: web_app=300, m2m_client=600, mobile_app=300. The operational store should be configured with EnableTokenCleanup=true, TokenCleanupInterval=1800, RemoveConsumedTokens=true, and ConsumedTokenCleanupDelay=300.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "web_app client has AccessTokenLifetime = 300",
+        "m2m_client has AccessTokenLifetime = 600",
+        "mobile_app client has AccessTokenLifetime = 300",
+        "Operational store or token cleanup is configured with EnableTokenCleanup = true and TokenCleanupInterval = 1800",
+        "RemoveConsumedTokens is set to true and ConsumedTokenCleanupDelay is set to 300"
+      ]
+    }
+  ]
+}

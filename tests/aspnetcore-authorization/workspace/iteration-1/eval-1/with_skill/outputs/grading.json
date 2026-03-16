@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "assertions": [
+    {"assertion": "Program.cs calls builder.Services.AddAuthorization with options that set FallbackPolicy", "pass": true, "rationale": "Response shows builder.Services.AddAuthorization(options => { options.FallbackPolicy = ... })"},
+    {"assertion": "FallbackPolicy uses RequireAuthenticatedUser()", "pass": true, "rationale": "Response shows .RequireAuthenticatedUser().Build() in the FallbackPolicy configuration"},
+    {"assertion": "The /health endpoint has .AllowAnonymous() applied", "pass": true, "rationale": "Response shows app.MapGet(\"/health\", ...).AllowAnonymous()"},
+    {"assertion": "app.UseAuthorization() is called after app.UseAuthentication()", "pass": true, "rationale": "Response shows app.UseAuthentication() followed by app.UseAuthorization() in correct order"}
+  ],
+  "passed": 4,
+  "failed": 0,
+  "total": 4
+}

@@ -1,0 +1,138 @@
+{
+  "skill_name": "oauth-oidc-protocols",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to implement a client credentials token request to call an API. My IdentityServer is at https://identity.example.com, the client ID is 'backend-service', secret is 'service-secret', and I need the 'catalog.read' scope. Use IdentityModel to fetch a token via the discovery document. Don't hardcode the token endpoint URL.",
+      "expected_output": "Code that fetches the discovery document from the authority URL, then uses the discovered token endpoint to make a client credentials token request with IdentityModel's RequestClientCredentialsTokenAsync.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code calls GetDiscoveryDocumentAsync to resolve endpoints from the authority rather than hardcoding the token endpoint URL",
+        "Code checks disco.IsError before using the discovery response to handle unreachable or invalid discovery documents",
+        "Code uses RequestClientCredentialsTokenAsync (or equivalent POST to the token endpoint) with grant_type=client_credentials",
+        "Code sets the Scope to 'catalog.read' and provides ClientId and ClientSecret in the token request",
+        "Code uses disco.TokenEndpoint as the Address for the token request rather than a hardcoded URL"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Explain the authorization code flow with PKCE step by step. I'm building a web application and want to understand exactly what happens during login. What is PKCE, why is it necessary, and what does each step of the flow look like at the protocol level?",
+      "expected_output": "Detailed explanation of authorization code + PKCE flow covering code_verifier generation, code_challenge computation (SHA256), the authorize redirect, the callback with the authorization code, the token exchange with code_verifier, and why PKCE prevents authorization code interception.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that the client generates a random code_verifier and computes a code_challenge as its SHA256 hash",
+        "Response describes the authorize endpoint redirect including the code_challenge and code_challenge_method=S256 parameters",
+        "Response explains that the authorization code returned in the callback is exchanged at the token endpoint along with the original code_verifier",
+        "Response explains that PKCE prevents authorization code interception attacks because an attacker who intercepts the code cannot produce the matching code_verifier",
+        "Response mentions that Duende IdentityServer requires PKCE by default (RequirePkce = true) and ASP.NET Core's OIDC handler sends PKCE automatically since .NET 7"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My API receives a reference token (opaque string) instead of a JWT. How do I validate it? The API's client ID is 'catalog-api' and secret is 'api-secret'. The IdentityServer is at https://identity.example.com. Show me how to call the introspection endpoint to validate the token.",
+      "expected_output": "Code using IdentityModel's IntrospectTokenAsync to validate the reference token against the introspection endpoint, with proper error checking of the IsActive property.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code fetches the discovery document to resolve the introspection endpoint rather than hardcoding it",
+        "Code calls IntrospectTokenAsync (or POSTs to the introspection endpoint) with the API's ClientId and ClientSecret for authentication",
+        "Code checks the IsActive property (or 'active' field) of the introspection response to determine if the token is valid",
+        "Response explains that reference tokens are opaque identifiers (not self-contained JWTs) and require server-side validation via introspection",
+        "Response mentions that reference tokens enable immediate revocation unlike JWTs which are valid until expiry"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm building a single-page application (React) that calls my API directly from the browser using an access token obtained via implicit flow. My colleague says this is insecure. Is that true? What should I do instead?",
+      "expected_output": "Explanation that implicit flow is deprecated because it exposes tokens in URL fragments, and the recommended approach is the Backend-for-Frontend (BFF) pattern using authorization code + PKCE with a server-side component.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response states that the implicit flow is deprecated and should not be used, explaining tokens are exposed in URL fragments",
+        "Response recommends the Backend-for-Frontend (BFF) pattern as the correct approach for SPAs",
+        "Response explains that authorization code flow with PKCE should be used instead of implicit flow",
+        "Response mentions that with BFF, tokens are kept server-side and the SPA uses session cookies to communicate with its backend"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I have a client application that parses the access token JWT to read the user's name and email claims and display them in the UI. After a server upgrade, the access token format changed from JWT to reference token and now everything breaks. What's the correct way to get user info in my client?",
+      "expected_output": "Explanation that clients should treat access tokens as opaque, use the ID token for user identity claims, and optionally call the userinfo endpoint. Code showing the correct approach.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens",
+        "Response recommends using the ID token for user identity claims (name, email) in the client application",
+        "Response mentions the userinfo endpoint as an alternative for retrieving user claims",
+        "Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "My token exchange is failing and I don't know why. I'm getting an 'invalid_client' error from the token endpoint. The client ID is 'web.app' and the secret is 'correct-secret'. Walk me through a systematic debugging approach for token endpoint failures.",
+      "expected_output": "A systematic debugging checklist covering discovery document verification, client ID match, redirect URI exact match, scope registration, grant type allowance, PKCE, client secret encoding, clock skew, HTTPS, and CORS.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response includes checking that the discovery document at /.well-known/openid-configuration is reachable and returns valid JSON",
+        "Response includes verifying the client ID in the request exactly matches the server registration",
+        "Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)",
+        "Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes",
+        "Response covers checking redirect URI for exact string match including scheme, host, port, path, and trailing slash"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I want to implement refresh token rotation for my web application client. Explain how refresh token rotation works and configure a Duende IdentityServer client that uses OneTimeOnly refresh tokens with the offline_access scope.",
+      "expected_output": "Client configuration with AllowedGrantTypes including authorization code, AllowOfflineAccess=true, RefreshTokenUsage=OneTimeOnly, and explanation of the rotation mechanism.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response configures RefreshTokenUsage = TokenUsage.OneTimeOnly on the client to enable refresh token rotation",
+        "Response sets AllowOfflineAccess = true on the client so that the offline_access scope can be requested",
+        "Response explains that with OneTimeOnly, each refresh token exchange returns a new refresh token and invalidates the old one",
+        "Response mentions that the default changed to ReUse in IdentityServer v7.0, so OneTimeOnly must be set explicitly for rotation",
+        "Response includes offline_access in the client's AllowedScopes"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "What are Pushed Authorization Requests (PAR) and DPoP? When would I need them, and how do they improve security compared to a standard authorization code + PKCE flow?",
+      "expected_output": "Explanation of PAR moving authorization parameters to a backchannel POST preventing parameter tampering, and DPoP binding tokens to a client's cryptographic key preventing token theft/replay. Mention of FAPI 2.0 requiring these.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that PAR moves authorization parameters from the query string to a backchannel POST to the /connect/par endpoint, returning a request_uri that the client uses in the authorize redirect",
+        "Response explains that DPoP binds access tokens to a client's cryptographic key pair via a 'cnf' claim, preventing stolen tokens from being used by attackers",
+        "Response mentions that PAR prevents parameter tampering and URL length issues with authorization requests",
+        "Response mentions FAPI 2.0 as a financial-grade API profile that requires PAR and DPoP (or mTLS) for enhanced security"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response explains that SameSite=Strict prevents the cookie from being set during the OIDC callback redirect from IdentityServer", "pass": true, "rationale": "The response explicitly explains that SameSite=Strict means the cookie is never sent on cross-site requests and that the OIDC callback from IdentityServer is exactly this kind of cross-site navigation."},
+    {"assertion": "Response recommends changing SameSiteMode.Strict to SameSiteMode.Lax for the authentication cookie", "pass": true, "rationale": "The response clearly recommends 'Change SameSiteMode.Strict to SameSiteMode.Lax' as the fix."},
+    {"assertion": "Response includes code setting options.Cookie.SameSite = SameSiteMode.Lax on the cookie handler", "pass": true, "rationale": "The response includes 'options.Cookie.SameSite = SameSiteMode.Lax;' in the AddCookie configuration code."},
+    {"assertion": "Response mentions setting Cookie.SecurePolicy to Always for HTTPS", "pass": true, "rationale": "The response includes 'options.Cookie.SecurePolicy = CookieSecurePolicy.Always;' in the code and explains it."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

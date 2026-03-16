@@ -1,0 +1,12 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Response mentions implementing ITicketStore (backed by IDistributedCache or similar) to move the authentication ticket server-side so the cookie only holds a session key", "pass": true, "rationale": "The response mentions ITicketStore and shows options.SessionStore for moving the ticket server-side so the cookie only contains a session reference."},
+    {"assertion": "Response mentions using ClaimActions.DeleteClaims to remove unnecessary claims like sid, idp, auth_time, or amr from the cookie", "pass": true, "rationale": "The response shows ClaimActions.DeleteClaim for sid, idp, and auth_time claims."},
+    {"assertion": "Response explains that SaveTokens=true stores access, refresh, and ID tokens in the cookie which contributes to the size problem", "pass": true, "rationale": "The response explains that 'tokens stored when SaveTokens = true include the access token, refresh token, and ID token, which can significantly increase cookie size'."}
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

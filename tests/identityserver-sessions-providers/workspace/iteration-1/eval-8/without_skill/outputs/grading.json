@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
+      "pass": false,
+      "rationale": "The without_skill response does not show the one-step `AddServerSideSessions<RedisSessionStore>()` pattern. Instead it shows separate DI registration via `AddSingleton<IServerSideSessionStore, RedisSessionStore>()` followed by `AddServerSideSessions()`, which is not the one-step pattern."
+    },
+    {
+      "assertion": "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
+      "pass": true,
+      "rationale": "Code shows `.AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>()`."
+    },
+    {
+      "assertion": "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
+      "pass": false,
+      "rationale": "The response mentions 'the serialized authentication ticket' but does not explicitly state that it is protected by Data Protection. It mentions Data Protection keys for 'session decryption' in the notes but doesn't clearly state the AuthenticationTicket itself is Data Protection-protected."
+    },
+    {
+      "assertion": "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
+      "pass": false,
+      "rationale": "The response mentions subject ID and session ID but does not mention DisplayName as a queryable index. It only lists 'subject ID' and 'session ID' without framing them as queryable indices alongside DisplayName."
+    },
+    {
+      "assertion": "Response notes that UserDisplayNameClaimType is null by default due to PII concerns",
+      "pass": false,
+      "rationale": "The response does not mention UserDisplayNameClaimType or that it is null by default due to PII concerns."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

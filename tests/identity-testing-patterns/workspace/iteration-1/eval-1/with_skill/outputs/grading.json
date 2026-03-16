@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>", "pass": true, "rationale": "TestAuthHandler class explicitly extends AuthenticationHandler<AuthenticationSchemeOptions>"},
+    {"assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test", "pass": true, "rationale": "ITestClaimsProvider interface defined with SetClaims, ClearClaims, and GetClaims methods"},
+    {"assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme", "pass": true, "rationale": "ApiFactory calls AddAuthentication(TestAuthHandler.SchemeName).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(...)"},
+    {"assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized", "pass": true, "rationale": "Test calls _factory.ClaimsProvider.ClearClaims() and asserts HttpStatusCode.Unauthorized"},
+    {"assertion": "Does NOT disable authorization entirely — authorization policies remain active", "pass": true, "rationale": "Only authentication is replaced; authorization policies (AdminOnly, ApiScope) remain active. Explicitly noted in the response."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

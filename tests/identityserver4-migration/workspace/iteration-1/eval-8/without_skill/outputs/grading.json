@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output replaces 'using IdentityServer4.Models' with 'using Duende.IdentityServer.Models'",
+      "pass": true,
+      "rationale": "Code shows 'using Duende.IdentityServer.Models' replacing the old namespace."
+    },
+    {
+      "assertion": "Output preserves the Client definitions with ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes intact",
+      "pass": true,
+      "rationale": "Both Client definitions are preserved exactly as in the original."
+    },
+    {
+      "assertion": "Output preserves the ApiScope, ApiResource, and IdentityResource definitions",
+      "pass": true,
+      "rationale": "All resource definitions are preserved unchanged."
+    },
+    {
+      "assertion": "Output maintains the Secret and GrantTypes usage (these types exist in Duende with the same API surface)",
+      "pass": true,
+      "rationale": "Secret and GrantTypes are used identically. States they are 'essentially the same in Duende IdentityServer.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

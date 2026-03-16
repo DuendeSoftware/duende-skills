@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it (e.g., new Secret(\"...\".Sha256()))",
+      "pass": true,
+      "rationale": "Response identifies the missing .Sha256() call and provides the fix: new Secret(\"super-secret-password\".Sha256())."
+    },
+    {
+      "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue and removes it",
+      "pass": true,
+      "rationale": "Response identifies the trailing slash mismatch and fixes it to \"https://app.example.com/signin-oidc\" without trailing slash."
+    },
+    {
+      "assertion": "Output identifies the missing 'openid' scope (IdentityServerConstants.StandardScopes.OpenId) and adds it to AllowedScopes",
+      "pass": true,
+      "rationale": "Response identifies the missing openid scope and adds IdentityServerConstants.StandardScopes.OpenId to AllowedScopes."
+    },
+    {
+      "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+      "pass": true,
+      "rationale": "Response changes AllowOfflineAccess from false to true."
+    },
+    {
+      "assertion": "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault",
+      "pass": true,
+      "rationale": "Response warns about hardcoding secrets and recommends loading from configuration or vault, with a code example using configuration[\"Clients:MyWebApp:Secret\"]."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it (e.g., new Secret(\"...\".Sha256()))",
+      "pass": true,
+      "rationale": "Response identifies the missing .Sha256() and fixes it to new Secret(\"super-secret-password\".Sha256())."
+    },
+    {
+      "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue and removes it",
+      "pass": true,
+      "rationale": "Response identifies the trailing slash mismatch and removes it."
+    },
+    {
+      "assertion": "Output identifies the missing 'openid' scope (IdentityServerConstants.StandardScopes.OpenId) and adds it to AllowedScopes",
+      "pass": true,
+      "rationale": "Response identifies the missing openid scope and adds it (using string literal 'openid')."
+    },
+    {
+      "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+      "pass": true,
+      "rationale": "Response changes AllowOfflineAccess to true."
+    },
+    {
+      "assertion": "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault",
+      "pass": false,
+      "rationale": "Response does NOT warn about hardcoding secrets in source code. The fixed configuration still uses the hardcoded string \"super-secret-password\".Sha256() and no recommendation is made to load from configuration or vault."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

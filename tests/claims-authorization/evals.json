@@ -1,0 +1,122 @@
+{
+  "skill_name": "claims-authorization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to implement a custom IProfileService for my Duende IdentityServer so that user claims like 'department' and 'tenant_id' from our database are included in access tokens. Show me how to build and register it. The tenant_id claim must always be present in every token regardless of scopes.",
+      "expected_output": "A custom IProfileService implementation (extending DefaultProfileService) that loads claims from a user repository, uses context.AddRequestedClaims for scope-filtered claims, uses context.IssuedClaims.Add for the mandatory tenant_id claim, implements IsActiveAsync, and registers via AddProfileService<T>().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Implements IProfileService or extends DefaultProfileService",
+        "Uses context.AddRequestedClaims for scope-filtered claims like 'department'",
+        "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering",
+        "Implements IsActiveAsync to check whether the user is still active",
+        "Registers the profile service with AddProfileService<T>() on the IdentityServer builder"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My API is consuming JWTs from Duende IdentityServer but User.FindFirst(\"sub\") returns null. I can see the claim is in the token when I decode it at jwt.io. What's going on and how do I fix it?",
+      "expected_output": "An explanation that the JWT bearer handler's default MapInboundClaims behavior renames 'sub' to the long WS-Federation URI, with the fix of setting MapInboundClaims = false and optionally setting NameClaimType and RoleClaimType on TokenValidationParameters.",
+      "files": [],
+      "assertions": [
+        "Identifies MapInboundClaims as the root cause — the JWT bearer handler renames 'sub' to the long Microsoft XML namespace URI",
+        "Shows setting options.MapInboundClaims = false on the JWT bearer handler",
+        "Mentions JwtClaimTypes.Subject or the short name 'sub' vs the long http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier URI",
+        "Does NOT suggest the claim is missing from the token itself"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I've added a 'department' claim to my users in the database and my IProfileService emits it, but it never appears in the access token. What am I missing?",
+      "expected_output": "An explanation that claims are opt-in by scope — the claim type must be declared in the UserClaims collection of an ApiScope, ApiResource, or IdentityResource, and the client must request that scope. Shows how to add UserClaims to the ApiScope definition.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+        "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+        "Mentions that the client must also request the scope that contains the claim",
+        "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to enrich the ClaimsPrincipal in my API after JWT validation with application-specific roles from a local database. The roles shouldn't be in the token itself. How should I do this?",
+      "expected_output": "An IClaimsTransformation implementation that looks up application roles from a local repository and adds them as new claims via a new ClaimsIdentity added to the principal (not mutating the existing identity). Registered as a transient service.",
+      "files": [],
+      "assertions": [
+        "Implements IClaimsTransformation with a TransformAsync method",
+        "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place",
+        "Loads roles from a local repository or database based on the user's subject claim",
+        "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)",
+        "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want my IProfileService to return different claims depending on whether the token being issued is an identity token or an access token. Identity tokens should be small with just the user's name, while access tokens should include richer application claims. How do I differentiate?",
+      "expected_output": "Code using context.Caller to check ProfileDataCallers constants (ClaimsProviderIdentityToken vs ClaimsProviderAccessToken) and emitting different claim sets accordingly.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Uses context.Caller to differentiate between token types",
+        "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+        "Emits a minimal claim set (e.g. just name) for identity tokens",
+        "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm implementing a token exchange extension grant (urn:ietf:params:oauth:grant-type:token-exchange) in Duende IdentityServer. Show me how to build the IExtensionGrantValidator and emit custom claims like the original client ID into the resulting token.",
+      "expected_output": "An IExtensionGrantValidator implementation that validates the subject_token, extracts the subject, and returns a GrantValidationResult with custom claims. Registered via AddExtensionGrantValidator<T>().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'",
+        "Extracts and validates the subject_token from the request",
+        "Returns a GrantValidationResult with a subject ID and custom claims array",
+        "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder",
+        "Mentions that IProfileService is called after the grant validator and can augment claims further"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "We have a client credentials flow client called 'billing-service'. I need to add static claims like customer_id=acme-corp and region=us-east to its access tokens. Also, I want the claims to appear without the default 'client_' prefix.",
+      "expected_output": "A Client configuration with Claims containing ClientClaim objects and ClientClaimsPrefix set to empty string to remove the prefix.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Adds ClientClaim objects to the Client.Claims collection with 'customer_id' and 'region'",
+        "Sets ClientClaimsPrefix to an empty string to remove the 'client_' prefix",
+        "Uses GrantTypes.ClientCredentials for the client",
+        "Mentions that client claims are emitted by default only in client credentials flow, or requires AlwaysSendClientClaims = true for other flows"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I need to set up an external Azure AD login on my IdentityServer and map the incoming AAD claims (like 'oid' and 'groups') to my internal claim types. Show me both the OIDC handler configuration with ClaimActions and the login callback claim mapping.",
+      "expected_output": "An OIDC handler configuration for Azure AD with MapInboundClaims = false, ClaimActions.Clear() followed by explicit MapJsonKey calls, and a callback method that maps AAD-specific claims (oid, groups) to internal claim types.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false",
+        "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones",
+        "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'",
+        "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+        "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions"
+      ]
+    }
+  ]
+}

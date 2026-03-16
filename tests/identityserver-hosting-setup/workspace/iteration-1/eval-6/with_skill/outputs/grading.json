@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> BEFORE calling AddAspNetIdentity", "pass": true, "rationale": "Code registers AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomClaimsPrincipalFactory>() before AddAspNetIdentity"},
+    {"assertion": "Program.cs calls AddAspNetIdentity<ApplicationUser>() which will wrap and call through to the custom factory", "pass": true, "rationale": "Code calls AddIdentityServer().AddAspNetIdentity<ApplicationUser>()"},
+    {"assertion": "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync", "pass": true, "rationale": "CustomProfileService inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync"},
+    {"assertion": "The IsUserActiveAsync override checks a property on the user (e.g., user.IsEnabled or user.IsActive) to determine if the user is active", "pass": true, "rationale": "IsUserActiveAsync returns Task.FromResult(user.IsActive)"},
+    {"assertion": "The CustomProfileService is registered in DI as the IProfileService implementation", "pass": true, "rationale": "Code registers AddTransient<Duende.IdentityServer.Services.IProfileService, CustomProfileService>()"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

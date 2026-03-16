@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances", "pass": true, "rationale": "Response explicitly states 'ASP.NET Core Data Protection keys are not shared across your load-balanced instances' and explains the encryption/decryption failure across instances"},
+    {"assertion": "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)", "pass": true, "rationale": "Code calls builder.Services.AddDataProtection().PersistKeysToDbContext<DataProtectionDbContext>()"},
+    {"assertion": "Program.cs includes SetApplicationName() to ensure a consistent application name across instances", "pass": true, "rationale": "Code calls .SetApplicationName(\"IdentityServer\") on the data protection builder"},
+    {"assertion": "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation", "pass": true, "rationale": "Response recommends AddOperationalStore for database-backed key storage and also mentions configuring a shared file system path as an alternative: options.KeyManagement.KeyPath = \"/shared-mount/identity-keys\""}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

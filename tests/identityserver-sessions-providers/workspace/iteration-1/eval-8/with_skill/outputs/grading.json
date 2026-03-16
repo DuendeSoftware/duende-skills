@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
+      "pass": true,
+      "rationale": "Code shows `builder.Services.AddIdentityServer().AddServerSideSessions<RedisSessionStore>();` as the one-step approach."
+    },
+    {
+      "assertion": "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
+      "pass": true,
+      "rationale": "Code shows `builder.Services.AddIdentityServer().AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>();` as the two-step approach."
+    },
+    {
+      "assertion": "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
+      "pass": true,
+      "rationale": "Response states: 'The session stores the serialized ASP.NET Core AuthenticationTicket... The data is protected using ASP.NET Core's Data Protection API — your Redis store receives encrypted bytes, not plaintext.'"
+    },
+    {
+      "assertion": "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
+      "pass": true,
+      "rationale": "Response includes a table listing SubjectId (sub claim value), SessionId (sid claim value), and DisplayName (configurable claim type) as the three queryable indices."
+    },
+    {
+      "assertion": "Response notes that UserDisplayNameClaimType is null by default due to PII concerns",
+      "pass": true,
+      "rationale": "Response states: 'The UserDisplayNameClaimType is unset (null) by default because display names often contain PII (names, emails). You must explicitly opt in.'"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

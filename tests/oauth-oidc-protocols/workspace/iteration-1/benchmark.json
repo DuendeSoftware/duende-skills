@@ -1,0 +1,66 @@
+{
+  "metadata": {"skill_name": "oauth-oidc-protocols", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 37, "passed": 37, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 37, "passed": 28, "failed": 9, "pass_rate": 75.7},
+    "delta": {"assertions_improved": 9, "delta_pass_rate": 24.3}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Response mentions that Duende IdentityServer requires PKCE by default (RequirePkce = true) and ASP.NET Core's OIDC handler sends PKCE automatically since .NET 7"]
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": ["Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)", "Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes"]
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Response mentions that the default changed to ReUse in IdentityServer v7.0, so OneTimeOnly must be set explicitly for rotation"]
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "delta": 0.5,
+      "without_skill_failures": ["Response explains that PAR moves authorization parameters from the query string to a backchannel POST to the /connect/par endpoint, returning a request_uri that the client uses in the authorize redirect", "Response mentions FAPI 2.0 as a financial-grade API profile that requires PAR and DPoP (or mTLS) for enhanced security"]
+    }
+  ]
+}

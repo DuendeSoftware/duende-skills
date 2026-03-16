@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls .AddServerSideSessions() on the IdentityServer builder (not as an option property)",
+      "pass": true,
+      "rationale": "Response calls .AddServerSideSessions() on the builder chain."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)",
+      "pass": true,
+      "rationale": "Response contains 'options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5);'."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true",
+      "pass": true,
+      "rationale": "Response contains 'options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;'."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true",
+      "pass": false,
+      "rationale": "Response does NOT set options.Authentication.CoordinateClientLifetimesWithUserSession to true. Instead, it mentions setting 'CoordinateLifetimeWithUserSession' on individual client configurations, which is a different (per-client) property, not the global options.Authentication setting required by the assertion."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

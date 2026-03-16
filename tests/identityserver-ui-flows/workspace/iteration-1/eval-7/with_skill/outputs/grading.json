@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage",
+      "pass": true,
+      "rationale": "Program.cs calls builder.Services.AddOidcStateDataFormatterCache(\"corporate-idp\")."
+    },
+    {
+      "assertion": "The external login trigger stores returnUrl in AuthenticationProperties.Items before calling Challenge",
+      "pass": true,
+      "rationale": "ExternalLoginModel stores {\"returnUrl\", returnUrl} in AuthenticationProperties.Items before Challenge."
+    },
+    {
+      "assertion": "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme",
+      "pass": true,
+      "rationale": "Callback retrieves result.Properties.Items[\"returnUrl\"] after AuthenticateAsync."
+    },
+    {
+      "assertion": "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback",
+      "pass": true,
+      "rationale": "Callback validates with _interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

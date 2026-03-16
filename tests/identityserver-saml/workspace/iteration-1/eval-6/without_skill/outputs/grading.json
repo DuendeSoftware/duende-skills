@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Lists all four signing behaviors: SignAssertion, SignResponse, SignBoth, DoNotSign", "pass": false, "rationale": "Lists conceptual signing options but uses wrong enum names (e.g., 'SignAssertionAndResponse' instead of 'SignBoth', 'No Signing' instead of 'DoNotSign'). Does not use the correct Duende enum values."},
+    {"assertion": "Recommends SignBoth for the specific requirement of signing both assertion and response", "pass": false, "rationale": "Uses 'SigningBehavior.SignAssertionAndResponse' instead of the correct 'SamlSigningBehavior.SignBoth'."},
+    {"assertion": "Notes that SignAssertion is the default and most interoperable option", "pass": true, "rationale": "States 'Signing the assertion is the default and most commonly used option'."},
+    {"assertion": "Warns that DoNotSign should only be used for testing, never in production", "pass": true, "rationale": "States 'Never disable signing in production environments'."},
+    {"assertion": "Shows how to set SigningBehavior on the SamlServiceProvider or as a default via options.Saml.DefaultSigningBehavior", "pass": false, "rationale": "Uses AddSaml(options => ...) lambda instead of the correct options.Saml.DefaultSigningBehavior path. Also uses wrong enum type 'SigningBehavior' instead of 'SamlSigningBehavior'."}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

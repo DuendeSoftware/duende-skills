@@ -1,0 +1,125 @@
+{
+  "skill_name": "identityserver-deployment",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My IdentityServer is deployed behind an Nginx reverse proxy that terminates TLS. The discovery document at /.well-known/openid-configuration is showing http:// URLs instead of https://. How do I fix this in my Program.cs?",
+      "expected_output": "Configure ForwardedHeadersOptions to handle X-Forwarded-Proto and X-Forwarded-Host headers, or set the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable. The middleware must run early in the pipeline, before IdentityServer middleware.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output contains configuration of ForwardedHeaders with either ForwardedHeaders.XForwardedProto or the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable approach",
+        "Output mentions that the ForwardedHeaders middleware must run before IdentityServer middleware in the pipeline",
+        "Output includes adding proxy IP addresses to KnownProxies or KnownNetworks for production, or explains the default localhost-only trust",
+        "If explicit configuration is shown, ForwardedHeaders option includes XForwardedProto (to fix the http vs https issue)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're deploying IdentityServer to a Kubernetes cluster with 3 replicas. Users are getting CryptographicException errors intermittently. What's going wrong and how do I configure Data Protection properly for this environment?",
+      "expected_output": "The issue is that Data Protection keys are not shared across instances. Configure PersistKeysTo a shared store (Redis, database, etc.), set an explicit application name with SetApplicationName, and optionally protect keys with a certificate or key vault.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+        "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+        "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+        "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+        "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to add health checks to my IdentityServer so our monitoring system (hitting /health) can detect when the service is unhealthy. Show me how to implement health checks that verify the discovery endpoint and JWKS endpoint are working.",
+      "expected_output": "Implement IHealthCheck classes that invoke the IdentityServer discovery and JWKS endpoint handlers internally, register them with AddHealthChecks, and map the /health endpoint.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler",
+        "Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler",
+        "Output registers the health checks using builder.Services.AddHealthChecks() and maps the health endpoint with app.MapHealthChecks()",
+        "Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add OpenTelemetry to my IdentityServer for production monitoring. I want metrics exported to Prometheus and distributed tracing. Only enable the tracing sources appropriate for production — not the verbose ones.",
+      "expected_output": "Configure OpenTelemetry with the Duende.IdentityServer meter, Prometheus exporter for metrics, and only the Basic tracing source for production. Add the Prometheus scraping endpoint.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output adds the 'Duende.IdentityServer' meter (or Telemetry.ServiceName) to the metrics configuration",
+        "Output configures a Prometheus exporter for metrics (AddPrometheusExporter) and maps the scraping endpoint (UseOpenTelemetryPrometheusScrapingEndpoint)",
+        "Output adds only IdentityServerConstants.Tracing.Basic as the tracing source for production, and does NOT include Stores, Validation, Cache, or Services sources",
+        "Output includes the necessary OpenTelemetry NuGet packages (OpenTelemetry.Extensions.Hosting, OpenTelemetry.Instrumentation.AspNetCore, OpenTelemetry.Exporter.OpenTelemetryProtocol or Prometheus exporter)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Our IdentityServer logs are extremely verbose in production and we're seeing token values in the logs. Fix the logging configuration in appsettings.json for production use and show me how to filter out OperationCanceledException noise from cancelled requests.",
+      "expected_output": "Set the Duende.IdentityServer log level to Warning in production (never Trace or Debug, which expose tokens). Configure the UnhandledExceptionLoggingFilter to suppress OperationCanceledException when the request is aborted.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Output changes the logging level for Duende.IdentityServer to Warning (or higher) in the appsettings.json or production appsettings",
+        "Output explains that Trace and Debug levels expose sensitive data like tokens and must not be used in production",
+        "Output configures options.Logging.UnhandledExceptionLoggingFilter to return false for OperationCanceledException when ctx.RequestAborted.IsCancellationRequested is true",
+        "Output sets the Default log level to Information or Warning rather than Debug"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We're running IdentityServer in a multi-instance deployment. What distributed caching setup do I need, and why? Some of our OIDC login flows to external providers are failing intermittently.",
+      "expected_output": "Configure IDistributedCache (e.g., Redis) because IdentityServer uses it for OIDC state data, JWT replay cache, device flow throttling, and PAR. Without shared cache, state created on one instance can't be read by another, causing external OIDC flows to fail.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B",
+        "Output configures a distributed cache implementation such as AddStackExchangeRedisCache or AddSqlServerCache",
+        "Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store",
+        "Output does NOT suggest using the default in-memory DistributedCache for multi-instance deployments"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I want to enable the IdentityServer events system and send events to our Seq logging server for auditing. Show me how to enable all event categories and create a custom IEventSink that writes to Seq.",
+      "expected_output": "Enable all event types via IdentityServer options (RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, RaiseInformationEvents). Implement an IEventSink that uses Serilog to write events to Seq with structured logging.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Output enables all four event categories: RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents on the IdentityServer options",
+        "Output implements IEventSink with a PersistAsync method that receives Event objects",
+        "Output writes events to Seq using structured logging (e.g., Serilog WriteTo.Seq) with event name, id, and details",
+        "Output registers the custom event sink in the DI container so IdentityServer uses it"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "We have two reverse proxies in a chain (Cloudflare -> Nginx -> IdentityServer). Our ForwardedHeaders configuration isn't working correctly. The discovery document still shows the wrong host. What's the issue?",
+      "expected_output": "With multiple proxies, ForwardLimit must be set to 2 (matching the number of proxies), and both proxy IP addresses must be added to KnownProxies or KnownNetworks. Also ensure XForwardedHost is included in the ForwardedHeaders flags.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+        "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+        "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+        "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed"
+      ]
+    }
+  ]
+}

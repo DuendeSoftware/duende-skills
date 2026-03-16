@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "assertions": [
+    {"assertion": "A Document class/record is defined with at least Department and OwnerId properties", "pass": true, "rationale": "Response defines public record Document(int Id, string Title, string Department, string OwnerId)"},
+    {"assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit", "pass": true, "rationale": "Response defines Operations class with static Read and Edit OperationAuthorizationRequirement fields"},
+    {"assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>", "pass": true, "rationale": "Response shows DocumentAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Document>"},
+    {"assertion": "The Read operation checks the user's 'department' claim against the resource's Department property", "pass": true, "rationale": "Response checks context.User.FindFirst(\"department\")?.Value against resource.Department"},
+    {"assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property", "pass": true, "rationale": "Response checks context.User.FindFirst(\"sub\")?.Value against resource.OwnerId"}
+  ],
+  "passed": 5,
+  "failed": 0,
+  "total": 5
+}

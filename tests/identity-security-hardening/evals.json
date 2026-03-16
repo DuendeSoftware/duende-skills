@@ -1,0 +1,113 @@
+{
+  "skill_name": "identity-security-hardening",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Our IdentityServer is deployed behind an AWS ALB that terminates TLS. We're getting 'IDX20803: Unable to obtain configuration' errors from downstream APIs because the discovery document shows an http:// issuer. Also, we have no HSTS or HTTPS redirection configured. Fix the transport security in Program.cs so it works correctly behind our reverse proxy at 10.0.0.1 and enforces HTTPS with strong HSTS.",
+      "expected_output": "Program.cs is updated with ForwardedHeaders middleware configured for XForwardedFor and XForwardedProto restricted to the known proxy IP 10.0.0.1, placed as the first middleware. HSTS is configured with MaxAge >= 365 days, IncludeSubDomains = true, and Preload = true. HttpsRedirection is added with a 308 permanent redirect status code. The middleware ordering is: ForwardedHeaders -> HttpsRedirection -> HSTS -> IdentityServer.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains ForwardedHeaders configuration with XForwardedFor and XForwardedProto",
+        "Program.cs restricts KnownProxies to the proxy IP address 10.0.0.1 and does not accept forwarded headers from any source",
+        "Program.cs configures HSTS with MaxAge of at least 365 days and IncludeSubDomains = true",
+        "Program.cs calls UseForwardedHeaders() before UseHttpsRedirection() and UseIdentityServer() in the middleware pipeline",
+        "Program.cs uses StatusCodes.Status308PermanentRedirect or equivalent 308 status code for HTTPS redirection"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to harden the 'web.app' client in our IdentityServer. It currently has PKCE disabled, uses wildcard redirect URIs, has an 8-hour access token lifetime, and reuses refresh tokens. Also it uses GrantTypes.CodeAndClientCredentials which seems wrong. Please fix all the security issues with this client configuration following OAuth 2.0 Security BCP (RFC 9700).",
+      "expected_output": "The web.app client is updated: RequirePkce set to true, wildcard redirect URIs replaced with exact-match fully-qualified URIs, AllowedGrantTypes changed to GrantTypes.Code only, AccessTokenLifetime reduced to 300 seconds (5 minutes), RefreshTokenUsage changed to OneTimeOnly, RefreshTokenExpiration changed to Absolute with a reasonable AbsoluteRefreshTokenLifetime, and CoordinateLifetimeWithUserSession set to true.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "The web.app client has RequirePkce = true and does not set it to false",
+        "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+        "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+        "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+        "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The 'spa.legacy' client still uses implicit flow. Migrate it to a secure flow. Also, the client secret for 'background.worker' is hardcoded as a string literal. Fix that to load from configuration. While you're at it, the 'web.app' client secret is also a hardcoded literal - fix that too.",
+      "expected_output": "The spa.legacy client is migrated from GrantTypes.Implicit to GrantTypes.Code with RequirePkce = true, AllowAccessTokensViaBrowser removed or set to false. Client secrets for background.worker and web.app are loaded from configuration (appsettings.json or IConfiguration) rather than inline string literals. Secrets are hashed with Sha256() after loading from configuration.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "No client uses GrantTypes.Implicit anywhere in the file",
+        "The spa.legacy client uses GrantTypes.Code with RequirePkce = true",
+        "The spa.legacy client does not have AllowAccessTokensViaBrowser = true",
+        "Client secrets are loaded from configuration (builder.Configuration, config[], or IConfiguration) rather than hardcoded string literals passed to Sha256()"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add Content Security Policy headers and rate limiting to our IdentityServer. The CSP should protect our login and consent UI pages against XSS and clickjacking. Rate limiting should protect the token endpoint with a sliding window of 20 requests per minute per IP, and the authorize endpoint with 10 requests per minute per IP.",
+      "expected_output": "Program.cs adds CSP middleware that sets Content-Security-Policy with at minimum default-src 'self', frame-ancestors 'none', and object-src 'none'. X-Frame-Options: DENY and X-Content-Type-Options: nosniff headers are also set. Rate limiting is configured with AddRateLimiter using a sliding window policy for the token endpoint (20 permits/minute) and a fixed window for the authorize endpoint (10 permits/minute), both partitioned by client IP.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+        "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+        "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+        "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+        "Program.cs calls UseRateLimiter() in the middleware pipeline"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Replace the developer signing credential with proper automatic key management. Use ES256 as the primary algorithm with RS256 as fallback. Configure 90-day rotation with 14-day propagation and retention. Make sure Data Protection is set up for the load-balanced deployment with keys persisted to /var/identity/dp-keys.",
+      "expected_output": "Program.cs removes AddDeveloperSigningCredential() and configures KeyManagement options with RotationInterval = 90 days, PropagationTime = 14 days, RetentionDuration = 14 days, DataProtectKeys = true. SigningAlgorithms is configured with ES256 first, then RS256. Data Protection is configured with PersistKeysToFileSystem pointing to /var/identity/dp-keys and SetApplicationName is called.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Program.cs does not call AddDeveloperSigningCredential()",
+        "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+        "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+        "Program.cs configures DataProtectKeys = true for key management",
+        "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Configure server-side sessions with hardened lifetimes for our IdentityServer. We need: absolute cookie lifetime of 8 hours with no sliding expiration, expired session cleanup every 10 minutes, back-channel logout triggered when sessions expire, and client token lifetimes coordinated with user sessions. Also configure the web.app client to support back-channel logout at https://app.example.com/bff/backchannel.",
+      "expected_output": "Program.cs configures server-side sessions with CookieLifetime = 8 hours, CookieSlidingExpiration = false, RemoveExpiredSessions = true, RemoveExpiredSessionsFrequency = 10 minutes, ExpiredSessionsTriggerBackchannelLogout = true, and CoordinateClientLifetimesWithUserSession = true. AddServerSideSessions() is called on the IdentityServer builder. The web.app client is updated with BackChannelLogoutUri and BackChannelLogoutSessionRequired = true.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
+        "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
+        "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+        "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
+        "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Perform a security audit of our IdentityServer setup and fix ALL issues you find. Provide a summary of what was wrong and what you changed, following the Production Security Checklist from the identity-security-hardening skill.",
+      "expected_output": "A comprehensive audit that identifies and fixes multiple issues: developer signing credential replaced with automatic key management, implicit flow client migrated to code+PKCE, wildcard redirect URIs replaced with exact-match URIs, PKCE enabled on web.app, hardcoded secrets loaded from configuration instead, long access token lifetimes reduced, refresh token reuse changed to one-time-only, HTTPS/HSTS configured, CORS origins added where missing, CSP headers added, rate limiting configured. The summary lists each finding and remediation.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+        "No redirect URI contains wildcard characters (* or regex patterns)",
+        "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+        "All access token lifetimes are 900 seconds or less for interactive clients",
+        "The output includes a summary or explanation listing the security issues found and how they were remediated"
+      ]
+    }
+  ]
+}

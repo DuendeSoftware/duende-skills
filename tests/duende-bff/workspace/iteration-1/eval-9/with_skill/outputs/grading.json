@@ -1,0 +1,14 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup", "pass": true, "rationale": "Shows AddBff().ConfigureOpenIdConnect().ConfigureCookies() and the manual AddAuthentication/AddCookie/AddOpenIdConnect is completely removed from code"},
+    {"assertion": "Output does NOT contain 'MapBffManagementEndpoints'", "pass": true, "rationale": "MapBffManagementEndpoints does not appear in any code block. It is mentioned only in a comment explaining its removal and in the summary table — the migrated code does not call it."},
+    {"assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'", "pass": true, "rationale": "Shows .WithAccessToken(RequiredTokenType.User) in the code. RequireAccessToken does not appear in code blocks."},
+    {"assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints", "pass": true, "rationale": "Shows .AddRemoteApis() chained after ConfigureCookies()"},
+    {"assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)", "pass": true, "rationale": "Preserves Authority='https://identity.example.com', ClientId='spa', ClientSecret='secret', ResponseType='code', Scope.Add('api1'), SaveTokens=true, and cookie settings"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

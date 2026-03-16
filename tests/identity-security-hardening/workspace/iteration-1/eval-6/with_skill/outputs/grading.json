@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "CookieLifetime = TimeSpan.FromHours(8) and CookieSlidingExpiration = false are both set"
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
+      "pass": true,
+      "rationale": "options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true is present"
+    },
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": ".AddServerSideSessions() is called on the builder chain"
+    },
+    {
+      "assertion": "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
+      "pass": true,
+      "rationale": "BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\""
+    },
+    {
+      "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+      "pass": true,
+      "rationale": "options.Authentication.CoordinateClientLifetimesWithUserSession = true is set"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

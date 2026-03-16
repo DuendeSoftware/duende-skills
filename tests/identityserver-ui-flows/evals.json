@@ -1,0 +1,119 @@
+{
+  "skill_name": "identityserver-ui-flows",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a login page using Razor Pages for our IdentityServer. It should use IIdentityServerInteractionService to get the authorization context from the returnUrl, display the client name to the user, validate credentials against TestUserStore, and establish the authentication session using IdentityServerUser. Make sure to protect against open redirect attacks by validating the returnUrl before redirecting back.",
+      "expected_output": "A Razor Page (Login.cshtml.cs) is created that injects IIdentityServerInteractionService and TestUserStore. OnGet retrieves the authorization context via GetAuthorizationContextAsync(returnUrl) and populates the view with the client name. OnPost validates credentials via TestUserStore.ValidateCredentials, creates an IdentityServerUser with the user's SubjectId, calls HttpContext.SignInAsync, validates returnUrl using either Url.IsLocalUrl or _interaction.IsValidReturnUrl, and redirects back to returnUrl.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "A login page model file exists that injects IIdentityServerInteractionService via constructor",
+        "The login page calls GetAuthorizationContextAsync(returnUrl) to retrieve the authorization context rather than parsing returnUrl manually",
+        "The login page creates an IdentityServerUser with the subject ID and calls HttpContext.SignInAsync to establish the session",
+        "The login page validates returnUrl using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add Azure AD as an external identity provider to our IdentityServer. Register it with scheme name 'AAD' and display name 'Corporate Login'. Configure the external login trigger to challenge with AAD and store the returnUrl in AuthenticationProperties. Then implement the callback handler that reads the external cookie, finds or provisions a local user, establishes the IdentityServer session with the external IdP recorded, and cleans up the external cookie. Use IdentityServerConstants.ExternalCookieAuthenticationScheme as the SignInScheme.",
+      "expected_output": "Program.cs registers an OpenID Connect handler with scheme 'AAD', SignInScheme set to IdentityServerConstants.ExternalCookieAuthenticationScheme. A login page or controller triggers Challenge('AAD') with AuthenticationProperties containing the returnUrl. A callback handler authenticates against ExternalCookieAuthenticationScheme, extracts the external user claims, creates an IdentityServerUser with IdentityProvider set to the scheme name, calls SignInAsync, then calls SignOutAsync on ExternalCookieAuthenticationScheme to clean up.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs or an authentication setup file registers an OpenIdConnect handler with scheme name 'AAD' and SignInScheme set to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+        "The external login trigger calls Challenge with 'AAD' and stores returnUrl in AuthenticationProperties.Items",
+        "The callback handler calls HttpContext.AuthenticateAsync with IdentityServerConstants.ExternalCookieAuthenticationScheme to read the external identity",
+        "The callback handler calls HttpContext.SignOutAsync with IdentityServerConstants.ExternalCookieAuthenticationScheme to clean up the temporary cookie",
+        "The callback handler creates an IdentityServerUser or ClaimsPrincipal with IdentityProvider set to the external scheme name"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement the consent page for our IdentityServer using Razor Pages. The page should use IIdentityServerInteractionService to get the authorization context and display the requesting client name and requested scopes. When the user grants consent, call GrantConsentAsync with the selected scopes and RememberConsent = true. When the user denies consent, call DenyAuthorizationAsync with AccessDenied. Validate the returnUrl before redirecting.",
+      "expected_output": "A Razor Page consent model is created that injects IIdentityServerInteractionService. OnGet calls GetAuthorizationContextAsync to retrieve client and scope information. OnPost handles both grant and deny: for grant, it calls GrantConsentAsync with a ConsentResponse containing ScopesValuesConsented and RememberConsent = true; for deny, it calls DenyAuthorizationAsync with AuthorizationError.AccessDenied. The returnUrl is validated before redirect.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details",
+        "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true",
+        "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent",
+        "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Implement the logout flow for our IdentityServer. Configure the logout URL in IdentityServer options. Build a logout page that uses IIdentityServerInteractionService.GetLogoutContextAsync to get the logout context. The page should sign the user out, render the SignOutIFrameUrl for front-channel logout notifications, and redirect to the PostLogoutRedirectUri. Also configure the web.app client with a BackChannelLogoutUri at https://app.example.com/bff/backchannel for back-channel logout.",
+      "expected_output": "Program.cs sets opt.UserInteraction.LogoutUrl to a specific logout path. A logout page injects IIdentityServerInteractionService, calls GetLogoutContextAsync(logoutId), signs the user out with HttpContext.SignOutAsync(), renders context.SignOutIFrameUrl in an iframe for front-channel notifications, and redirects to context.PostLogoutRedirectUri. The web.app client is updated with BackChannelLogoutUri = 'https://app.example.com/bff/backchannel'.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs configures opt.UserInteraction.LogoutUrl to a specific logout path",
+        "A logout page calls GetLogoutContextAsync(logoutId) to retrieve the logout context",
+        "The logout page calls HttpContext.SignOutAsync to end the authentication session",
+        "The logout page uses context.SignOutIFrameUrl for front-channel logout iframe rendering",
+        "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Implement an error page for our IdentityServer. Configure the error URL and the error query parameter name in IdentityServer options. The page should use IIdentityServerInteractionService.GetErrorContextAsync to retrieve the error details and display the error code and request ID to the user, but must not expose the full error description for security reasons. Log the full error details at Debug level.",
+      "expected_output": "Program.cs configures opt.UserInteraction.ErrorUrl and optionally opt.UserInteraction.ErrorId. An error page injects IIdentityServerInteractionService and ILogger. OnGet calls GetErrorContextAsync(errorId) to retrieve ErrorMessage with Error, ErrorDescription, RequestId, and ClientId. The page displays Error and RequestId to the user but does not render ErrorDescription in the UI. The full error details including ErrorDescription are logged at Debug level.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs configures opt.UserInteraction.ErrorUrl to a specific error page path",
+        "An error page calls GetErrorContextAsync(errorId) to retrieve error details from IIdentityServerInteractionService",
+        "The error page displays the Error code and RequestId to the user but does not render ErrorDescription directly in the view",
+        "The error page logs the full error details including ErrorDescription using ILogger at Debug level"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Implement Home Realm Discovery (HRD) for our IdentityServer login page. We have three external providers: 'AAD' for @contoso.com, 'Google' for consumer users, and local login. The login page should: 1) Check if the authorization context has an IdP hint via acr_values and skip the UI by redirecting directly to that provider, 2) If no hint, ask the user for their email and automatically route @contoso.com addresses to AAD, 3) Restrict the spa.app client to only show Google and local login using IdentityProviderRestrictions.",
+      "expected_output": "The login page checks context.IdP from GetAuthorizationContextAsync — if it matches a known provider, it immediately issues a Challenge to that provider without showing the login UI. If no IdP hint, the page collects the user's email and checks the domain: @contoso.com routes to AAD via Challenge, others show Google and local login options. The spa.app client is configured with IdentityProviderRestrictions containing 'Google' and 'local'. The login page respects IdentityProviderRestrictions when displaying available providers.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The login page checks context.IdP from GetAuthorizationContextAsync and bypasses the login UI when an IdP hint is present",
+        "The login page performs email-domain-based routing, sending @contoso.com users to the AAD provider",
+        "The spa.app client is configured with IdentityProviderRestrictions that includes 'Google' and excludes 'AAD'",
+        "The login page issues a Challenge to the appropriate external provider scheme when HRD determines the provider"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Our IdentityServer uses an external OIDC provider (scheme: 'corporate-idp') and we're hitting URL length issues because the state parameter is too long. Also, the returnUrl is being lost during the external authentication round-trip — after the callback, users end up on the home page instead of back at the authorization endpoint. Fix the state storage issue and ensure the returnUrl is preserved across the entire external login flow including the challenge and callback.",
+      "expected_output": "Program.cs calls AddOidcStateDataFormatterCache('corporate-idp') to store OIDC state server-side using IDistributedCache instead of the URL. The external login trigger stores returnUrl in AuthenticationProperties.Items dictionary before issuing the Challenge. The callback handler retrieves returnUrl from result.Properties.Items after authenticating the external cookie. The returnUrl is validated before redirecting.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage",
+        "The external login trigger stores returnUrl in AuthenticationProperties.Items before calling Challenge",
+        "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme",
+        "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback"
+      ]
+    }
+  ]
+}

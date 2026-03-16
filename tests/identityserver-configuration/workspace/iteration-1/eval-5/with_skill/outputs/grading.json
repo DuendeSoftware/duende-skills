@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls .AddServerSideSessions() on the IdentityServer builder (not as an option property)",
+      "pass": true,
+      "rationale": "Response calls .AddServerSideSessions() on the IdentityServer builder chain with a comment explaining it's called on the builder, not as an option."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)",
+      "pass": true,
+      "rationale": "Response contains 'options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5);'."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true",
+      "pass": true,
+      "rationale": "Response contains 'options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;'."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true",
+      "pass": true,
+      "rationale": "Response contains 'options.Authentication.CoordinateClientLifetimesWithUserSession = true;'."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,134 @@
+{
+  "skill_name": "identityserver-token-security",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to enable DPoP for a client called 'dpop_client' in my IdentityServer. The client uses client credentials flow with a shared secret. I also want to control the clock skew to 2 minutes. Show me the client configuration and explain what DPoP does.",
+      "expected_output": "A Client configuration with RequireDPoP = true, DPoPClockSkew set to 2 minutes, client credentials grant type, and a shared secret. Explanation that DPoP binds tokens to an asymmetric key via the cnf claim with a jkt thumbprint, and that the client proves possession by sending a signed DPoP proof JWT header on every request.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets RequireDPoP = true on the client configuration",
+        "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client",
+        "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value",
+        "Mentions that DPoP requires Enterprise Edition and version >= 6.3",
+        "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to configure my API to validate DPoP proof tokens. The API uses JWT bearer auth with scheme 'token', authority https://identity.example.com. What packages do I need and how do I set this up?",
+      "expected_output": "Code that configures AddJwtBearer for the 'token' scheme, calls ConfigureDPoPTokensForScheme('token') on IServiceCollection, registers a distributed cache for replay detection, and mentions the Duende.AspNetCore.Authentication.JwtBearer package.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda",
+        "Registers a distributed cache (e.g., AddDistributedMemoryCache for dev, mentions Redis or similar for production)",
+        "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'",
+        "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need to set up mTLS client authentication in IdentityServer. The client 'mtls.client' should authenticate using its X.509 certificate thumbprint 'ABC123DEF456'. Also show me how to configure the mTLS endpoints on a subdomain called 'mtls'.",
+      "expected_output": "IdentityServer configuration with MutualTls.Enabled = true, MutualTls.DomainName = 'mtls', AddMutualTlsSecretValidators(), certificate authentication scheme setup, and a client with X509CertificateThumbprint secret type.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets options.MutualTls.Enabled = true in AddIdentityServer options",
+        "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain",
+        "Calls AddMutualTlsSecretValidators() on the IdentityServer builder",
+        "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)",
+        "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Configure Pushed Authorization Requests (PAR) in my IdentityServer. I want PAR required globally with a 5-minute lifetime. Also configure a specific client 'banking_app' that overrides the lifetime to 15 minutes.",
+      "expected_output": "IdentityServer options with PushedAuthorization.Required = true, PushedAuthorization.Lifetime = 300, and a client with RequirePushedAuthorization = true and PushedAuthorizationLifetime = 900.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets options.PushedAuthorization.Required = true in AddIdentityServer options",
+        "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)",
+        "Sets RequirePushedAuthorization = true on the banking_app client",
+        "Sets PushedAuthorizationLifetime = 900 on the banking_app client to override global lifetime",
+        "Mentions PAR requires Business or Enterprise edition (version >= 7.0)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to configure a client that uses JWT Secured Authorization Requests (JAR) with an RSA key. The client 'secure_app' must always send signed request objects. Show me both the server-side client configuration and explain how the client's signing key is registered.",
+      "expected_output": "A Client with RequireRequestObject = true and a ClientSecret using either JsonWebKey or X509CertificateBase64 type. Explanation of how JAR makes authorization parameters tamperproof via a signed JWT.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Sets RequireRequestObject = true on the client",
+        "Configures a ClientSecret with Type set to IdentityServerConstants.SecretTypes.JsonWebKey or IdentityServerConstants.SecretTypes.X509CertificateBase64",
+        "Explains that JAR wraps authorization request parameters in a signed JWT making them tamperproof",
+        "Mentions that the same key can be shared between client authentication (private_key_jwt) and JAR"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We're building an open banking platform and need FAPI 2.0 compliance. Show me the complete IdentityServer configuration and a FAPI 2.0 compliant client definition. The client uses authorization code flow with DPoP and PAR.",
+      "expected_output": "Comprehensive FAPI 2.0 server configuration including PS256 signing algorithms, DPoP supported algorithms, client assertion algorithms, request object algorithms, JwtValidationClockSkew. Client with RequireDPoP, RequirePushedAuthorization, RequirePkce, RequireClientSecret, confidential client with JWK secret, code grant, and RefreshTokenUsage = ReUse.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)",
+        "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms",
+        "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0",
+        "Client has RequireDPoP = true AND RequirePushedAuthorization = true",
+        "Client uses a JsonWebKey secret (not shared secret) for authentication, consistent with FAPI 2.0 requirement for private_key_jwt or mTLS"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I want to use mTLS to bind tokens to a client certificate WITHOUT using the certificate for client authentication. The client 'hybrid_app' authenticates with a shared secret but I want the access token to contain a cnf claim with the certificate thumbprint. How do I configure this?",
+      "expected_output": "IdentityServer configuration with MutualTls.AlwaysEmitConfirmationClaim = true. Client uses standard shared secret authentication. Explanation that the cnf claim with x5t#S256 will be embedded in the token based on the TLS client certificate, independent of client authentication method.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options",
+        "Client uses standard shared secret authentication (not certificate-based authentication)",
+        "Explains that the cnf claim with x5t#S256 will be embedded in the access token",
+        "Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm setting up DPoP on the client side using Duende.AccessTokenManagement. I need to configure it for a client credentials flow with a DPoP key. The token endpoint is https://identity.example.com/connect/token. Also show me how to generate a suitable DPoP JWK.",
+      "expected_output": "Code using AddClientCredentialsTokenManagement with DPoPJsonWebKey set on the client configuration. Code to generate an RSA key pair and serialize it as a JWK with PS256 algorithm. Warning about DPoP key management (persistence and secrecy).",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Calls AddClientCredentialsTokenManagement and AddClient with DPoPJsonWebKey set on the client options",
+        "Sets the TokenEndpoint to 'https://identity.example.com/connect/token'",
+        "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256",
+        "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security"
+      ]
+    }
+  ]
+}

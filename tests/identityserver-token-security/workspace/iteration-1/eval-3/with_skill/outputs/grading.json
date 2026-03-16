@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Sets options.MutualTls.Enabled = true in AddIdentityServer options", "pass": true, "rationale": "Code sets options.MutualTls.Enabled = true in the AddIdentityServer options lambda."},
+    {"assertion": "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain", "pass": true, "rationale": "Code sets options.MutualTls.DomainName = \"mtls\"."},
+    {"assertion": "Calls AddMutualTlsSecretValidators() on the IdentityServer builder", "pass": true, "rationale": "Code calls idsvrBuilder.AddMutualTlsSecretValidators()."},
+    {"assertion": "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)", "pass": true, "rationale": "Client secret has Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint."},
+    {"assertion": "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme", "pass": true, "rationale": "Code calls AddCertificate('Certificate', ...) and sets options.MutualTls.ClientCertificateAuthenticationScheme = 'Certificate'."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

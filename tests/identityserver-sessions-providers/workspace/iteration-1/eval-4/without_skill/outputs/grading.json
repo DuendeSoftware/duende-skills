@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs removes or replaces at least one static AddOpenIdConnect registration with dynamic provider configuration",
+      "pass": true,
+      "rationale": "The static AddGoogle() and AddOpenIdConnect('EntraId') registrations are removed and replaced with dynamic provider configuration via AddConfigurationStore()."
+    },
+    {
+      "assertion": "Program.cs or a seed file creates an OidcProvider with Scheme set to 'demoidsrv' and Authority set to 'https://demo.duendesoftware.com'",
+      "pass": false,
+      "rationale": "The seed data uses the raw EF entity type `IdentityProvider` with serialized properties rather than the `OidcProvider` model type. While it stores the correct scheme and authority values, it does not use the `OidcProvider` model class which has typed properties for Authority and ClientId."
+    },
+    {
+      "assertion": "Program.cs calls AddConfigurationStoreCache() for caching dynamic provider lookups",
+      "pass": false,
+      "rationale": "The response does not call AddConfigurationStoreCache(). It only calls AddConfigurationStore() without enabling caching."
+    },
+    {
+      "assertion": "Response mentions or acknowledges that dynamic identity providers require the Enterprise Edition",
+      "pass": false,
+      "rationale": "The response does not mention the Enterprise Edition requirement for dynamic identity providers."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options", "pass": true, "rationale": "Code sets options.MutualTls.AlwaysEmitConfirmationClaim = true."},
+    {"assertion": "Client uses standard shared secret authentication (not certificate-based authentication)", "pass": true, "rationale": "Client uses ClientSecrets = { new Secret('hybrid_secret'.Sha256()) } — standard shared secret."},
+    {"assertion": "Explains that the cnf claim with x5t#S256 will be embedded in the access token", "pass": true, "rationale": "Response shows the cnf claim JSON with x5t#S256 and explains it's the SHA-256 thumbprint."},
+    {"assertion": "Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)", "pass": true, "rationale": "Response explicitly states 'the client must present a TLS client certificate when calling the token endpoint' and dedicates a section to this requirement."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

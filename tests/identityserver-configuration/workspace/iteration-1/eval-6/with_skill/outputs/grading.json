@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection",
+      "pass": true,
+      "rationale": "Response includes new IdentityResources.OpenId() in the AddInMemoryIdentityResources list."
+    },
+    {
+      "assertion": "Output includes new IdentityResources.Profile() in the identity resources collection",
+      "pass": true,
+      "rationale": "Response includes new IdentityResources.Profile() in the AddInMemoryIdentityResources list."
+    },
+    {
+      "assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
+      "pass": true,
+      "rationale": "Response defines new IdentityResource(name: \"organization\", displayName: \"Your organization info\", userClaims: new[] { \"org_id\", \"org_name\", \"org_role\" })."
+    },
+    {
+      "assertion": "The custom 'organization' identity resource has Required set to true",
+      "pass": true,
+      "rationale": "Response sets Required = true on the custom organization identity resource."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

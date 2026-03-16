@@ -1,0 +1,199 @@
+{
+  "skill_name": "identityserver-stores",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up Duende IdentityServer with EF Core configuration and operational stores using SQL Server. The connection string is in appsettings.json under ConnectionStrings:IdentityServer. Make sure migrations will work correctly from this host project. Also enable token cleanup every 30 minutes.",
+      "expected_output": "Program.cs registers both AddConfigurationStore and AddOperationalStore with UseSqlServer, sets MigrationsAssembly to the host project assembly, and configures token cleanup with a 1800-second interval.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddConfigurationStore with options that include ConfigureDbContext using UseSqlServer",
+        "Program.cs calls AddOperationalStore with options that include ConfigureDbContext using UseSqlServer",
+        "Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)",
+        "AddOperationalStore options set EnableTokenCleanup to true and TokenCleanupInterval to 1800",
+        "The connection string is read from configuration via builder.Configuration.GetConnectionString(\"IdentityServer\") or equivalent"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to implement a custom IClientStore that reads client definitions from a MongoDB collection. The store should accept an IMongoDatabase via constructor injection and query a 'clients' collection. Map the MongoDB document to a Duende IdentityServer Client model. We're on IdentityServer v7, so no CancellationToken parameters. Register it with caching enabled (5-minute expiration).",
+      "expected_output": "A custom IClientStore implementation class that takes IMongoDatabase, queries a MongoDB 'clients' collection, and maps results to Client objects. Registration uses AddClientStore<T> with AddInMemoryCaching and AddClientStoreCache<T>. Cache expiration is configured to 5 minutes. No CancellationToken parameters since it targets v7.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "A class implementing IClientStore is created with a constructor accepting IMongoDatabase",
+        "The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)",
+        "Registration calls AddClientStore<T> where T is the custom store class",
+        "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching",
+        "ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Configure the EF Core stores with separate database schemas: use 'idscfg' for configuration tables and 'idsop' for operational tables. Each should have its own migration history table in the respective schema. Use SQL Server.",
+      "expected_output": "Program.cs configures AddConfigurationStore with DefaultSchema='idscfg' and MigrationsHistoryTable in 'idscfg' schema, and AddOperationalStore with DefaultSchema='idsop' and MigrationsHistoryTable in 'idsop' schema.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "AddConfigurationStore sets options.DefaultSchema to \"idscfg\"",
+        "AddOperationalStore sets options.DefaultSchema to \"idsop\"",
+        "Configuration store calls MigrationsHistoryTable with the schema parameter set to \"idscfg\"",
+        "Operational store calls MigrationsHistoryTable with the schema parameter set to \"idsop\"",
+        "Both store registrations include MigrationsAssembly pointing to the host project"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Enable server-side sessions backed by the EF Core operational store. Also configure token cleanup to remove consumed tokens, with a cleanup delay of 300 seconds for consumed tokens.",
+      "expected_output": "Program.cs calls AddServerSideSessions() and AddOperationalStore with EnableTokenCleanup=true, RemoveConsumedTokens=true, and ConsumedTokenCleanupDelay=300.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+        "AddOperationalStore is configured with EnableTokenCleanup set to true",
+        "AddOperationalStore options set RemoveConsumedTokens to true",
+        "AddOperationalStore options set ConsumedTokenCleanupDelay to 300",
+        "AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We run IdentityServer on 4 nodes behind a load balancer. I want to add caching for the EF configuration store but using Redis as a distributed cache instead of in-memory, so all nodes see the same cached data. The Redis connection string is in appsettings.json at Redis:ConnectionString. Set cache expiration to 10 minutes for clients and resources.",
+      "expected_output": "Program.cs registers AddStackExchangeRedisCache with the Redis connection string, replaces ICache<T> with a distributed cache implementation, calls AddConfigurationStoreCache(), and sets client and resource cache expiration to 10 minutes.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddStackExchangeRedisCache with the Redis connection string from configuration",
+        "ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration",
+        "AddConfigurationStoreCache() is called after the configuration store registration",
+        "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+        "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Write a startup database initialization method that applies EF Core migrations for both ConfigurationDbContext and PersistedGrantDbContext, then seeds the initial client and API scope data from the Config class if the database is empty. This is for a development environment only.",
+      "expected_output": "A static method (e.g. InitializeDatabase) that creates a service scope, calls Database.Migrate() on both PersistedGrantDbContext and ConfigurationDbContext, checks if clients exist, and seeds from Config.Clients and Config.ApiScopes using ToEntity().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The method creates a scoped service provider via IServiceScopeFactory.CreateScope() or app.ApplicationServices equivalent",
+        "Database.Migrate() is called on both PersistedGrantDbContext and ConfigurationDbContext",
+        "Before seeding clients, a check is performed (e.g. !configContext.Clients.Any()) to avoid duplicate data",
+        "Client entities are added using the .ToEntity() extension method to convert from the IdentityServer model to the EF entity"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I need a dedicated background worker service that handles token cleanup instead of running it on the web nodes. Disable token cleanup on the web node and create a TokenCleanupWorker class that runs cleanup every 2 hours using Duende's TokenCleanupService.",
+      "expected_output": "Token cleanup is disabled on the web node (EnableTokenCleanup=false). A TokenCleanupWorker BackgroundService class is created that injects TokenCleanupService and calls CleanupGrantsAsync in a loop with a 2-hour delay.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "AddOperationalStore options set EnableTokenCleanup to false",
+        "A class inheriting from BackgroundService (or IHostedService) is created named TokenCleanupWorker or similar",
+        "The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework",
+        "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken",
+        "The delay between cleanup runs is 2 hours (TimeSpan.FromHours(2) or equivalent)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Create a tenant-aware IClientStore for a shared-database multi-tenant setup. The store should filter clients by TenantId using an ITenantContext service that provides the current tenant. Use EF Core with a custom AppDbContext that has a Clients DbSet with a TenantId column.",
+      "expected_output": "A TenantAwareClientStore implementing IClientStore that injects AppDbContext and ITenantContext. FindClientByIdAsync filters by both clientId and TenantId. The store is registered via AddClientStore<TenantAwareClientStore>().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "A class implementing IClientStore is created with constructor parameters for a DbContext and ITenantContext (or equivalent tenant resolver)",
+        "FindClientByIdAsync applies a Where filter that includes both the clientId parameter AND the tenant identifier from ITenantContext",
+        "The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient",
+        "An ITenantContext interface (or equivalent) is defined or referenced that exposes the current tenant identifier"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "We need to implement a custom IPersistedGrantStore and IDeviceFlowStore for our Redis-backed operational data. Show me how to register these custom stores with IdentityServer instead of using the EF Core operational store. The custom classes are called RedisPersistedGrantStore and RedisDeviceFlowStore.",
+      "expected_output": "Program.cs registers the custom stores using builder.Services.AddTransient<IPersistedGrantStore, RedisPersistedGrantStore>() and builder.Services.AddTransient<IDeviceFlowStore, RedisDeviceFlowStore>(). The EF operational store (AddOperationalStore) is removed. AddIdentityServer() is still called but without AddOperationalStore.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Program.cs registers RedisPersistedGrantStore as IPersistedGrantStore using AddTransient or AddScoped",
+        "Program.cs registers RedisDeviceFlowStore as IDeviceFlowStore using AddTransient or AddScoped",
+        "Program.cs does not call AddOperationalStore for EF Core since custom stores replace it",
+        "Program.cs still calls AddIdentityServer() for the core IdentityServer registration"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Configure our operational store with advanced token cleanup settings for a high-traffic production environment. We want: batch size of 500 tokens per cycle, cleanup every 15 minutes, consumed tokens removed after a 10-minute grace period, and the fuzzy start enabled to avoid conflicts across our 3 load-balanced instances. Also set up a custom schema called 'identity_ops' for the operational tables.",
+      "expected_output": "Program.cs configures AddOperationalStore with EnableTokenCleanup = true, TokenCleanupInterval = 900, TokenCleanupBatchSize = 500, RemoveConsumedTokens = true, ConsumedTokenCleanupDelay = 600, FuzzTokenCleanupStart = true, and DefaultSchema = 'identity_ops'.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets TokenCleanupBatchSize = 500 on the operational store options",
+        "Program.cs sets ConsumedTokenCleanupDelay = 600 on the operational store options",
+        "Program.cs sets FuzzTokenCleanupStart = true on the operational store options",
+        "Program.cs sets DefaultSchema to 'identity_ops' on the operational store options",
+        "Program.cs sets TokenCleanupInterval = 900 and EnableTokenCleanup = true"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Set up both the configuration store and operational store using separate databases. The configuration store should use the connection string 'ConfigDb' and the operational store should use 'OpsDb' from appsettings.json. Each should use a custom migration history table in their respective schemas: 'config' schema for configuration and 'ops' schema for operational. Also add these connection strings to appsettings.json.",
+      "expected_output": "Program.cs configures AddConfigurationStore with UseSqlServer using 'ConfigDb' connection string and MigrationsHistoryTable in 'config' schema with DefaultSchema = 'config'. AddOperationalStore uses 'OpsDb' connection string and MigrationsHistoryTable in 'ops' schema with DefaultSchema = 'ops'. appsettings.json is updated with both connection strings.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs uses different connection strings for configuration store and operational store",
+        "Program.cs sets DefaultSchema = 'config' or similar on the configuration store options",
+        "Program.cs sets DefaultSchema = 'ops' or similar on the operational store options",
+        "Program.cs calls MigrationsHistoryTable for at least one of the stores with a custom table name and schema",
+        "appsettings.json contains both ConfigDb and OpsDb connection strings under ConnectionStrings"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "We're getting the error 'No database provider has been configured for this DbContext' when starting IdentityServer with EF stores. Our current setup calls AddConfigurationStore and AddOperationalStore but the MigrationsAssembly is not set. Fix this, and also show me the EF Core migration commands I need to run to create the initial migrations for both the ConfigurationDbContext and PersistedGrantDbContext.",
+      "expected_output": "Program.cs is fixed to include sql.MigrationsAssembly() pointing to the current assembly in both AddConfigurationStore and AddOperationalStore. The response includes dotnet ef migrations add commands for both ConfigurationDbContext and PersistedGrantDbContext with appropriate -c and -o flags, plus dotnet ef database update commands for both contexts.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs includes MigrationsAssembly set to the current project assembly in both store configurations",
+        "The response includes a dotnet ef migrations add command with -c ConfigurationDbContext",
+        "The response includes a dotnet ef migrations add command with -c PersistedGrantDbContext",
+        "The response includes dotnet ef database update commands for both contexts"
+      ]
+    }
+  ]
+}

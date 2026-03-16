@@ -1,0 +1,66 @@
+{
+  "metadata": {"skill_name": "identityserver-token-security", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 36, "passed": 36, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 36, "passed": 25, "failed": 11, "pass_rate": 69.4},
+    "delta": {"assertions_improved": 11, "delta_pass_rate": 30.6}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Mentions that DPoP requires Enterprise Edition and version >= 6.3"]
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda"]
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme"]
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": ["Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)", "Mentions PAR requires Business or Enterprise edition (version >= 7.0)"]
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Mentions that the same key can be shared between client authentication (private_key_jwt) and JAR"]
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "delta": 0.6,
+      "without_skill_failures": ["Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)", "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms", "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0"]
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)"]
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security"]
+    }
+  ]
+}

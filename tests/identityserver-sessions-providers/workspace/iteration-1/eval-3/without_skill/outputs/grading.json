@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and Authentication.CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "Code shows `options.Authentication.CookieLifetime = TimeSpan.FromHours(8);` and `options.Authentication.CookieSlidingExpiration = false;`."
+    },
+    {
+      "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+      "pass": false,
+      "rationale": "The without_skill response does not include `CoordinateClientLifetimesWithUserSession = true`. It sets cookie lifetime and sliding expiration but misses the critical coordination setting."
+    },
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "Code shows `.AddServerSideSessions()` chained on the IdentityServer builder."
+    },
+    {
+      "assertion": "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'",
+      "pass": true,
+      "rationale": "Code shows `BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\"` on the web.app client."
+    },
+    {
+      "assertion": "The web.app client has AccessTokenLifetime set to 300 (5 minutes)",
+      "pass": true,
+      "rationale": "Code shows `AccessTokenLifetime = 300` on the web.app client."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

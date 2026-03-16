@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response includes updating the .NET target framework as one of the first steps",
+      "pass": true,
+      "rationale": "Step 1 is 'Update Target Framework' — listed as the first step."
+    },
+    {
+      "assertion": "Response includes replacing IdentityServer4 NuGet packages with Duende equivalents",
+      "pass": true,
+      "rationale": "Step 2 lists specific package replacements (IdentityServer4 → Duende.IdentityServer, etc.)."
+    },
+    {
+      "assertion": "Response includes updating namespaces from IdentityServer4 to Duende.IdentityServer",
+      "pass": true,
+      "rationale": "Step 3 covers search and replace of namespaces."
+    },
+    {
+      "assertion": "Response includes creating and applying EF Core database migrations for both ConfigurationDbContext and PersistedGrantDbContext",
+      "pass": true,
+      "rationale": "Step 5 mentions creating migrations for both ConfigurationDbContext and PersistedGrantDbContext."
+    },
+    {
+      "assertion": "Response includes configuring a license key for Duende IdentityServer",
+      "pass": false,
+      "rationale": "Does not mention configuring a Duende license key anywhere in the checklist."
+    },
+    {
+      "assertion": "Response includes verifying the deployment (e.g., checking discovery document, testing token issuance)",
+      "pass": true,
+      "rationale": "Step 8 includes 'Verify token issuance works correctly' and 'Test all OAuth/OIDC flows end-to-end.'"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 6,
+  "score": 0.833
+}

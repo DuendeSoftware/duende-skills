@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "assertions": [
+    {"assertion": "A policy is defined that includes RequireClaim(\"scope\", \"catalog.write\") for client-level authorization", "pass": true, "rationale": "Response shows policy.RequireClaim(\"scope\", \"catalog.write\")"},
+    {"assertion": "The same policy includes RequireRole(\"admin\") or equivalent user-level claim check", "pass": true, "rationale": "Response shows policy.RequireRole(\"admin\") in the same policy"},
+    {"assertion": "The policy is applied to the DELETE /products/{id} endpoint", "pass": true, "rationale": "Response shows .RequireAuthorization(\"catalog-admin-delete\") on the DELETE endpoint"},
+    {"assertion": "The response explains that scopes represent client permissions and roles/claims represent user permissions, and both should be checked", "pass": false, "rationale": "Response mentions that both must be satisfied and briefly says 'the client has been granted write access and the user actually has admin privileges' but does not clearly explain that scopes represent CLIENT permissions vs roles represent USER permissions or why checking both is important from a security perspective. The explanation is too brief to satisfy this assertion."}
+  ],
+  "passed": 3,
+  "failed": 1,
+  "total": 4
+}

@@ -1,0 +1,137 @@
+{
+  "skill_name": "identityserver-hosting-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a minimal Duende IdentityServer with in-memory stores. Define one API scope called 'api1' and one machine-to-machine client called 'm2m.client' using client_credentials grant with the secret 'secret'. Make sure the middleware pipeline is in the correct order.",
+      "expected_output": "Program.cs with AddIdentityServer calling AddInMemoryApiScopes and AddInMemoryClients, a Config class or inline definitions with the API scope and client, and the correct middleware ordering: UseStaticFiles, UseRouting, UseIdentityServer, UseAuthorization.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI",
+        "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'",
+        "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials",
+        "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()",
+        "Program.cs calls app.UseRouting() before app.UseIdentityServer()"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have an existing IdentityServer project and need to fix the middleware pipeline. Currently the order is: UseIdentityServer, UseRouting, UseAuthentication, UseAuthorization. What's wrong and what's the correct order?",
+      "expected_output": "Explanation that UseRouting must come before UseIdentityServer, that UseAuthentication is redundant because UseIdentityServer includes it internally, and the correct order is UseStaticFiles, UseRouting, UseIdentityServer, UseAuthorization.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that UseRouting() must come before UseIdentityServer() in the pipeline",
+        "Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally",
+        "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization",
+        "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Integrate ASP.NET Identity with my IdentityServer project. I have an ApplicationUser class and an ApplicationDbContext already set up. Show me how to wire up both ASP.NET Identity and IdentityServer together.",
+      "expected_output": "Program.cs with AddIdentity<ApplicationUser, IdentityRole> with AddEntityFrameworkStores and AddDefaultTokenProviders, followed by AddIdentityServer().AddAspNetIdentity<ApplicationUser>(). Explanation that AddAspNetIdentity registers IProfileService and other IdentityServer-specific services.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddIdentity<ApplicationUser, IdentityRole>() with AddEntityFrameworkStores<ApplicationDbContext>() to register ASP.NET Identity",
+        "Program.cs calls AddIdentityServer() followed by .AddAspNetIdentity<ApplicationUser>() to bridge ASP.NET Identity to IdentityServer",
+        "Response explains that AddAspNetIdentity registers IProfileService for adding claims to tokens",
+        "Program.cs includes AddDefaultTokenProviders() on the ASP.NET Identity registration"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "My IdentityServer is deployed behind an nginx reverse proxy. The discovery document shows http:// URLs instead of https://, and my cookies are missing the secure attribute. How do I fix this?",
+      "expected_output": "Configuration of ForwardedHeadersOptions with XForwardedHost and XForwardedProto, adding UseForwardedHeaders() early in the pipeline before UseIdentityServer(). Explanation of the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable as an alternative.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme",
+        "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()",
+        "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes",
+        "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Configure the IdentityServerOptions for my project. I need to set the issuer URI to https://identity.mycompany.com, load the license key from configuration, and emit scopes as a space-delimited string in JWTs. Also configure data protection for a multi-instance deployment using Entity Framework.",
+      "expected_output": "Program.cs with AddIdentityServer options block setting IssuerUri, LicenseKey from configuration, EmitScopesAsSpaceDelimitedStringInJwt=true, and AddDataProtection with PersistKeysToDbContext and SetApplicationName.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets options.IssuerUri = 'https://identity.mycompany.com' inside the AddIdentityServer options lambda",
+        "Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it",
+        "Program.cs sets options.EmitScopesAsSpaceDelimitedStringInJwt = true",
+        "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage",
+        "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I have a custom IUserClaimsPrincipalFactory<ApplicationUser> called CustomClaimsPrincipalFactory. I need to register it with ASP.NET Identity and IdentityServer so that my custom claims are included in tokens. Also, I need to disable tokens for inactive users by overriding IsActiveAsync.",
+      "expected_output": "Program.cs registering the custom factory before AddAspNetIdentity, and a CustomProfileService class inheriting from ProfileService<ApplicationUser> that overrides IsUserActiveAsync.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> BEFORE calling AddAspNetIdentity",
+        "Program.cs calls AddAspNetIdentity<ApplicationUser>() which will wrap and call through to the custom factory",
+        "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync",
+        "The IsUserActiveAsync override checks a property on the user (e.g., user.IsEnabled or user.IsActive) to determine if the user is active",
+        "The CustomProfileService is registered in DI as the IProfileService implementation"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I'm setting up IdentityServer from scratch. What hosting pattern should I use? My team wants to co-host it with our main API to reduce deployment complexity. Also, should I set the IssuerUri explicitly or let it be inferred?",
+      "expected_output": "Recommendation to use a separate dedicated host for IdentityServer, explaining the security risks of co-hosting with an API. Explanation that IssuerUri should generally be left to infer from the request URL unless there is a specific need like internal Kubernetes addresses.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API",
+        "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs",
+        "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default",
+        "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Set up a complete IdentityServer project with identity resources (openid, profile), an API scope 'weatherapi', and an interactive web client using authorization_code grant. The client should have redirect URI https://webapp.example.com/signin-oidc and post-logout redirect URI https://webapp.example.com/signout-callback-oidc.",
+      "expected_output": "Program.cs with AddIdentityServer, AddInMemoryIdentityResources (openid, profile), AddInMemoryApiScopes (weatherapi), AddInMemoryClients with an interactive client configured for authorization_code with PKCE, and proper middleware pipeline.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+        "Program.cs calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+        "Program.cs defines a client with AllowedGrantTypes set to Code (authorization code with PKCE)",
+        "The client configuration includes RedirectUris containing 'https://webapp.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://webapp.example.com/signout-callback-oidc'",
+        "Program.cs has the correct middleware pipeline ordering: UseIdentityServer after UseRouting and before UseAuthorization"
+      ]
+    }
+  ]
+}

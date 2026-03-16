@@ -1,0 +1,120 @@
+{
+  "metadata": {"skill_name": "token-management", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 49, "passed": 49, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 49, "passed": 23, "failed": 26, "pass_rate": 46.9},
+    "delta": {"assertions_improved": 26, "delta_pass_rate": 53.1}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Output uses v4 strongly-typed ClientCredentialsClientName.Parse() for the client name (not a raw string)"]
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Output wires up RevokeRefreshTokenAsync() in the cookie OnSigningOut event handler"]
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 0, "failed": 5, "total": 5, "pass_rate": 0.0},
+      "delta": 1.0,
+      "without_skill_failures": [
+        "Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager",
+        "Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string",
+        "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value",
+        "Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically",
+        "Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup",
+        "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler",
+        "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+        "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Output identifies that .GetToken() is called without first checking .Succeeded, which will throw InvalidOperationException on failure",
+        "Output identifies that AddClientCredentialsTokenHandler is used without AddDefaultAccessTokenResiliency(), meaning 401 responses won't be retried"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0},
+      "without_skill": {"passed": 1, "failed": 2, "total": 3, "pass_rate": 0.333},
+      "delta": 0.667,
+      "without_skill_failures": [
+        "Output chains .AddUserAccessTokenHandler() on the gRPC client registration to attach user tokens automatically",
+        "Output includes or references AddOpenIdConnectAccessTokenManagement() as prerequisite for user token management"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+        "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+        "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
+        "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 0, "failed": 4, "total": 4, "pass_rate": 0.0},
+      "delta": 1.0,
+      "without_skill_failures": [
+        "Implements ITokenRequestCustomizer interface with a Customize method",
+        "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+        "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+        "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler"
+      ]
+    }
+  ]
+}

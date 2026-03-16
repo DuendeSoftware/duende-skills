@@ -1,0 +1,120 @@
+{
+  "skill_name": "aspnetcore-authorization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Configure a FallbackPolicy so that all endpoints require authentication by default. The /health endpoint should remain publicly accessible using AllowAnonymous.",
+      "expected_output": "Program.cs configures AddAuthorization with a FallbackPolicy requiring authenticated users, and the /health endpoint uses .AllowAnonymous().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls builder.Services.AddAuthorization with options that set FallbackPolicy",
+        "FallbackPolicy uses RequireAuthenticatedUser()",
+        "The /health endpoint has .AllowAnonymous() applied",
+        "app.UseAuthorization() is called after app.UseAuthentication()"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add scope-based authorization policies for my products API. GET /products should require the 'catalog.read' scope. POST /products should require the 'catalog.write' scope. Apply these policies to the existing minimal API endpoints.",
+      "expected_output": "Two named authorization policies are defined using RequireClaim(\"scope\", ...) and applied to the GET and POST /products endpoints via .RequireAuthorization().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "An authorization policy requiring the 'catalog.read' scope is defined using RequireClaim",
+        "An authorization policy requiring the 'catalog.write' scope is defined using RequireClaim",
+        "The GET /products endpoint uses .RequireAuthorization() referencing the read policy",
+        "The POST /products endpoint uses .RequireAuthorization() referencing the write policy",
+        "builder.Services.AddAuthorization is called to register the policies"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I need a custom authorization handler that checks for scopes that might arrive as a space-delimited string in the JWT. Create a ScopeRequirement and ScopeHandler, register them, and create a policy called 'catalog.read' that uses this custom requirement.",
+      "expected_output": "A ScopeRequirement class implementing IAuthorizationRequirement and a ScopeHandler class extending AuthorizationHandler<ScopeRequirement> that splits the scope claim on spaces. Both are registered in DI and used in a policy.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "A ScopeRequirement class is created implementing IAuthorizationRequirement with a Scope property",
+        "A ScopeHandler class is created extending AuthorizationHandler<ScopeRequirement>",
+        "The handler splits the scope claim value using Split(' ') or similar space-delimiter parsing",
+        "The handler calls context.Succeed(requirement) when the scope matches, and does NOT call context.Fail() on mismatch",
+        "The ScopeHandler is registered in DI as IAuthorizationHandler"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Group the /admin/users GET and POST endpoints under a MapGroup with a shared authorization policy that requires the 'admin' role. Define the policy centrally.",
+      "expected_output": "An 'admin' policy is defined with RequireRole(\"admin\") and applied to a MapGroup(\"/admin\") that contains the users endpoints.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "An authorization policy named 'admin' is defined using RequireRole(\"admin\")",
+        "app.MapGroup(\"/admin\") is used to group the admin endpoints",
+        ".RequireAuthorization(\"admin\") or equivalent is applied to the group",
+        "The individual admin endpoints are registered on the group rather than on app directly"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Create a resource-based authorization handler for documents. Users should be able to read documents if they share the same department claim. Only the document owner (matched by 'sub' claim to OwnerId) should be able to edit. Create an Operations class with Read and Edit constants, a Document model, and the handler.",
+      "expected_output": "A DocumentAuthorizationHandler extending AuthorizationHandler<OperationAuthorizationRequirement, Document> that checks department for reads and OwnerId for edits. An Operations class with static Read/Edit fields.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "A Document class/record is defined with at least Department and OwnerId properties",
+        "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit",
+        "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>",
+        "The Read operation checks the user's 'department' claim against the resource's Department property",
+        "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "The DELETE /products/{id} endpoint should require both the 'catalog.write' scope (client permission) AND the 'admin' role (user permission). Define a single policy that combines both requirements. Explain why checking both is important.",
+      "expected_output": "A policy that uses both RequireClaim(\"scope\", \"catalog.write\") and RequireRole(\"admin\") in the same policy, applied to the DELETE endpoint. Explanation covers the difference between client scopes and user permissions.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "A policy is defined that includes RequireClaim(\"scope\", \"catalog.write\") for client-level authorization",
+        "The same policy includes RequireRole(\"admin\") or equivalent user-level claim check",
+        "The policy is applied to the DELETE /products/{id} endpoint",
+        "The response explains that scopes represent client permissions and roles/claims represent user permissions, and both should be checked"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I have a handler that calls context.Fail() when a scope claim is missing. Users are being denied even though they have another handler that should grant access. What's wrong and how do I fix it?\n\n```csharp\npublic class ScopeHandler : AuthorizationHandler<ApiAccessRequirement>\n{\n    protected override Task HandleRequirementAsync(\n        AuthorizationHandlerContext context, ApiAccessRequirement requirement)\n    {\n        if (!context.User.HasClaim(\"scope\", \"api.read\"))\n            context.Fail();\n        else\n            context.Succeed(requirement);\n        return Task.CompletedTask;\n    }\n}\n```",
+      "expected_output": "Explanation that context.Fail() is a hard veto that blocks all other handlers, and the fix is to remove the Fail() call and simply not call Succeed() when the condition is not met.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The response explains that context.Fail() is a hard veto that prevents any other handler from satisfying the requirement",
+        "The fix removes the context.Fail() call",
+        "The corrected handler only calls context.Succeed(requirement) when the condition is met",
+        "The response mentions that not calling Succeed() means 'no opinion' and allows other handlers to still satisfy the requirement"
+      ]
+    }
+  ]
+}

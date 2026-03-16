@@ -1,0 +1,175 @@
+{
+  "skill_name": "duende-bff",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a bare ASP.NET Core app and I need to set up Duende BFF v4 to secure a React SPA. My IDP is at https://idp.example.com, client ID is spa-bff-client, client secret is secret. I need openid, profile, and offline_access scopes. Show me the full Program.cs setup.",
+      "expected_output": "A complete Program.cs using the BFF v4 registration API: AddBff() with ConfigureOpenIdConnect and ConfigureCookies, correct middleware ordering (UseRouting, UseAuthentication, UseBff, UseAuthorization), and the required scopes including offline_access for refresh tokens.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Calls AddBff() on builder.Services",
+        "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+        "Adds 'offline_access' to the OIDC scopes",
+        "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization",
+        "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to add a local API endpoint GET /api/orders that returns order data, and also proxy requests from /api/catalog to a remote catalog service at https://catalog-service.internal/api. The local endpoint should require authentication, and the remote endpoint should forward the user's access token. Show me how.",
+      "expected_output": "Code showing a local endpoint with .RequireAuthorization().AsBffApiEndpoint(), and MapRemoteBffApiEndpoint for the remote proxy with .WithAccessToken(RequiredTokenType.User). Should also show AddRemoteApis() in service registration.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection",
+        "Local endpoint uses .RequireAuthorization()",
+        "Calls AddRemoteApis() on the BFF builder",
+        "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api",
+        "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We're moving to production and need server-side sessions with EF Core backed by SQL Server. The connection string is in configuration under ConnectionStrings:BffSessions. We also need automatic session cleanup every 10 minutes. Show me the setup.",
+      "expected_output": "Code that calls AddEntityFrameworkServerSideSessions with UseSqlServer and the connection string from configuration, plus AddSessionCleanupBackgroundProcess() and SessionCleanupInterval set to 10 minutes.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+        "Configures UseSqlServer with the connection string from configuration",
+        "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+        "Calls AddSessionCleanupBackgroundProcess()",
+        "Warns against or does NOT use in-memory sessions for production"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "My SPA team keeps getting 401 errors when calling our BFF API endpoints with fetch(). They're authenticated and can see data on /bff/user. What's likely wrong, and can you show me the correct JavaScript fetch pattern?",
+      "expected_output": "Diagnosis that the X-CSRF: 1 header is missing from fetch calls. A JavaScript fetch wrapper that automatically includes the header, plus centralized 401 handling that redirects to /bff/login on session expiry.",
+      "files": [],
+      "assertions": [
+        "Identifies the missing X-CSRF: 1 header as the root cause",
+        "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+        "Shows 401 response handling that redirects to /bff/login",
+        "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We have a BFF behind an nginx reverse proxy. Users keep getting logged out after authentication completes — the OIDC callback seems to fail. The BFF is mounted at /app sub-path. What configuration am I missing?",
+      "expected_output": "Guidance to configure UseForwardedHeaders for XForwardedFor and XForwardedProto before UseAuthentication, and UsePathBase('/app'). May also mention SameSite cookie issues with cross-site IDP redirects.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj"
+      ],
+      "assertions": [
+        "Configures UseForwardedHeaders with ForwardedHeaders.XForwardedFor and ForwardedHeaders.XForwardedProto",
+        "Places UseForwardedHeaders before UseAuthentication in the middleware pipeline",
+        "Configures UsePathBase('/app') for the sub-path mount",
+        "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I have an endpoint /api/reports that should work for both authenticated users and anonymous visitors. If a user is logged in, attach their token; if not, don't challenge them — just call the downstream API without a token. What RequiredTokenType should I use?",
+      "expected_output": "Use RequiredTokenType.UserOrNone, which forwards the user token if logged in but does not trigger a challenge for anonymous users — it simply sends no token.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj"
+      ],
+      "assertions": [
+        "Recommends RequiredTokenType.UserOrNone",
+        "Explains that UserOrNone forwards user token if available, no token if anonymous, without triggering a challenge",
+        "Does NOT recommend RequiredTokenType.User (which would challenge anonymous users)",
+        "Shows MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrNone)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "We're running 3 instances of our BFF behind a load balancer. Users are randomly getting logged out when their requests hit a different instance. What's the fix?",
+      "expected_output": "Diagnosis that the default in-memory Data Protection key ring is not shared across instances, so cookies encrypted by one instance can't be decrypted by another. Fix: configure shared Data Protection key storage (e.g., database, Azure Blob, Redis). Also recommend server-side sessions with a shared store.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj"
+      ],
+      "assertions": [
+        "Identifies Data Protection key ring as the root cause — each instance generates its own keys",
+        "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+        "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+        "Shows code for AddDataProtection() with a persistent key store"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I need a local BFF API endpoint that calls a remote service using the logged-in user's access token. I don't want to use MapRemoteBffApiEndpoint — I want to make the HTTP call manually in my endpoint handler with automatic token refresh. Show me both the named HttpClient pattern and the manual GetUserAccessTokenAsync approach.",
+      "expected_output": "Two patterns: (1) AddUserAccessTokenHttpClient with a named client that automatically attaches tokens, and (2) a manual approach using GetUserAccessTokenAsync + SetBearerToken. Both endpoints marked with AsBffApiEndpoint().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj"
+      ],
+      "assertions": [
+        "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+        "Shows GetUserAccessTokenAsync for the manual pattern",
+        "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+        "Does NOT return the raw access token to the browser (no Results.Json with the token value)",
+        "Mentions that token refresh is handled automatically by AccessTokenManagement"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I have an existing V3 BFF setup that manually configures authentication with AddCookie and AddOpenIdConnect, and calls MapBffManagementEndpoints(). Migrate it to V4 conventions. Also update the remote API endpoint from .RequireAccessToken(TokenType.User) to the V4 syntax. Here is my current code:\n\n```csharp\nbuilder.Services.AddAuthentication(options =>\n{\n    options.DefaultScheme = \"cookie\";\n    options.DefaultChallengeScheme = \"oidc\";\n    options.DefaultSignOutScheme = \"oidc\";\n})\n.AddCookie(\"cookie\", options =>\n{\n    options.Cookie.Name = \"__Host-bff\";\n    options.Cookie.SameSite = SameSiteMode.Strict;\n})\n.AddOpenIdConnect(\"oidc\", options =>\n{\n    options.Authority = \"https://identity.example.com\";\n    options.ClientId = \"spa\";\n    options.ClientSecret = \"secret\";\n    options.ResponseType = \"code\";\n    options.Scope.Add(\"api1\");\n    options.SaveTokens = true;\n});\n\nbuilder.Services.AddBff();\n\nvar app = builder.Build();\napp.UseAuthentication();\napp.UseBff();\napp.UseAuthorization();\n\napp.MapBffManagementEndpoints();\napp.MapRemoteBffApiEndpoint(\"/api/data\", new Uri(\"https://api.example.com\"))\n    .RequireAccessToken(TokenType.User);\napp.Run();\n```",
+      "expected_output": "Migrated code uses AddBff().ConfigureOpenIdConnect().ConfigureCookies() instead of manual auth setup, removes MapBffManagementEndpoints(), and updates .RequireAccessToken(TokenType.User) to .WithAccessToken(RequiredTokenType.User).",
+      "files": [],
+      "assertions": [
+        "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
+        "Output does NOT contain 'MapBffManagementEndpoints'",
+        "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+        "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
+        "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Set up YARP reverse proxy integration with BFF. Route all requests matching '/api/{**catch-all}' to a cluster at 'https://upstream-api.example.com'. Attach the user's access token and enforce anti-forgery checks. Use in-code configuration (LoadFromMemory), not appsettings.json.",
+      "expected_output": "YARP configured with AddReverseProxy().AddBffExtensions(), LoadFromMemory with RouteConfig using .WithAccessToken and .WithAntiforgeryCheck, MapReverseProxy pipeline with UseAntiforgeryCheck().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'",
+        "Program.cs contains 'LoadFromMemory' with RouteConfig and ClusterConfig",
+        "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+        "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
+        "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "I have a Blazor WASM app that needs BFF integration. Set up the server-side Program.cs with BFF and AddBffBlazorClient(). Then show me the client-side (WASM) Program.cs that configures BffBlazorClient with a 30-second polling interval and creates a typed HTTP client called WeatherClient for local API calls.",
+      "expected_output": "Server-side: AddBff().ConfigureOpenIdConnect().AddBffBlazorClient(). Client-side: AddBffBlazorClient with Polling.Interval = 30s, AddLocalApiHttpClient<WeatherClient>().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+        "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+        "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+        "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "skill_name": "identity-testing-patterns",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a protected Web API (see Program.cs) and I want to write integration tests for it. Show me how to create a TestAuthHandler so I can test my endpoints without a real IdentityServer. I need to control the ClaimsPrincipal per-test and verify that unauthenticated requests return 401.",
+      "expected_output": "A TestAuthHandler implementation that injects a ClaimsPrincipal into the pipeline, an ITestClaimsProvider interface, a WebApplicationFactory that registers the test scheme, and example tests showing 401 for unauthenticated and 200 for authenticated requests.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+        "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+        "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+        "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+        "Does NOT disable authorization entirely — authorization policies remain active"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to test my API by generating self-signed JWT tokens in my test project. Create a TestTokenFactory that issues JWTs with a static RSA key, and show me how to configure the API's WebApplicationFactory to trust that key. The API audience is 'my-api'.",
+      "expected_output": "A TestTokenFactory class with a static RSA signing key and a CreateAccessToken method, plus a WebApplicationFactory override that replaces the JWT Bearer handler with TokenValidationParameters trusting the test key.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Creates a static RsaSecurityKey using RSA.Create(2048) or similar",
+        "The CreateAccessToken method accepts subject, audience, and claims parameters",
+        "Uses SecurityTokenDescriptor and JsonWebTokenHandler (or JwtSecurityTokenHandler) to create the token",
+        "The WebApplicationFactory replaces JWT Bearer options with TokenValidationParameters that set IssuerSigningKey to the test key",
+        "Sets ValidAudience to 'my-api' in the token validation parameters"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to set up an in-process IdentityServer using WebApplicationFactory for integration testing. I need to test client credentials token issuance. Show me the factory, the test configuration with a test client, and a test that requests a token from /connect/token.",
+      "expected_output": "A WebApplicationFactory<Program> that hosts IdentityServer with test clients, static signing key, and in-memory stores. A test that uses RequestClientCredentialsTokenAsync to get a token and asserts it's valid.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "The factory disables automatic key management via options.KeyManagement.Enabled = false",
+        "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key",
+        "Registers test clients via AddInMemoryClients with at least one client credentials client",
+        "The test calls RequestClientCredentialsTokenAsync (from IdentityModel) against the in-process server",
+        "Asserts that the token response is not an error and contains a non-empty AccessToken"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I have an IAuthorizationHandler called MinimumAgeHandler that checks a birthdate claim. Show me how to unit test it directly without spinning up a web host. I need tests for both a user who meets the age requirement and one who doesn't.",
+      "expected_output": "Direct unit tests that construct an AuthorizationHandlerContext with a synthetic ClaimsPrincipal containing a birthdate claim, invoke HandleAsync, and check context.HasSucceeded.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+        "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+        "Calls HandleAsync on the handler directly",
+        "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+        "Asserts context.HasSucceeded is false for a user not meeting the age requirement"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to write an integration test that verifies my AdminOnly policy works correctly against the DELETE /api/products/{id} endpoint. Using the TestAuthHandler pattern, show tests for: 1) admin role gets 204, 2) viewer role gets 403, 3) no auth gets 401.",
+      "expected_output": "Integration tests using a WebApplicationFactory with TestAuthHandler that exercise the DELETE endpoint with different claim sets and assert the correct HTTP status codes.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Test with role=admin claims asserts HttpStatusCode.NoContent (204)",
+        "Test with role=viewer claims asserts HttpStatusCode.Forbidden (403)",
+        "Test with no claims (unauthenticated) asserts HttpStatusCode.Unauthorized (401)",
+        "Each test sets distinct claims via the TestClaimsProvider before making the request",
+        "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "After issuing a client credentials token from my in-process IdentityServer, I want to parse the JWT and validate its claims. Show me how to read the token claims and assert that the issued token contains the expected client_id, scope, and issuer.",
+      "expected_output": "Code that issues a token via RequestClientCredentialsTokenAsync, then uses JsonWebTokenHandler to parse the JWT and assert on specific claims like client_id, scope, and iss.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Uses JsonWebTokenHandler.ReadJsonWebToken (or JwtSecurityTokenHandler) to parse the access token string",
+        "Asserts the client_id claim matches the test client's ID",
+        "Asserts the scope claim contains the expected scope value",
+        "Asserts the issuer (iss) claim matches the expected authority URL",
+        "Does NOT make a network call to validate the token — parses it locally"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I want to unit test a custom IProfileService implementation. My profile service loads roles from a database and adds them as claims. Show me how to test GetProfileDataAsync and IsActiveAsync with a mocked user repository.",
+      "expected_output": "Unit tests that create a ProfileDataRequestContext and IsActiveContext with a synthetic ClaimsPrincipal, invoke the profile service methods, and assert on IssuedClaims and IsActive properties. The user repository is mocked.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Creates a ProfileDataRequestContext with a subject ClaimsPrincipal containing a sub claim",
+        "Mocks an IUserRepository (or equivalent) to return known role values",
+        "Calls GetProfileDataAsync and asserts that context.IssuedClaims contains the expected role claims",
+        "Tests IsActiveAsync and asserts context.IsActive is set correctly based on the mock",
+        "Does NOT require a running IdentityServer — tests the service in isolation"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I keep getting test failures when running my IdentityServer integration tests in CI. The key management tries to write key files to disk and I get port conflicts with localhost:5001. What are the common pitfalls and how do I fix them?",
+      "expected_output": "Guidance on disabling automatic key management in tests, using factory.CreateClient() base address instead of hard-coded ports, and using AddDeveloperSigningCredential(persistKey: false). Should also mention not sharing HttpClient instances across tests.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+        "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+        "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
+        "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests"
+      ]
+    }
+  ]
+}

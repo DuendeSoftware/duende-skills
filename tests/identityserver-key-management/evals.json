@@ -1,0 +1,133 @@
+{
+  "skill_name": "identityserver-key-management",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Configure automatic key management on my IdentityServer so that keys rotate every 30 days, are announced 5 days before becoming active, and retired keys are kept for 7 days. Don't delete retired keys.",
+      "expected_output": "Program.cs updated with KeyManagement options: RotationInterval=30 days, PropagationTime=5 days, RetentionDuration=7 days, DeleteRetiredKeys=false.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'options.KeyManagement.RotationInterval' set to TimeSpan.FromDays(30)",
+        "Program.cs contains 'options.KeyManagement.PropagationTime' set to TimeSpan.FromDays(5)",
+        "Program.cs contains 'options.KeyManagement.RetentionDuration' set to TimeSpan.FromDays(7)",
+        "Program.cs contains 'options.KeyManagement.DeleteRetiredKeys = false'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to use static signing keys instead of automatic key management. I want to load a PFX certificate from disk at path '/certs/signing.pfx' with password from configuration, use RS256, and disable automatic key management.",
+      "expected_output": "Program.cs disables automatic key management, loads an X509 certificate from a PFX file, and registers it as a signing credential with RS256.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'options.KeyManagement.Enabled = false'",
+        "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+        "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+        "Program.cs does not remove the existing client and scope configuration"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We're deploying IdentityServer behind a load balancer with multiple instances. Configure the signing key storage to use the Entity Framework operational store backed by SQL Server. Also make sure data protection is properly configured for multi-instance deployment with database persistence.",
+      "expected_output": "Program.cs adds the EF operational store with SQL Server for key storage and configures ASP.NET Core Data Protection with shared persistence.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string",
+        "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem",
+        "Program.cs calls SetApplicationName with an explicit application name string",
+        "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to support multiple signing algorithms. Configure key management for RS256 with X.509 wrapping as the default, plus ES256 as a secondary algorithm. Also configure a specific client 'mobile-app' to use ES256 for its identity tokens.",
+      "expected_output": "Program.cs configures SigningAlgorithms with RS256 (UseX509Certificate=true) and ES256, and adds a client with AllowedIdentityTokenSigningAlgorithms set to ES256.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true",
+        "Program.cs includes a SigningAlgorithmOptions for EcdsaSha256 (ES256) in the SigningAlgorithms array",
+        "Program.cs defines a client with ClientId 'mobile-app' that has AllowedIdentityTokenSigningAlgorithms containing EcdsaSha256 or 'ES256'",
+        "The RS256 algorithm entry appears before ES256 in the SigningAlgorithms array to be the default"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I currently have a static signing key and want to migrate to automatic key management. We're in Phase 1 - I need to enable automatic key management while keeping my existing static key as the active signing credential. The static key is loaded from Azure Key Vault via a method called GetSigningKeyFromVault().",
+      "expected_output": "Program.cs enables automatic key management (Enabled=true) and keeps the static key from GetSigningKeyFromVault() registered via AddSigningCredential so it takes precedence while automatic keys are announced.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)",
+        "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)",
+        "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)",
+        "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm performing a manual key rotation with static keys. We're in Phase 2 now - the new key has been announced and caches have refreshed. Switch signing to the new key and keep the old key for validation. Both keys are loaded from methods LoadOldKey() and LoadNewKey(). Use RS256.",
+      "expected_output": "Program.cs disables automatic key management, registers the new key as AddSigningCredential and the old key as AddValidationKey, both with RS256.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'options.KeyManagement.Enabled = false'",
+        "Program.cs calls AddSigningCredential with the new key (from LoadNewKey()) and SecurityAlgorithms.RsaSha256",
+        "Program.cs calls AddValidationKey with the old key (from LoadOldKey()) and SecurityAlgorithms.RsaSha256",
+        "AddSigningCredential is called with the NEW key (not the old key), and AddValidationKey is called with the OLD key (not the new key)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I'm getting 'CryptographicException: The key was not found in the key ring' errors in my load-balanced IdentityServer deployment. The keys directory is at the default location. What's wrong and how do I fix it? Show me the code changes needed.",
+      "expected_output": "Explanation that data protection keys are not shared across instances, plus code to configure shared data protection persistence and optionally switch to a database-backed key store.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances",
+        "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)",
+        "Program.cs includes SetApplicationName() to ensure a consistent application name across instances",
+        "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I want to store signing keys on a shared file system at /mnt/shared/identity-keys and set the key cache duration to 1 hour instead of the default. Also increase the RSA key size to 4096 bits.",
+      "expected_output": "Program.cs configures KeyManagement.KeyPath to the shared path, KeyCacheDuration to 1 hour, and RsaKeySize to 4096.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'",
+        "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)",
+        "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'",
+        "Program.cs does not disable automatic key management"
+      ]
+    }
+  ]
+}

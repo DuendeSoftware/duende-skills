@@ -1,0 +1,66 @@
+{
+  "metadata": {"skill_name": "identityserver-hosting-setup", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 36, "passed": 36, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 36, "passed": 22, "failed": 14, "pass_rate": 61.1},
+    "delta": {"assertions_improved": 14, "delta_pass_rate": 38.9}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": ["Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()"]
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
+      "delta": 0.75,
+      "without_skill_failures": ["Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally", "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization", "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template"]
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Response explains that AddAspNetIdentity registers IProfileService for adding claims to tokens"]
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": ["Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes"]
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "delta": 0.6,
+      "without_skill_failures": ["Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it", "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage", "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances"]
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "delta": 0.6,
+      "without_skill_failures": ["Program.cs registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> BEFORE calling AddAspNetIdentity", "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync", "The IsUserActiveAsync override checks a property on the user (e.g., user.IsEnabled or user.IsActive) to determine if the user is active"]
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "delta": 0.5,
+      "without_skill_failures": ["Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default", "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)"]
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    }
+  ]
+}

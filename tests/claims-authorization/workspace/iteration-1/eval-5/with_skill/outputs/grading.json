@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Uses context.Caller to differentiate between token types", "pass": true, "rationale": "Uses context.Caller with an if/else check"},
+    {"assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens", "pass": true, "rationale": "Explicitly checks IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken"},
+    {"assertion": "Emits a minimal claim set (e.g. just name) for identity tokens", "pass": true, "rationale": "Only emits JwtClaimTypes.Name for identity tokens"},
+    {"assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering", "pass": true, "rationale": "Emits name, email, department, tenant_id, subscription_tier and uses context.AddRequestedClaims(claims)"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

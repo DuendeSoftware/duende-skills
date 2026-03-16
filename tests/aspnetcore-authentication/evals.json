@@ -1,0 +1,133 @@
+{
+  "skill_name": "aspnetcore-authentication",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Configure OIDC authentication for my web app. The IdentityServer is at https://identity.example.com, client ID is 'web.app', client secret is 'secret'. I need openid, profile, and api1 scopes. Make sure claims aren't remapped to XML URIs.",
+      "expected_output": "Program.cs with AddAuthentication setting DefaultScheme to Cookies and DefaultChallengeScheme to oidc, AddCookie, AddOpenIdConnect with MapInboundClaims=false, Scope.Clear() before adding scopes, SaveTokens=true, and correct middleware ordering.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping",
+        "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates",
+        "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme",
+        "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline",
+        "Program.cs sets ResponseType to 'code' for authorization code flow"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set up JWT Bearer authentication for my API project. The authority is https://identity.example.com and the audience should be 'catalog-api'. I want the name and role claims to work correctly with ASP.NET Core's User.Identity.Name and role-based authorization.",
+      "expected_output": "Program.cs with AddAuthentication and AddJwtBearer configured with Authority, Audience, MapInboundClaims=false, and TokenValidationParameters setting NameClaimType and RoleClaimType.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs configures AddJwtBearer with Authority set to the IdentityServer URL",
+        "Program.cs sets MapInboundClaims = false on the JWT Bearer handler",
+        "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'",
+        "Program.cs sets Audience or ValidAudience to 'catalog-api'",
+        "Program.cs calls app.UseAuthentication() before app.UseAuthorization()"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have an API that needs to accept both JWT access tokens and reference (opaque) tokens. The authority is https://identity.example.com, API client ID is 'catalog-api', and the API secret is 'api-secret'. Set up combined JWT and reference token validation.",
+      "expected_output": "Program.cs configuring both AddJwtBearer with ForwardDefaultSelector for reference tokens and AddOAuth2Introspection for the introspection endpoint.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection",
+        "Program.cs configures AddOAuth2Introspection with ClientId and ClientSecret for the API",
+        "Program.cs registers two authentication scheme handlers (JWT Bearer and introspection)",
+        "Program.cs sets MapInboundClaims = false on the JWT Bearer handler"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm getting a redirect loop after login in my OIDC-authenticated web app. The cookie never seems to get set after the callback from IdentityServer. I'm using SameSiteMode.Strict on my cookie. What's wrong and how do I fix it?",
+      "expected_output": "Explanation that SameSiteMode.Strict prevents the cookie from being sent on the cross-site OIDC callback redirect, and the fix is to use SameSiteMode.Lax. Code showing the corrected cookie configuration.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that SameSite=Strict prevents the cookie from being set during the OIDC callback redirect from IdentityServer",
+        "Response recommends changing SameSiteMode.Strict to SameSiteMode.Lax for the authentication cookie",
+        "Response includes code setting options.Cookie.SameSite = SameSiteMode.Lax on the cookie handler",
+        "Response mentions setting Cookie.SecurePolicy to Always for HTTPS"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to add custom parameters to the OIDC authorize request. Specifically, I want to pass acr_values of 'tenant:myorg' and a login_hint with the user's email. Also, when authentication fails I want to redirect to a custom error page at /auth-error instead of showing the default error.",
+      "expected_output": "Program.cs with OIDC handler Events configured: OnRedirectToIdentityProvider adding AcrValues and login_hint, and OnRemoteFailure redirecting to /auth-error.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs configures OpenIdConnectEvents on the OIDC handler",
+        "Program.cs sets OnRedirectToIdentityProvider to add AcrValues = 'tenant:myorg' to the ProtocolMessage",
+        "Program.cs sets OnRemoteFailure to call context.HandleResponse() and redirect to /auth-error",
+        "Program.cs passes login_hint via context.ProtocolMessage.LoginHint or SetParameter in the OnRedirectToIdentityProvider event"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Add a sign-out endpoint to my web app at /logout that properly signs out from both the local cookie session and the IdentityServer session. Explain the sign-out flow.",
+      "expected_output": "A /logout endpoint that calls SignOutAsync for both the cookie scheme and the OIDC scheme, with an explanation of the full sign-out flow.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs maps a /logout endpoint (via MapGet, controller action, or Razor page)",
+        "The logout handler calls SignOutAsync for the cookie authentication scheme to clear the local session",
+        "The logout handler calls SignOutAsync for the OIDC scheme to trigger redirect to IdentityServer's end session endpoint"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "My authentication cookie is too large and exceeding the 4KB browser limit. I'm using SaveTokens=true and getting many claims from the userinfo endpoint. What are my options to fix this?",
+      "expected_output": "Explanation of the cookie size problem with multiple solutions: using ITicketStore backed by a distributed cache, filtering unnecessary claims with ClaimActions.DeleteClaims, or using Duende IdentityServer server-side sessions.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response mentions implementing ITicketStore (backed by IDistributedCache or similar) to move the authentication ticket server-side so the cookie only holds a session key",
+        "Response mentions using ClaimActions.DeleteClaims to remove unnecessary claims like sid, idp, auth_time, or amr from the cookie",
+        "Response explains that SaveTokens=true stores access, refresh, and ID tokens in the cookie which contributes to the size problem"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm using User.FindFirst(\"sub\") in my controller but it returns null even though the user is authenticated. The user's subject claim exists in the ID token. What's going on?",
+      "expected_output": "Explanation of the claim type mapping issue where 'sub' is remapped to the long XML URI, and the fix using MapInboundClaims=false plus setting NameClaimType and RoleClaimType.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains that the default Microsoft OIDC/JWT handler maps 'sub' to the long XML URI 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'",
+        "Response recommends setting MapInboundClaims = false on the OIDC or JWT Bearer handler to preserve original claim names",
+        "Response shows setting TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role' so User.Identity.Name and role checks still work",
+        "Response explains this is a common pitfall where claims are silently renamed by the handler"
+      ]
+    }
+  ]
+}

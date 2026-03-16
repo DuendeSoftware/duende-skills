@@ -1,0 +1,138 @@
+{
+  "skill_name": "identityserver-sessions-providers",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Enable server-side sessions in our IdentityServer using Entity Framework Core with the SQL Server connection string already in appsettings.json. Store the user's 'name' claim as the display name in the session index. Make sure sessions are production-ready, not in-memory.",
+      "expected_output": "Program.cs calls AddServerSideSessions() on the IdentityServer builder and configures AddOperationalStore with UseSqlServer using the existing connection string. ServerSideSessions.UserDisplayNameClaimType is set to 'name'. The in-memory default is replaced with a durable EF Core store.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs calls AddServerSideSessions() on the IdentityServer builder chain",
+        "Program.cs configures AddOperationalStore with UseSqlServer using the connection string from configuration",
+        "Program.cs sets ServerSideSessions.UserDisplayNameClaimType to 'name'",
+        "Program.cs does not rely on the default in-memory session store for production use"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to build an admin endpoint that can query user sessions with paging and also terminate all sessions for a specific user. Show me how to inject and use ISessionManagementService to: (1) query the first page of 10 sessions, (2) get the next page, and (3) revoke all sessions for a user including back-channel logout but without revoking consents.",
+      "expected_output": "Code demonstrating ISessionManagementService injection, QuerySessionsAsync with CountRequested=10, paging via ResultsToken, and RemoveSessionsAsync with RemoveServerSideSession=true, RevokeTokens=true, SendBackchannelLogoutNotification=true, RevokeConsents=false. Mentions preferring GetSessionsAsync over QuerySessionsAsync for simple listing.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code uses ISessionManagementService with QuerySessionsAsync and CountRequested = 10 for the first page",
+        "Code uses ResultsToken from the first query result to fetch the next page",
+        "Code uses RemoveSessionsAsync with RevokeConsents = false to preserve consent grants",
+        "Code sets SendBackchannelLogoutNotification = true (explicitly or by relying on the default) in RemoveSessionsContext",
+        "Response mentions preferring GetSessionsAsync over QuerySessionsAsync for simple session listing"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Configure inactivity timeout for our IdentityServer. We want an 8-hour absolute session lifetime with no sliding expiration. Client token lifetimes should be coordinated with the user session globally. Expired sessions must trigger back-channel logout. The web.app client needs a BackChannelLogoutUri at https://app.example.com/bff/backchannel. Also set the access token lifetime for web.app to 5 minutes so refresh token usage signals activity.",
+      "expected_output": "Program.cs enables server-side sessions, sets CookieLifetime to 8 hours, CookieSlidingExpiration to false, CoordinateClientLifetimesWithUserSession to true, ExpiredSessionsTriggerBackchannelLogout to true. The web.app client gets BackChannelLogoutUri and a 300-second AccessTokenLifetime. Access token lifetime is shorter than session lifetime.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets Authentication.CookieLifetime to 8 hours and Authentication.CookieSlidingExpiration to false",
+        "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+        "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+        "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'",
+        "The web.app client has AccessTokenLifetime set to 300 (5 minutes)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We have hundreds of external identity providers and adding them all via static AddOpenIdConnect() calls is causing performance issues at startup. Convert our setup to use dynamic identity providers with Entity Framework Core. Keep the existing connection string. Add caching for the provider store. Show how to seed one dynamic OIDC provider for 'demoidsrv' pointing to https://demo.duendesoftware.com with client ID 'login'.",
+      "expected_output": "Program.cs removes static AddOpenIdConnect registrations and configures dynamic providers via the ConfigurationDbContext. AddConfigurationStoreCache() is called for caching. A seed data example shows adding an OidcProvider entity to the ConfigurationDbContext with Scheme='demoidsrv', Authority, and ClientId. The DynamicProviders feature is noted as Enterprise Edition.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs removes or replaces at least one static AddOpenIdConnect registration with dynamic provider configuration",
+        "Program.cs or a seed file creates an OidcProvider with Scheme set to 'demoidsrv' and Authority set to 'https://demo.duendesoftware.com'",
+        "Program.cs calls AddConfigurationStoreCache() for caching dynamic provider lookups",
+        "Response mentions or acknowledges that dynamic identity providers require the Enterprise Edition"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Create a custom dynamic provider type for Google authentication. I need a GoogleIdentityProvider class that stores ClientId and ClientSecret, the handler registration in Program.cs, and the ConfigureAuthenticationOptions implementation that maps properties to GoogleOptions. Use the existing Google config from appsettings.json.",
+      "expected_output": "A GoogleIdentityProvider class extending IdentityProvider with ProviderType='google' and properties for ClientId/ClientSecret using the indexer pattern. Program.cs registers the handler mapping via options.DynamicProviders.AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>. A GoogleDynamicConfigureOptions class deriving from ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider> maps properties and sets SignInScheme and CallbackPath.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code defines a GoogleIdentityProvider class that extends IdentityProvider with a 'google' provider type constant",
+        "GoogleIdentityProvider uses the indexer pattern (this[\"ClientId\"]) for property storage",
+        "Program.cs calls AddProviderType with GoogleHandler, GoogleOptions, and GoogleIdentityProvider type parameters",
+        "Code includes a ConfigureAuthenticationOptions-derived class that maps GoogleIdentityProvider properties to GoogleOptions",
+        "The configure class sets SignInScheme and CallbackPath on the GoogleOptions"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Configure the kiosk.app client for CIBA (Client Initiated Backchannel Authentication). It should use the CIBA grant type and poll mode. Explain what interfaces I need to implement and show stub implementations for the user validator and notification service. The user should be identified by their login_hint.",
+      "expected_output": "The kiosk.app client is updated with AllowedGrantTypes including GrantType.Ciba. Stub implementations of IBackchannelAuthenticationUserValidator (validates login_hint and returns sub claim) and IBackchannelAuthenticationUserNotificationService (sends notification) are shown. Both are registered in DI. CIBA is noted as Enterprise Edition. The poll delivery mode is used.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The kiosk.app client AllowedGrantTypes includes Ciba or 'urn:openid:params:grant-type:ciba'",
+        "Code includes an implementation of IBackchannelAuthenticationUserValidator that processes login_hint",
+        "Code includes an implementation of IBackchannelAuthenticationUserNotificationService",
+        "Both CIBA interfaces are registered in the DI container",
+        "Response mentions that CIBA requires the Enterprise Edition"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Our expired sessions are piling up in the database. Configure the automatic session cleanup job to run every 5 minutes with a batch size of 200. Also make sure the first cleanup run is randomized to avoid conflicts in our multi-instance deployment. Disable back-channel logout on session expiration since our clients don't support it.",
+      "expected_output": "Program.cs configures ServerSideSessions options: RemoveExpiredSessions=true, RemoveExpiredSessionsFrequency=5 minutes, RemoveExpiredSessionsBatchSize=200, FuzzExpiredSessionRemovalStart=true, ExpiredSessionsTriggerBackchannelLogout=false. AddServerSideSessions() is called.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets ServerSideSessions.RemoveExpiredSessionsFrequency to 5 minutes (TimeSpan.FromMinutes(5))",
+        "Program.cs sets ServerSideSessions.RemoveExpiredSessionsBatchSize to 200",
+        "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false",
+        "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm implementing a custom IServerSideSessionStore backed by Redis instead of Entity Framework. Show me the registration pattern for using a custom session store with IdentityServer. I need both the one-step and two-step registration approaches. Also explain what data is stored in the session and what queryable indices are available.",
+      "expected_output": "Two registration patterns shown: (1) one-step via AddServerSideSessions<RedisSessionStore>(), (2) two-step via AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>(). Explanation that the store contains the serialized AuthenticationTicket protected by Data Protection, with queryable indices for SubjectId (sub claim), SessionId (sid claim), and DisplayName (configurable claim type, null by default due to PII).",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
+        "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
+        "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
+        "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
+        "Response notes that UserDisplayNameClaimType is null by default due to PII concerns"
+      ]
+    }
+  ]
+}

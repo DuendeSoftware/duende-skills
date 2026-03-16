@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "A class extending DefaultProfileService or implementing IProfileService is defined", "pass": true, "rationale": "CustomProfileService implements IProfileService (not DefaultProfileService, but the assertion allows either)."},
+    {"assertion": "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims", "pass": false, "rationale": "The code uses context.IssuedClaims.AddRange(claims) which adds all claims directly, not context.AddRequestedClaims()."},
+    {"assertion": "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present", "pass": false, "rationale": "The code checks for the 'act' claim string but does not check for the token exchange authentication method. It just always checks for 'act' claim without verifying the authentication method is token exchange."},
+    {"assertion": "The profile service is registered via AddProfileService<T>() on the IdentityServer builder", "pass": true, "rationale": "Code calls idsvrBuilder.AddProfileService<CustomProfileService>()."}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

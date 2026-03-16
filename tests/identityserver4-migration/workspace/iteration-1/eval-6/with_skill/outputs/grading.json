@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends removing AddDeveloperSigningCredential",
+      "pass": true,
+      "rationale": "Explicitly states 'AddDeveloperSigningCredential() — this must be removed' and shows it commented as 'Old (remove this)'."
+    },
+    {
+      "assertion": "Response mentions Duende's automatic key management as the recommended replacement",
+      "pass": true,
+      "rationale": "States 'Duende IdentityServer (Business and Enterprise editions) includes automatic key management as a built-in feature. This is the recommended replacement.'"
+    },
+    {
+      "assertion": "Response addresses the concern about existing tokens by suggesting a transitional period where the old key remains available for validation",
+      "pass": true,
+      "rationale": "Option 2 explicitly describes keeping the old key 'alongside automatic key management during a transitional period' with code showing AddValidationKey."
+    },
+    {
+      "assertion": "Response suggests that if all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically",
+      "pass": true,
+      "rationale": "Option 1 states: 'If all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

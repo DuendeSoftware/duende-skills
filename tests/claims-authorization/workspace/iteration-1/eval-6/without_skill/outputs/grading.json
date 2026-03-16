@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'", "pass": true, "rationale": "Implements IExtensionGrantValidator with correct GrantType"},
+    {"assertion": "Extracts and validates the subject_token from the request", "pass": true, "rationale": "Extracts and validates subject_token correctly"},
+    {"assertion": "Returns a GrantValidationResult with a subject ID and custom claims array", "pass": true, "rationale": "Returns GrantValidationResult with sub and claims array"},
+    {"assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder", "pass": true, "rationale": "Shows AddExtensionGrantValidator<TokenExchangeValidator>()"},
+    {"assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further", "pass": false, "rationale": "No mention of IProfileService being called after the grant validator"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

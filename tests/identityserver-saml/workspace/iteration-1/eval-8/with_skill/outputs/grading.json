@@ -1,0 +1,13 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Uses ISamlInteractionService injected via dependency injection", "pass": true, "rationale": "ISamlInteractionService is injected via constructor injection in both controller and Razor page examples."},
+    {"assertion": "Calls GetRequestContextAsync with the returnUrl parameter", "pass": true, "rationale": "Calls _samlInteraction.GetRequestContextAsync(returnUrl)."},
+    {"assertion": "Checks if the returned context is non-null to determine if it's a SAML request", "pass": true, "rationale": "Uses 'if (samlContext != null)' and 'if (context != null)' pattern."},
+    {"assertion": "Accesses context.ServiceProvider or context.RequestedNameIdFormat for SP details", "pass": true, "rationale": "Accesses samlContext.ServiceProvider and samlContext.RequestedNameIdFormat."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

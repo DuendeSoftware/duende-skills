@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The code calls .AddSaml() on the IdentityServer builder chain", "pass": false, "rationale": "The code calls .AddSamlPlugin() instead of the correct .AddSaml() method."},
+    {"assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer", "pass": false, "rationale": "The response adds a separate NuGet package 'Duende.IdentityServer.Saml2p', which is incorrect — SAML is built into the main package."},
+    {"assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'", "pass": false, "rationale": "Uses 'ServiceProvider' class instead of 'SamlServiceProvider'. The EntityId is set but on the wrong type."},
+    {"assertion": "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'", "pass": false, "rationale": "Uses 'AssertionConsumerServices' with a different structure instead of 'AssertionConsumerServiceUrls'."},
+    {"assertion": "The code mentions or uses AddInMemorySamlServiceProviders to register the SP", "pass": false, "rationale": "Uses 'AddInMemoryServiceProviders' instead of the correct 'AddInMemorySamlServiceProviders'."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

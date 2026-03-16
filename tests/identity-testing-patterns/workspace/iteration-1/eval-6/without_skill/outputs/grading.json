@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses JsonWebTokenHandler.ReadJsonWebToken (or JwtSecurityTokenHandler) to parse the access token string", "pass": true, "rationale": "Uses JwtSecurityTokenHandler.ReadJwtToken to parse the token"},
+    {"assertion": "Asserts the client_id claim matches the test client's ID", "pass": true, "rationale": "Checks client_id claim equals \"test-client\""},
+    {"assertion": "Asserts the scope claim contains the expected scope value", "pass": true, "rationale": "Checks scope claim equals \"api1\""},
+    {"assertion": "Asserts the issuer (iss) claim matches the expected authority URL", "pass": false, "rationale": "Only asserts issuer is not null, does not match against expected authority URL"},
+    {"assertion": "Does NOT make a network call to validate the token — parses it locally", "pass": true, "rationale": "Uses ReadJwtToken for local parsing, no network call"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

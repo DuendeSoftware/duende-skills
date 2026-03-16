@@ -1,0 +1,115 @@
+{
+  "skill_name": "identityserver-saml",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to set up Duende IdentityServer as a SAML 2.0 Identity Provider. I already have IdentityServer configured with OIDC clients. Show me how to add SAML support and register a service provider with entity ID https://crm.contoso.com that posts assertions to https://crm.contoso.com/saml/acs.",
+      "expected_output": "Working code that calls .AddSaml() on the IdentityServer builder, registers an in-memory SamlServiceProvider with the correct EntityId and AssertionConsumerServiceUrls, and does NOT add a separate NuGet package.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The code calls .AddSaml() on the IdentityServer builder chain",
+        "No separate NuGet package is added — SAML is built into Duende.IdentityServer",
+        "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+        "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'",
+        "The code mentions or uses AddInMemorySamlServiceProviders to register the SP"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're going to production with our SAML IdP. Right now we use AddInMemorySamlServiceProviders. What's the recommended approach for production, and can you show me how to implement a custom store backed by EF Core?",
+      "expected_output": "An explanation that in-memory stores are not suitable for production, followed by a custom ISamlServiceProviderStore implementation using EF Core with FindByEntityIdAsync, registered via AddSamlServiceProviderStore<T>().",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Warns against using in-memory stores in production",
+        "Implements ISamlServiceProviderStore interface",
+        "The store class has a FindByEntityIdAsync method that accepts a string entityId and CancellationToken",
+        "Uses AddSamlServiceProviderStore<T>() for registration",
+        "Uses EF Core (DbContext) for data access"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have a legacy SAML service provider that expects attributes in a custom format like urn:custom:email instead of standard claim types. How can I customize the claim-to-attribute mapping in Duende IdentityServer's SAML support?",
+      "expected_output": "A custom ISamlClaimsMapper implementation that maps claims to SamlAttribute objects with custom Name values, registered as a transient service. Includes a warning that implementing ISamlClaimsMapper replaces all default mappings.",
+      "assertions": [
+        "Implements ISamlClaimsMapper interface",
+        "The mapper returns SamlAttribute objects with custom Name values",
+        "Warns that ISamlClaimsMapper completely replaces default claim mapping — DefaultClaimMappings are not applied",
+        "Registers the custom mapper with dependency injection (e.g., AddTransient)"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "hey, one of our SAML service providers keeps complaining about 'response has expired' errors. clock sync seems fine on our side. what settings should I tweak?",
+      "expected_output": "Guidance to increase the DefaultClockSkew setting in IdentityServerOptions.Saml, with code showing how to configure it. May also mention DefaultRequestMaxAge.",
+      "assertions": [
+        "Mentions DefaultClockSkew as the relevant setting",
+        "Shows configuration via options.Saml.DefaultClockSkew",
+        "Suggests increasing the value beyond the default 5 minutes",
+        "Does NOT suggest changes to the OIDC/OAuth configuration — this is SAML-specific"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Configure a SAML service provider in Duende IdentityServer that requires encrypted assertions. The SP's encryption certificate is at certs/sp-encryption.cer. Also enable IdP-initiated SSO for this SP.",
+      "expected_output": "A SamlServiceProvider configuration with EncryptAssertions = true, EncryptionCertificates populated from the certificate file, and AllowIdpInitiated = true. Should also mention enabling the IdP-initiated SSO endpoint.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Sets EncryptAssertions = true on the SamlServiceProvider",
+        "Populates EncryptionCertificates with a certificate loaded from certs/sp-encryption.cer",
+        "Sets AllowIdpInitiated = true on the SamlServiceProvider",
+        "Mentions that the IdP-initiated SSO endpoint must be enabled via options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true",
+        "Does NOT set EncryptAssertions = true without providing EncryptionCertificates"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What SAML signing behaviors does Duende IdentityServer support? We have an SP that requires both the assertion and the full response to be signed. What should we use?",
+      "expected_output": "An explanation of all four signing behaviors (SignAssertion, SignResponse, SignBoth, DoNotSign) with a recommendation to use SignBoth for this specific case. Should note that SignAssertion is the default and most interoperable, and DoNotSign should never be used in production.",
+      "assertions": [
+        "Lists all four signing behaviors: SignAssertion, SignResponse, SignBoth, DoNotSign",
+        "Recommends SignBoth for the specific requirement of signing both assertion and response",
+        "Notes that SignAssertion is the default and most interoperable option",
+        "Warns that DoNotSign should only be used for testing, never in production",
+        "Shows how to set SigningBehavior on the SamlServiceProvider or as a default via options.Saml.DefaultSigningBehavior"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "I want to add SAML support to my IdentityServer. Do I need to install a separate NuGet package? Also, what license edition do I need?",
+      "expected_output": "Clear statement that SAML is built into Duende.IdentityServer (no separate package) and requires the Enterprise Edition license. Should mention this was introduced in v8.0.",
+      "assertions": [
+        "States that no separate NuGet package is needed — SAML is built into Duende.IdentityServer",
+        "States that Enterprise Edition license is required",
+        "Mentions SAML support was introduced in version 8.0"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "I'm building a login page for my IdentityServer that handles both OIDC and SAML requests. How can I detect if an incoming authentication request is a SAML AuthnRequest, and get details about the requesting service provider?",
+      "expected_output": "Code using ISamlInteractionService.GetRequestContextAsync(returnUrl) injected into the login controller/page, checking if the result is non-null to detect SAML requests, with access to context.ServiceProvider and context.RequestedNameIdFormat.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Uses ISamlInteractionService injected via dependency injection",
+        "Calls GetRequestContextAsync with the returnUrl parameter",
+        "Checks if the returned context is non-null to determine if it's a SAML request",
+        "Accesses context.ServiceProvider or context.RequestedNameIdFormat for SP details"
+      ]
+    }
+  ]
+}

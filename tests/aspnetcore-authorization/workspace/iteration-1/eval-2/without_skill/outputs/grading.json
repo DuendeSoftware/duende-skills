@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "assertions": [
+    {"assertion": "An authorization policy requiring the 'catalog.read' scope is defined using RequireClaim", "pass": true, "rationale": "Response defines policy with policy.RequireClaim(\"scope\", \"catalog.read\")"},
+    {"assertion": "An authorization policy requiring the 'catalog.write' scope is defined using RequireClaim", "pass": true, "rationale": "Response defines policy with policy.RequireClaim(\"scope\", \"catalog.write\")"},
+    {"assertion": "The GET /products endpoint uses .RequireAuthorization() referencing the read policy", "pass": true, "rationale": "Response shows .RequireAuthorization(\"CatalogRead\") on GET /products"},
+    {"assertion": "The POST /products endpoint uses .RequireAuthorization() referencing the write policy", "pass": true, "rationale": "Response shows .RequireAuthorization(\"CatalogWrite\") on POST /products"},
+    {"assertion": "builder.Services.AddAuthorization is called to register the policies", "pass": true, "rationale": "Response shows builder.Services.AddAuthorization(options => { ... })"}
+  ],
+  "passed": 5,
+  "failed": 0,
+  "total": 5
+}

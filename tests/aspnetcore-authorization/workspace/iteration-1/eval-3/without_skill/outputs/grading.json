@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "assertions": [
+    {"assertion": "A ScopeRequirement class is created implementing IAuthorizationRequirement with a Scope property", "pass": true, "rationale": "Response creates ScopeRequirement : IAuthorizationRequirement with a Scope property"},
+    {"assertion": "A ScopeHandler class is created extending AuthorizationHandler<ScopeRequirement>", "pass": true, "rationale": "Response creates ScopeHandler : AuthorizationHandler<ScopeRequirement>"},
+    {"assertion": "The handler splits the scope claim value using Split(' ') or similar space-delimiter parsing", "pass": true, "rationale": "Response uses scopeClaim.Value.Split(' ') to parse space-delimited scopes"},
+    {"assertion": "The handler calls context.Succeed(requirement) when the scope matches, and does NOT call context.Fail() on mismatch", "pass": false, "rationale": "Response calls context.Fail() both when scopeClaim is null and when the scope doesn't match. The handler uses context.Fail() on mismatch instead of simply not calling Succeed()."},
+    {"assertion": "The ScopeHandler is registered in DI as IAuthorizationHandler", "pass": true, "rationale": "Response shows builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>()"}
+  ],
+  "passed": 4,
+  "failed": 1,
+  "total": 5
+}

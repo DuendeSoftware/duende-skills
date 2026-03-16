@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+      "pass": true,
+      "rationale": "spa.legacy uses GrantTypes.Code with RequirePkce = true; no client has RequirePkce = false"
+    },
+    {
+      "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
+      "pass": true,
+      "rationale": "All redirect URIs are exact-match: https://app.example.com/signin-oidc, https://spa.example.com/callback, etc."
+    },
+    {
+      "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential removed; KeyManagement configured with ES256+RS256 algorithms"
+    },
+    {
+      "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
+      "pass": true,
+      "rationale": "web.app: 300s, spa.legacy: 300s, native.app: 300s; M2M clients at 900s"
+    },
+    {
+      "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
+      "pass": true,
+      "rationale": "Detailed findings table with 12 issues, severity ratings, and specific remediations"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 14,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response warns that the issuer URI (iss claim) must remain the same after migration",
+      "pass": true,
+      "rationale": "States 'the issuer URI must remain the same' and explains it appears as the 'iss claim in tokens.'"
+    },
+    {
+      "assertion": "Response explains that changing the issuer breaks existing tokens and/or client trust relationships",
+      "pass": true,
+      "rationale": "States 'Existing tokens will fail validation because the iss claim won't match what APIs expect' and 'Refresh tokens may become invalid.'"
+    },
+    {
+      "assertion": "Response recommends setting options.IssuerUri explicitly in the Duende IdentityServer configuration",
+      "pass": true,
+      "rationale": "Shows code: 'builder.Services.AddIdentityServer(options => { options.IssuerUri = \"https://your-identity-server.example.com\"; });'"
+    },
+    {
+      "assertion": "Response suggests checking the current /.well-known/openid-configuration discovery document to find the existing issuer value",
+      "pass": true,
+      "rationale": "States 'Verify the discovery document' and 'check /.well-known/openid-configuration to confirm the issuer value matches the original.' However, this is framed as a post-migration verification step rather than a pre-migration step to find the current value. Still, /.well-known/openid-configuration is explicitly mentioned for checking the issuer."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

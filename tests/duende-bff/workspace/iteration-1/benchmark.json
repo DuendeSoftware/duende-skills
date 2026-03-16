@@ -1,0 +1,114 @@
+{
+  "metadata": {"skill_name": "duende-bff", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "summary": {
+    "with_skill": {"total_assertions": 50, "passed": 50, "failed": 0, "pass_rate": 100.0},
+    "without_skill": {"total_assertions": 50, "passed": 32, "failed": 18, "pass_rate": 64.0},
+    "delta": {"assertions_improved": 18, "delta_pass_rate": 36.0}
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+        "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Calls AddRemoteApis() on the BFF builder",
+        "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+        "Calls AddSessionCleanupBackgroundProcess()"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Both API endpoints use .AsBffApiEndpoint() for CSRF protection"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Output does NOT contain 'MapBffManagementEndpoints'",
+        "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+        "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+        "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
+        "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+        "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+        "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'"
+      ]
+    }
+  ]
+}
