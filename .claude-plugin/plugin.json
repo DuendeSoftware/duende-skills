@@ -14,7 +14,6 @@
     "./skills/aspnetcore-authentication",
     "./skills/aspnetcore-authorization",
     "./skills/claims-authorization",
-    "./skills/crap-analysis",
     "./skills/csharp-api-design",
     "./skills/csharp-coding-standards",
     "./skills/csharp-concurrency-patterns",

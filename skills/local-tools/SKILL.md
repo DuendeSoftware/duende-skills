@@ -4,15 +4,6 @@ description: Managing local .NET tools with dotnet-tools.json for consistent too
 invocable: false
 ---
 
-<!-- TODO: IDENTITY-SKILLS ADAPTATION
-- [ ] Remove DocFX and Incrementalist tool examples (those skills are deleted)
-- [ ] Add dotnet-ef focus for IdentityServer operational store migrations (dotnet ef migrations add, database update)
-- [ ] Add dotnet user-jwts tool for local JWT testing against IdentityServer
-- [ ] Keep ReportGenerator and CSharpier examples (still useful)
-- [ ] Update "Complete Development Setup" example to IdentityServer context
-- [ ] Review all examples for identity-relevance
--->
-
 # .NET Local Tools
 
 ## When to Use This Skill
@@ -20,7 +11,7 @@ invocable: false
 Use this skill when:
 - Setting up consistent tooling across a development team
 - Ensuring CI/CD pipelines use the same tool versions as local development
-- Managing project-specific CLI tools (docfx, incrementalist, dotnet-ef, etc.)
+- Managing project-specific CLI tools (dotnet-ef, dotnet user-jwts, reportgenerator, etc.)
 - Avoiding global tool version conflicts between projects
 
 ## What Are Local Tools?
@@ -58,10 +49,10 @@ This creates:
 
 ```bash
 # Install a tool locally
-dotnet tool install docfx
+dotnet tool install dotnet-ef
 
 # Install specific version
-dotnet tool install docfx --version 2.78.3
+dotnet tool install dotnet-ef --version 9.0.0
 
 # Install from a specific source
 dotnet tool install MyTool --add-source https://mycompany.pkgs.visualstudio.com/_packaging/feed/nuget/v3/index.json
@@ -83,24 +74,10 @@ dotnet tool restore
   "version": 1,
   "isRoot": true,
   "tools": {
-    "docfx": {
-      "version": "2.78.3",
-      "commands": [
-        "docfx"
-      ],
-      "rollForward": false
-    },
     "dotnet-ef": {
       "version": "9.0.0",
       "commands": [
         "dotnet-ef"
-      ],
-      "rollForward": false
-    },
-    "incrementalist.cmd": {
-      "version": "1.2.0",
-      "commands": [
-        "incrementalist"
       ],
       "rollForward": false
     },
@@ -130,31 +107,10 @@ dotnet tool restore
 
 ## Common Tools
 
-### Documentation
-
-```bash
-# DocFX - API documentation generator
-dotnet tool install docfx
-```
-
-```json
-"docfx": {
-  "version": "2.78.3",
-  "commands": ["docfx"],
-  "rollForward": false
-}
-```
-
-**Usage:**
-```bash
-dotnet docfx docfx.json
-dotnet docfx serve _site
-```
-
 ### Entity Framework Core
 
 ```bash
-# EF Core CLI for migrations
+# Entity Framework Core tools — essential for IdentityServer store migrations
 dotnet tool install dotnet-ef
 ```
 
@@ -168,8 +124,15 @@ dotnet tool install dotnet-ef
 
 **Usage:**
 ```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
+# Create migration for IdentityServer configuration store
+dotnet ef migrations add InitialConfigurationStore -c ConfigurationDbContext -o Data/Migrations/Configuration
+
+# Create migration for IdentityServer operational store
+dotnet ef migrations add InitialOperationalStore -c PersistedGrantDbContext -o Data/Migrations/Operational
+
+# Apply migrations
+dotnet ef database update -c ConfigurationDbContext
+dotnet ef database update -c PersistedGrantDbContext
 ```
 
 ### Code Coverage
@@ -190,27 +153,6 @@ dotnet tool install dotnet-reportgenerator-globaltool
 **Usage:**
 ```bash
 dotnet reportgenerator -reports:coverage.cobertura.xml -targetdir:coveragereport -reporttypes:Html
-```
-
-### Incremental Builds
-
-```bash
-# Incrementalist - build only changed projects
-dotnet tool install incrementalist.cmd
-```
-
-```json
-"incrementalist.cmd": {
-  "version": "1.2.0",
-  "commands": ["incrementalist"],
-  "rollForward": false
-}
-```
-
-**Usage:**
-```bash
-# Get projects affected by changes since main branch
-incrementalist --branch main
 ```
 
 ### Code Formatting
@@ -249,6 +191,16 @@ dotnet tool install jb
 }
 ```
 
+### Local JWT Testing
+
+`dotnet user-jwts` is a built-in .NET CLI tool (no install required) for creating test JWTs during local IdentityServer development:
+
+```bash
+# Create a test JWT for local API development
+dotnet user-jwts create --scope "api1" --claim "sub=testuser"
+dotnet user-jwts create --issuer "https://localhost:5001" --audience "api1"
+```
+
 ---
 
 ## CI/CD Integration
@@ -278,9 +230,6 @@ jobs:
 
       - name: Generate coverage report
         run: dotnet reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coveragereport
-
-      - name: Build documentation
-        run: dotnet docfx docs/docfx.json
 ```
 
 ### Azure Pipelines
@@ -312,10 +261,10 @@ steps:
 
 ```bash
 # Update to latest version
-dotnet tool update docfx
+dotnet tool update dotnet-ef
 
 # Update to specific version
-dotnet tool update docfx --version 2.79.0
+dotnet tool update dotnet-ef --version 9.0.1
 ```
 
 ### List Installed Tools
@@ -331,7 +280,7 @@ dotnet tool list --outdated
 ### Remove a Tool
 
 ```bash
-dotnet tool uninstall docfx
+dotnet tool uninstall dotnet-ef
 ```
 
 ---
@@ -355,8 +304,8 @@ Prevents MSBuild from searching parent directories for tool manifests:
 Use `"rollForward": false` for reproducible builds:
 
 ```json
-"docfx": {
-  "version": "2.78.3",
+"dotnet-ef": {
+  "version": "9.0.0",
   "rollForward": false
 }
 ```
@@ -367,7 +316,7 @@ Always run `dotnet tool restore` before using any local tool:
 
 ```yaml
 - run: dotnet tool restore
-- run: dotnet docfx docs/docfx.json
+- run: dotnet ef database update -c ConfigurationDbContext
 ```
 
 ### 4. Document Tool Requirements
@@ -406,11 +355,11 @@ Ensure you're running from the repository root:
 ```bash
 # Wrong - running from subdirectory
 cd src/MyApp
-dotnet docfx  # Error: tool not found
+dotnet ef migrations add ...  # Error: tool not found
 
 # Correct - run from solution root
 cd ../..
-dotnet docfx docs/docfx.json
+dotnet ef migrations add InitialCreate
 ```
 
 ### Version Conflicts
@@ -438,11 +387,6 @@ dotnet tool restore
   "version": 1,
   "isRoot": true,
   "tools": {
-    "docfx": {
-      "version": "2.78.3",
-      "commands": ["docfx"],
-      "rollForward": false
-    },
     "dotnet-ef": {
       "version": "9.0.0",
       "commands": ["dotnet-ef"],
@@ -456,11 +400,6 @@ dotnet tool restore
     "csharpier": {
       "version": "0.30.3",
       "commands": ["dotnet-csharpier"],
-      "rollForward": false
-    },
-    "incrementalist.cmd": {
-      "version": "1.2.0",
-      "commands": ["incrementalist"],
       "rollForward": false
     }
   }
@@ -479,9 +418,10 @@ dotnet csharpier .
 dotnet test --collect:"XPlat Code Coverage"
 dotnet reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage
 
-# Build documentation
-dotnet docfx docs/docfx.json
+# Apply IdentityServer store migrations
+dotnet ef database update -c ConfigurationDbContext
+dotnet ef database update -c PersistedGrantDbContext
 
-# Check which projects changed (for large repos)
-incrementalist --branch main
+# Create a test JWT for local API development
+dotnet user-jwts create --scope "api1" --claim "sub=testuser"
 ```

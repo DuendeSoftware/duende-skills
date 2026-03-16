@@ -4,15 +4,6 @@ description: Use Verify for snapshot testing in .NET. Approve API surfaces, HTTP
 invocable: false
 ---
 
-<!-- TODO: IDENTITY-SKILLS ADAPTATION
-- [ ] Add focus on protocol response snapshots (OAuth/OIDC token responses, discovery document, JWKS endpoint)
-- [ ] Add example of snapshot-testing IdentityServer discovery endpoint (/.well-known/openid-configuration)
-- [ ] Add example of snapshot-testing token endpoint JSON responses
-- [ ] Remove MJML/email template references (that skill is deleted; fix orphaned cross-reference to aspnetcore/transactional-emails)
-- [ ] Keep general Verify patterns (still useful)
-- [ ] Review all examples for identity-relevance
--->
-
 # Snapshot Testing with Verify
 
 ## When to Use This Skill
@@ -23,6 +14,7 @@ Use snapshot testing when:
 - Testing HTTP response bodies and headers
 - Validating serialization output
 - Catching unintended changes in complex objects
+- Snapshot-testing IdentityServer protocol responses (discovery document, JWKS, token structure)
 
 ---
 
@@ -118,38 +110,76 @@ Creates `VerifyRenderedEmail.verified.html` - viewable in browser.
 
 ---
 
-## Email Template Testing
+### Snapshot-Testing Protocol Responses
 
-Use Verify to catch unintended changes in rendered email templates:
+Snapshot-test IdentityServer endpoint responses to detect unintended changes in token structure, discovery documents, and JWKS.
+
+#### Discovery Document
 
 ```csharp
 [Fact]
-public async Task UserSignupInvitation_RendersCorrectly()
+public async Task Discovery_document_should_match_snapshot()
 {
-    var renderer = _services.GetRequiredService<IMjmlTemplateRenderer>();
+    var client = _factory.CreateClient();
+    var response = await client.GetAsync("/.well-known/openid-configuration");
+    var json = await response.Content.ReadAsStringAsync();
 
-    var variables = new Dictionary<string, string>
+    // Normalize volatile fields before snapshotting
+    var doc = JsonDocument.Parse(json);
+    var normalized = NormalizeDiscoveryDocument(doc);
+
+    await Verify(normalized);
+}
+
+private static object NormalizeDiscoveryDocument(JsonDocument doc)
+{
+    var root = doc.RootElement;
+    return new
     {
-        { "OrganizationName", "Acme Corporation" },
-        { "InviteeName", "John Doe" },
-        { "InviterName", "Jane Admin" },
-        { "InvitationLink", "https://example.com/invite/abc123" },
-        { "ExpirationDate", "December 31, 2025" }
+        issuer = root.GetProperty("issuer").GetString(),
+        scopes_supported = root.GetProperty("scopes_supported").EnumerateArray()
+            .Select(e => e.GetString()).Order().ToArray(),
+        grant_types_supported = root.GetProperty("grant_types_supported").EnumerateArray()
+            .Select(e => e.GetString()).Order().ToArray(),
+        response_types_supported = root.GetProperty("response_types_supported").EnumerateArray()
+            .Select(e => e.GetString()).Order().ToArray(),
+        claims_supported = root.GetProperty("claims_supported").EnumerateArray()
+            .Select(e => e.GetString()).Order().ToArray()
     };
-
-    var html = await renderer.RenderTemplateAsync(
-        "UserInvitations/UserSignupInvitation",
-        variables);
-
-    await Verify(html, extension: "html");
 }
 ```
 
-**Benefits for email testing:**
-- Catches CSS/layout regressions
-- Detects broken template variables
-- Visual review in diff tool
-- Version control tracks email changes
+#### Token Response Structure
+
+```csharp
+[Fact]
+public async Task Token_response_structure_should_match_snapshot()
+{
+    var disco = await _client.GetDiscoveryDocumentAsync();
+    var response = await _client.RequestClientCredentialsTokenAsync(
+        new ClientCredentialsTokenRequest
+        {
+            Address = disco.TokenEndpoint,
+            ClientId = "test.client",
+            ClientSecret = "secret",
+            Scope = "api1"
+        });
+
+    // Snapshot the token structure, not the values
+    var handler = new JsonWebTokenHandler();
+    var token = handler.ReadJsonWebToken(response.AccessToken);
+
+    var structure = new
+    {
+        token.Issuer,
+        Audiences = token.Audiences.Order().ToArray(),
+        ClaimTypes = token.Claims.Select(c => c.Type).Distinct().Order().ToArray(),
+        Algorithm = token.Alg
+    };
+
+    await Verify(structure);
+}
+```
 
 ---
 

@@ -1,6 +1,6 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **28 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **27 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
 
 ## Installation
 
@@ -113,7 +113,6 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 |-------|-------------|
 | `playwright-blazor` | End-to-end testing with Playwright for Blazor applications |
 | `snapshot-testing` | Snapshot testing with Verify — protocol response snapshots, token response validation |
-| `crap-analysis` | CRAP metric analysis — identifying complex untested code for targeted coverage improvement |
 
 ### .NET Ecosystem
 
@@ -166,7 +165,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (28 skills total)
+│   └── ... (27 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh

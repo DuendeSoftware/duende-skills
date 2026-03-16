@@ -4,15 +4,6 @@ description: Modern .NET project structure including .slnx solution format, Dire
 invocable: false
 ---
 
-<!-- TODO: IDENTITY-SKILLS ADAPTATION
-- [ ] Tailor "Complete Project Structure" section to IdentityServer solution layouts (e.g., src/IdentityServer/, src/Bff/, tests/IdentityServer.IntegrationTests/)
-- [ ] Add example Directory.Packages.props showing Duende NuGet packages (Duende.IdentityServer, Duende.BFF, Duende.AccessTokenManagement)
-- [ ] Add DuendeVersion shared version variable example
-- [ ] Update "Related Skills" links to reference identity-skills
-- [ ] Consider adding IdentityServer-specific NuGet.Config with any required Duende feed
-- [ ] Review all examples for identity-relevance
--->
-
 # .NET Project Structure and Build Configuration
 
 ## When to Use This Skill
@@ -261,15 +252,27 @@ Central Package Management (CPM) provides a single source of truth for all NuGet
 
   <!-- Define version variables for related packages -->
   <PropertyGroup>
-    <AkkaVersion>1.5.35</AkkaVersion>
+    <DuendeVersion>7.1.0</DuendeVersion>
+    <DuendeBffVersion>3.0.0</DuendeBffVersion>
+    <DuendeTokenManagementVersion>3.0.0</DuendeTokenManagementVersion>
     <AspireVersion>9.1.0</AspireVersion>
   </PropertyGroup>
 
   <!-- Application Dependencies -->
   <ItemGroup Label="App Dependencies">
-    <PackageVersion Include="Akka" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Cluster" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Persistence" Version="$(AkkaVersion)" />
+    <!-- Duende IdentityServer -->
+    <PackageVersion Include="Duende.IdentityServer" Version="$(DuendeVersion)" />
+    <PackageVersion Include="Duende.IdentityServer.EntityFramework" Version="$(DuendeVersion)" />
+    <PackageVersion Include="Duende.IdentityServer.AspNetIdentity" Version="$(DuendeVersion)" />
+
+    <!-- Duende BFF -->
+    <PackageVersion Include="Duende.BFF" Version="$(DuendeBffVersion)" />
+    <PackageVersion Include="Duende.BFF.Yarp" Version="$(DuendeBffVersion)" />
+
+    <!-- Duende Token Management -->
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="$(DuendeTokenManagementVersion)" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="$(DuendeTokenManagementVersion)" />
+
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
   </ItemGroup>
 
@@ -292,11 +295,17 @@ Central Package Management (CPM) provides a single source of truth for all NuGet
 ### Consuming Packages (No Version Needed)
 
 ```xml
-<!-- In MyApp.csproj -->
+<!-- In IdentityServer.csproj -->
 <ItemGroup>
-  <PackageReference Include="Akka" />
-  <PackageReference Include="Akka.Cluster" />
+  <PackageReference Include="Duende.IdentityServer" />
+  <PackageReference Include="Duende.IdentityServer.EntityFramework" />
   <PackageReference Include="Microsoft.Extensions.Hosting" />
+</ItemGroup>
+
+<!-- In Bff.csproj -->
+<ItemGroup>
+  <PackageReference Include="Duende.BFF" />
+  <PackageReference Include="Duende.BFF.Yarp" />
 </ItemGroup>
 
 <!-- In MyApp.Tests.csproj -->
@@ -312,7 +321,7 @@ Central Package Management (CPM) provides a single source of truth for all NuGet
 1. **Single source of truth** - All versions in one file
 2. **No version drift** - All projects use same versions
 3. **Easy updates** - Change once, applies everywhere
-4. **Grouped packages** - Version variables for related packages (e.g., all Akka packages)
+4. **Grouped packages** - Version variables for related packages (e.g., all Duende packages)
 
 ---
 
@@ -512,6 +521,34 @@ MySolution/
 ├── RELEASE_NOTES.md                # Version history
 ├── README.md                       # Project documentation
 └── logo.png                        # Package icon
+```
+
+### Typical IdentityServer Solution Layout
+
+```
+MySolution/
+├── src/
+│   ├── IdentityServer/              # Duende IdentityServer host
+│   │   └── IdentityServer.csproj
+│   ├── Api/                         # Protected API
+│   │   └── Api.csproj
+│   ├── Bff/                         # Backend for Frontend
+│   │   └── Bff.csproj
+│   ├── Web/                         # Web application (MVC/Razor Pages)
+│   │   └── Web.csproj
+│   └── Shared/                      # Shared models and constants
+│       └── Shared.csproj
+├── tests/
+│   ├── IdentityServer.Tests/        # Unit tests
+│   │   └── IdentityServer.Tests.csproj
+│   └── IntegrationTests/            # Integration tests with WebApplicationFactory
+│       └── IntegrationTests.csproj
+├── Directory.Build.props
+├── Directory.Packages.props
+├── MySolution.slnx
+├── global.json
+├── NuGet.Config
+└── RELEASE_NOTES.md
 ```
 
 ---

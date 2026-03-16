@@ -4,14 +4,6 @@ description: Manage NuGet packages using Central Package Management (CPM) and do
 invocable: false
 ---
 
-<!-- TODO: IDENTITY-SKILLS ADAPTATION
-- [ ] Replace Akka/Aspire examples in "Shared Version Variables" with Duende packages (Duende.IdentityServer, Duende.BFF, Duende.AccessTokenManagement, etc.)
-- [ ] Add DuendeVersion shared variable example in Directory.Packages.props
-- [ ] Keep all CLI command reference sections (generic, still useful)
-- [ ] Update NuGet.config section to mention Duende license feed if applicable
-- [ ] Review all examples for identity-relevance
--->
-
 # NuGet Package Management
 
 ## When to Use This Skill
@@ -110,39 +102,29 @@ Group related packages with shared version variables:
 
   <!-- Shared version variables -->
   <PropertyGroup Label="SharedVersions">
-    <AkkaVersion>1.5.59</AkkaVersion>
-    <AkkaHostingVersion>1.5.59</AkkaHostingVersion>
-    <AspireVersion>9.0.0</AspireVersion>
-    <OpenTelemetryVersion>1.11.0</OpenTelemetryVersion>
+    <DuendeVersion>7.1.0</DuendeVersion>
+    <DuendeBffVersion>3.0.0</DuendeBffVersion>
+    <DuendeTokenManagementVersion>3.0.0</DuendeTokenManagementVersion>
     <XunitVersion>2.9.2</XunitVersion>
   </PropertyGroup>
 
-  <!-- Akka.NET packages - all use same version -->
-  <ItemGroup Label="Akka.NET">
-    <PackageVersion Include="Akka" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Cluster" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Cluster.Tools" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Persistence" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Streams" Version="$(AkkaVersion)" />
-    <PackageVersion Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
-    <PackageVersion Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+  <!-- Duende IdentityServer -->
+  <ItemGroup Label="Duende.IdentityServer">
+    <PackageVersion Include="Duende.IdentityServer" Version="$(DuendeVersion)" />
+    <PackageVersion Include="Duende.IdentityServer.EntityFramework" Version="$(DuendeVersion)" />
+    <PackageVersion Include="Duende.IdentityServer.AspNetIdentity" Version="$(DuendeVersion)" />
   </ItemGroup>
 
-  <!-- Aspire packages -->
-  <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting" Version="$(AspireVersion)" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireVersion)" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="$(AspireVersion)" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="$(AspireVersion)" />
+  <!-- Duende BFF -->
+  <ItemGroup Label="Duende.BFF">
+    <PackageVersion Include="Duende.BFF" Version="$(DuendeBffVersion)" />
+    <PackageVersion Include="Duende.BFF.Yarp" Version="$(DuendeBffVersion)" />
   </ItemGroup>
 
-  <!-- OpenTelemetry packages -->
-  <ItemGroup Label="OpenTelemetry">
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OpenTelemetryVersion)" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OpenTelemetryVersion)" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="$(OpenTelemetryVersion)" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="$(OpenTelemetryVersion)" />
+  <!-- Duende Token Management -->
+  <ItemGroup Label="Duende.AccessTokenManagement">
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="$(DuendeTokenManagementVersion)" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="$(DuendeTokenManagementVersion)" />
   </ItemGroup>
 
   <!-- Testing -->
@@ -156,7 +138,7 @@ Group related packages with shared version variables:
 ```
 
 **Benefits:**
-- Update all Akka packages by changing one variable
+- Update all Duende packages by changing one variable
 - Clear organization with labeled ItemGroups
 - Prevents version mismatches in related packages
 
@@ -359,7 +341,7 @@ When you must override CPM for one project (rare):
 <PackageReference Include="Newtonsoft.Json" VersionOverride="12.0.3" />
 ```
 
-**Warning**: This is detected by Slopwatch (see `dotnet/slopwatch` skill) as potential slop.
+**Warning**: Use `VersionOverride` sparingly — it defeats the purpose of CPM and makes it harder to detect outdated packages across the solution.
 
 ---
 
@@ -435,12 +417,12 @@ Then commit `packages.lock.json` files.
 
 ```xml
 <!-- BAD: Related packages with different versions -->
-<PackageVersion Include="Akka" Version="1.5.59" />
-<PackageVersion Include="Akka.Cluster" Version="1.5.58" />  <!-- Mismatch! -->
+<PackageVersion Include="Duende.IdentityServer" Version="7.1.0" />
+<PackageVersion Include="Duende.IdentityServer.EntityFramework" Version="7.0.9" />  <!-- Mismatch! -->
 
 <!-- GOOD: Use shared variable -->
-<PackageVersion Include="Akka" Version="$(AkkaVersion)" />
-<PackageVersion Include="Akka.Cluster" Version="$(AkkaVersion)" />
+<PackageVersion Include="Duende.IdentityServer" Version="$(DuendeVersion)" />
+<PackageVersion Include="Duende.IdentityServer.EntityFramework" Version="$(DuendeVersion)" />
 ```
 
 ---
