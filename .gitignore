@@ -61,3 +61,4 @@ $RECYCLE.BIN/
 # Claude Code / AI artifacts (if any temp files are generated)
 .claude/
 *.ai.tmp
+.weave

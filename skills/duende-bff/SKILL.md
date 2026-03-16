@@ -8,30 +8,558 @@ invocable: false
 
 ## When to Use This Skill
 
-TODO: Define when this skill should be invoked.
+- Building or securing a SPA (React, Angular, Vue, Blazor WASM) that calls APIs requiring authentication
+- Implementing the Backend-for-Frontend security pattern to keep access tokens out of the browser
+- Configuring BFF session management, login/logout endpoints, and server-side sessions
+- Proxying requests from a frontend to remote APIs while automatically attaching access tokens
+- Adding CSRF/anti-forgery protection to APIs consumed by browser-based applications
+- Integrating `Duende.BFF` with `Duende.AccessTokenManagement` for automatic token refresh
+- Deploying a BFF behind a reverse proxy or configuring same-site cookie behavior
 
-## Related Skills
+## Core Principles
 
-TODO: List related skills from this repo.
+1. **Tokens Never Touch the Browser** — The BFF holds all OAuth tokens server-side; the browser only ever sees an HTTP-only, Secure, SameSite cookie
+2. **CSRF Protection Is Mandatory** — Every BFF API endpoint must require the `x-csrf: 1` header; use `.AsBffApiEndpoint()` or `MapRemoteBffApiEndpoint` — never skip it without an explicit alternative
+3. **Cookie Configuration Determines Security Posture** — `SameSite=Strict` is preferred when the IDP is on the same site; `Lax` is acceptable when cross-site redirects are required after login
+4. **Server-Side Sessions for Production** — The default in-memory cookie session is unsuitable for production; persist sessions with `Duende.BFF.EntityFramework`
+5. **Token Management Is Automatic** — BFF integrates with `Duende.AccessTokenManagement`; never manually refresh tokens or pass raw access tokens to the frontend
 
 ---
 
-## Overview
+## Pattern 1: Setup and Registration (BFF v4)
 
-TODO: High-level concepts and architecture.
+BFF v4 uses a streamlined registration API that auto-configures OpenID Connect and cookie authentication with recommended defaults.
 
-## Key Concepts
+```csharp
+// ✅ v4: AddBff() with fluent OIDC and cookie configuration
+builder.Services.AddBff()
+    .ConfigureOpenIdConnect(options =>
+    {
+        options.Authority = "https://your-idp.example.com";
+        options.ClientId = "my-bff-client";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.ResponseMode = "query";
 
-TODO: Core concepts with code examples.
+        options.GetClaimsFromUserInfoEndpoint = true;
+        options.SaveTokens = true;
+        options.MapInboundClaims = false;
 
-## Common Patterns
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("offline_access"); // Required for refresh tokens
+    })
+    .ConfigureCookies(options =>
+    {
+        // Use Strict when your IDP is on the same site as the BFF.
+        // Use Lax when a cross-site redirect is required (e.g., IDP on a different domain).
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
 
-TODO: Recommended implementation patterns.
+builder.Services.AddAuthorization();
 
-## Anti-Patterns
+var app = builder.Build();
 
-TODO: What to avoid and why.
+app.UseAuthentication();
+app.UseRouting();
+app.UseBff();          // Adds CSRF anti-forgery enforcement middleware
+app.UseAuthorization();
+
+app.Run();
+```
+
+```csharp
+// ❌ v4: Do NOT manually wire AddCookie + AddOpenIdConnect when using AddBff()
+// ConfigureOpenIdConnect and ConfigureCookies handle this correctly
+builder.Services.AddAuthentication()
+    .AddCookie("cookie")
+    .AddOpenIdConnect("oidc", ...); // Bypasses BFF's recommended defaults
+```
+
+### BFF v3 Registration
+
+For projects still on v3, explicit scheme setup is required and `MapBffManagementEndpoints()` must be called manually:
+
+```csharp
+// ✅ v3: explicit authentication scheme wiring
+builder.Services.AddBff();
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = "cookie";
+        options.DefaultChallengeScheme = "oidc";
+        options.DefaultSignOutScheme = "oidc";
+    })
+    .AddCookie("cookie", options =>
+    {
+        options.Cookie.Name = "__Host-bff";
+        options.Cookie.SameSite = SameSiteMode.Strict;
+    })
+    .AddOpenIdConnect("oidc", options =>
+    {
+        options.Authority = "https://your-idp.example.com";
+        options.ClientId = "my-bff-client";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.SaveTokens = true;
+        options.Scope.Add("offline_access");
+    });
+
+// ...
+
+app.MapBffManagementEndpoints(); // ✅ Required in v3
+```
+
+---
+
+## Pattern 2: Login and Logout Endpoints
+
+In BFF v4, management endpoints (`/bff/login`, `/bff/logout`, `/bff/user`, `/bff/backchannel-logout`) are registered automatically by `AddBff()` with the implicit default frontend. In v3, they require an explicit call to `MapBffManagementEndpoints()`.
+
+**Login** — A browser navigation to `/bff/login` initiates an OIDC Authorization Code flow. After the IDP redirects back, the BFF sets an HTTP-only authentication cookie.
+
+```csharp
+// ✅ Trigger login from the SPA (browser navigation, not fetch)
+// React example:
+// window.location.href = '/bff/login?returnUrl=/dashboard';
+
+// ✅ Optional: supply a returnUrl to redirect after login
+// GET /bff/login?returnUrl=/dashboard
+// The returnUrl must be a local path; absolute URLs are rejected.
+```
+
+**Logout** — A browser navigation to `/bff/logout` signs the user out locally and initiates an OIDC end_session flow. It also revokes the refresh token automatically.
+
+```csharp
+// ✅ The sid claim from /bff/user must be passed as a query parameter
+// GET /bff/logout?sid=<session-id>
+// This is required to prevent CSRF attacks on the logout endpoint.
+```
+
+```csharp
+// ❌ Do NOT call /bff/logout via fetch() without the sid parameter.
+// The logout endpoint validates the sid to prevent cross-site logout attacks.
+```
+
+---
+
+## Pattern 3: CSRF / Anti-Forgery Protection
+
+The BFF enforces a custom `x-csrf` header on every protected endpoint. This triggers a CORS preflight for cross-origin requests, effectively preventing CSRF attacks. The header value is irrelevant — its presence is sufficient.
+
+### Local (Embedded) API Endpoints
+
+```csharp
+// ✅ Minimal API: decorate with AsBffApiEndpoint()
+app.MapGet("/api/data", (HttpContext ctx) => Results.Ok("data"))
+    .RequireAuthorization()
+    .AsBffApiEndpoint();
+
+// ✅ MVC Controllers: apply to the entire controller via attribute
+[Route("api/data")]
+[BffApi]
+public class DataController : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() => Ok("data");
+}
+
+// ✅ MVC Controllers: apply at mapping time
+app.MapControllers()
+    .RequireAuthorization()
+    .AsBffApiEndpoint();
+```
+
+```csharp
+// ❌ Do NOT expose BFF API endpoints without AsBffApiEndpoint() or BffApi attribute.
+// Without it, the x-csrf header is not enforced and the endpoint is CSRF-vulnerable.
+app.MapGet("/api/data", () => Results.Ok("data"))
+    .RequireAuthorization(); // Missing .AsBffApiEndpoint()
+```
+
+### Middleware Order
+
+`UseBff()` must appear **after** `UseRouting()` but **before** `UseAuthorization()`. Incorrect order silently disables anti-forgery enforcement.
+
+```csharp
+// ✅ Correct middleware order
+app.UseAuthentication();
+app.UseRouting();
+app.UseBff();           // Must be here
+app.UseAuthorization();
+app.MapControllers().AsBffApiEndpoint();
+
+// ❌ Wrong: UseBff() after UseAuthorization() — anti-forgery is not applied
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
+app.UseBff();           // Too late
+```
+
+---
+
+## Pattern 4: Remote API Proxying
+
+The BFF can act as a reverse proxy to APIs deployed on separate hosts. Requests carry only the session cookie; the BFF exchanges it for an access token before forwarding.
+
+Install the YARP integration package:
+
+```
+dotnet add package Duende.BFF.Yarp
+```
+
+```csharp
+// ✅ Direct forwarding via MapRemoteBffApiEndpoint
+builder.Services.AddBff()
+    .AddRemoteApis();
+
+// Maps /api/orders and all sub-paths to https://orders-service/orders
+app.MapRemoteBffApiEndpoint("/api/orders", new Uri("https://orders-service/orders"))
+    .WithAccessToken(RequiredTokenType.User);    // Attach the user's access token
+
+app.MapRemoteBffApiEndpoint("/api/public", new Uri("https://content-service/public"))
+    .WithAccessToken(RequiredTokenType.None);    // Anonymous remote API
+
+app.MapRemoteBffApiEndpoint("/api/internal", new Uri("https://internal-service/api"))
+    .WithAccessToken(RequiredTokenType.Client);  // Client credentials token (machine-to-machine)
+```
+
+### Token Type Options
+
+| `RequiredTokenType` | Behavior |
+|---|---|
+| `None` | No token attached; anonymous passthrough |
+| `User` | Forwards the current user's access token; challenges if unauthenticated |
+| `Client` | Forwards a client credentials token; works even without a logged-in user |
+| `UserOrClient` | Forwards user token if available, falls back to client token |
+| `UserOrNone` | Forwards user token if logged in, no token if anonymous (no challenge) |
+
+```csharp
+// ✅ Restrict access in addition to token requirements
+app.MapRemoteBffApiEndpoint("/api/admin", new Uri("https://admin-service/api"))
+    .WithAccessToken(RequiredTokenType.User)
+    .RequireAuthorization("AdminPolicy");
+```
+
+```csharp
+// ❌ MapRemoteBffApiEndpoint opens the entire sub-path namespace.
+// Do NOT use broad paths like "/" or "/api" unless all sub-routes should be exposed.
+app.MapRemoteBffApiEndpoint("/", new Uri("https://backend-service")); // Exposes everything
+```
+
+---
+
+## Pattern 5: Session Management
+
+### Server-Side Sessions
+
+Default cookie-based sessions embed claims and tokens in the cookie. For production, move session data server-side: the cookie only carries a session ID, keeping cookie size small and enabling server-initiated revocation.
+
+```csharp
+// ✅ In-memory server-side sessions (development/testing only)
+builder.Services.AddBff()
+    .AddServerSideSessions();
+
+// ✅ Production: persist with Entity Framework
+// dotnet add package Duende.BFF.EntityFramework
+builder.Services.AddBff()
+    .AddEntityFrameworkServerSideSessions(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("BffSessions"));
+    });
+```
+
+```csharp
+// ✅ Session cleanup (v4): manual registration required
+builder.Services.AddBff(options =>
+{
+    options.SessionCleanupInterval = TimeSpan.FromMinutes(5);
+})
+.AddEntityFrameworkServerSideSessions(options =>
+{
+    options.UseSqlServer(connectionString);
+})
+.AddSessionCleanupBackgroundProcess();
+```
+
+```csharp
+// ❌ In-memory sessions are NOT suitable for production.
+// Sessions are lost on restart; BFF horizontal scaling requires a shared store.
+builder.Services.AddBff()
+    .AddServerSideSessions(); // No EF store — data lives only in process memory
+```
+
+### EF Migrations for Session Store
+
+```bash
+dotnet ef migrations add UserSessions -o Migrations -c SessionDbContext
+dotnet ef database update
+```
+
+---
+
+## Pattern 6: Token Management Integration
+
+BFF integrates with `Duende.AccessTokenManagement` (ATM) automatically when `SaveTokens = true` is set on the OIDC handler. Tokens are stored in the server-side session and refreshed transparently.
+
+```csharp
+// ✅ Retrieve the current user access token in a local API endpoint
+app.MapGet("/api/data", async (HttpContext ctx, IHttpClientFactory factory) =>
+{
+    // ATM handles refresh automatically if the token is expired
+    var token = await ctx.GetUserAccessTokenAsync();
+
+    var client = factory.CreateClient();
+    client.SetBearerToken(token);
+
+    var response = await client.GetAsync("https://remote-service/data");
+    return Results.Text(await response.Content.ReadAsStringAsync());
+})
+.AsBffApiEndpoint();
+```
+
+```csharp
+// ✅ Named HttpClient with automatic token management (preferred pattern)
+builder.Services.AddUserAccessTokenHttpClient("apiClient", configureClient: client =>
+{
+    client.BaseAddress = new Uri("https://remote-service/");
+});
+
+app.MapGet("/api/proxy", async (IHttpClientFactory factory) =>
+{
+    var client = factory.CreateClient("apiClient"); // Token attached automatically
+    return Results.Text(await (await client.GetAsync("data")).Content.ReadAsStringAsync());
+})
+.AsBffApiEndpoint();
+```
+
+```csharp
+// ✅ Typed HttpClient with token handler
+builder.Services.AddHttpClient<RemoteApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://remote-service/");
+})
+.AddUserAccessTokenHandler();
+```
+
+```csharp
+// ❌ Do NOT manually read tokens from the session and store them in JavaScript.
+// This defeats the entire purpose of BFF. Tokens must stay server-side.
+var token = await ctx.GetUserAccessTokenAsync();
+return Results.Json(new { accessToken = token }); // ❌ Exposes token to browser
+```
+
+### Refresh Token Revocation
+
+BFF revokes refresh tokens automatically at logout. Configure rotation behavior on IdentityServer — BFF clients are confidential clients and do **not** need rotating (one-time-use) refresh tokens.
+
+```csharp
+// ✅ Manually revoke if needed (e.g., on account compromise)
+await HttpContext.RevokeUserRefreshTokenAsync();
+```
+
+---
+
+## Pattern 7: SPA Integration
+
+### Session Check Endpoint (`/bff/user`)
+
+The `/bff/user` endpoint returns the current user's claims or `401`. Use it on SPA startup to determine authentication state.
+
+```javascript
+// ✅ React: check session on app load
+async function getUser() {
+    const response = await fetch('/bff/user', {
+        headers: { 'x-csrf': '1' }  // Required anti-forgery header
+    });
+    if (response.ok) {
+        return await response.json();
+    }
+    return null; // 401 = not authenticated
+}
+```
+
+### Fetch Wrapper for CSRF Header
+
+Every `fetch()` call to a BFF API endpoint must include `x-csrf: 1`. Wrap `fetch` globally rather than adding it to every call site.
+
+```javascript
+// ✅ Fetch wrapper that automatically appends the required CSRF header
+function bffFetch(url, options = {}) {
+    return fetch(url, {
+        ...options,
+        headers: {
+            'x-csrf': '1',
+            ...options.headers,
+        },
+    });
+}
+
+// Usage
+const data = await bffFetch('/api/orders').then(r => r.json());
+```
+
+```javascript
+// ❌ Missing x-csrf header — BFF will return 401
+const data = await fetch('/api/orders').then(r => r.json());
+```
+
+### Handling 401 and Session Expiry
+
+BFF API endpoints return `401` (not a redirect) when the session has expired. The SPA must detect this and redirect to `/bff/login`.
+
+```javascript
+// ✅ Centralized 401 handling in fetch wrapper
+async function bffFetch(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: { 'x-csrf': '1', ...options.headers },
+    });
+
+    if (response.status === 401) {
+        // Session expired — redirect to BFF login endpoint
+        window.location.href = `/bff/login?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+        return;
+    }
+
+    return response;
+}
+```
+
+### Login and Logout Links
+
+Login and logout are browser navigations, not `fetch` calls. Do not use `fetch` or `XMLHttpRequest` for these flows.
+
+```javascript
+// ✅ Navigate to login (triggers OIDC redirect)
+window.location.href = '/bff/login';
+
+// ✅ Navigate to logout — must include sid from /bff/user response
+const user = await bffFetch('/bff/user').then(r => r.json());
+const sid = user.find(c => c.type === 'sid')?.value;
+window.location.href = `/bff/logout?sid=${sid}`;
+```
+
+---
+
+## Pattern 8: Deployment Considerations
+
+### SameSite Cookie Configuration
+
+| Scenario | Recommended `SameSite` |
+|---|---|
+| IDP on same site as BFF (e.g., `auth.example.com` and `app.example.com`) | `Strict` |
+| IDP on a different domain (e.g., Duende demo, Auth0, Azure AD) | `Lax` |
+| Embedded in iframe or third-party context | Not supported — BFF requires first-party cookie |
+
+```csharp
+// ✅ Strict (preferred when IDP is same-site)
+options.Cookie.SameSite = SameSiteMode.Strict;
+
+// ✅ Lax (required when IDP is on a different domain)
+options.Cookie.SameSite = SameSiteMode.Lax;
+
+// ❌ None requires Secure=true and is only appropriate for third-party contexts
+// which are fundamentally incompatible with the BFF pattern
+options.Cookie.SameSite = SameSiteMode.None;
+```
+
+### Reverse Proxy / Path Base
+
+When the BFF is hosted behind a reverse proxy (e.g., nginx, Azure Application Gateway), configure forwarded headers and path base so authentication callbacks resolve correctly.
+
+```csharp
+// ✅ Trust forwarded headers from proxy (add before UseAuthentication)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+// ✅ If the BFF is mounted at a sub-path (e.g., /app)
+app.UsePathBase("/app");
+```
+
+### CORS Policy
+
+The BFF serves the SPA from the same origin, so CORS is typically not needed between the SPA and BFF. CORS should be configured only for cross-origin scenarios.
+
+```csharp
+// ✅ Restrict CORS to known origins if the BFF and SPA are on different origins
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SpaPolicy", policy =>
+    {
+        policy.WithOrigins("https://app.example.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Required for cookie-based auth across origins
+    });
+});
+
+app.UseCors("SpaPolicy");
+```
+
+### Data Protection in Clustered Deployments
+
+When running multiple BFF instances, cookies and anti-forgery tokens must be decryptable by all nodes. Configure a shared Data Protection key store.
+
+```csharp
+// ✅ Shared key ring (e.g., Azure Blob Storage + Key Vault)
+builder.Services.AddDataProtection()
+    .PersistKeysToAzureBlobStorage(/* ... */)
+    .ProtectKeysWithAzureKeyVault(/* ... */);
+
+// ✅ Shared key ring via database (e.g., Entity Framework)
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>();
+```
+
+```csharp
+// ❌ Default in-memory key ring in multi-instance deployments
+// Each instance generates its own keys; cookies from one instance
+// cannot be decrypted by another.
+builder.Services.AddDataProtection(); // No persistence — broken in clusters
+```
+
+---
+
+## Common Pitfalls
+
+- **Calling `/bff/login` or `/bff/logout` via `fetch()`** — These endpoints trigger OIDC redirects and must be browser navigations (`window.location.href`), not AJAX calls.
+
+- **Omitting `offline_access` scope** — Without a refresh token, BFF cannot automatically renew expired access tokens. The user will receive 401 errors from remote APIs when their access token expires.
+
+- **Using in-memory sessions in production** — `AddServerSideSessions()` without EF means sessions vanish on restart and cannot be shared across instances. Always use `AddEntityFrameworkServerSideSessions()` in production.
+
+- **Forgetting `SaveTokens = true`** — Without this, OIDC tokens are not stored in the session, and `GetUserAccessTokenAsync()` returns nothing. Token management silently fails.
+
+- **Missing `x-csrf: 1` header in SPA fetch calls** — BFF returns 401 for API requests without the header. Centralize header injection in a fetch wrapper rather than adding it to each call site.
+
+- **Incorrect middleware order** — `UseBff()` must come after `UseRouting()` and before `UseAuthorization()`. Any deviation silently breaks anti-forgery enforcement without a clear error.
+
+- **Exposing access tokens to the frontend** — Returning token values from a local API endpoint to JavaScript completely defeats the BFF pattern and its token-theft protections.
+
+- **Using `SameSite=Strict` with a cross-site IDP** — After the OIDC redirect back from the IDP, the browser won't send the post-login session cookie on the first request because it was a cross-site navigation. Use `Lax` when the IDP is on a different site.
+
+- **Forgetting to revoke the refresh token on logout** — BFF does this automatically, but if `RevokeRefreshTokenOnLogout = false` is set, abandoned sessions retain valid refresh tokens indefinitely.
+
+- **Not configuring Data Protection in multi-instance deployments** — Cookie decryption failures manifest as users being perpetually logged out in load-balanced environments.
+
+---
 
 ## Resources
 
-TODO: Links to authoritative documentation.
+- [Duende BFF Overview](https://docs.duendesoftware.com/bff/)
+- [Getting Started: Single Frontend](https://docs.duendesoftware.com/bff/getting-started/single-frontend/)
+- [Embedded (Local) APIs](https://docs.duendesoftware.com/bff/fundamentals/apis/local/)
+- [Proxying Remote APIs](https://docs.duendesoftware.com/bff/fundamentals/apis/remote/)
+- [Server-Side Sessions](https://docs.duendesoftware.com/bff/fundamentals/session/server-side-sessions/)
+- [Token Management](https://docs.duendesoftware.com/bff/fundamentals/tokens/)
+- [Session Management Endpoints](https://docs.duendesoftware.com/bff/fundamentals/session/management/)
+- [BFF v3 → v4 Upgrade Guide](https://docs.duendesoftware.com/bff/upgrading/bff-v3-to-v4/)
+- [NuGet: Duende.BFF](https://www.nuget.org/packages/Duende.BFF)
+- [NuGet: Duende.BFF.Yarp](https://www.nuget.org/packages/Duende.BFF.Yarp)
+- [NuGet: Duende.BFF.EntityFramework](https://www.nuget.org/packages/Duende.BFF.EntityFramework)
+- Related skills: `aspnetcore-authentication`, `token-management`, `identityserver-configuration`
