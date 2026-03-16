@@ -1,0 +1,38 @@
+{
+  "name": "identity-skills",
+  "version": "0.1.0",
+  "description": "Duende IdentityServer development skills and agents for Claude Code — covering OAuth/OIDC protocols, token management, ASP.NET Core authentication/authorization, BFF patterns, and secure identity architecture",
+  "author": {
+    "name": "Duende Software",
+    "url": "https://github.com/DuendeSoftware"
+  },
+  "repository": "https://github.com/DuendeSoftware/identity-skills",
+  "skills": [
+    "./skills/aspire-integration-testing",
+    "./skills/aspnetcore-authentication",
+    "./skills/aspnetcore-authorization",
+    "./skills/claims-authorization",
+    "./skills/duende-bff",
+    "./skills/identity-security-hardening",
+    "./skills/identity-testing-patterns",
+    "./skills/identityserver-aspire",
+    "./skills/identityserver-configuration",
+    "./skills/identityserver-dcr",
+    "./skills/identityserver-saml",
+    "./skills/identityserver-stores",
+    "./skills/local-tools",
+    "./skills/oauth-oidc-protocols",
+    "./skills/package-management",
+    "./skills/playwright-blazor",
+    "./skills/project-structure",
+    "./skills/snapshot-testing",
+    "./skills/token-management"
+  ],
+  "agents": [
+    "./agents/dotnet-benchmark-designer.md",
+    "./agents/dotnet-concurrency-specialist.md",
+    "./agents/dotnet-performance-analyst.md",
+    "./agents/identity-server-specialist.md",
+    "./agents/oauth-oidc-specialist.md"
+  ]
+}
