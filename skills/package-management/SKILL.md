@@ -4,6 +4,14 @@ description: Manage NuGet packages using Central Package Management (CPM) and do
 invocable: false
 ---
 
+<!-- TODO: IDENTITY-SKILLS ADAPTATION
+- [ ] Replace Akka/Aspire examples in "Shared Version Variables" with Duende packages (Duende.IdentityServer, Duende.BFF, Duende.AccessTokenManagement, etc.)
+- [ ] Add DuendeVersion shared variable example in Directory.Packages.props
+- [ ] Keep all CLI command reference sections (generic, still useful)
+- [ ] Update NuGet.config section to mention Duende license feed if applicable
+- [ ] Review all examples for identity-relevance
+-->
+
 # NuGet Package Management
 
 ## When to Use This Skill

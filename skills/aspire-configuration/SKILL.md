@@ -124,7 +124,7 @@ if (!config.UseVolumes)
 api.WithEnvironment("BlobStorage__Enabled", config.EnableBlobStorage.ToString());
 ```
 
-See `skills/aspire/integration-testing/SKILL.md` for patterns on passing
+See `aspire-integration-testing` skill for patterns on passing
 configuration overrides into `DistributedApplicationTestingBuilder`.
 
 ---
@@ -146,9 +146,8 @@ configuration overrides into `DistributedApplicationTestingBuilder`.
 
 ## Related Skills
 
-- `skills/aspire/service-defaults/SKILL.md`
-- `skills/aspire/integration-testing/SKILL.md`
-- `skills/akka/aspire-configuration/SKILL.md`
+- `aspire-service-defaults`
+- `aspire-integration-testing`
 
 ---
 

@@ -4,6 +4,15 @@ description: Use Verify for snapshot testing in .NET. Approve API surfaces, HTTP
 invocable: false
 ---
 
+<!-- TODO: IDENTITY-SKILLS ADAPTATION
+- [ ] Add focus on protocol response snapshots (OAuth/OIDC token responses, discovery document, JWKS endpoint)
+- [ ] Add example of snapshot-testing IdentityServer discovery endpoint (/.well-known/openid-configuration)
+- [ ] Add example of snapshot-testing token endpoint JSON responses
+- [ ] Remove MJML/email template references (that skill is deleted; fix orphaned cross-reference to aspnetcore/transactional-emails)
+- [ ] Keep general Verify patterns (still useful)
+- [ ] Review all examples for identity-relevance
+-->
+
 # Snapshot Testing with Verify
 
 ## When to Use This Skill
@@ -382,23 +391,6 @@ git add *.received.*  // Wrong!
 // Don't use for simple assertions
 await Verify(result.Count);  // Just use Assert.Equal(5, result.Count)
 ```
-
----
-
-## Integration with MJML Email Testing
-
-See the `aspnetcore/transactional-emails` skill for the complete pattern:
-
-1. MJML templates with `{{variable}}` placeholders
-2. Render to HTML with test data
-3. Snapshot test the rendered output
-4. Review changes in diff tool before approving
-
-This catches:
-- Broken variable substitution
-- CSS/layout regressions
-- Email client compatibility issues
-- Unintended content changes
 
 ---
 

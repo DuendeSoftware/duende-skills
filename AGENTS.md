@@ -2,10 +2,7 @@
 
 This repo supports both Claude Code and OpenCode.
 
-When adding/removing skills or agents, keep the router/index snippets up to date so downstream repos can copy/paste them.
-
-Reference:
-- `skills/meta/skills-index-snippets/SKILL.md`
+When adding/removing skills or agents, keep the plugin registry up to date.
 
 Maintenance:
 1. Update `.claude-plugin/plugin.json`

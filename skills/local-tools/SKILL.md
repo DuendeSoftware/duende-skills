@@ -4,6 +4,15 @@ description: Managing local .NET tools with dotnet-tools.json for consistent too
 invocable: false
 ---
 
+<!-- TODO: IDENTITY-SKILLS ADAPTATION
+- [ ] Remove DocFX and Incrementalist tool examples (those skills are deleted)
+- [ ] Add dotnet-ef focus for IdentityServer operational store migrations (dotnet ef migrations add, database update)
+- [ ] Add dotnet user-jwts tool for local JWT testing against IdentityServer
+- [ ] Keep ReportGenerator and CSharpier examples (still useful)
+- [ ] Update "Complete Development Setup" example to IdentityServer context
+- [ ] Review all examples for identity-relevance
+-->
+
 # .NET Local Tools
 
 ## When to Use This Skill

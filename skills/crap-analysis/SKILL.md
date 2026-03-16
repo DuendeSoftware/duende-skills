@@ -4,6 +4,12 @@ description: Analyze code coverage and CRAP (Change Risk Anti-Patterns) scores t
 invocable: true
 ---
 
+<!-- TODO: IDENTITY-SKILLS ADAPTATION
+- [ ] Add IdentityServer-specific exclusion patterns (generated migration files for operational/configuration stores: **/Migrations/**)
+- [ ] Minimal changes needed — this skill is generic and useful as-is
+- [ ] Review examples for identity-relevance
+-->
+
 # CRAP Score Analysis
 
 ## When to Use This Skill

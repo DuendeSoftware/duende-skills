@@ -4,6 +4,15 @@ description: Modern .NET project structure including .slnx solution format, Dire
 invocable: false
 ---
 
+<!-- TODO: IDENTITY-SKILLS ADAPTATION
+- [ ] Tailor "Complete Project Structure" section to IdentityServer solution layouts (e.g., src/IdentityServer/, src/Bff/, tests/IdentityServer.IntegrationTests/)
+- [ ] Add example Directory.Packages.props showing Duende NuGet packages (Duende.IdentityServer, Duende.BFF, Duende.AccessTokenManagement)
+- [ ] Add DuendeVersion shared version variable example
+- [ ] Update "Related Skills" links to reference identity-skills
+- [ ] Consider adding IdentityServer-specific NuGet.Config with any required Duende feed
+- [ ] Review all examples for identity-relevance
+-->
+
 # .NET Project Structure and Build Configuration
 
 ## When to Use This Skill

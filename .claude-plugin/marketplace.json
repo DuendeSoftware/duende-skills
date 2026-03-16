@@ -1,17 +1,17 @@
 {
-  "name": "dotnet-skills",
-  "description": "Official Claude Code Marketplace for .NET development - C#, F#, Akka.NET, Aspire, testing frameworks, and specialized tools",
+  "name": "identity-skills",
+  "description": "Claude Code Marketplace for Duende IdentityServer development — OAuth/OIDC, token management, ASP.NET Core authentication, BFF patterns, and secure identity architecture",
   "owner": {
-    "name": "Aaron Stannard",
-    "url": "https://github.com/Aaronontheweb"
+    "name": "Duende Software",
+    "url": "https://github.com/DuendeSoftware"
   },
-  "repository": "https://github.com/Aaronontheweb/dotnet-skills",
+  "repository": "https://github.com/DuendeSoftware/identity-skills",
   "plugins": [
     {
-      "name": "dotnet-skills",
+      "name": "identity-skills",
       "source": "./",
-      "version": "1.0.0",
-      "description": "Complete .NET development toolkit with 27 skills and 5 specialized agents covering Akka.NET, Aspire, testing, and modern C# patterns"
+      "version": "0.1.0",
+      "description": "Duende IdentityServer toolkit with 28 skills and 5 specialized agents covering OAuth/OIDC, token management, ASP.NET Core auth, and identity security patterns"
     }
   ]
 }

@@ -29,28 +29,26 @@ agent_name_from_path() {
   grep -m1 '^name:' "$file" | sed 's/^name:[[:space:]]*//'
 }
 
-declare -a akka=()
+declare -a identity=()
+declare -a oauth=()
+declare -a aspnetcore=()
 declare -a csharp=()
-declare -a aspnetcore_web=()
 declare -a data=()
 declare -a di_config=()
 declare -a testing=()
 declare -a dotnet=()
-declare -a quality_gates=()
-declare -a meta=()
 
 while IFS= read -r skill_dir; do
   name="$(skill_name_from_dir "$skill_dir")"
   case "$skill_dir" in
-    ./skills/akka-*) akka+=("$name") ;;
+    ./skills/identityserver-*|./skills/duende-*|./skills/identity-security-*) identity+=("$name") ;;
+    ./skills/oauth-*|./skills/token-*|./skills/claims-*) oauth+=("$name") ;;
+    ./skills/aspnetcore-*|./skills/aspire-*) aspnetcore+=("$name") ;;
     ./skills/csharp-*) csharp+=("$name") ;;
-    ./skills/aspire-*|./skills/mjml-*) aspnetcore_web+=("$name") ;;
     ./skills/efcore-*|./skills/database-*) data+=("$name") ;;
     ./skills/microsoft-extensions-*) di_config+=("$name") ;;
-    ./skills/slopwatch|./skills/crap-analysis) quality_gates+=("$name") ;;
-    ./skills/testcontainers|./skills/playwright-*|./skills/snapshot-*|./skills/verify-*) testing+=("$name") ;;
-    ./skills/project-structure|./skills/local-tools|./skills/package-management|./skills/serialization|./skills/dotnet-devcert-*) dotnet+=("$name") ;;
-    ./skills/marketplace-*|./skills/skills-index-*) meta+=("$name") ;;
+    ./skills/identity-testing-*|./skills/playwright-*|./skills/snapshot-*|./skills/crap-analysis) testing+=("$name") ;;
+    ./skills/project-structure|./skills/local-tools|./skills/package-management|./skills/dotnet-devcert-*) dotnet+=("$name") ;;
     *) ;; # ignore
   esac
 done < <(jq -r '.skills[]' "$PLUGIN_JSON")
@@ -66,18 +64,17 @@ join_csv() {
 }
 
 compressed="$(cat <<EOF
-[dotnet-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any .NET work.
-|flow:{skim repo patterns -> consult dotnet-skills by name -> implement smallest-change -> note conflicts}
+[identity-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any identity/auth/.NET work.
+|flow:{skim repo patterns -> consult identity-skills by name -> implement smallest-change -> note conflicts}
 |route:
-|akka:{$(join_csv "${akka[@]}")}
+|identity:{$(join_csv "${identity[@]}")}
+|oauth:{$(join_csv "${oauth[@]}")}
+|aspnetcore:{$(join_csv "${aspnetcore[@]}")}
 |csharp:{$(join_csv "${csharp[@]}")}
-|aspnetcore-web:{$(join_csv "${aspnetcore_web[@]}")}
 |data:{$(join_csv "${data[@]}")}
 |di-config:{$(join_csv "${di_config[@]}")}
 |testing:{$(join_csv "${testing[@]}")}
 |dotnet:{$(join_csv "${dotnet[@]}")}
-|quality-gates:{$(join_csv "${quality_gates[@]}")}
-|meta:{$(join_csv "${meta[@]}")}
 |agents:{$(join_csv "${agents[@]}")}
 EOF
 )"
@@ -90,15 +87,15 @@ import re
 import sys
 
 readme_path = pathlib.Path(os.environ["README_PATH"])
-start = "<!-- BEGIN DOTNET-SKILLS COMPRESSED INDEX -->"
-end = "<!-- END DOTNET-SKILLS COMPRESSED INDEX -->"
+start = "<!-- BEGIN IDENTITY-SKILLS COMPRESSED INDEX -->"
+end = "<!-- END IDENTITY-SKILLS COMPRESSED INDEX -->"
 compressed = os.environ["COMPRESSED"].strip()
 
 text = readme_path.read_text(encoding="utf-8")
 pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.S)
 
 if not pattern.search(text):
-    sys.stderr.write("README markers not found: add BEGIN/END DOTNET-SKILLS COMPRESSED INDEX\n")
+    sys.stderr.write("README markers not found: add BEGIN/END IDENTITY-SKILLS COMPRESSED INDEX\n")
     sys.exit(1)
 
 replacement = f"{start}\n```markdown\n{compressed}\n```\n{end}"

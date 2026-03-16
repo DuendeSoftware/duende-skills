@@ -206,13 +206,12 @@ builder.Services.AddAkka("MySystem", (builder, sp) =>
     builder
         .AddOrderActors()
         .AddInventoryActors()
-        .AddNotificationActors();
+         .AddNotificationActors();
 });
 ```
 
-See `akka-hosting-actor-patterns` skill for complete Akka.Hosting patterns.
-
 ---
+
 
 ## Anti-Patterns
 

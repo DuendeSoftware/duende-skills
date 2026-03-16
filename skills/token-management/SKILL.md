@@ -1,0 +1,37 @@
+---
+name: token-management
+description: Token management patterns using Duende.AccessTokenManagement. Covers client credential token caching, user token refresh, token storage, DPoP support, and integration with HttpClientFactory.
+invocable: false
+---
+
+# Token Management
+
+## When to Use This Skill
+
+TODO: Define when this skill should be invoked.
+
+## Related Skills
+
+TODO: List related skills from this repo.
+
+---
+
+## Overview
+
+TODO: High-level concepts and architecture.
+
+## Key Concepts
+
+TODO: Core concepts with code examples.
+
+## Common Patterns
+
+TODO: Recommended implementation patterns.
+
+## Anti-Patterns
+
+TODO: What to avoid and why.
+
+## Resources
+
+TODO: Links to authoritative documentation.
