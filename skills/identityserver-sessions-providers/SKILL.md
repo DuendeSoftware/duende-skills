@@ -91,7 +91,7 @@ Queryable indices extracted from the session:
 | Session ID   | `sid` claim value                                 |
 | Display Name | Configurable claim type (e.g., `name` or `email`) |
 
-Configure the display name claim:
+Configure the display name claim. **Note**: `UserDisplayNameClaimType` is **unset (null) by default** due to PII concerns. You must explicitly set it if you want display names stored in the session index:
 
 ```csharp
 // Program.cs
@@ -154,13 +154,15 @@ await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
 });
 ```
 
-Selective revocation:
+Selective revocation (filtering by `SessionId` or `ClientIds` is also supported):
 
 ```csharp
 // Only revoke refresh tokens, keep session and consents
 await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
 {
     SubjectId = "12345",
+    SessionId = "abc123",        // optional: target a specific session
+    ClientIds = { "my_app" },    // optional: target specific clients
     RevokeTokens = true,
     RemoveServerSideSession = false,
     RevokeConsents = false,
@@ -189,7 +191,7 @@ OpenID Connect does not natively provide distributed session management based on
 
 Server-side sessions at IdentityServer provide the central record for monitoring user activity:
 
-1. **Activity signals**: As the user's client uses refresh tokens, introspection, or userinfo, these protocol calls extend the server-side session automatically via the `ISessionCoordinationService`.
+1. **Activity signals**: As the user's client uses refresh tokens, introspection, or userinfo, these protocol calls extend the server-side session automatically via an internal `ISessionCoordinationService` (this is an implementation detail, not a public API for consumers).
 2. **Inactivity detection**: When no activity occurs within the session timeout, the session expires and cleanup is triggered (back-channel logout, token revocation).
 
 ### Configuration at IdentityServer
@@ -207,9 +209,12 @@ builder.Services.AddIdentityServer(options =>
     options.Authentication.CoordinateClientLifetimesWithUserSession = true;
 
     // 3. Trigger back-channel logout when sessions expire
+    // This is already true by default, shown here for explicitness
     options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
 }).AddServerSideSessions();
 ```
+
+**Note**: `ExpiredSessionsTriggerBackchannelLogout` defaults to `true`, so step 3 is technically optional. The only setting you must explicitly enable is `CoordinateClientLifetimesWithUserSession` (step 2).
 
 Alternatively, enable coordination per-client:
 
@@ -230,6 +235,46 @@ var client = new Client
 | Client without access tokens              | Cannot signal activity                    | Must implement back-channel logout                             |
 
 **Critical**: Configure access token lifetime to be shorter than the server-side session lifetime at IdentityServer, so that refresh token usage naturally keeps the session alive.
+
+## Session Expiration and Cleanup
+
+When a session cookie expires without explicit logout, the server-side session record remains in the store. An automatic cleanup job periodically scans for and removes these expired records.
+
+### Expiration Configuration Options
+
+All options are on `options.ServerSideSessions`:
+
+| Option | Default | Description |
+| ------ | ------- | ----------- |
+| `RemoveExpiredSessions` | `true` | Enables periodic cleanup of expired sessions |
+| `RemoveExpiredSessionsFrequency` | 10 minutes | How often the cleanup job runs |
+| `RemoveExpiredSessionsBatchSize` | 100 | Number of expired records removed per batch |
+| `ExpiredSessionsTriggerBackchannelLogout` | `true` | Send back-channel logout notifications when expired sessions are cleaned up |
+| `FuzzExpiredSessionRemovalStart` | `true` | Randomize the first cleanup run to avoid multi-instance conflicts |
+
+### Customizing the Cleanup Interval
+
+```csharp
+// Program.cs
+builder.Services.AddIdentityServer(options => {
+    options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromSeconds(60);
+}).AddServerSideSessions();
+```
+
+### Disabling Automatic Cleanup
+
+```csharp
+builder.Services.AddIdentityServer(options => {
+    options.ServerSideSessions.RemoveExpiredSessions = false;
+}).AddServerSideSessions();
+```
+
+### Configuring Session Lifetime
+
+The server-side session lifetime is inherited from the cookie authentication handler:
+
+- **Default (no ASP.NET Identity)**: Controlled by `options.Authentication.CookieLifetime` (defaults to 10 hours)
+- **With ASP.NET Core Identity**: Controlled by `ConfigureApplicationCookie(options => options.ExpireTimeSpan = ...)` (defaults to 14 days)
 
 ## Dynamic Identity Providers
 
@@ -447,9 +492,9 @@ CIBA allows a user to authenticate on a different device than the one running th
 
 ### CIBA Flow
 
-1. **Client** sends a backchannel authentication request to IdentityServer's `/ciba` endpoint
+1. **Client** sends a backchannel authentication request to IdentityServer's `/connect/ciba` endpoint
 2. **IdentityServer** validates the request and identifies the user via `IBackchannelAuthenticationUserValidator` (you must implement this)
-3. **IdentityServer** creates a pending login request in the `BackchannelAuthenticationRequestStore`
+3. **IdentityServer** creates a pending login request in the `IBackchannelAuthenticationRequestStore`
 4. **IdentityServer** notifies the user via `IBackchannelAuthenticationUserNotificationService` (you must implement this — e.g., push notification, email, SMS)
 5. **User** reviews and approves/denies the request; your UI calls `IBackchannelAuthenticationInteractionService.CompleteLoginRequestAsync`
 6. **Client** polls the token endpoint and receives tokens (or an error if denied/timed out)

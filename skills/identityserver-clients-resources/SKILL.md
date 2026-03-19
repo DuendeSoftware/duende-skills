@@ -492,11 +492,11 @@ new Client
     {
         new Secret(@"CN=client, OU=production, O=company", "client.dn")
         {
-            Type = SecretTypes.X509CertificateName
+            Type = IdentityServerConstants.SecretTypes.X509CertificateName
         },
         new Secret("bca0d040847f843c5ee0fa6eb494837470155868", "mtls.tb")
         {
-            Type = SecretTypes.X509CertificateThumbprint
+            Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
         }
     }
 }

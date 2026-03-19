@@ -142,7 +142,7 @@ For machine-to-machine communication with no user involvement.
    └────────────────────────────────────┘
 ```
 
-> With `RefreshTokenUsage = OneTimeOnly` (the default), each refresh returns a **new** refresh token. The old one is invalidated. This enables **refresh token rotation**, a key security measure.
+> With `RefreshTokenUsage = OneTimeOnly`, each refresh returns a **new** refresh token. The old one is invalidated. This enables **refresh token rotation**, a key security measure. Note: the default changed to `ReUse` in IdentityServer v7.0 — set `OneTimeOnly` explicitly for rotation.
 
 ### Deprecated / Discouraged Flows
 
@@ -180,7 +180,7 @@ var jwksUri = disco.JwksUri;
 
 ### JWKS (JSON Web Key Set)
 
-The JWKS endpoint (typically `/.well-known/openid-configuration/jwks`) publishes the public keys used to verify token signatures. APIs and clients fetch this to validate JWTs.
+The JWKS endpoint (advertised via the `jwks_uri` field in the discovery document; in Duende IdentityServer this is `/.well-known/openid-configuration/jwks`) publishes the public keys used to verify token signatures. APIs and clients fetch this to validate JWTs.
 
 **Key rotation:** When IdentityServer rotates signing keys, the new key appears in JWKS during the propagation period before it becomes the active signing key. Client libraries cache JWKS for 24 hours by default.
 
@@ -449,4 +449,4 @@ When a token exchange fails, check these in order:
 - [Resource Indicators (RFC 8707)](https://tools.ietf.org/html/rfc8707)
 - [DPoP (RFC 9449)](https://datatracker.ietf.org/doc/html/rfc9449)
 - [PAR (RFC 9126)](https://datatracker.ietf.org/doc/html/rfc9126)
-- [Duende IdentityServer Specs — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/overview/specs/)
+- [Duende IdentityServer Specs — Duende Docs](https://docs.duendesoftware.com/identityserver/overview/specs/)

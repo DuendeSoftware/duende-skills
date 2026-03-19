@@ -38,7 +38,7 @@ dotnet new install Duende.Templates
 dotnet new duende-is-empty -n IdentityServer
 ```
 
-The `isempty` template creates a minimal project with the IdentityServer NuGet package installed and basic configuration.
+The `duende-is-empty` template creates a minimal project with the IdentityServer NuGet package installed and basic configuration.
 
 ## Step 2: Register IdentityServer Services (DI)
 
@@ -181,7 +181,29 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 | `EmitStaticAudienceClaim`                   | `false`           | Static `aud` claim in `{issuer}/resources` format |
 | `EmitIssuerIdentificationResponseParameter` | `true`            | `iss` param on authorize responses (RFC 9207)     |
 
-## Step 5: ASP.NET Identity Integration
+## Step 5: Configure the License Key
+
+Duende IdentityServer requires a valid license for production use. Without a license key, IdentityServer runs in trial/community mode and will log a warning on startup.
+
+Set the license key via `options.LicenseKey` or via configuration:
+
+```csharp
+// Option 1: Inline in AddIdentityServer (not recommended for production — keep out of source control)
+builder.Services.AddIdentityServer(options =>
+{
+    options.LicenseKey = "YOUR_LICENSE_KEY";
+});
+
+// Option 2: From configuration (recommended)
+builder.Services.AddIdentityServer(options =>
+{
+    options.LicenseKey = builder.Configuration["IdentityServer:LicenseKey"];
+});
+```
+
+Store the key in a secret manager, environment variable, or key vault — never in source-controlled `appsettings.json`.
+
+## Step 6: ASP.NET Identity Integration
 
 To use ASP.NET Identity as the user store for IdentityServer, install the integration package and configure both systems:
 
@@ -205,11 +227,11 @@ builder.Services.AddIdentityServer()
 
 - **`IProfileService`** - uses `IUserClaimsPrincipalFactory` to add claims to tokens
 - **`IResourceOwnerPasswordValidator`** - supports the password grant type
-- **`IUserClaimsPrincipalFactory`** decorator - wraps any custom implementation registered before
+- **`IUserClaimsPrincipalFactory`** - a wrapper implementation that calls through to the previously registered factory and adds extra IdentityServer-specific claims
 
 ### Custom IUserClaimsPrincipalFactory
 
-If you register a custom `IUserClaimsPrincipalFactory` before calling `AddAspNetIdentity`, the IdentityServer implementation will use the decorator pattern to wrap yours:
+If you register a custom `IUserClaimsPrincipalFactory` before calling `AddAspNetIdentity`, the IdentityServer registration will resolve your factory and call through to it, layering additional claims on top:
 
 ```csharp
 // Program.cs

@@ -679,14 +679,19 @@ For dynamic tenant scenarios, implement `ICorsPolicyService`:
 // ✅ Custom CORS policy — validates against a database of allowed origins
 public sealed class TenantCorsPolicyService : ICorsPolicyService
 {
-    private readonly IClientStore _clients;
+    // NOTE: IClientStore only exposes FindClientByIdAsync(string clientId).
+    // There is no FindEnabledClientsAsync() method. To enumerate all clients for
+    // CORS origin checks you need a custom repository or direct DB query.
+    // The example below uses a hypothetical IClientRepository; replace with your
+    // own abstraction (e.g. direct EF Core DbContext query).
+    private readonly IClientRepository _clientRepository;
     private readonly ILogger<TenantCorsPolicyService> _logger;
 
     public TenantCorsPolicyService(
-        IClientStore clients,
+        IClientRepository clientRepository,
         ILogger<TenantCorsPolicyService> logger)
     {
-        _clients = clients;
+        _clientRepository = clientRepository;
         _logger = logger;
     }
 
@@ -695,7 +700,7 @@ public sealed class TenantCorsPolicyService : ICorsPolicyService
         // Normalize: strip trailing slash, lowercase
         var normalizedOrigin = origin.TrimEnd('/').ToLowerInvariant();
 
-        var allClients = await _clients.FindEnabledClientsAsync();
+        var allClients = await _clientRepository.GetAllClientsAsync();
         var isAllowed = allClients
             .SelectMany(c => c.AllowedCorsOrigins)
             .Select(o => o.TrimEnd('/').ToLowerInvariant())
@@ -829,8 +834,8 @@ Server-side sessions provide centralized session control with absolute lifetimes
 // ✅ Server-side session configuration with hardened lifetimes
 builder.Services.AddIdentityServer(options =>
 {
-    // Enable server-side sessions (Business/Enterprise edition)
-    options.ServerSideSessions.Enabled = true;
+    // NOTE: Server-side sessions are enabled by calling AddServerSideSessions()
+    // on the IdentityServer builder (see below) — there is no Enabled property here.
     options.ServerSideSessions.RemoveExpiredSessions = true;
     options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(10);
 
@@ -847,7 +852,7 @@ builder.Services.AddIdentityServer(options =>
     options.Authentication.CookieSlidingExpiration = false;
 });
 
-// Register a server-side session store (requires persistence store)
+// Enable server-side sessions (Business/Enterprise edition) — call on the builder
 idsvrBuilder.AddServerSideSessions();
 ```
 
@@ -896,8 +901,11 @@ builder.Services.AddIdentityServer(options =>
     // Nonce — OpenID Connect replay protection
     options.InputLengthRestrictions.Nonce = 300;         // default: 300
 
-    // Code challenge for PKCE
-    options.InputLengthRestrictions.CodeChallengeLength = 150; // default: 150
+    // Code challenge for PKCE — use the correct min/max length properties
+    // (verify exact property names against current Duende IdentityServer source,
+    //  e.g. CodeChallengeMinLength / CodeChallengeMaxLength)
+    options.InputLengthRestrictions.CodeChallengeMinLength = 43;  // RFC 7636 minimum
+    options.InputLengthRestrictions.CodeChallengeMaxLength = 128; // RFC 7636 maximum
 });
 ```
 

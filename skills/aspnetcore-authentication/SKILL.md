@@ -97,7 +97,7 @@ app.UseAuthorization();
 | `MapInboundClaims = false` | Prevents renaming `sub` → `http://schemas.xmlsoap.org/.../nameidentifier` | `true` (maps) |
 | `SaveTokens = true` | Stores access/refresh tokens in the cookie for later API calls | `false` |
 | `GetClaimsFromUserInfoEndpoint = true` | Fetches full profile claims from userinfo | `false` |
-| `ResponseType = "code"` | Authorization code flow (PKCE is automatic in .NET 7+) | `"code"` |
+| `ResponseType = "code"` | Authorization code flow (PKCE is automatic in .NET 7+) | `"code"` (.NET 7+; was `"code id_token"` in earlier versions) |
 
 ---
 
@@ -420,16 +420,21 @@ options.Scope.Add("api1");
 When `SaveTokens = true` and many claims are included, the cookie can exceed browser limits:
 
 ```csharp
-// ✅ Solution 1: Use server-side session storage
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
+// ✅ Solution 1: Use a server-side ITicketStore to move auth ticket out of the cookie.
+// Implement ITicketStore backed by IDistributedCache (e.g., Redis), then register it:
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+});
+builder.Services.AddSingleton<ITicketStore, RedisTicketStore>(); // your ITicketStore impl
 
 .AddCookie("Cookies", options =>
 {
-    options.SessionStore = new DistributedSessionStore(
-        builder.Services.BuildServiceProvider()
-            .GetRequiredService<IDistributedCache>());
+    // Wire the ITicketStore so the cookie only holds a session key, not the full ticket
+    options.SessionStore = app.Services.GetRequiredService<ITicketStore>();
 });
+// Note: ITicketStore is in Microsoft.AspNetCore.Authentication.Cookies namespace.
+// There is no built-in DistributedSessionStore class — you must implement ITicketStore.
 
 // ✅ Solution 2: Filter claims stored in the cookie
 .AddOpenIdConnect("oidc", options =>
@@ -460,5 +465,5 @@ Usually caused by the cookie not being set due to SameSite restrictions:
 - [ASP.NET Core Authentication — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/)
 - [OpenID Connect Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/social/)
 - [JWT Bearer Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/jwt-bearer/)
-- [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/v7/quickstarts/)
-- [OIDC Handler Events — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/fundamentals/openid-connect-events/)
+- [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/quickstarts/)
+- [OIDC Handler Events — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/openid-connect-events/)

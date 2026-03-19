@@ -139,7 +139,7 @@ app.Run();
 | --------------------- | ------------------------------------------------- | ------------------------------------------- |
 | Auth handler setup    | `ConfigureOpenIdConnect()` / `ConfigureCookies()` | Manual `AddCookie()` / `AddOpenIdConnect()` |
 | Management endpoints  | Auto-registered                                   | `MapBffManagementEndpoints()` required      |
-| Remote API token type | `RequiredTokenType.User`                          | `TokenType.User`                            |
+| Remote API token type | `.WithAccessToken(RequiredTokenType.User)`        | `.RequireAccessToken(TokenType.User)`       |
 
 ## BFF Management Endpoints
 
@@ -304,16 +304,20 @@ Remote APIs are external services that the BFF proxies requests to, attaching ac
 ### Simple Remote API Mapping
 
 ```csharp
-// Program.cs
-app.MapRemoteBffApiEndpoint("/api/external", "https://api.example.com/data")
-    .RequireAccessToken(RequiredTokenType.User); // V4
-    // .RequireAccessToken(TokenType.User);      // V3
+// Program.cs — V4 requires .AddRemoteApis() in service registration
+builder.Services.AddBff()
+    .AddRemoteApis();
+
+app.MapRemoteBffApiEndpoint("/api/external", new Uri("https://api.example.com/data"))
+    .WithAccessToken(RequiredTokenType.User); // V4
+    // .RequireAccessToken(TokenType.User);   // V3
 ```
 
 ### Token Attachment Modes
 
 | Mode           | Description                                            | Use Case                                                |
 | -------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| `None`         | No token attached; anonymous passthrough               | Public endpoints that don't require authentication      |
 | `User`         | Attach user access token; fail if not available        | User-specific API calls                                 |
 | `Client`       | Attach client credentials token                        | Machine-to-machine calls                                |
 | `UserOrClient` | Prefer user token, fall back to client token           | APIs that serve both authenticated and service contexts |
@@ -321,21 +325,27 @@ app.MapRemoteBffApiEndpoint("/api/external", "https://api.example.com/data")
 
 ```csharp
 // User token required
-app.MapRemoteBffApiEndpoint("/api/user-data", "https://api.example.com/user")
-    .RequireAccessToken(RequiredTokenType.User);
+app.MapRemoteBffApiEndpoint("/api/user-data", new Uri("https://api.example.com/user"))
+    .WithAccessToken(RequiredTokenType.User);
 
 // Client credentials
-app.MapRemoteBffApiEndpoint("/api/config", "https://api.example.com/config")
-    .RequireAccessToken(RequiredTokenType.Client);
+app.MapRemoteBffApiEndpoint("/api/config", new Uri("https://api.example.com/config"))
+    .WithAccessToken(RequiredTokenType.Client);
 
 // Prefer user, fall back to client
-app.MapRemoteBffApiEndpoint("/api/mixed", "https://api.example.com/mixed")
-    .RequireAccessToken(RequiredTokenType.UserOrClient);
+app.MapRemoteBffApiEndpoint("/api/mixed", new Uri("https://api.example.com/mixed"))
+    .WithAccessToken(RequiredTokenType.UserOrClient);
 ```
 
 ## YARP Integration
 
 For complex proxying scenarios, BFF integrates with YARP (Yet Another Reverse Proxy).
+
+Install the YARP integration package:
+
+```bash
+dotnet add package Duende.BFF.Yarp
+```
 
 ### Setup
 
@@ -420,6 +430,8 @@ When using JSON configuration, set BFF metadata on routes:
 
 ### YARP Code Configuration Extensions
 
+Note: YARP uses `TokenType` (not `RequiredTokenType` which is used by `MapRemoteBffApiEndpoint`).
+
 | Extension                         | Purpose                        |
 | --------------------------------- | ------------------------------ |
 | `WithAccessToken(TokenType.User)` | Attach user access token       |
@@ -499,7 +511,7 @@ builder.Services.AddBffBlazorClient(options =>
     options.RemoteApiPath = "/api/remote";
     options.Polling = new BffBlazorClientPollingOptions
     {
-        Interval = TimeSpan.FromMinutes(1)
+        Interval = TimeSpan.FromSeconds(30) // Default is 5 seconds
     };
 });
 
@@ -510,9 +522,9 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 
 ### BffBlazorServerOptions
 
-| Option            | Default    | Purpose                           |
-| ----------------- | ---------- | --------------------------------- |
-| `PollingInterval` | 60 seconds | How often to check session status |
+| Option            | Default   | Purpose                           |
+| ----------------- | --------- | --------------------------------- |
+| `PollingInterval` | 5 seconds | How often to check session status |
 
 ### BffBlazorClientOptions
 
@@ -520,18 +532,19 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 | ------------------ | ------------- | ------------------------------- |
 | `RemoteApiPath`    | `/api/remote` | Base path for remote API calls  |
 | `BaseAddress`      | (from host)   | Base address for API calls      |
-| `Polling.Interval` | 60 seconds    | Session status polling interval |
+| `Polling.Interval` | 5 seconds     | Session status polling interval |
 
 ## BffOptions Reference
 
-| Option                             | Default    | Purpose                                         |
-| ---------------------------------- | ---------- | ----------------------------------------------- |
-| `AntiForgeryHeaderName`            | `"X-CSRF"` | Name of the anti-forgery header                 |
-| `AntiForgeryHeaderValue`           | `"1"`      | Expected value of the anti-forgery header       |
-| `ManagementBasePath`               | `"/bff"`   | Base path for management endpoints              |
-| `RevokeRefreshTokenOnLogout`       | `true`     | Revoke refresh tokens on logout                 |
-| `AnonymousSessionResponse`         | (null)     | Response for `/bff/user` when anonymous         |
-| `BackchannelLogoutAllUserSessions` | `false`    | Logout all sessions on backchannel notification |
+| Option                             | Default     | Purpose                                         |
+| ---------------------------------- | ----------- | ----------------------------------------------- |
+| `AntiForgeryHeaderName`            | `"X-CSRF"`  | Name of the anti-forgery header                 |
+| `AntiForgeryHeaderValue`           | `"1"`       | Expected value of the anti-forgery header       |
+| `ManagementBasePath`               | `"/bff"`    | Base path for management endpoints              |
+| `RevokeRefreshTokenOnLogout`       | `true`      | Revoke refresh tokens on logout                 |
+| `AnonymousSessionResponse`         | (null)      | Response for `/bff/user` when anonymous         |
+| `BackchannelLogoutAllUserSessions` | `false`     | Logout all sessions on backchannel notification |
+| `SessionCleanupInterval`           | 10 minutes  | Interval for expired session cleanup            |
 
 ## Common Anti-Patterns
 
@@ -544,7 +557,7 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 - ❌ Hardcoding `/bff/logout` without the `sid` parameter
 - ✅ Use the `bff:logout_url` from the `/bff/user` response
 
-- ❌ Using `RequireAccessToken` without requesting `offline_access` scope
+- ❌ Using `WithAccessToken` without requesting `offline_access` scope
 - ✅ Request `offline_access` to enable token refresh; otherwise expired tokens cause failures
 
 - ❌ Calling `MapBffManagementEndpoints()` in V4 (unnecessary, auto-registered)

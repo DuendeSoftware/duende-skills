@@ -32,14 +32,16 @@ Duende IdentityServer is backed by two kinds of data, accessed through store int
 │  • API Scopes            │  • Refresh tokens                │
 │  • Identity Resources    │  • User consent                  │
 │  • Identity Providers    │  • Device codes                  │
-│  • CORS policies         │  • Signing keys                  │
-│                          │  • Server-side sessions           │
+│  • CORS policies         │  • Pushed auth. requests         │
+│                          │  • Signing keys                  │
+│                          │  • Server-side sessions          │
 ├──────────────────────────┼──────────────────────────────────┤
 │  ConfigurationDbContext   │  PersistedGrantDbContext          │
 │  (IClientStore,          │  (IPersistedGrantStore,           │
 │   IResourceStore,        │   IDeviceFlowStore,               │
-│   IIdentityProviderStore,│   IServerSideSessionStore,        │
-│   ICorsPolicyService)    │   ISigningKeyStore)               │
+│   IIdentityProviderStore,│   IPushedAuthorizationRequestStore,│
+│   ICorsPolicyService)    │   IServerSideSessionStore,        │
+│                          │   ISigningKeyStore)               │
 └──────────────────────────┴──────────────────────────────────┘
 ```
 
@@ -181,6 +183,7 @@ builder.Services.AddIdentityServer()
 | `EnableTokenCleanup`        | `bool`                            | `false` | Enable automatic cleanup of expired grants and pushed authorization requests |
 | `RemoveConsumedTokens`      | `bool`                            | `false` | Also remove consumed grants during cleanup (added >= 5.1)                    |
 | `TokenCleanupInterval`      | `int`                             | `3600`  | Cleanup interval in seconds                                                  |
+| `TokenCleanupBatchSize`     | `int`                             | `100`   | Number of expired tokens removed per cleanup cycle                           |
 | `ConsumedTokenCleanupDelay` | `int`                             | `0`     | Seconds to wait after consumption before cleaning up (added >= 6.3)          |
 | `FuzzTokenCleanupStart`     | `bool`                            | `true`  | Randomize first cleanup run to avoid multi-instance conflicts (added >= 7.0) |
 
@@ -190,6 +193,7 @@ builder.Services.AddIdentityServer()
 | ------------------------- | --------------------------------------------------------------------- |
 | `IPersistedGrantStore`    | Stores authorization codes, reference tokens, refresh tokens, consent |
 | `IDeviceFlowStore`        | Stores device authorization grants                                    |
+| `IPushedAuthorizationRequestStore` | Stores pushed authorization requests (PAR)                   |
 | `IServerSideSessionStore` | Stores server-side session data                                       |
 | `ISigningKeyStore`        | Stores dynamically created signing keys                               |
 
@@ -207,6 +211,7 @@ builder.Services.AddIdentityServer()
 
         options.EnableTokenCleanup = true;           // disabled by default
         options.TokenCleanupInterval = 3600;          // 1 hour (default)
+        options.TokenCleanupBatchSize = 100;          // tokens removed per cycle (default)
         options.RemoveConsumedTokens = true;          // also remove consumed tokens
         options.ConsumedTokenCleanupDelay = 300;      // wait 5 minutes after consumption
         options.FuzzTokenCleanupStart = true;         // randomize first run (default)
@@ -217,6 +222,7 @@ builder.Services.AddIdentityServer()
 
 - Token cleanup only removes grants that are beyond their `Expiration`.
 - Consumed grants (with `ConsumedTime` set) are only removed if `RemoveConsumedTokens = true`.
+- `TokenCleanupBatchSize` controls how many expired tokens are deleted per cleanup cycle (default: 100). Tune this for large grant tables to avoid long-running delete transactions.
 - `ConsumedTokenCleanupDelay` controls how long consumed tokens are kept after consumption — useful when you have a custom `IRefreshTokenService` that accepts recently consumed tokens.
 - `FuzzTokenCleanupStart` (v7.0+) randomizes the first cleanup run to reduce update conflicts when multiple instances run the cleanup simultaneously.
 

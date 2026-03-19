@@ -400,7 +400,7 @@ public sealed class EncryptedHybridCacheSerializer : IHybridCacheSerializer<Clie
 
 ```csharp
 // ✅ Inject a custom HybridCache only for AccessTokenManagement (uses service keys)
-services.AddKeyedSingleton<IHybridCache>(
+services.AddKeyedSingleton<HybridCache>(
     ServiceProviderKeys.ClientCredentialsTokenCache,
     new MyCustomCacheImplementation());
 ```

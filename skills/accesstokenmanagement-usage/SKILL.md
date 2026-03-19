@@ -161,15 +161,25 @@ dotnet add package Duende.AccessTokenManagement
 ```
 
 ```csharp
-// Program.cs
+// Program.cs (v4 — strongly typed wrappers)
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
+    .AddClient(ClientCredentialsClientName.Parse("api-client"), client =>
     {
-        client.TokenEndpoint = "https://identity.example.com/connect/token";
-        client.ClientId = "service_app";
-        client.ClientSecret = "secret";
-        client.Scope = "api1";
+        client.TokenEndpoint = new Uri("https://identity.example.com/connect/token");
+        client.ClientId = ClientId.Parse("service_app");
+        client.ClientSecret = ClientSecret.Parse("secret");
+        client.Scope = Scope.Parse("api1");
     });
+
+// v3 — plain strings (no Parse wrappers, string-based AddClient overload)
+// builder.Services.AddClientCredentialsTokenManagement()
+//     .AddClient("api-client", client =>
+//     {
+//         client.TokenEndpoint = "https://identity.example.com/connect/token";
+//         client.ClientId = "service_app";
+//         client.ClientSecret = "secret";
+//         client.Scope = "api1";
+//     });
 ```
 
 ### Using Client Credentials Tokens with HttpClient
@@ -177,8 +187,9 @@ builder.Services.AddClientCredentialsTokenManagement()
 **Named HTTP client:**
 
 ```csharp
-// Program.cs
-builder.Services.AddClientCredentialsHttpClient("api-client", "api-client",
+// Program.cs (v4)
+builder.Services.AddClientCredentialsHttpClient("api-client",
+    ClientCredentialsClientName.Parse("api-client"),
     configureClient: client =>
     {
         client.BaseAddress = new Uri("https://api.example.com");
@@ -186,33 +197,40 @@ builder.Services.AddClientCredentialsHttpClient("api-client", "api-client",
 
 // The first parameter is the HTTP client name
 // The second parameter is the token client name (from AddClient)
+
+// v3 — second parameter is a plain string:
+// builder.Services.AddClientCredentialsHttpClient("api-client", "api-client", ...);
 ```
 
 **Typed HTTP client:**
 
 ```csharp
-// Program.cs
+// Program.cs (v4)
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri("https://api.example.com");
 })
-.AddClientCredentialsTokenHandler("api-client");
+.AddClientCredentialsTokenHandler(ClientCredentialsClientName.Parse("api-client"));
+
+// v3 — plain string:
+// .AddClientCredentialsTokenHandler("api-client");
 ```
 
 ### Worker Service / BackgroundService Pattern
 
 ```csharp
-// Program.cs
+// Program.cs (v4)
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
+    .AddClient(ClientCredentialsClientName.Parse("api-client"), client =>
     {
-        client.TokenEndpoint = "https://identity.example.com/connect/token";
-        client.ClientId = "worker";
-        client.ClientSecret = "secret";
-        client.Scope = "api1";
+        client.TokenEndpoint = new Uri("https://identity.example.com/connect/token");
+        client.ClientId = ClientId.Parse("worker");
+        client.ClientSecret = ClientSecret.Parse("secret");
+        client.Scope = Scope.Parse("api1");
     });
 
-builder.Services.AddClientCredentialsHttpClient("api-client", "api-client",
+builder.Services.AddClientCredentialsHttpClient("api-client",
+    ClientCredentialsClientName.Parse("api-client"),
     configureClient: client =>
     {
         client.BaseAddress = new Uri("https://api.example.com");
@@ -246,47 +264,42 @@ public class DataSyncWorker : BackgroundService
 `AddClientCredentialsHttpClient` in V4 includes an automatic retry handler that retries on `401` responses (forcing a fresh token). You can also add this manually:
 
 ```csharp
+// v4
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri("https://api.example.com");
 })
-.AddClientCredentialsTokenHandler("api-client")
-.AddDefaultAccessTokenResiliency();
+.AddDefaultAccessTokenResiliency()
+.AddClientCredentialsTokenHandler(ClientCredentialsClientName.Parse("api-client"));
+
+// v3 — plain string:
+// .AddClientCredentialsTokenHandler("api-client");
 ```
 
 ## Token Caching
 
 ### Cache Lifetime Buffer
 
-Tokens are cached until they expire, minus a `CacheLifetimeBuffer` to ensure the token is refreshed before it actually expires:
+Tokens are cached until they expire, minus a `CacheLifetimeBuffer` to ensure the token is refreshed before it actually expires. This option is set on `ClientCredentialsTokenManagementOptions`, not on individual clients:
 
 ```csharp
-// User token management
-builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
+// Client credentials cache options
+builder.Services.AddClientCredentialsTokenManagement(options =>
 {
     options.CacheLifetimeBuffer = 120; // seconds (default: 60)
+    options.CacheKeyPrefix = "myapp:tokens:"; // custom prefix for all cache keys
 });
-
-// Client credentials
-builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
-    {
-        client.TokenEndpoint = "https://identity.example.com/connect/token";
-        client.ClientId = "service";
-        client.ClientSecret = "secret";
-        client.CacheLifetimeBuffer = 120; // per-client override
-    });
 ```
+
+> `CacheLifetimeBuffer` and `CacheKeyPrefix` are global options — they apply to all client credentials token clients.
 
 ### V4: HybridCache
 
-V4 uses `Microsoft.Extensions.Caching.Hybrid.HybridCache` for token caching. Register a cache implementation:
+V4 uses `Microsoft.Extensions.Caching.Hybrid.HybridCache` for token caching. It is two-tier: in-memory L1 + optional remote L2. No explicit registration is required for the default in-memory tier.
 
 ```csharp
-builder.Services.AddHybridCache(); // In-memory
-// Or distributed:
+// Add a distributed remote cache (e.g., Redis) — HybridCache picks it up automatically as L2
 // builder.Services.AddStackExchangeRedisCache(options => { ... });
-// builder.Services.AddHybridCache();
 ```
 
 ### V3: IDistributedCache
@@ -297,16 +310,6 @@ V3 uses `IDistributedCache`:
 builder.Services.AddDistributedMemoryCache(); // Development
 // Or for production:
 // builder.Services.AddStackExchangeRedisCache(options => { ... });
-```
-
-### Cache Key Prefix
-
-```csharp
-builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
-    {
-        client.CacheKeyPrefix = "myapp:tokens:"; // custom prefix
-    });
 ```
 
 ### Custom Cache Key Generation (V4)
@@ -349,11 +352,11 @@ builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
 
 ```csharp
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
+    .AddClient(ClientCredentialsClientName.Parse("api-client"), client =>
     {
-        client.TokenEndpoint = "https://identity.example.com/connect/token";
-        client.ClientId = "service";
-        client.ClientSecret = "secret";
+        client.TokenEndpoint = new Uri("https://identity.example.com/connect/token");
+        client.ClientId = ClientId.Parse("service");
+        client.ClientSecret = ClientSecret.Parse("secret");
         client.DPoPJsonWebKey = """
         {
             "kty": "EC",
@@ -543,47 +546,99 @@ builder.Services.AddSingleton<IClientAssertionService, JwtClientAssertionService
 
 ### ITokenRequestCustomizer (V4)
 
-Customize token requests dynamically, useful for multi-tenant scenarios:
+Customize token requests dynamically, useful for multi-tenant scenarios. The customizer modifies `TokenRequestParameters` based on the outgoing HTTP request context:
 
 ```csharp
 public class TenantTokenRequestCustomizer : ITokenRequestCustomizer
 {
-    private readonly ITenantProvider _tenantProvider;
+    private readonly ITenantResolver _tenantResolver;
+    private readonly ITenantConfigStore _tenantConfigStore;
 
-    public TenantTokenRequestCustomizer(ITenantProvider tenantProvider)
+    public TenantTokenRequestCustomizer(
+        ITenantResolver tenantResolver, ITenantConfigStore tenantConfigStore)
     {
-        _tenantProvider = tenantProvider;
+        _tenantResolver = tenantResolver;
+        _tenantConfigStore = tenantConfigStore;
     }
 
-    public Task CustomizeTokenRequestAsync(TokenRequestContext context)
+    public async Task<TokenRequestParameters> Customize(
+        HttpRequestMessage httpRequest,
+        TokenRequestParameters baseParameters,
+        CancellationToken cancellationToken)
     {
-        var tenant = _tenantProvider.GetCurrentTenant();
-        context.RequestParameters["acr_values"] = $"tenant:{tenant.Id}";
-        return Task.CompletedTask;
+        var tenantId = await _tenantResolver.GetTenantIdAsync(httpRequest, cancellationToken);
+        var tenantConfig = await _tenantConfigStore.GetConfigurationAsync(tenantId, cancellationToken);
+
+        return baseParameters with
+        {
+            Resource = Resource.Parse(tenantConfig.ApiResource),
+            Scope = Scope.Parse(tenantConfig.RequiredScopes),
+        };
     }
 }
 ```
 
-### ITokenRetriever (V4)
-
-Replace the default token retrieval logic entirely:
+Register the customizer by passing it to the `Add*Handler` methods:
 
 ```csharp
-public class CustomTokenRetriever : AccessTokenRequestHandler.ITokenRetriever
+var customizer = new TenantTokenRequestCustomizer(tenantResolver, tenantConfigStore);
+
+services.AddHttpClient("client-credentials-http-client")
+    .AddClientCredentialsTokenHandler(customizer,
+        ClientCredentialsClientName.Parse("api-client"));
+
+services.AddHttpClient("user-access-http-client")
+    .AddUserAccessTokenHandler(customizer);
+```
+
+### ITokenRetriever (V4)
+
+Replace the default token retrieval logic entirely. Implement `AccessTokenRequestHandler.ITokenRetriever` and wire it into an `AccessTokenRequestHandler`:
+
+```csharp
+public class CustomTokenRetriever(
+    IClientCredentialsTokenManager clientCredentialsTokenManager,
+    ClientCredentialsClientName clientName) : AccessTokenRequestHandler.ITokenRetriever
 {
-    public Task<ClientCredentialsToken> GetTokenAsync(
-        string clientName,
-        TokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default)
+    public async Task<TokenResult<AccessTokenRequestHandler.IToken>> GetTokenAsync(
+        HttpRequestMessage request, CancellationToken ct)
     {
-        // Custom token retrieval logic (e.g., from a vault, external service)
-        return Task.FromResult(new ClientCredentialsToken
+        var param = new TokenRequestParameters
         {
-            AccessToken = "...",
-            Expiration = DateTimeOffset.UtcNow.AddHours(1)
-        });
+            ForceTokenRenewal = request.GetForceRenewal() // for retry policies
+        };
+
+        var result = await clientCredentialsTokenManager
+            .GetAccessTokenAsync(clientName, param, ct);
+
+        if (!result.Succeeded)
+        {
+            return result.FailedResult;
+        }
+
+        return TokenResult.Success(result.Token);
     }
 }
+```
+
+Register via `AddHttpMessageHandler`:
+
+```csharp
+services.AddHttpClient<ApiClient>()
+    .AddDefaultAccessTokenResiliency()
+    .AddHttpMessageHandler(provider =>
+    {
+        var retriever = new CustomTokenRetriever(...);
+        var logger = provider.GetRequiredService<ILogger<AccessTokenRequestHandler>>();
+        var dPoPProofService = provider.GetRequiredService<IDPoPProofService>();
+        var dPoPNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
+
+        return new AccessTokenRequestHandler(
+            tokenRetriever: retriever,
+            dPoPNonceStore: dPoPNonceStore,
+            dPoPProofService: dPoPProofService,
+            logger: logger);
+    });
 ```
 
 ## Complete Example: Web App with User and Client Credentials
@@ -619,17 +674,18 @@ builder.Services.AddUserAccessTokenHttpClient("user-api",
         client.BaseAddress = new Uri("https://api.example.com");
     });
 
-// Client credentials for service-to-service
+// Client credentials for service-to-service (v4 types)
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("service-client", client =>
+    .AddClient(ClientCredentialsClientName.Parse("service-client"), client =>
     {
-        client.TokenEndpoint = "https://identity.example.com/connect/token";
-        client.ClientId = "web_app_service";
-        client.ClientSecret = "service_secret";
-        client.Scope = "backend.api";
+        client.TokenEndpoint = new Uri("https://identity.example.com/connect/token");
+        client.ClientId = ClientId.Parse("web_app_service");
+        client.ClientSecret = ClientSecret.Parse("service_secret");
+        client.Scope = Scope.Parse("backend.api");
     });
 
-builder.Services.AddClientCredentialsHttpClient("service-api", "service-client",
+builder.Services.AddClientCredentialsHttpClient("service-api",
+    ClientCredentialsClientName.Parse("service-client"),
     configureClient: client =>
     {
         client.BaseAddress = new Uri("https://backend.example.com");
@@ -695,4 +751,4 @@ app.Run();
 
 7. **Token endpoint vs authority**: For client credentials, you can specify either `TokenEndpoint` (explicit URL) or the library can discover it from the OIDC discovery document. Do not set both unless you have a specific reason.
 
-8. **Resiliency handler ordering**: The `AddDefaultAccessTokenResiliency()` handler retries on `401`. Ensure it is added after the token handler in the delegating handler chain (which is the default when using the fluent API).
+8. **Resiliency handler ordering**: The `AddDefaultAccessTokenResiliency()` handler retries on `401`. Ensure it is added before the token handler in the delegating handler chain so it can intercept the response. This is the default order when using the fluent API (e.g., `.AddDefaultAccessTokenResiliency().AddClientCredentialsTokenHandler(...)`).

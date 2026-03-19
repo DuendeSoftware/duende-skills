@@ -210,7 +210,7 @@ Prefer schema-based formats over reflection-based:
 | Newtonsoft.Json | Reflection-based | Poor - type names in payload |
 | BinaryFormatter | Reflection-based | Terrible - never use |
 
-See `dotnet/serialization` skill for details.
+Prefer schema-based serializers with explicit contracts for stable wire compatibility.
 
 ---
 

@@ -206,6 +206,8 @@ builder.Services.AddIdentityServer()
 
 **Custom store (production):**
 
+> **Version Note:** `CancellationToken` parameters on store interfaces were added in Duende IdentityServer v8. In v7, omit the `CancellationToken` parameter.
+
 ```csharp
 builder.Services.AddIdentityServer()
     .AddSaml()

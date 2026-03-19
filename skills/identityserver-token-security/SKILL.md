@@ -336,8 +336,8 @@ builder.Services.AddIdentityServer(options =>
     // Require PAR globally
     options.PushedAuthorization.Required = false; // default
 
-    // Lifetime of pushed authorization requests (default: 10 minutes)
-    options.PushedAuthorization.Lifetime = TimeSpan.FromMinutes(10);
+    // Lifetime of pushed authorization requests in seconds (default: 600 = 10 minutes)
+    options.PushedAuthorization.Lifetime = 600; // seconds (int, not TimeSpan)
 
     // Allow redirect URIs not pre-registered (default: false)
     options.PushedAuthorization.AllowUnregisteredPushedRedirectUris = false;
@@ -391,7 +391,7 @@ builder.Services.AddIdentityServer(options =>
 | Property                                                  | Default    | Description                      |
 | --------------------------------------------------------- | ---------- | -------------------------------- |
 | `PushedAuthorization.Required`                            | `false`    | Require PAR globally             |
-| `PushedAuthorization.Lifetime`                            | 10 minutes | PAR request lifetime             |
+| `PushedAuthorization.Lifetime`                            | `600` (seconds, `int`) | PAR request lifetime             |
 | `PushedAuthorization.AllowUnregisteredPushedRedirectUris` | `false`    | Allow unregistered redirect URIs |
 | `Client.RequirePushedAuthorization`                       | `false`    | Per-client PAR requirement       |
 | `Client.PushedAuthorizationLifetime`                      | `null`     | Per-client lifetime override     |
@@ -477,6 +477,8 @@ The FAPI 2.0 Security Profile is a set of OAuth security best practices for high
 | DPoP server-provided nonce                       | Configure                              | Set `DPoPValidationMode`                            |
 | Authorization code max 60 seconds                | Configure                              | Set `AuthorizationCodeLifetime = 60`                |
 | JWT clock skew max 10 seconds future             | Configure                              | `JwtValidationClockSkew = TimeSpan.FromSeconds(10)` |
+| PAR required                                     | Configure per-client or globally       | Set `RequirePushedAuthorization = true` on client or `PushedAuthorization.Required = true` globally |
+| PKCE required                                    | Configure per-client                   | Set `RequirePkce = true` on client (strongly recommended) |
 
 ### FAPI 2.0 Server Setup
 

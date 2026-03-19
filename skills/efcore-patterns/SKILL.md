@@ -418,19 +418,27 @@ await _db.Orders
 
 ## Common Pitfalls
 
-### 1. Forgetting to Update When NoTracking
+### 1. Inconsistent Tracking Between Queries and FindAsync
+
+With global `QueryTrackingBehavior.NoTracking`, LINQ queries return untracked entities, but `FindAsync()` **always** tracks — it operates on the identity map first and attaches results to the change tracker regardless of the global setting.
 
 ```csharp
-// ❌ Silent failure - entity not tracked
-var customer = await _db.Customers.FindAsync(id);
+// ❌ Silent failure - LINQ query returns untracked entity under global NoTracking
+var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id);
 customer.Name = "New Name";
-await _db.SaveChangesAsync(); // Does nothing!
+await _db.SaveChangesAsync(); // Does nothing! Entity is untracked.
 
-// ✅ Explicit update
-var customer = await _db.Customers.FindAsync(id);
+// ✅ Explicit update required for LINQ queries under global NoTracking
+var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id);
 customer.Name = "New Name";
 _db.Customers.Update(customer);
 await _db.SaveChangesAsync();
+
+// ⚠️ FindAsync() ALWAYS tracks, even with global QueryTrackingBehavior.NoTracking
+// This WILL persist changes — which may be surprising if you expect NoTracking behavior
+var customer = await _db.Customers.FindAsync(id);
+customer.Name = "New Name";
+await _db.SaveChangesAsync(); // Changes ARE saved — FindAsync bypasses global NoTracking!
 ```
 
 ### 2. N+1 Query Problem

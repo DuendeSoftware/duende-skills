@@ -244,13 +244,13 @@ public class DocumentAuthorizationHandler
     {
         var userId = context.User.FindFirst("sub")?.Value;
 
-        if (requirement.Name == Operations.Read)
+        if (requirement == Operations.Read)
         {
             // Anyone in the same department can read
             if (context.User.HasClaim("department", resource.Department))
                 context.Succeed(requirement);
         }
-        else if (requirement.Name == Operations.Edit)
+        else if (requirement == Operations.Edit)
         {
             // Only the owner can edit
             if (resource.OwnerId == userId)
@@ -263,8 +263,8 @@ public class DocumentAuthorizationHandler
 
 public static class Operations
 {
-    public static readonly string Read = nameof(Read);
-    public static readonly string Edit = nameof(Edit);
+    public static readonly OperationAuthorizationRequirement Read = new() { Name = nameof(Read) };
+    public static readonly OperationAuthorizationRequirement Edit = new() { Name = nameof(Edit) };
 }
 ```
 
@@ -291,7 +291,7 @@ public class DocumentsController : ControllerBase
         var result = await _authz.AuthorizeAsync(
             User,
             document,
-            new OperationAuthorizationRequirement { Name = Operations.Read });
+            Operations.Read);
 
         if (!result.Succeeded) return Forbid();
 
@@ -423,12 +423,14 @@ builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
 
 ### 3. Calling context.Fail() in Handlers
 
+`context.Fail()` **actively denies** authorization regardless of what other handlers say — it's a hard veto. Not calling `context.Succeed()` simply means "I have no opinion"; other handlers can still satisfy the requirement.
+
 ```csharp
-// ❌ WRONG — Fail() prevents other handlers from succeeding
+// ❌ WRONG — Fail() is a hard veto: it denies even if another handler would succeed
 protected override Task HandleRequirementAsync(...)
 {
     if (!context.User.HasClaim("scope", "api.read"))
-        context.Fail(); // Blocks all other handlers!
+        context.Fail(); // Forces denial — blocks all other handlers permanently!
     return Task.CompletedTask;
 }
 
@@ -437,10 +439,12 @@ protected override Task HandleRequirementAsync(...)
 {
     if (context.User.HasClaim("scope", "api.read"))
         context.Succeed(requirement);
-    // If this handler can't satisfy it, another handler might
+    // Not calling Succeed() means "I don't know" — other handlers may still succeed
     return Task.CompletedTask;
 }
 ```
+
+> Only call `context.Fail()` when you need to **guarantee** denial even if other handlers would approve (e.g., a security blocklist check). In most cases, simply omit the `Succeed()` call.
 
 ### 4. Ignoring Client vs User Authorization
 
@@ -464,5 +468,5 @@ options.AddPolicy("write", p =>
 - [Authorization in ASP.NET Core — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/introduction)
 - [Policy-Based Authorization — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/policies)
 - [Resource-Based Authorization — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/resourcebased)
-- [Protecting APIs — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/apis/)
-- [API Authorization — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/apis/aspnetcore/authorization/)
+- [Protecting APIs — Duende Docs](https://docs.duendesoftware.com/identityserver/latest/apis/)
+- [API Authorization — Duende Docs](https://docs.duendesoftware.com/identityserver/latest/apis/aspnetcore/authorization/)

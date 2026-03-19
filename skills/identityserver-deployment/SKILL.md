@@ -303,7 +303,7 @@ openTelemetry.ConfigureResource(r => r
     .AddService(builder.Environment.ApplicationName));
 
 openTelemetry.WithMetrics(m => m
-    .AddMeter(Telemetry.ServiceName)
+    .AddMeter("Duende.IdentityServer")   // Telemetry.ServiceName == "Duende.IdentityServer"
     .AddPrometheusExporter());
 
 openTelemetry.WithTracing(t => t
@@ -413,6 +413,7 @@ builder.Services.AddIdentityServer(options =>
     options.Events.RaiseSuccessEvents = true;
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseErrorEvents = true;
+    options.Events.RaiseInformationEvents = true;
 });
 ```
 
