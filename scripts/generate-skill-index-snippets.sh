@@ -33,7 +33,6 @@ declare -a identity=()
 declare -a oauth=()
 declare -a aspnetcore=()
 declare -a testing=()
-declare -a dotnet=()
 
 while IFS= read -r skill_dir; do
   name="$(skill_name_from_dir "$skill_dir")"
@@ -41,8 +40,7 @@ while IFS= read -r skill_dir; do
     ./skills/identityserver-*|./skills/duende-*|./skills/identity-security-*) identity+=("$name") ;;
     ./skills/oauth-*|./skills/token-*|./skills/claims-*) oauth+=("$name") ;;
     ./skills/aspnetcore-*|./skills/aspire-*) aspnetcore+=("$name") ;;
-    ./skills/identity-testing-*|./skills/playwright-*|./skills/snapshot-*) testing+=("$name") ;;
-    ./skills/project-structure|./skills/local-tools|./skills/package-management) dotnet+=("$name") ;;
+    ./skills/identity-testing-*) testing+=("$name") ;;
     *) ;; # ignore
   esac
 done < <(jq -r '.skills[]' "$PLUGIN_JSON")
@@ -65,7 +63,6 @@ compressed="$(cat <<EOF
 |oauth:{$(join_csv "${oauth[@]}")}
 |aspnetcore:{$(join_csv "${aspnetcore[@]}")}
 |testing:{$(join_csv "${testing[@]}")}
-|dotnet:{$(join_csv "${dotnet[@]}")}
 |agents:{$(join_csv "${agents[@]}")}
 EOF
 )"

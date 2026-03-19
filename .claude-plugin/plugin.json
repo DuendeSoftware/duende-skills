@@ -20,12 +20,7 @@
     "./skills/identityserver-dcr",
     "./skills/identityserver-saml",
     "./skills/identityserver-stores",
-    "./skills/local-tools",
     "./skills/oauth-oidc-protocols",
-    "./skills/package-management",
-    "./skills/playwright-blazor",
-    "./skills/project-structure",
-    "./skills/snapshot-testing",
     "./skills/token-management"
   ],
   "agents": [

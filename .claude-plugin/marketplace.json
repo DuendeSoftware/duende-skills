@@ -11,7 +11,7 @@
       "name": "identity-skills",
       "source": "./",
       "version": "0.1.0",
-      "description": "Duende IdentityServer toolkit with 28 skills and 5 specialized agents covering OAuth/OIDC, token management, ASP.NET Core auth, and identity security patterns"
+      "description": "Duende IdentityServer toolkit with 14 skills and 5 specialized agents covering OAuth/OIDC, token management, ASP.NET Core auth, and identity security patterns"
     }
   ]
 }

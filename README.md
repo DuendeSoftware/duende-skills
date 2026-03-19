@@ -1,6 +1,6 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **19 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **14 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
 
 > **Tip: 📦 Use with [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**
 >
@@ -98,18 +98,8 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 | Skill | Description |
 |-------|-------------|
 | `aspire-integration-testing` | Integration testing with Aspire — DistributedApplication, OAuth test patterns, auth bypass strategies |
-| `playwright-blazor` | End-to-end testing with Playwright for Blazor — authentication flows, OAuth redirect mocking |
-| `snapshot-testing` | Snapshot testing with Verify — IdentityServer protocol response snapshots, token structure validation |
 
-### .NET Ecosystem (Identity-Focused)
-
-| Skill | Description |
-|-------|-------------|
-| `project-structure` | Solution and project structure — IdentityServer solution layout, Duende package grouping, MSBuild |
-| `local-tools` | Local .NET tools — dotnet-ef migrations for IdentityServer stores, dotnet user-jwts, CSharpier |
-| `package-management` | NuGet package management — Duende package version variables, Central Package Management |
-
-> **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, database performance, Aspire configuration, dependency injection, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
+> **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, database performance, Aspire configuration, dependency injection, Playwright testing, snapshot testing, project structure, package management, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
 
 ---
 
@@ -153,7 +143,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (19 skills total)
+│   └── ... (14 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh
@@ -192,8 +182,7 @@ Based on [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), Copyri
 |identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-dcr,identityserver-saml,identityserver-stores}
 |oauth:{claims-authorization,oauth-oidc-protocols,token-management}
 |aspnetcore:{aspire-integration-testing,aspnetcore-authentication,aspnetcore-authorization}
-|testing:{identity-testing-patterns,playwright-blazor-testing,snapshot-testing}
-|dotnet:{dotnet-local-tools,package-management,dotnet-project-structure}
+|testing:{identity-testing-patterns}
 |agents:{dotnet-benchmark-designer,dotnet-concurrency-specialist,dotnet-performance-analyst,identity-server-specialist,oauth-oidc-specialist}
 ```
 <!-- END IDENTITY-SKILLS COMPRESSED INDEX -->

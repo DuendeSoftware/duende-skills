@@ -40,9 +40,7 @@ Skills use a flat directory structure with prefixes for domain-specific skills:
 - `oauth-*` — OAuth 2.0 / OpenID Connect protocol-level skills
 - `csharp-*` — C# language skills
 - `aspire-*` — .NET Aspire skills
-- `microsoft-extensions-*` — Microsoft.Extensions.* packages
-- `playwright-*` — Playwright-specific skills
-- No prefix for general .NET skills (e.g., `efcore-patterns`, `project-structure`)
+- No prefix for general .NET skills (e.g., `efcore-patterns`)
 
 ## File Formats
 
