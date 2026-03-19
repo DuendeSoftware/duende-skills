@@ -368,6 +368,14 @@ Services receive `OTEL_EXPORTER_OTLP_ENDPOINT` automatically, sending telemetry 
 
 ---
 
+## Related Skills
+
+- `aspire-configuration` — AppHost-to-app configuration mapping
+- `aspire-integration-testing` — test fixtures for Aspire apps
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost
+
+---
+
 ## Resources
 
 - **Aspire Service Defaults**: https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/service-defaults

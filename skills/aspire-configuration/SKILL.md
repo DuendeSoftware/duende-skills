@@ -148,6 +148,7 @@ configuration overrides into `DistributedApplicationTestingBuilder`.
 
 - `aspire-service-defaults`
 - `aspire-integration-testing`
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost
 
 ---
 

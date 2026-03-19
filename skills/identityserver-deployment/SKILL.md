@@ -525,3 +525,11 @@ Events work well with structured logging stores like ELK, Seq, or Splunk.
 7. **Cookie SameSite failures behind proxy**: If the proxy strips HTTPS, cookies won't get the `Secure` attribute, causing `SameSite=None` cookies to be rejected by browsers. Fix the proxy configuration first.
 
 8. **OpenTelemetry trace source selection**: In production, subscribing to all trace sources (`Stores`, `Validation`, etc.) can generate excessive trace data. Start with `Basic` and add more sources as needed for troubleshooting.
+
+---
+
+## Related Skills
+
+- `identityserver-hosting-setup` — DI registration and middleware pipeline
+- `identityserver-data-storage` — EF Core stores, migrations, token cleanup
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost

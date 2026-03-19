@@ -325,3 +325,11 @@ These are completely separate:
 6. **Shared hosting with APIs/clients** - Co-hosting IdentityServer with other applications increases the attack surface. Use a dedicated host.
 
 7. **Not calling `AddAspNetIdentity` after `AddIdentity`** - When using ASP.NET Identity, you must call both. `AddIdentity` configures ASP.NET Identity; `AddAspNetIdentity` bridges it to IdentityServer.
+
+---
+
+## Related Skills
+
+- `identityserver-configuration` — client definitions, resources, scopes
+- `identityserver-deployment` — production deployment, data protection, health checks
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost

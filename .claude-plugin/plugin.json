@@ -24,6 +24,7 @@
     "./skills/efcore-patterns",
     "./skills/identity-security-hardening",
     "./skills/identity-testing-patterns",
+    "./skills/identityserver-aspire",
     "./skills/identityserver-configuration",
     "./skills/identityserver-stores",
     "./skills/local-tools",

@@ -438,3 +438,11 @@ builder.Services.AddIdentityServer()
 5. **Schema changes are your responsibility**: When upgrading IdentityServer versions, check for schema changes and apply appropriate migrations. Duende does not auto-migrate.
 
 6. **No built-in admin UI**: IdentityServer does not include an administrative interface for managing configuration data. You need third-party tools or custom implementations.
+
+---
+
+## Related Skills
+
+- `identityserver-configuration` — client definitions, resources, scopes
+- `identityserver-deployment` — production deployment, data protection, health checks
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost

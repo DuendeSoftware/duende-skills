@@ -1,6 +1,6 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **27 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **28 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
 
 ## Installation
 
@@ -67,6 +67,7 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 |-------|-------------|
 | `identityserver-configuration` | IdentityServer host configuration — clients, resources, scopes, signing credentials, server-side sessions |
 | `identityserver-stores` | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations |
+| `identityserver-aspire` | Aspire AppHost orchestration — dependency graphs, authority URL wiring, health checks, multi-instance |
 | `oauth-oidc-protocols` | OAuth 2.0 and OpenID Connect fundamentals — flows, PKCE, discovery, JWKS, introspection |
 | `duende-bff` | Backend-for-Frontend security framework for SPAs — session management, API proxying, token management |
 | `token-management` | Token lifecycle with Duende.AccessTokenManagement — caching, refresh, DPoP, HttpClientFactory integration |
@@ -165,7 +166,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (27 skills total)
+│   └── ... (28 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh
@@ -195,4 +196,18 @@ MIT License — Copyright (c) 2026 Duende Software.
 Based on [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), Copyright (c) 2025 Aaron Stannard.
 
 <!-- BEGIN IDENTITY-SKILLS COMPRESSED INDEX -->
+```markdown
+[identity-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any identity/auth/.NET work.
+|flow:{skim repo patterns -> consult identity-skills by name -> implement smallest-change -> note conflicts}
+|route:
+|identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-stores}
+|oauth:{claims-authorization,oauth-oidc-protocols,token-management}
+|aspnetcore:{aspire-configuration,aspire-integration-testing,aspire-service-defaults,aspnetcore-authentication,aspnetcore-authorization}
+|csharp:{api-design,modern-csharp-coding-standards,csharp-concurrency-patterns,type-design-performance}
+|data:{database-performance,efcore-patterns}
+|di-config:{microsoft-extensions-configuration,dependency-injection-patterns}
+|testing:{identity-testing-patterns,playwright-blazor-testing,snapshot-testing}
+|dotnet:{dotnet-devcert-trust,dotnet-local-tools,package-management,dotnet-project-structure}
+|agents:{dotnet-benchmark-designer,dotnet-concurrency-specialist,dotnet-performance-analyst,identity-server-specialist,oauth-oidc-specialist}
+```
 <!-- END IDENTITY-SKILLS COMPRESSED INDEX -->
