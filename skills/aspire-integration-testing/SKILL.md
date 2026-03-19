@@ -220,6 +220,4 @@ See [ci-and-tooling.md](ci-and-tooling.md) for GitHub Actions setup, custom reso
 
 ## Related Skills
 
-- `aspire-configuration` — AppHost-to-app configuration mapping
-- `aspire-service-defaults` — OpenTelemetry and health check setup
 - `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost

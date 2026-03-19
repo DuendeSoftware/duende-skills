@@ -27,8 +27,6 @@ Use this skill when:
 
 ## Related Skills
 
-- `aspire-configuration` — general AppHost-to-app configuration mapping pattern
-- `aspire-service-defaults` — OpenTelemetry and health check setup
 - `aspire-integration-testing` — test fixtures for Aspire apps
 - `identityserver-hosting-setup` — IdentityServer DI and middleware pipeline
 - `identityserver-deployment` — production deployment, data protection, health check implementations

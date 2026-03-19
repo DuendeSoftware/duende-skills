@@ -32,9 +32,6 @@ agent_name_from_path() {
 declare -a identity=()
 declare -a oauth=()
 declare -a aspnetcore=()
-declare -a csharp=()
-declare -a data=()
-declare -a di_config=()
 declare -a testing=()
 declare -a dotnet=()
 
@@ -44,11 +41,8 @@ while IFS= read -r skill_dir; do
     ./skills/identityserver-*|./skills/duende-*|./skills/identity-security-*) identity+=("$name") ;;
     ./skills/oauth-*|./skills/token-*|./skills/claims-*) oauth+=("$name") ;;
     ./skills/aspnetcore-*|./skills/aspire-*) aspnetcore+=("$name") ;;
-    ./skills/csharp-*) csharp+=("$name") ;;
-    ./skills/efcore-*|./skills/database-*) data+=("$name") ;;
-    ./skills/microsoft-extensions-*) di_config+=("$name") ;;
-    ./skills/identity-testing-*|./skills/playwright-*|./skills/snapshot-*|./skills/crap-analysis) testing+=("$name") ;;
-    ./skills/project-structure|./skills/local-tools|./skills/package-management|./skills/dotnet-devcert-*) dotnet+=("$name") ;;
+    ./skills/identity-testing-*|./skills/playwright-*|./skills/snapshot-*) testing+=("$name") ;;
+    ./skills/project-structure|./skills/local-tools|./skills/package-management) dotnet+=("$name") ;;
     *) ;; # ignore
   esac
 done < <(jq -r '.skills[]' "$PLUGIN_JSON")
@@ -70,9 +64,6 @@ compressed="$(cat <<EOF
 |identity:{$(join_csv "${identity[@]}")}
 |oauth:{$(join_csv "${oauth[@]}")}
 |aspnetcore:{$(join_csv "${aspnetcore[@]}")}
-|csharp:{$(join_csv "${csharp[@]}")}
-|data:{$(join_csv "${data[@]}")}
-|di-config:{$(join_csv "${di_config[@]}")}
 |testing:{$(join_csv "${testing[@]}")}
 |dotnet:{$(join_csv "${dotnet[@]}")}
 |agents:{$(join_csv "${agents[@]}")}

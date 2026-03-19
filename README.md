@@ -1,6 +1,10 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **30 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **19 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+
+> **Tip: 📦 Use with [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**
+>
+> Duende IdentityServer Skills focus on **identity and security**. For general .NET development skills (C# coding standards, EF Core, Aspire configuration, dependency injection, concurrency patterns, database performance, and more), install **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)** as well. The skills in each repo are complementary and additive. No overlapping skills, with full coverage when used together.
 
 ## Installation
 
@@ -22,6 +26,12 @@ To update:
 /plugin marketplace update
 ```
 
+> **Recommended:** Also install [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) for general .NET development coverage:
+> ```
+> /plugin marketplace add Aaronontheweb/dotnet-skills
+> /plugin install dotnet-skills
+> ```
+
 ### GitHub Copilot
 
 [Official Docs](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
@@ -40,6 +50,8 @@ mkdir -p ~/.copilot/skills
 cp -r /tmp/identity-skills/skills/* ~/.copilot/skills/
 ```
 
+> **Recommended:** Also install [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) for general .NET development coverage.
+
 ### OpenCode
 
 [Official Docs](https://opencode.ai/docs/skills)
@@ -56,6 +68,8 @@ for skill_file in /tmp/identity-skills/skills/*/SKILL.md; do
 done
 cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 ```
+
+> **Recommended:** Also install [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) for general .NET development coverage.
 
 ---
 
@@ -79,52 +93,23 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 | `aspnetcore-authentication` | ASP.NET Core authentication middleware — OIDC, JWT Bearer, cookies, schemes, external providers |
 | `aspnetcore-authorization` | ASP.NET Core authorization — policies, IAuthorizationHandler, scope-based API authz, minimal APIs |
 
-### C# Language
-
-| Skill | Description |
-|-------|-------------|
-| `csharp-coding-standards` | Modern C# patterns — immutability, nullable reference types, sealed classes, file-scoped namespaces |
-| `csharp-api-design` | API design — method overloads, fluent builders, strongly-typed IDs, extension methods |
-| `csharp-concurrency-patterns` | Concurrency — async/await best practices, channels, cancellation, avoiding deadlocks |
-| `csharp-type-design-performance` | Type design — records, value objects, Span\<T\>, struct layout, pooling |
-
-### Data Access
-
-| Skill | Description |
-|-------|-------------|
-| `efcore-patterns` | EF Core patterns — DbContext design, migrations, query optimization, owned entities |
-| `database-performance` | Database performance — indexing, query plans, N+1 avoidance, connection pooling |
-
-### .NET Aspire
-
-| Skill | Description |
-|-------|-------------|
-| `aspire-configuration` | Aspire app host configuration — service references, environment variables, resource definitions |
-| `aspire-integration-testing` | Integration testing with Aspire — DistributedApplication, container orchestration, test isolation |
-| `aspire-service-defaults` | Service defaults — OpenTelemetry, health checks, resilience, structured logging |
-
-### Microsoft.Extensions
-
-| Skill | Description |
-|-------|-------------|
-| `microsoft-extensions-configuration` | Configuration system — providers, binding, strongly-typed options, validation |
-| `microsoft-extensions-dependency-injection` | Dependency injection — lifetime management, factory patterns, keyed services, validation |
-
 ### Testing & Quality
 
 | Skill | Description |
 |-------|-------------|
-| `playwright-blazor` | End-to-end testing with Playwright for Blazor applications |
-| `snapshot-testing` | Snapshot testing with Verify — protocol response snapshots, token response validation |
+| `aspire-integration-testing` | Integration testing with Aspire — DistributedApplication, OAuth test patterns, auth bypass strategies |
+| `playwright-blazor` | End-to-end testing with Playwright for Blazor — authentication flows, OAuth redirect mocking |
+| `snapshot-testing` | Snapshot testing with Verify — IdentityServer protocol response snapshots, token structure validation |
 
-### .NET Ecosystem
+### .NET Ecosystem (Identity-Focused)
 
 | Skill | Description |
 |-------|-------------|
-| `project-structure` | Solution and project structure — layout conventions, Directory.Packages.props, MSBuild |
-| `local-tools` | Local .NET tools — dotnet-ef migrations, dotnet user-jwts, CSharpier, ReportGenerator |
-| `package-management` | NuGet package management — Duende packages, Central Package Management, version variables |
-| `dotnet-devcert-trust` | HTTPS development certificates — trusting the ASP.NET Core dev cert for local identity work |
+| `project-structure` | Solution and project structure — IdentityServer solution layout, Duende package grouping, MSBuild |
+| `local-tools` | Local .NET tools — dotnet-ef migrations for IdentityServer stores, dotnet user-jwts, CSharpier |
+| `package-management` | NuGet package management — Duende package version variables, Central Package Management |
+
+> **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, database performance, Aspire configuration, dependency injection, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
 
 ---
 
@@ -168,7 +153,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (30 skills total)
+│   └── ... (19 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh
@@ -188,6 +173,8 @@ When adding new skills, use the appropriate prefix:
 - `identity-*` for cross-cutting identity concerns
 - `oauth-*` / `token-*` / `claims-*` for protocol and authz skills
 
+**General .NET skills** (C#, EF Core, Aspire, DI, etc.) belong in [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), not here. This repo focuses exclusively on identity, authentication, and authorization.
+
 See `CLAUDE.md` for the full contribution workflow.
 
 ---
@@ -204,12 +191,9 @@ Based on [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), Copyri
 |route:
 |identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-dcr,identityserver-saml,identityserver-stores}
 |oauth:{claims-authorization,oauth-oidc-protocols,token-management}
-|aspnetcore:{aspire-configuration,aspire-integration-testing,aspire-service-defaults,aspnetcore-authentication,aspnetcore-authorization}
-|csharp:{api-design,modern-csharp-coding-standards,csharp-concurrency-patterns,type-design-performance}
-|data:{database-performance,efcore-patterns}
-|di-config:{microsoft-extensions-configuration,dependency-injection-patterns}
+|aspnetcore:{aspire-integration-testing,aspnetcore-authentication,aspnetcore-authorization}
 |testing:{identity-testing-patterns,playwright-blazor-testing,snapshot-testing}
-|dotnet:{dotnet-devcert-trust,dotnet-local-tools,package-management,dotnet-project-structure}
+|dotnet:{dotnet-local-tools,package-management,dotnet-project-structure}
 |agents:{dotnet-benchmark-designer,dotnet-concurrency-specialist,dotnet-performance-analyst,identity-server-specialist,oauth-oidc-specialist}
 ```
 <!-- END IDENTITY-SKILLS COMPRESSED INDEX -->
