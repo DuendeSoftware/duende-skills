@@ -197,7 +197,7 @@ IdentityServer can emit scopes in two formats, controlled by `EmitScopesAsSpaceD
 
 ### Normalizing Scope Claims
 
-When scopes are emitted as a space-delimited string, the `scope` claim appears as a single string value. Use `ScopeConverter` to normalize it back to individual claims for easier policy checks:
+When scopes are emitted as a space-delimited string, the `scope` claim appears as a single string value. To normalize it back to individual claims for easier policy checks, implement a custom `IClaimsTransformation`:
 
 ```csharp
 // Program.cs
@@ -209,10 +209,32 @@ builder.Services.AddAuthentication("Bearer")
         options.TokenValidationParameters.ValidTypes = ["at+jwt"];
     });
 
-builder.Services.AddScopeTransformation();
+// Register a custom claims transformation to split space-delimited scopes
+builder.Services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>();
 ```
 
-`AddScopeTransformation()` registers a claims transformation that converts a space-delimited `scope` claim into individual `scope` claims, so authorization policies work consistently regardless of the format.
+```csharp
+// ScopeClaimsTransformation.cs
+public class ScopeClaimsTransformation : IClaimsTransformation
+{
+    public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+    {
+        var identity = (ClaimsIdentity)principal.Identity!;
+        var scopeClaim = identity.FindFirst("scope");
+        if (scopeClaim != null && scopeClaim.Value.Contains(' '))
+        {
+            identity.RemoveClaim(scopeClaim);
+            foreach (var scope in scopeClaim.Value.Split(' '))
+            {
+                identity.AddClaim(new Claim("scope", scope));
+            }
+        }
+        return Task.FromResult(principal);
+    }
+}
+```
+
+This transformation converts a space-delimited `scope` claim into individual `scope` claims, so authorization policies work consistently regardless of the format.
 
 ### Defining Authorization Policies
 
@@ -336,9 +358,10 @@ builder.Services.AddAuthentication("token")
         options.Authority = "https://identity.example.com";
         options.Audience = "api1";
         options.TokenValidationParameters.ValidTypes = ["at+jwt"];
-
-        options.ConfigureDPoPTokensForScheme("token");
     });
+
+// Configure DPoP on the service collection, NOT inside AddJwtBearer
+builder.Services.ConfigureDPoPTokensForScheme("token");
 
 // DPoP replay detection requires a distributed cache
 builder.Services.AddDistributedMemoryCache();
@@ -346,7 +369,7 @@ builder.Services.AddDistributedMemoryCache();
 
 #### DPoP Validation Details
 
-The `ConfigureDPoPTokensForScheme` extension:
+The `ConfigureDPoPTokensForScheme` extension is called on `IServiceCollection`, **not** inside the `AddJwtBearer` options lambda. It:
 
 1. Validates the `DPoP` proof JWT in the request header
 2. Confirms the `jkt` (JWK thumbprint) in the access token's `cnf` claim matches the proof key
@@ -354,20 +377,23 @@ The `ConfigureDPoPTokensForScheme` extension:
 4. Uses `IDistributedCache` for nonce/replay detection
 
 ```csharp
-// ❌ WRONG: DPoP without distributed cache — replay detection will fail
+// ❌ WRONG: DPoP configured inside AddJwtBearer lambda — this is not valid
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.ConfigureDPoPTokensForScheme("token");
+        options.ConfigureDPoPTokensForScheme("token"); // ← wrong location
     });
 
-// ✅ CORRECT: Always register a distributed cache for DPoP
+// ✅ CORRECT: ConfigureDPoPTokensForScheme on IServiceCollection, plus distributed cache
 builder.Services.AddDistributedMemoryCache(); // or Redis, SQL, etc.
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.ConfigureDPoPTokensForScheme("token");
+        options.Authority = "https://identity.example.com";
+        options.Audience = "api1";
+        options.TokenValidationParameters.ValidTypes = ["at+jwt"];
     });
+builder.Services.ConfigureDPoPTokensForScheme("token");
 ```
 
 ## Local API Authentication
@@ -411,7 +437,7 @@ app.MapGet("/local-api/data", () => Results.Ok(data))
     .RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName);
 
 // Or with controllers
-[Authorize(AuthenticationSchemes = IdentityServerConstants.LocalApi.AuthenticationScheme)]
+[Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]
 [ApiController]
 [Route("local-api/[controller]")]
 public class LocalDataController : ControllerBase
@@ -459,7 +485,8 @@ builder.Services.AddAuthentication("token")
         options.ClientSecret = "api1_secret";
     });
 
-builder.Services.AddScopeTransformation();
+// Custom claims transformation to normalize space-delimited scope claims
+builder.Services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -499,7 +526,7 @@ app.Run();
 - ✅ Always set a shared secret between the API and the introspection endpoint
 
 - ❌ Hardcoding scope checks against a space-delimited string without normalization
-- ✅ Use `AddScopeTransformation()` to normalize scope claims into individual claims
+- ✅ Implement a custom `IClaimsTransformation` to split space-delimited scope claims into individual claims
 
 - ❌ Configuring DPoP validation without registering `IDistributedCache`
 - ✅ Always register a distributed cache implementation for DPoP replay detection
@@ -513,7 +540,7 @@ app.Run();
 
 2. **Introspection returns inactive**: If introspection returns `active: false`, check that the `ApiResource` secret matches and the scopes are correctly associated with the resource.
 
-3. **Scope claim format inconsistency**: If IdentityServer emits scopes as a space-delimited string but your policies expect individual claims, authorization will fail silently. Use `AddScopeTransformation()` to normalize.
+3. **Scope claim format inconsistency**: If IdentityServer emits scopes as a space-delimited string but your policies expect individual claims, authorization will fail silently. Implement a custom `IClaimsTransformation` to normalize.
 
 4. **ForwardReferenceToken with wrong scheme name**: The scheme name passed to `ForwardReferenceToken()` must exactly match the scheme name used in `AddOAuth2Introspection()`.
 
@@ -521,4 +548,4 @@ app.Run();
 
 6. **Local API auth in separate host**: `AddLocalApiAuthentication()` only works when the API is co-hosted with IdentityServer. For separate API hosts, use JWT bearer or introspection.
 
-7. **Missing AddScopeTransformation in production**: During development, scopes may work because of the default array format. When `EmitScopesAsSpaceDelimitedStringInJwt` is enabled (or changed), policies break without the scope transformation.
+7. **Missing scope normalization in production**: During development, scopes may work because of the default array format. When `EmitScopesAsSpaceDelimitedStringInJwt` is enabled (or changed), policies break without a custom `IClaimsTransformation` to split the scope claim.

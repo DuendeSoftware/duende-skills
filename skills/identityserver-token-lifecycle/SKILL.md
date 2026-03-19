@@ -319,7 +319,7 @@ To emit the `act` claim in tokens, your profile service must handle it:
 ```csharp
 public class ProfileService : IProfileService
 {
-    public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         if (context.Subject.GetAuthenticationMethod() == OidcConstants.GrantTypes.TokenExchange)
         {
@@ -363,7 +363,7 @@ Extend `DefaultProfileService` and use `AddRequestedClaims`:
 ```csharp
 public class SampleProfileService : DefaultProfileService
 {
-    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         var claims = await GetClaimsFromDatabaseAsync(context.Subject);
         context.AddRequestedClaims(claims);
@@ -425,7 +425,7 @@ app.MapGet("/myAction", async (IIdentityServerTools tools) =>
 | Token                    | Recommended Lifetime                      | Rationale                                        |
 | ------------------------ | ----------------------------------------- | ------------------------------------------------ |
 | Identity Token           | 5 minutes (default: 300s)                 | Only used once during authentication             |
-| JWT Access Token         | 5-15 minutes                              | Short-lived; cannot be revoked                   |
+| JWT Access Token         | 5-15 minutes (default: 3600s = 1 hour)    | Short-lived; cannot be revoked                   |
 | Reference Access Token   | 5-60 minutes                              | Can be revoked, so slightly longer is acceptable |
 | Refresh Token (absolute) | Hours to days depending on security needs | Balance UX vs risk                               |
 | Refresh Token (sliding)  | Shorter than absolute (e.g., 1 hour)      | Auto-expire unused tokens                        |

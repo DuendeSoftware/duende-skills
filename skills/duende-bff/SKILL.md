@@ -19,7 +19,7 @@ invocable: false
 ## Core Principles
 
 1. **Tokens Never Touch the Browser** — The BFF holds all OAuth tokens server-side; the browser only ever sees an HTTP-only, Secure, SameSite cookie
-2. **CSRF Protection Is Mandatory** — Every BFF API endpoint must require the `x-csrf: 1` header; use `.AsBffApiEndpoint()` or `MapRemoteBffApiEndpoint` — never skip it without an explicit alternative
+2. **CSRF Protection Is Mandatory** — Every BFF API endpoint must require the `X-CSRF: 1` header; use `.AsBffApiEndpoint()` or `MapRemoteBffApiEndpoint` — never skip it without an explicit alternative
 3. **Cookie Configuration Determines Security Posture** — `SameSite=Strict` is preferred when the IDP is on the same site; `Lax` is acceptable when cross-site redirects are required after login
 4. **Server-Side Sessions for Production** — The default in-memory cookie session is unsuitable for production; persist sessions with `Duende.BFF.EntityFramework`
 5. **Token Management Is Automatic** — BFF integrates with `Duende.AccessTokenManagement`; never manually refresh tokens or pass raw access tokens to the frontend
@@ -61,8 +61,8 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseAuthentication();
 app.UseRouting();
+app.UseAuthentication();
 app.UseBff();          // Adds CSRF anti-forgery enforcement middleware
 app.UseAuthorization();
 
@@ -147,7 +147,7 @@ In BFF v4, management endpoints (`/bff/login`, `/bff/logout`, `/bff/user`, `/bff
 
 ## Pattern 3: CSRF / Anti-Forgery Protection
 
-The BFF enforces a custom `x-csrf` header on every protected endpoint. This triggers a CORS preflight for cross-origin requests, effectively preventing CSRF attacks. The header value is irrelevant — its presence is sufficient.
+The BFF enforces a custom `X-CSRF` header on every protected endpoint. This triggers a CORS preflight for cross-origin requests, effectively preventing CSRF attacks. The header value is irrelevant — its presence is sufficient.
 
 ### Local (Embedded) API Endpoints
 
@@ -185,15 +185,15 @@ app.MapGet("/api/data", () => Results.Ok("data"))
 
 ```csharp
 // ✅ Correct middleware order
-app.UseAuthentication();
 app.UseRouting();
+app.UseAuthentication();
 app.UseBff();           // Must be here
 app.UseAuthorization();
 app.MapControllers().AsBffApiEndpoint();
 
 // ❌ Wrong: UseBff() after UseAuthorization() — anti-forgery is not applied
-app.UseAuthentication();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseBff();           // Too late
 ```
@@ -372,7 +372,7 @@ The `/bff/user` endpoint returns the current user's claims or `401`. Use it on S
 // ✅ React: check session on app load
 async function getUser() {
     const response = await fetch('/bff/user', {
-        headers: { 'x-csrf': '1' }  // Required anti-forgery header
+        headers: { 'X-CSRF': '1' }  // Required anti-forgery header
     });
     if (response.ok) {
         return await response.json();
@@ -383,7 +383,7 @@ async function getUser() {
 
 ### Fetch Wrapper for CSRF Header
 
-Every `fetch()` call to a BFF API endpoint must include `x-csrf: 1`. Wrap `fetch` globally rather than adding it to every call site.
+Every `fetch()` call to a BFF API endpoint must include `X-CSRF: 1`. Wrap `fetch` globally rather than adding it to every call site.
 
 ```javascript
 // ✅ Fetch wrapper that automatically appends the required CSRF header
@@ -391,7 +391,7 @@ function bffFetch(url, options = {}) {
     return fetch(url, {
         ...options,
         headers: {
-            'x-csrf': '1',
+            'X-CSRF': '1',
             ...options.headers,
         },
     });
@@ -402,7 +402,7 @@ const data = await bffFetch('/api/orders').then(r => r.json());
 ```
 
 ```javascript
-// ❌ Missing x-csrf header — BFF will return 401
+// ❌ Missing X-CSRF header — BFF will return 401
 const data = await fetch('/api/orders').then(r => r.json());
 ```
 
@@ -415,7 +415,7 @@ BFF API endpoints return `401` (not a redirect) when the session has expired. Th
 async function bffFetch(url, options = {}) {
     const response = await fetch(url, {
         ...options,
-        headers: { 'x-csrf': '1', ...options.headers },
+        headers: { 'X-CSRF': '1', ...options.headers },
     });
 
     if (response.status === 401) {
@@ -535,7 +535,7 @@ builder.Services.AddDataProtection(); // No persistence — broken in clusters
 
 - **Forgetting `SaveTokens = true`** — Without this, OIDC tokens are not stored in the session, and `GetUserAccessTokenAsync()` returns nothing. Token management silently fails.
 
-- **Missing `x-csrf: 1` header in SPA fetch calls** — BFF returns 401 for API requests without the header. Centralize header injection in a fetch wrapper rather than adding it to each call site.
+- **Missing `X-CSRF: 1` header in SPA fetch calls** — BFF returns 401 for API requests without the header. Centralize header injection in a fetch wrapper rather than adding it to each call site.
 
 - **Incorrect middleware order** — `UseBff()` must come after `UseRouting()` and before `UseAuthorization()`. Any deviation silently breaks anti-forgery enforcement without a clear error.
 

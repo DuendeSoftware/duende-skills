@@ -19,7 +19,6 @@ Use this skill when:
 ## Related Skills
 
 - **`dotnet-local-tools`** - Managing local .NET tools with dotnet-tools.json
-- **`microsoft-extensions-configuration`** - Configuration validation patterns
 
 ---
 

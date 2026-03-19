@@ -215,3 +215,9 @@ See [ci-and-tooling.md](ci-and-tooling.md) for GitHub Actions setup, custom reso
 4. **Check container logs** - Use `docker logs` to inspect container output
 5. **Use breakpoints in fixtures** - Debug fixture initialization to catch startup issues
 6. **Verify resource names** - Ensure resource names match between AppHost and tests
+
+---
+
+## Related Skills
+
+- `identityserver-aspire` — orchestrating IdentityServer in Aspire AppHost

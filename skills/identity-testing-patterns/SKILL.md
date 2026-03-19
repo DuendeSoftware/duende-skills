@@ -76,7 +76,9 @@ public sealed class IdentityServerFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.UseEnvironment("Testing");
+
+        builder.ConfigureTestServices(services =>
         {
             // Remove any existing IdentityServer registration to replace it cleanly
             var descriptor = services.SingleOrDefault(
@@ -100,8 +102,6 @@ public sealed class IdentityServerFactory : WebApplicationFactory<Program>
             // Static development signing key — never use this in production
             .AddDeveloperSigningCredential(persistKey: false);
         });
-
-        builder.UseEnvironment("Testing");
     }
 }
 ```
@@ -329,7 +329,9 @@ public static class TestTokenFactory
             Expires = DateTime.UtcNow.Add(lifetime ?? TimeSpan.FromMinutes(5)),
             SigningCredentials = new SigningCredentials(
                 TestSigningKey,
-                SecurityAlgorithms.RsaSha256)
+                SecurityAlgorithms.RsaSha256),
+            // ✅ RFC 9068: access tokens must carry typ=at+jwt
+            TokenType = "at+jwt"
         };
 
         var handler = new JsonWebTokenHandler();
@@ -344,7 +346,7 @@ public static class TestTokenFactory
 // ✅ In WebApplicationFactory for the API project
 protected override void ConfigureWebHost(IWebHostBuilder builder)
 {
-    builder.ConfigureServices(services =>
+    builder.ConfigureTestServices(services =>
     {
         // Remove production JWT Bearer authentication
         var jwtDescriptor = services.FirstOrDefault(
@@ -476,7 +478,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             services.AddSingleton<ITestClaimsProvider>(ClaimsProvider);
 
@@ -699,7 +701,7 @@ public sealed class BffFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             // Replace OIDC with a short-circuit test handler
             // that immediately signs in a test user on /bff/login
@@ -726,12 +728,14 @@ public class BffUserEndpointTests : IClassFixture<BffFactory>
 
     public BffUserEndpointTests(BffFactory factory)
     {
-        // ✅ Use a handler that stores and sends cookies automatically
-        _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        // ✅ Use a CookieContainer so session cookies are stored and sent automatically
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler
         {
-            HandleCookies = true,
+            CookieContainer = cookieContainer,
             AllowAutoRedirect = false
-        });
+        };
+        _client = factory.CreateDefaultClient(handler);
     }
 
     [Fact]
@@ -955,11 +959,11 @@ var token = TestTokenFactory.CreateAccessToken(
 
 ## Resources
 
-- [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/v7/quickstarts/)
-- [Duende IdentityServer Samples — GitHub](https://github.com/DuendeSoftware/Samples/tree/main/IdentityServer/v7)
+- [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/quickstarts/)
+- [Duende IdentityServer Samples — GitHub](https://github.com/DuendeSoftware/Samples/tree/main/IdentityServer)
 - [ASP.NET Core Integration Tests with WebApplicationFactory](https://learn.microsoft.com/aspnet/core/test/integration-tests)
-- [IProfileService Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/reference/services/profile-service/)
-- [Protecting APIs with JWT — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/apis/aspnetcore/jwt/)
+- [IProfileService Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/reference/services/profile-service/)
+- [Protecting APIs with JWT — Duende Docs](https://docs.duendesoftware.com/identityserver/apis/aspnetcore/jwt/)
 - [ASP.NET Core Authorization Tests — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/policies)
 - [IdentityModel Client Library](https://docs.duendesoftware.com/identitymodel/)
 - [Duende BFF Samples](https://docs.duendesoftware.com/bff/samples/)

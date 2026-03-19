@@ -160,7 +160,7 @@ new Client
 | `AllowOfflineAccess` | Enable refresh token issuance | `false` |
 | `AccessTokenLifetime` | Access token duration in seconds | `3600` (1 hour) |
 | `IdentityTokenLifetime` | Identity token duration in seconds | `300` (5 min) |
-| `RefreshTokenUsage` | `ReUse` or `OneTimeOnly` | `OneTimeOnly` |
+| `RefreshTokenUsage` | `ReUse` or `OneTimeOnly` | `ReUse` (recommend `OneTimeOnly` for security) |
 | `RefreshTokenExpiration` | `Absolute` or `Sliding` | `Absolute` |
 | `AbsoluteRefreshTokenLifetime` | Max refresh token lifetime in seconds | `2592000` (30 days) |
 | `AllowedCorsOrigins` | CORS origins for token endpoint calls | empty |
@@ -226,8 +226,8 @@ Define custom identity resources for application-specific user claims:
 // ✅ Custom identity resource for tenant membership
 new IdentityResource(
     name: "tenant",
-    userClaims: new[] { "tenant_id", "tenant_name", "tenant_role" },
-    displayName: "Your organization info")
+    displayName: "Your organization info",
+    userClaims: new[] { "tenant_id", "tenant_name", "tenant_role" })
 {
     Required = true // Do not show on consent screen as optional
 }
@@ -417,25 +417,23 @@ Server-side sessions store authentication session data in a server-side store in
 ```csharp
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
-    options.ServerSideSessions.Enabled = true;
-
     // Remove expired sessions automatically
     options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(10);
     options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
 
     // Coordinate client token lifetimes with user sessions
     options.Authentication.CoordinateClientLifetimesWithUserSession = true;
-});
-
-// Add a server-side session store (EF Core or custom)
-idsvrBuilder.AddServerSideSessions();
+})
+    // Server-side sessions are enabled by calling AddServerSideSessions()
+    .AddServerSideSessions();
 ```
+
+> **Important:** Server-side sessions are enabled by calling `.AddServerSideSessions()` on the IdentityServer builder — there is no `options.ServerSideSessions.Enabled` property. Add this to the builder chain, not to options.
 
 ### Session Expiration Options
 
 | Option | Default | Purpose |
 |--------|---------|---------|
-| `ServerSideSessions.Enabled` | `false` | Master switch for server-side sessions |
 | `ServerSideSessions.RemoveExpiredSessionsFrequency` | 10 min | Cleanup interval |
 | `ServerSideSessions.RemoveExpiredSessions` | `true` | Enable automatic cleanup |
 | `ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout` | `true` | Notify clients on session expiry |
@@ -589,7 +587,7 @@ options.IssuerUri = "https://identity.example.com";
 | `KeyManagement.Enabled` | `true` | `true` |
 | `KeyManagement.DataProtectKeys` | `true` | `true` + configure Data Protection |
 | `Events.Raise*Events` | Optional | All `true` |
-| `ServerSideSessions.Enabled` | Optional | Recommended |
+| `ServerSideSessions` (`AddServerSideSessions()`) | Optional | Recommended |
 | Secrets | In-memory / config | Key vault / certificates |
 | Store | In-memory | EF Core or custom |
 | HTTPS | Optional | **Required** |
@@ -598,9 +596,9 @@ options.IssuerUri = "https://identity.example.com";
 
 ## Resources
 
-- [Clients — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/fundamentals/clients/)
-- [Resources — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/fundamentals/resources/)
-- [Key Management — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/fundamentals/key-management/)
-- [IdentityServerOptions Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/reference/options/)
-- [Server-Side Sessions — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/ui/server-side-sessions/)
-- [Client Model Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/v7/reference/models/client/)
+- [Clients — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/clients/)
+- [Resources — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/resources/)
+- [Key Management — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/key-management/)
+- [IdentityServerOptions Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/reference/options/)
+- [Server-Side Sessions — Duende Docs](https://docs.duendesoftware.com/identityserver/ui/server-side-sessions/)
+- [Client Model Reference — Duende Docs](https://docs.duendesoftware.com/identityserver/reference/models/client/)

@@ -34,7 +34,7 @@ Browser → IdentityServer Middleware → UI Pages (Login, Consent, Logout, Erro
 | Page    | Purpose                               | Default URL                               |
 | ------- | ------------------------------------- | ----------------------------------------- |
 | Login   | Establish authentication session      | Inferred from cookie handler `LoginPath`  |
-| Logout  | Terminate session, notify clients     | Inferred from cookie handler `LogoutPath` |
+| Logout  | Terminate session, notify clients     | Set via `opt.UserInteraction.LogoutUrl`   |
 | Consent | Grant/deny client access to resources | `/consent`                                |
 | Error   | Display protocol error information    | `/home/error`                             |
 
@@ -319,10 +319,7 @@ return Redirect(returnUrl);
 ### Denying Consent
 
 ```csharp
-await _interaction.GrantConsentAsync(context, new ConsentResponse
-{
-    Error = AuthorizationError.AccessDenied
-});
+await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
 ```
 
 ### Validating returnUrl
@@ -427,7 +424,7 @@ Your login page checks `context.IdP` from `GetAuthorizationContextAsync` and can
 
 1. **Login page does not preserve `returnUrl`**: The `returnUrl` must survive across all page transitions (post-backs, external redirects, MFA steps). Store it in hidden form fields, route data, or the `AuthenticationProperties.Items` dictionary.
 
-2. **Cookie handler `LoginPath`/`LogoutPath` mismatch**: If no explicit `LoginUrl`/`LogoutUrl` is configured, IdentityServer infers them from the cookie handler. Make sure the cookie handler paths match your actual page routes.
+2. **Cookie handler `LoginPath` mismatch**: If no explicit `LoginUrl` is configured, IdentityServer infers it from the cookie handler's `LoginPath`. Make sure the cookie handler `LoginPath` matches your actual login page route. The `LogoutUrl` is not inferred from the cookie handler — it must always be set explicitly via `opt.UserInteraction.LogoutUrl`.
 
 3. **SignOutScheme differs with ASP.NET Identity**: When using ASP.NET Identity, the `SignOutScheme` for external providers should be `IdentityConstants.ApplicationScheme`, not `IdentityServerConstants.SignoutScheme`.
 

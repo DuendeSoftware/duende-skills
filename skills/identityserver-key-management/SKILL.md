@@ -87,11 +87,11 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 | `PropagationTime`                    | 14 days   | Time for new keys to propagate to all servers and clients |
 | `RetentionDuration`                  | 14 days   | Duration retired keys remain in discovery                 |
 | `DeleteRetiredKeys`                  | `true`    | Delete keys after retention period                        |
-| `KeyPath`                            | `~/keys`  | File system path for default key store                    |
+| `KeyPath`                            | `{ContentRootPath}/keys` | File system path for default key store               |
 | `DataProtectKeys`                    | `true`    | Encrypt keys at rest using data protection                |
 | `KeyCacheDuration`                   | 24 hours  | Cache duration for keys from store                        |
 | `InitializationDuration`             | 5 minutes | Synchronization window on first key creation              |
-| `InitializationSynchronizationDelay` | varies    | Delay between retries during initialization               |
+| `InitializationSynchronizationDelay` | 5 seconds | Delay between retries during initialization               |
 
 ### Multiple Signing Algorithms
 
@@ -131,7 +131,7 @@ var api = new ApiResource("invoice")
 
 ### Default: File System
 
-The default `FileSystemKeyStore` writes keys to the `KeyPath` directory (defaults to `~/keys`). This directory must be:
+The default `FileSystemKeyStore` writes keys to the `KeyPath` directory (defaults to `{ContentRootPath}/keys`). This directory must be:
 
 - Excluded from source control
 - Accessible (read/write) to all load-balanced instances if using file-based storage
@@ -409,7 +409,7 @@ builder.Services.AddIdentityServer()
 
 ## Common Pitfalls
 
-1. **`~/keys` directory in source control** - Contains cryptographic secrets. Add to `.gitignore`. If accidentally committed, the keys may be data-protected with development-only data protection keys and fail in production.
+1. **`keys` directory in source control** - Contains cryptographic secrets. Add the `keys` directory (under the app content root) to `.gitignore`. If accidentally committed, the keys may be data-protected with development-only data protection keys and fail in production.
 
 2. **Data protection not configured for production** - Default data protection uses machine-specific keys. In containers or multi-instance deployments, keys protected by one instance cannot be read by another. Always configure shared, persistent data protection.
 

@@ -81,6 +81,8 @@ public interface IProfileService
     Task GetProfileDataAsync(ProfileDataRequestContext context);
 
     // Called to check whether the user is still active (e.g. not disabled).
+    // context.Caller is a ProfileIsActiveCallers constant that tells you WHY
+    // the check is being made (e.g. AuthorizeEndpoint, Token, RefreshTokenValidation).
     Task IsActiveAsync(IsActiveContext context);
 }
 ```
@@ -108,6 +110,7 @@ public sealed class ApplicationProfileService : DefaultProfileService
     public ApplicationProfileService(
         IUserRepository users,
         ILogger<ApplicationProfileService> logger)
+        : base(logger)
     {
         _users = users;
         _logger = logger;
@@ -146,6 +149,8 @@ public sealed class ApplicationProfileService : DefaultProfileService
     }
 }
 ```
+
+> **`ProfileIsActiveCallers`**: `IsActiveContext.Caller` is a `ProfileIsActiveCallers` constant indicating **why** the check is being made — e.g. `AuthorizeEndpoint`, `Token`, `RefreshTokenValidation`, `UserInfoRequestValidation`. Use it to apply different strictness levels; for example, you might allow a soft-disabled account to complete an in-flight refresh but deny new interactive logins.
 
 ```csharp
 // Program.cs
@@ -652,6 +657,7 @@ public sealed class DynamicProfileService : DefaultProfileService
         IUserPermissionService permissions,
         IFeatureFlagService features,
         ILogger<DynamicProfileService> logger)
+        : base(logger)
     {
         _permissions = permissions;
         _features = features;
@@ -842,15 +848,15 @@ The IdentityServer session cookie stores the `ClaimsPrincipal` from `SignInAsync
 
 ## Resources
 
-- [Duende IdentityServer — Claims fundamentals](https://docs.duendesoftware.com/identityserver/v7/fundamentals/claims/)
-- [Duende IdentityServer — Profile Service reference](https://docs.duendesoftware.com/identityserver/v7/reference/services/profile-service/)
-- [Duende IdentityServer — Identity Resources](https://docs.duendesoftware.com/identityserver/v7/fundamentals/resources/identity/)
-- [Duende IdentityServer — API Scopes](https://docs.duendesoftware.com/identityserver/v7/fundamentals/resources/api-scopes/)
-- [Duende IdentityServer — API Resources](https://docs.duendesoftware.com/identityserver/v7/fundamentals/resources/api-resources/)
-- [Duende IdentityServer — Extension Grants](https://docs.duendesoftware.com/identityserver/v7/tokens/extension-grants/)
-- [Duende IdentityServer — External Providers](https://docs.duendesoftware.com/identityserver/v7/ui/login/external/)
-- [Duende IdentityServer — Token types overview](https://docs.duendesoftware.com/identityserver/v7/tokens/)
-- [Duende IdentityServer — Custom Token Request Validator](https://docs.duendesoftware.com/identityserver/v7/tokens/dynamic-validation/)
+- [Duende IdentityServer — Claims fundamentals](https://docs.duendesoftware.com/identityserver/fundamentals/claims/)
+- [Duende IdentityServer — Profile Service reference](https://docs.duendesoftware.com/identityserver/reference/services/profile-service/)
+- [Duende IdentityServer — Identity Resources](https://docs.duendesoftware.com/identityserver/fundamentals/resources/identity/)
+- [Duende IdentityServer — API Scopes](https://docs.duendesoftware.com/identityserver/fundamentals/resources/api-scopes/)
+- [Duende IdentityServer — API Resources](https://docs.duendesoftware.com/identityserver/fundamentals/resources/api-resources/)
+- [Duende IdentityServer — Extension Grants](https://docs.duendesoftware.com/identityserver/tokens/extension-grants/)
+- [Duende IdentityServer — External Providers](https://docs.duendesoftware.com/identityserver/ui/login/external/)
+- [Duende IdentityServer — Token types overview](https://docs.duendesoftware.com/identityserver/tokens/)
+- [Duende IdentityServer — Custom Token Request Validator](https://docs.duendesoftware.com/identityserver/tokens/dynamic-validation/)
 - [ASP.NET Core — IClaimsTransformation](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/claims)
 - [OpenID Connect Core spec — Standard scope/claim mappings](https://openid.net/specs/openid-connect-core-1_0.html#scopeclaims)
 

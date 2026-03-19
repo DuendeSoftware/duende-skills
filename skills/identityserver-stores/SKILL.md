@@ -181,7 +181,7 @@ public static void InitializeDatabase(IApplicationBuilder app)
 
 ### Handling Schema Updates Across Versions
 
-When upgrading IdentityServer, always check the [upgrade guide](https://docs.duendesoftware.com/identityserver/v7/upgrades/) for schema changes before applying the new package version:
+When upgrading IdentityServer, always check the [upgrade guide](https://docs.duendesoftware.com/identityserver/upgrades/) for schema changes before applying the new package version:
 
 1. Review the changelog for any new columns or tables in `ConfigurationDbContext` or `PersistedGrantDbContext`.
 2. Scaffold a new EF migration: `dotnet ef migrations add UpgradeToV7x --context ConfigurationDbContext`.
@@ -264,6 +264,9 @@ builder.Services.AddIdentityServer()
 
 Implement custom stores when EF Core is unsuitable — for example, when client definitions live in an external system, or when operational data must be stored in Redis or a document database.
 
+> **Version Note — CancellationToken parameters (v8+):**
+> The store interface signatures below include `CancellationToken` parameters, which were **added in Duende IdentityServer v8**. In **v7 and earlier**, these interfaces do **not** accept `CancellationToken` — omit the parameter when targeting v7. Additionally, `IClientStore.GetAllClientsAsync` is a **new method in v8**; it does not exist in v7.
+
 ### `IClientStore`
 
 ```csharp
@@ -275,10 +278,16 @@ public sealed class ExternalApiClientStore : IClientStore
     public ExternalApiClientStore(IExternalClientApi api)
         => _api = api;
 
-    public async Task<Client?> FindClientByIdAsync(string clientId)
+    public async Task<Client?> FindClientByIdAsync(string clientId, CancellationToken ct = default)
     {
         var dto = await _api.GetClientAsync(clientId);
         return dto is null ? null : dto.ToIdentityServerClient();
+    }
+
+    public async IAsyncEnumerable<Client> GetAllClientsAsync(CancellationToken ct = default)
+    {
+        await foreach (var dto in _api.GetAllClientsAsync(ct))
+            yield return dto.ToIdentityServerClient();
     }
 }
 ```
@@ -292,7 +301,7 @@ builder.Services.AddIdentityServer()
 ### `IResourceStore`
 
 ```csharp
-// ✅ Custom resource store — must implement all three query methods
+// ✅ Custom resource store — must implement all five query methods
 public sealed class DatabaseResourceStore : IResourceStore
 {
     private readonly ResourceRepository _repo;
@@ -300,22 +309,22 @@ public sealed class DatabaseResourceStore : IResourceStore
     public DatabaseResourceStore(ResourceRepository repo) => _repo = repo;
 
     public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(
-        IEnumerable<string> scopeNames)
+        IEnumerable<string> scopeNames, CancellationToken ct = default)
         => _repo.GetIdentityResourcesAsync(scopeNames);
 
     public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(
-        IEnumerable<string> scopeNames)
+        IEnumerable<string> scopeNames, CancellationToken ct = default)
         => _repo.GetApiScopesAsync(scopeNames);
 
     public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(
-        IEnumerable<string> scopeNames)
+        IEnumerable<string> scopeNames, CancellationToken ct = default)
         => _repo.GetApiResourcesByScopeAsync(scopeNames);
 
     public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(
-        IEnumerable<string> apiResourceNames)
+        IEnumerable<string> apiResourceNames, CancellationToken ct = default)
         => _repo.GetApiResourcesByNameAsync(apiResourceNames);
 
-    public Task<Resources> GetAllResourcesAsync()
+    public Task<Resources> GetAllResourcesAsync(CancellationToken ct = default)
         => _repo.GetAllAsync();
 }
 ```
@@ -331,7 +340,7 @@ public sealed class RedisPersistedGrantStore : IPersistedGrantStore
     public RedisPersistedGrantStore(IConnectionMultiplexer mux)
         => _redis = mux.GetDatabase();
 
-    public async Task StoreAsync(PersistedGrant grant)
+    public async Task StoreAsync(PersistedGrant grant, CancellationToken ct = default)
     {
         var json = JsonSerializer.Serialize(grant);
         var expiry = grant.Expiration.HasValue
@@ -340,32 +349,26 @@ public sealed class RedisPersistedGrantStore : IPersistedGrantStore
         await _redis.StringSetAsync(grant.Key, json, expiry);
     }
 
-    public async Task<PersistedGrant?> GetAsync(string key)
+    public async Task<PersistedGrant?> GetAsync(string key, CancellationToken ct = default)
     {
         var value = await _redis.StringGetAsync(key);
         return value.IsNull ? null : JsonSerializer.Deserialize<PersistedGrant>(value!);
     }
 
-    public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
+    public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CancellationToken ct = default)
     {
         // Redis requires a secondary index (e.g., SET per subjectId) for filtered queries
         // Implementation depends on your indexing strategy
         throw new NotImplementedException("Implement with a subject-keyed index");
     }
 
-    public Task RemoveAsync(string key)
+    public Task RemoveAsync(string key, CancellationToken ct = default)
         => _redis.KeyDeleteAsync(key);
 
-    public Task RemoveAllAsync(PersistedGrantFilter filter)
+    public Task RemoveAllAsync(PersistedGrantFilter filter, CancellationToken ct = default)
     {
         // Requires secondary index lookup
         throw new NotImplementedException("Implement with a subject-keyed index");
-    }
-
-    public Task UpdateConsumedAsync(PersistedGrant grant)
-    {
-        // Must update ConsumedTime without overwriting other fields
-        return StoreAsync(grant);
     }
 }
 ```
@@ -459,10 +462,10 @@ builder.Services.AddIdentityServer()
     .AddSigningKeyStore<YourCustomSigningKeyStore>();
 ```
 
-The `ISigningKeyStore` interface has three methods:
-- `LoadKeysAsync()` — returns all `SerializedKey` records; called on startup and periodically
-- `StoreKeyAsync(SerializedKey key)` — persists a newly created key
-- `DeleteKeyAsync(string id)` — removes a retired key
+The `ISigningKeyStore` interface has three methods (CancellationToken parameters are v8+ only — see version note above):
+- `LoadKeysAsync(CancellationToken ct)` — returns all `SerializedKey` records; called on startup and periodically
+- `StoreKeyAsync(SerializedKey key, CancellationToken ct)` — persists a newly created key
+- `DeleteKeyAsync(string id, CancellationToken ct)` — removes a retired key
 
 ### Data Protection Considerations
 
@@ -657,16 +660,16 @@ builder.Services.AddOperationalStore(options =>
 
 ## Resources
 
-- [Data Stores & Persistence overview](https://docs.duendesoftware.com/identityserver/v7/data/) — authoritative top-level docs
-- [Configuration Data](https://docs.duendesoftware.com/identityserver/v7/data/configuration/) — store interfaces, custom registration, caching, in-memory stores
-- [Operational Data](https://docs.duendesoftware.com/identityserver/v7/data/operational/) — grants, signing keys, server-side sessions, custom store registration
-- [EF Core Integration](https://docs.duendesoftware.com/identityserver/v7/data/ef/) — `AddConfigurationStore`, `AddOperationalStore`, `OperationalStoreOptions`, schema options, token cleanup options
-- [EF Quickstart](https://docs.duendesoftware.com/identityserver/v7/quickstarts/4-entity-framework/) — end-to-end walkthrough including migration creation
-- [ISigningKeyStore reference](https://docs.duendesoftware.com/identityserver/v7/reference/stores/signing-key-store/)
-- [IServerSideSessionStore reference](https://docs.duendesoftware.com/identityserver/v7/reference/stores/server-side-sessions/)
-- [IPersistedGrantStore reference](https://docs.duendesoftware.com/identityserver/v7/reference/stores/persisted-grant-store/)
-- [Key Management fundamentals](https://docs.duendesoftware.com/identityserver/v7/fundamentals/key-management/)
-- [Server-Side Sessions overview](https://docs.duendesoftware.com/identityserver/v7/ui/server-side-sessions/)
+- [Data Stores & Persistence overview](https://docs.duendesoftware.com/identityserver/data/) — authoritative top-level docs
+- [Configuration Data](https://docs.duendesoftware.com/identityserver/data/configuration/) — store interfaces, custom registration, caching, in-memory stores
+- [Operational Data](https://docs.duendesoftware.com/identityserver/data/operational/) — grants, signing keys, server-side sessions, custom store registration
+- [EF Core Integration](https://docs.duendesoftware.com/identityserver/data/ef/) — `AddConfigurationStore`, `AddOperationalStore`, `OperationalStoreOptions`, schema options, token cleanup options
+- [EF Quickstart](https://docs.duendesoftware.com/identityserver/quickstarts/4-entity-framework/) — end-to-end walkthrough including migration creation
+- [ISigningKeyStore reference](https://docs.duendesoftware.com/identityserver/reference/stores/signing-key-store/)
+- [IServerSideSessionStore reference](https://docs.duendesoftware.com/identityserver/reference/stores/server-side-sessions/)
+- [IPersistedGrantStore reference](https://docs.duendesoftware.com/identityserver/reference/stores/persisted-grant-store/)
+- [Key Management fundamentals](https://docs.duendesoftware.com/identityserver/fundamentals/key-management/)
+- [Server-Side Sessions overview](https://docs.duendesoftware.com/identityserver/ui/server-side-sessions/)
 - [Duende EF migrations sample](https://github.com/DuendeSoftware/products/tree/main/identity-server/migrations/IdentityServerDb) — reference SQL Server migration project maintained by Duende
 - Related skill: `identityserver-configuration` — client and resource model configuration
 - Related skill: `efcore-patterns` — EF Core best practices applicable to `ConfigurationDbContext` and `PersistedGrantDbContext`
