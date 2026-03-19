@@ -38,11 +38,10 @@ declare -a dotnet=()
 while IFS= read -r skill_dir; do
   name="$(skill_name_from_dir "$skill_dir")"
   case "$skill_dir" in
-    ./skills/identityserver-*|./skills/duende-*|./skills/identity-security-*) identity+=("$name") ;;
-    ./skills/oauth-*|./skills/token-*|./skills/claims-*) oauth+=("$name") ;;
+    ./skills/identityserver-*|./skills/duende-*|./skills/bff-*|./skills/identity-security-*) identity+=("$name") ;;
+    ./skills/oauth-*|./skills/token-*|./skills/claims-*|./skills/accesstokenmanagement-*) oauth+=("$name") ;;
     ./skills/aspnetcore-*|./skills/aspire-*) aspnetcore+=("$name") ;;
     ./skills/identity-testing-*|./skills/playwright-*|./skills/snapshot-*) testing+=("$name") ;;
-    ./skills/project-structure|./skills/local-tools|./skills/package-management) dotnet+=("$name") ;;
     *) ;; # ignore
   esac
 done < <(jq -r '.skills[]' "$PLUGIN_JSON")
@@ -63,9 +62,9 @@ compressed="$(cat <<EOF
 |route:
 |identity:{$(join_csv "${identity[@]}")}
 |oauth:{$(join_csv "${oauth[@]}")}
-|aspnetcore:{$(join_csv "${aspnetcore[@]}")}
-|testing:{$(join_csv "${testing[@]}")}
-|dotnet:{$(join_csv "${dotnet[@]}")}
+|aspnetcore:{$(join_csv ${aspnetcore[@]+"${aspnetcore[@]}"})}
+|testing:{$(join_csv ${testing[@]+"${testing[@]}"})}
+|dotnet:{$(join_csv ${dotnet[@]+"${dotnet[@]}"})}
 |agents:{$(join_csv "${agents[@]}")}
 EOF
 )"

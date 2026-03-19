@@ -1,6 +1,6 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **19 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **25 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
 
 > **Tip: 📦 Use with [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**
 >
@@ -75,41 +75,62 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 
 ## Skills Library
 
-### Identity & OAuth
+### IdentityServer Core
 
 | Skill | Description |
 |-------|-------------|
 | `identityserver-configuration` | IdentityServer host configuration — clients, resources, scopes, signing credentials, server-side sessions |
-| `identityserver-stores` | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations |
+| `identityserver-hosting-setup` | Setting up and hosting IdentityServer — DI registration, middleware pipeline, hosting patterns, license configuration, ASP.NET Identity integration |
+| `identityserver-clients-resources` | Configuring clients and resources — client types (M2M, interactive, SPA), grant types, API Scopes vs API Resources vs Identity Resources, secret management |
+| `identityserver-stores` | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations, caching, multi-tenant patterns |
+| `identityserver-data-storage` | Data persistence with EF Core — configuration stores, operational stores, caching, token cleanup, custom stores, database migrations |
+| `identityserver-sessions-providers` | Server-side sessions — session management and querying, inactivity timeout, dynamic identity providers, CIBA |
+| `identityserver-ui-flows` | Login, logout, consent, error pages — IIdentityServerInteractionService, external provider integration, Home Realm Discovery |
+
+### IdentityServer Advanced
+
+| Skill | Description |
+|-------|-------------|
+| `identityserver-token-lifecycle` | Token types, refresh token management, token exchange (RFC 8693), extension grants, IProfileService claims, lifetime best practices |
+| `identityserver-token-security` | Advanced token security — DPoP, mTLS certificate binding, Pushed Authorization Requests (PAR), JAR, FAPI 2.0 compliance |
+| `identityserver-key-management` | Signing key management — automatic key management, KeyManagementOptions, data protection at rest, static keys, multi-instance deployment |
+| `identityserver-api-protection` | Protecting APIs — JWT bearer authentication, reference token introspection, scope-based authorization, DPoP/mTLS validation, local API authentication |
+| `identityserver-deployment` | Production deployment — reverse proxy, data protection, health checks, distributed caching, multi-instance, OpenTelemetry, logging |
 | `identityserver-saml` | SAML 2.0 Identity Provider — service provider setup, endpoints, attribute mapping, signing behavior |
-| `identityserver-dcr` | Dynamic Client Registration — endpoint setup, validation, software statements, client stores |
+| `identityserver-dcr` | Dynamic Client Registration — endpoint setup, authorization policies, custom validation, software statements, client configuration stores |
 | `identityserver-aspire` | Aspire AppHost orchestration — dependency graphs, authority URL wiring, health checks, multi-instance |
+
+### OAuth, Tokens & Claims
+
+| Skill | Description |
+|-------|-------------|
 | `oauth-oidc-protocols` | OAuth 2.0 and OpenID Connect fundamentals — flows, PKCE, discovery, JWKS, introspection |
-| `duende-bff` | Backend-for-Frontend security framework for SPAs — session management, API proxying, token management |
-| `token-management` | Token lifecycle with Duende.AccessTokenManagement — caching, refresh, DPoP, HttpClientFactory integration |
-| `identity-testing-patterns` | Testing IdentityServer integrations — WebApplicationFactory, mock token issuance, protocol validation |
-| `claims-authorization` | Claims-based authorization — policies, requirement handlers, resource-based authz, claims transformation |
-| `identity-security-hardening` | Security hardening — key rotation, HTTPS, CORS, CSP, rate limiting, token lifetime tuning |
-| `aspnetcore-authentication` | ASP.NET Core authentication middleware — OIDC, JWT Bearer, cookies, schemes, external providers |
-| `aspnetcore-authorization` | ASP.NET Core authorization — policies, IAuthorizationHandler, scope-based API authz, minimal APIs |
+| `token-management` | Token management with Duende.AccessTokenManagement — caching, refresh, DPoP, HttpClientFactory integration |
+| `accesstokenmanagement-usage` | Automatic token lifecycle management — user token management with OIDC, client credentials flows, token caching, Blazor Server support |
+| `claims-authorization` | Claims transformation and profile service patterns — IProfileService, IClaimsTransformation, claim type mapping, token claim filtering |
 
-### Testing & Quality
+### BFF & Frontend Security
 
 | Skill | Description |
 |-------|-------------|
-| `aspire-integration-testing` | Integration testing with Aspire — DistributedApplication, OAuth test patterns, auth bypass strategies |
-| `playwright-blazor` | End-to-end testing with Playwright for Blazor — authentication flows, OAuth redirect mocking |
-| `snapshot-testing` | Snapshot testing with Verify — IdentityServer protocol response snapshots, token structure validation |
+| `duende-bff` | Duende BFF security framework for SPAs — session management, API endpoint proxying, token management, anti-forgery protection |
+| `bff-pattern` | BFF pattern with Duende.BFF — architecture, OIDC integration, session management, local and remote API proxying, YARP integration, Blazor support |
 
-### .NET Ecosystem (Identity-Focused)
+### ASP.NET Core Auth
 
 | Skill | Description |
 |-------|-------------|
-| `project-structure` | Solution and project structure — IdentityServer solution layout, Duende package grouping, MSBuild |
-| `local-tools` | Local .NET tools — dotnet-ef migrations for IdentityServer stores, dotnet user-jwts, CSharpier |
-| `package-management` | NuGet package management — Duende package version variables, Central Package Management |
+| `aspnetcore-authentication` | Authentication middleware — OIDC, JWT Bearer, cookies, schemes, challenge/forbid flows, external providers |
+| `aspnetcore-authorization` | Authorization patterns — policies, IAuthorizationHandler, scope-based API authz, minimal APIs |
+| `identity-security-hardening` | Security hardening — key rotation, HTTPS, CORS, CSP, rate limiting, token lifetime tuning, audit patterns |
 
-> **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, database performance, Aspire configuration, dependency injection, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
+### Testing
+
+| Skill | Description |
+|-------|-------------|
+| `identity-testing-patterns` | Testing IdentityServer integrations — WebApplicationFactory, mock token issuance, test authority, protocol validation |
+
+> **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, Aspire integration testing, Playwright, snapshot testing, project structure, local tools, package management, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
 
 ---
 
@@ -153,7 +174,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (19 skills total)
+│   └── ... (25 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh
@@ -189,11 +210,11 @@ Based on [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), Copyri
 [identity-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any identity/auth/.NET work.
 |flow:{skim repo patterns -> consult identity-skills by name -> implement smallest-change -> note conflicts}
 |route:
-|identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-dcr,identityserver-saml,identityserver-stores}
-|oauth:{claims-authorization,oauth-oidc-protocols,token-management}
-|aspnetcore:{aspire-integration-testing,aspnetcore-authentication,aspnetcore-authorization}
-|testing:{identity-testing-patterns,playwright-blazor-testing,snapshot-testing}
-|dotnet:{dotnet-local-tools,package-management,dotnet-project-structure}
+|identity:{bff-pattern,duende-bff,identity-security-hardening,identityserver-api-protection,identityserver-aspire,identityserver-clients-resources,identityserver-configuration,identityserver-data-storage,identityserver-dcr,identityserver-deployment,identityserver-hosting-setup,identityserver-key-management,identityserver-saml,identityserver-sessions-providers,identityserver-stores,identityserver-token-lifecycle,identityserver-token-security,identityserver-ui-flows}
+|oauth:{accesstokenmanagement-usage,claims-authorization,oauth-oidc-protocols,token-management}
+|aspnetcore:{aspnetcore-authentication,aspnetcore-authorization}
+|testing:{identity-testing-patterns}
+|dotnet:{}
 |agents:{dotnet-benchmark-designer,dotnet-concurrency-specialist,dotnet-performance-analyst,identity-server-specialist,oauth-oidc-specialist}
 ```
 <!-- END IDENTITY-SKILLS COMPRESSED INDEX -->
