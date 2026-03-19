@@ -1,6 +1,6 @@
 # Duende IdentityServer Skills for Claude Code
 
-A Claude Code plugin with **28 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
+A Claude Code plugin with **30 skills** and **5 specialized agents** for Duende IdentityServer and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende BFF, token management, ASP.NET Core authentication and authorization, and the .NET ecosystem skills needed to build production-grade identity infrastructure.
 
 ## Installation
 
@@ -67,6 +67,8 @@ cp /tmp/identity-skills/agents/*.md ~/.config/opencode/agents/
 |-------|-------------|
 | `identityserver-configuration` | IdentityServer host configuration — clients, resources, scopes, signing credentials, server-side sessions |
 | `identityserver-stores` | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations |
+| `identityserver-saml` | SAML 2.0 Identity Provider — service provider setup, endpoints, attribute mapping, signing behavior |
+| `identityserver-dcr` | Dynamic Client Registration — endpoint setup, validation, software statements, client stores |
 | `identityserver-aspire` | Aspire AppHost orchestration — dependency graphs, authority URL wiring, health checks, multi-instance |
 | `oauth-oidc-protocols` | OAuth 2.0 and OpenID Connect fundamentals — flows, PKCE, discovery, JWKS, introspection |
 | `duende-bff` | Backend-for-Frontend security framework for SPAs — session management, API proxying, token management |
@@ -166,7 +168,7 @@ identity-skills/
 │   ├── oauth-oidc-protocols/
 │   ├── aspnetcore-authentication/
 │   ├── duende-bff/
-│   └── ... (28 skills total)
+│   └── ... (30 skills total)
 ├── scripts/
 │   ├── validate-marketplace.sh
 │   └── generate-skill-index-snippets.sh
@@ -200,7 +202,7 @@ Based on [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills), Copyri
 [identity-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any identity/auth/.NET work.
 |flow:{skim repo patterns -> consult identity-skills by name -> implement smallest-change -> note conflicts}
 |route:
-|identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-stores}
+|identity:{duende-bff,identity-security-hardening,identityserver-aspire,identityserver-configuration,identityserver-dcr,identityserver-saml,identityserver-stores}
 |oauth:{claims-authorization,oauth-oidc-protocols,token-management}
 |aspnetcore:{aspire-configuration,aspire-integration-testing,aspire-service-defaults,aspnetcore-authentication,aspnetcore-authorization}
 |csharp:{api-design,modern-csharp-coding-standards,csharp-concurrency-patterns,type-design-performance}

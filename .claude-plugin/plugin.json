@@ -26,6 +26,8 @@
     "./skills/identity-testing-patterns",
     "./skills/identityserver-aspire",
     "./skills/identityserver-configuration",
+    "./skills/identityserver-dcr",
+    "./skills/identityserver-saml",
     "./skills/identityserver-stores",
     "./skills/local-tools",
     "./skills/microsoft-extensions-configuration",
