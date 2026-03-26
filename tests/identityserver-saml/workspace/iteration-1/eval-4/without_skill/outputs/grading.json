@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Mentions DefaultClockSkew as the relevant setting", "pass": false, "rationale": "Mentions 'MaxClockSkew' on a generic Saml2Options, not the specific 'DefaultClockSkew' setting."},
-    {"assertion": "Shows configuration via options.Saml.DefaultClockSkew", "pass": false, "rationale": "Uses Saml2Options.MaxClockSkew instead of the correct options.Saml.DefaultClockSkew path."},
-    {"assertion": "Suggests increasing the value beyond the default 5 minutes", "pass": true, "rationale": "Suggests increasing from 5 minutes to 10 minutes."},
-    {"assertion": "Does NOT suggest changes to the OIDC/OAuth configuration — this is SAML-specific", "pass": false, "rationale": "Suggests changing options.Authentication.CookieLifetime which is an OIDC/cookie configuration, not SAML-specific."}
+    {
+      "assertion": "Mentions DefaultClockSkew as the relevant setting",
+      "pass": false,
+      "rationale": "Does not mention DefaultClockSkew. Uses 'AllowedClockSkew' in a generic SamlOptions configure block."
+    },
+    {
+      "assertion": "Shows configuration via options.Saml.DefaultClockSkew",
+      "pass": false,
+      "rationale": "Does not show options.Saml.DefaultClockSkew. Shows a generic Configure<SamlOptions> approach instead."
+    },
+    {
+      "assertion": "Suggests increasing the value beyond the default 5 minutes",
+      "pass": true,
+      "rationale": "Suggests AllowedClockSkew of 10 minutes, which is beyond 5 minutes."
+    },
+    {
+      "assertion": "Does NOT suggest changes to the OIDC/OAuth configuration \u2014 this is SAML-specific",
+      "pass": false,
+      "rationale": "Suggests changing options.Authentication.CookieLifetime and CookieSlidingExpiration, which are OIDC/auth cookie settings, not SAML-specific."
+    }
   ],
   "pass_count": 1,
   "total_count": 4,

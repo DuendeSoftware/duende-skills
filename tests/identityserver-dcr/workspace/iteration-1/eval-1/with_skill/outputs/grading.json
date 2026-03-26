@@ -1,1 +1,34 @@
-{"eval_id":1,"variant":"with_skill","assertions":[{"assertion":"Adds or references the Duende.IdentityServer.Configuration NuGet package","pass":true,"rationale":"Shows 'dotnet add package Duende.IdentityServer.Configuration' command"},{"assertion":"Calls AddIdentityServerConfiguration() on the service collection","pass":true,"rationale":"Code includes 'builder.Services.AddIdentityServerConfiguration()'"},{"assertion":"Calls MapDynamicClientRegistration() to map the DCR endpoint","pass":true,"rationale":"Code includes 'app.MapDynamicClientRegistration()'"},{"assertion":"Mentions that DCR requires Business Edition or higher license","pass":true,"rationale":"States 'Business Edition or higher is required' explicitly"},{"assertion":"The MapDynamicClientRegistration() call includes RequireAuthorization() or the response warns about securing the endpoint","pass":true,"rationale":"Code shows '.RequireAuthorization(\"dcr\")' and warns about securing the endpoint"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration NuGet package",
+      "pass": true,
+      "rationale": "Shows dotnet add package Duende.IdentityServer.Configuration"
+    },
+    {
+      "assertion": "Calls AddIdentityServerConfiguration() on the service collection",
+      "pass": true,
+      "rationale": "Code shows builder.Services.AddIdentityServerConfiguration()"
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() to map the DCR endpoint",
+      "pass": true,
+      "rationale": "Code shows app.MapDynamicClientRegistration()"
+    },
+    {
+      "assertion": "Mentions that DCR requires Business Edition or higher license",
+      "pass": true,
+      "rationale": "Explicit note about Business Edition requirement"
+    },
+    {
+      "assertion": "The MapDynamicClientRegistration() call includes RequireAuthorization() or the response warns about securing the endpoint",
+      "pass": true,
+      "rationale": "RequireAuthorization() is chained on MapDynamicClientRegistration()"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

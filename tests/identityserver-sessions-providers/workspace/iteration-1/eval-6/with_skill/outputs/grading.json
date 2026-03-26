@@ -5,27 +5,27 @@
     {
       "assertion": "The kiosk.app client AllowedGrantTypes includes Ciba or 'urn:openid:params:grant-type:ciba'",
       "pass": true,
-      "rationale": "Code shows `AllowedGrantTypes = GrantTypes.Ciba` on the kiosk.app client."
+      "rationale": "Uses GrantType.Ciba in AllowedGrantTypes."
     },
     {
       "assertion": "Code includes an implementation of IBackchannelAuthenticationUserValidator that processes login_hint",
       "pass": true,
-      "rationale": "Code defines `CibaUserValidator : IBackchannelAuthenticationUserValidator` with `ValidateRequestAsync` that checks `context.LoginHint` and returns a ClaimsPrincipal with sub claim."
+      "rationale": "CibaUserValidator implements IBackchannelAuthenticationUserValidator and checks context.LoginHint."
     },
     {
       "assertion": "Code includes an implementation of IBackchannelAuthenticationUserNotificationService",
       "pass": true,
-      "rationale": "Code defines `CibaUserNotificationService : IBackchannelAuthenticationUserNotificationService` with `SendLoginRequestAsync` method."
+      "rationale": "CibaNotificationService implements IBackchannelAuthenticationUserNotificationService."
     },
     {
       "assertion": "Both CIBA interfaces are registered in the DI container",
       "pass": true,
-      "rationale": "Code shows both `builder.Services.AddTransient<IBackchannelAuthenticationUserValidator, CibaUserValidator>()` and `builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, CibaUserNotificationService>()`."
+      "rationale": "Both AddTransient registrations shown for validator and notification service."
     },
     {
       "assertion": "Response mentions that CIBA requires the Enterprise Edition",
       "pass": true,
-      "rationale": "Response states: 'CIBA requires the Duende IdentityServer Enterprise Edition.'"
+      "rationale": "States 'Enterprise Edition required for CIBA' prominently."
     }
   ],
   "pass_count": 5,

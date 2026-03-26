@@ -1,109 +1,122 @@
 # Moving SAML Service Providers to a Production Store
 
-## Why Move Away from In-Memory?
+In-memory stores (`AddInMemorySamlServiceProviders`) are fine for development and testing, but **not suitable for production** — they don't persist across restarts and can't be updated dynamically.
 
-`AddInMemorySamlServiceProviders` is fine for development and testing, but **not suitable for production** because:
-- Service provider configurations are lost on application restart
-- Changes require redeployment
-- Cannot be managed dynamically
+For production, implement a custom `ISamlServiceProviderStore` backed by EF Core and register it with `AddSamlServiceProviderStore<T>()`.
 
-For production, implement a custom `ISamlServiceProviderStore` backed by a persistent store like EF Core.
-
-## Custom ISamlServiceProviderStore with EF Core
-
-### 1. Create the DbContext
+## Custom Store Implementation
 
 ```csharp
-using Duende.IdentityServer.Models.Saml;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 
-public class SamlDbContext : DbContext
-{
-    public SamlDbContext(DbContextOptions<SamlDbContext> options) : base(options) { }
-
-    public DbSet<SamlServiceProvider> SamlServiceProviders => Set<SamlServiceProvider>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<SamlServiceProvider>(entity =>
-        {
-            entity.HasKey(sp => sp.EntityId);
-            entity.Property(sp => sp.EntityId).HasMaxLength(200);
-            entity.Property(sp => sp.DisplayName).HasMaxLength(200);
-        });
-    }
-}
-```
-
-### 2. Implement ISamlServiceProviderStore
-
-```csharp
-using Duende.IdentityServer.Models.Saml;
-using Duende.IdentityServer.Saml.Stores;
-using Microsoft.EntityFrameworkCore;
-
-public class DatabaseServiceProviderStore : ISamlServiceProviderStore
+public class SamlServiceProviderStore : ISamlServiceProviderStore
 {
     private readonly SamlDbContext _db;
 
-    public DatabaseServiceProviderStore(SamlDbContext db)
+    public SamlServiceProviderStore(SamlDbContext db)
     {
         _db = db;
     }
 
     public async Task<SamlServiceProvider?> FindByEntityIdAsync(
-        string entityId, CancellationToken cancellationToken)
+        string entityId, CancellationToken cancellationToken = default)
     {
-        return await _db.SamlServiceProviders
+        var entity = await _db.ServiceProviders
+            .Include(sp => sp.AssertionConsumerServices)
+            .Include(sp => sp.SigningCertificates)
+            .Include(sp => sp.EncryptionCertificates)
             .FirstOrDefaultAsync(
                 sp => sp.EntityId == entityId,
                 cancellationToken);
+
+        if (entity == null) return null;
+
+        return MapToModel(entity);
+    }
+
+    private static SamlServiceProvider MapToModel(SamlServiceProviderEntity entity)
+    {
+        return new SamlServiceProvider
+        {
+            EntityId = entity.EntityId,
+            DisplayName = entity.DisplayName,
+            AssertionConsumerServiceUrls = entity.AssertionConsumerServices
+                .Select(a => new Uri(a.Url))
+                .ToList(),
+            EncryptAssertions = entity.EncryptAssertions,
+            RequireConsent = entity.RequireConsent,
+            SigningBehavior = entity.SigningBehavior,
+            AllowIdpInitiated = entity.AllowIdpInitiated
+        };
     }
 }
 ```
 
-### 3. Register in Program.cs
+## EF Core DbContext
 
 ```csharp
-// Program.cs
-using Duende.IdentityServer.Models;
-using Microsoft.EntityFrameworkCore;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Register the SAML DbContext
-builder.Services.AddDbContext<SamlDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddIdentityServer(options =>
+public class SamlDbContext : DbContext
 {
-    options.EmitStaticAudienceClaim = true;
-})
-    .AddInMemoryClients(Config.Clients)
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddTestUsers(TestUsers.Users)
+    public SamlDbContext(DbContextOptions<SamlDbContext> options) : base(options) { }
+
+    public DbSet<SamlServiceProviderEntity> ServiceProviders => Set<SamlServiceProviderEntity>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SamlServiceProviderEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.EntityId).IsUnique();
+            entity.HasMany(e => e.AssertionConsumerServices);
+            entity.HasMany(e => e.SigningCertificates);
+            entity.HasMany(e => e.EncryptionCertificates);
+        });
+    }
+}
+
+public class SamlServiceProviderEntity
+{
+    public int Id { get; set; }
+    public string EntityId { get; set; } = default!;
+    public string? DisplayName { get; set; }
+    public bool EncryptAssertions { get; set; }
+    public bool RequireConsent { get; set; }
+    public SamlSigningBehavior SigningBehavior { get; set; }
+    public bool AllowIdpInitiated { get; set; }
+    public List<AssertionConsumerServiceEntity> AssertionConsumerServices { get; set; } = [];
+    public List<CertificateEntity> SigningCertificates { get; set; } = [];
+    public List<CertificateEntity> EncryptionCertificates { get; set; } = [];
+}
+
+public class AssertionConsumerServiceEntity
+{
+    public int Id { get; set; }
+    public string Url { get; set; } = default!;
+}
+
+public class CertificateEntity
+{
+    public int Id { get; set; }
+    public byte[] RawData { get; set; } = default!;
+}
+```
+
+## Registration in Program.cs
+
+```csharp
+builder.Services.AddDbContext<SamlDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SamlDb")));
+
+builder.Services.AddIdentityServer()
     .AddSaml()
-    // Use the custom EF Core-backed store instead of in-memory
-    .AddSamlServiceProviderStore<DatabaseServiceProviderStore>();
-
-builder.Services.AddRazorPages();
-
-var app = builder.Build();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-app.MapRazorPages();
-
-app.Run();
+    .AddSamlServiceProviderStore<SamlServiceProviderStore>();
 ```
 
 ## Key Points
 
-- **`ISamlServiceProviderStore`** is the interface to implement. It has a single method: `FindByEntityIdAsync(string entityId, CancellationToken cancellationToken)`.
-- **`AddSamlServiceProviderStore<T>()`** registers your custom store with IdentityServer, replacing the in-memory store.
-- The `CancellationToken` parameter was added in Duende IdentityServer v8. If you're on v7, omit it.
-- You can seed initial data via EF Core migrations or a separate seed utility.
-- Consider adding caching around the store for high-traffic scenarios.
+- `ISamlServiceProviderStore` has a single method: `FindByEntityIdAsync(string entityId, CancellationToken cancellationToken)`
+- Register with `.AddSamlServiceProviderStore<T>()` — this replaces `AddInMemorySamlServiceProviders`
+- The `CancellationToken` parameter was added in v8 — omit it if targeting v7
+- Design the EF Core schema with proper indexing on `EntityId` for efficient lookups

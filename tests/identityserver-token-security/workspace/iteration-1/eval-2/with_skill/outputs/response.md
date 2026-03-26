@@ -1,22 +1,19 @@
-# Configuring API DPoP Proof Token Validation
+# Configuring API-Side DPoP Validation
 
-To validate DPoP proof tokens in your API, you need the **Duende.AspNetCore.Authentication.JwtBearer** NuGet package, which extends the standard JWT bearer handler with DPoP processing.
+To validate DPoP proof tokens at the API, you need the `Duende.AspNetCore.Authentication.JwtBearer` NuGet package, JWT bearer authentication, DPoP configuration, and a distributed cache for replay detection.
 
-## Install the Package
+## NuGet Package
 
 ```bash
 dotnet add package Duende.AspNetCore.Authentication.JwtBearer
 ```
 
-## API Configuration
+## API Program.cs
 
 ```csharp
-// API Program.cs
-using Duende.AspNetCore.Authentication.JwtBearer;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure JWT bearer authentication
+// JWT Bearer authentication with DPoP
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
@@ -27,12 +24,12 @@ builder.Services.AddAuthentication("token")
     });
 
 // Extend the 'token' scheme with DPoP processing and validation
-// IMPORTANT: This is called on builder.Services (IServiceCollection), NOT inside AddJwtBearer
+// IMPORTANT: This is called on IServiceCollection, NOT inside AddJwtBearer
 builder.Services.ConfigureDPoPTokensForScheme("token");
 
-// DPoP replay detection requires a distributed cache
-// Use in-memory for development only; use Redis, SQL Server, or CosmosDB in production
-builder.Services.AddDistributedMemoryCache();
+// Distributed cache for DPoP replay detection
+// Use Redis, SQL Server, or CosmosDB in production
+builder.Services.AddDistributedMemoryCache(); // in-memory for development only
 
 builder.Services.AddAuthorization();
 
@@ -41,29 +38,33 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/api/protected", () => "Hello from protected API")
+app.MapGet("/api/data", () => "Protected data")
     .RequireAuthorization();
 
 app.Run();
 ```
 
-## How It Works
+## Key Configuration Points
 
-`ConfigureDPoPTokensForScheme("token")` registers middleware that:
+### `ConfigureDPoPTokensForScheme`
+This is an extension method from the `Duende.AspNetCore.Authentication.JwtBearer` package. It extends the JWT bearer handler to:
+1. Accept the `DPoP` authorization scheme (in addition to `Bearer`)
+2. Validate the DPoP proof JWT from the `DPoP` HTTP header
+3. Verify the `cnf.jkt` claim in the access token matches the proof key
+4. Check the HTTP method and URL in the proof match the actual request
+5. Detect replay attacks using the distributed cache
 
-1. Validates the access token normally via the JWT bearer handler.
-2. Extracts the DPoP proof token from the `DPoP` HTTP request header.
-3. Validates the JWT format and signature of the proof token.
-4. Verifies the `cnf.jkt` claim in the access token matches the public key in the DPoP proof.
-5. Validates the HTTP method and URL in the proof match the actual request.
-6. Checks for replay attacks using the distributed cache (stores `jti` values).
-7. Manages nonce generation and validation.
-8. Handles clock skew between the client and API.
-9. Returns appropriate `WWW-Authenticate` error response headers when validation fails.
+**Important**: `ConfigureDPoPTokensForScheme` is called on `builder.Services` (IServiceCollection), **not** inside the `AddJwtBearer` lambda. This is a common mistake.
 
-## Key Points
+### Distributed Cache
+DPoP replay detection requires `IDistributedCache`. Without it, an attacker could replay captured DPoP proofs. In production, use a durable distributed cache like Redis:
 
-- `ConfigureDPoPTokensForScheme` is called on `builder.Services` (the `IServiceCollection`), **not** inside the `AddJwtBearer` configuration lambda. This is a common mistake.
-- The `IDistributedCache` is critical — without it, DPoP replay detection doesn't work. In production, use a durable distributed cache like Redis (`AddStackExchangeRedisCache`) or SQL Server (`AddDistributedSqlServerCache`).
-- `ValidTypes = new[] { "at+jwt" }` ensures only JWT access tokens (per RFC 9068) are accepted.
-- The API automatically handles both `DPoP` and `Bearer` authorization schemes when DPoP is not required by the client. If the client requires DPoP (`RequireDPoP = true`), only `DPoP` scheme tokens are issued.
+```csharp
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+});
+```
+
+### ValidTypes
+Setting `ValidTypes` to `["at+jwt"]` ensures the API only accepts JWT access tokens (per RFC 9068), rejecting identity tokens or other JWT types.

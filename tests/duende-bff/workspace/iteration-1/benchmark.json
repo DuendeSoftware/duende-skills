@@ -1,52 +1,132 @@
 {
-  "metadata": {"skill_name": "duende-bff", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "duende-bff",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 50, "passed": 50, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 50, "passed": 32, "failed": 18, "pass_rate": 64.0},
-    "delta": {"assertions_improved": 18, "delta_pass_rate": 36.0}
+    "with_skill": {
+      "total_assertions": 50,
+      "passed": 50,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 50,
+      "passed": 22,
+      "failed": 28,
+      "pass_rate": 44.0
+    },
+    "delta": {
+      "assertions_improved": 28,
+      "delta_pass_rate": 56.0
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
       "delta": 0.4,
       "without_skill_failures": [
         "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
-        "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead"
+        "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() \u2014 uses the v4 fluent API instead"
       ]
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
       "without_skill_failures": [
+        "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection",
         "Calls AddRemoteApis() on the BFF builder",
         "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)"
       ]
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0.0
+      },
+      "delta": 1.0,
       "without_skill_failures": [
         "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
-        "Calls AddSessionCleanupBackgroundProcess()"
+        "Configures UseSqlServer with the connection string from configuration",
+        "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+        "Calls AddSessionCleanupBackgroundProcess()",
+        "Warns against or does NOT use in-memory sessions for production"
       ]
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "delta": 0.0,
-      "without_skill_failures": []
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Shows 401 response handling that redirects to /bff/login",
+        "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls"
+      ]
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
       "without_skill_failures": [
         "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor"
@@ -54,15 +134,37 @@
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
       "without_skill_failures": [
         "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions"
@@ -70,17 +172,42 @@
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
       "without_skill_failures": [
-        "Both API endpoints use .AsBffApiEndpoint() for CSRF protection"
+        "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+        "Shows GetUserAccessTokenAsync for the manual pattern",
+        "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+        "Mentions that token refresh is handled automatically by AccessTokenManagement"
       ]
     },
     {
       "eval_id": 9,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
       "delta": 0.6,
       "without_skill_failures": [
         "Output does NOT contain 'MapBffManagementEndpoints'",
@@ -90,10 +217,22 @@
     },
     {
       "eval_id": 10,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
-      "delta": 0.6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
       "without_skill_failures": [
+        "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'",
         "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
         "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
         "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'"
@@ -101,8 +240,19 @@
     },
     {
       "eval_id": 11,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
       "delta": 0.75,
       "without_skill_failures": [
         "Server-side code contains '.AddBffBlazorClient()' in the service configuration",

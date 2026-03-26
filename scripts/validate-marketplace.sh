@@ -104,6 +104,36 @@ while IFS= read -r file; do
     fi
 done < <(find "$REPO_ROOT/skills" -name "SKILL.md" 2>/dev/null)
 
+# Check that sub-documents referenced in SKILL.md files actually exist
+echo ""
+echo "Checking sub-document references..."
+sub_doc_ok=0
+sub_doc_missing=0
+while IFS= read -r skill_file; do
+    skill_dir=$(dirname "$skill_file")
+    # Extract markdown links from the Sub-Documents section: [text](docs/filename.md)
+    if grep -q "## Sub-Documents" "$skill_file" 2>/dev/null; then
+        # Extract all links pointing to docs/
+        while IFS= read -r sub_doc_path; do
+            full_sub_doc="$skill_dir/$sub_doc_path"
+            if [ -f "$full_sub_doc" ]; then
+                sub_doc_ok=$((sub_doc_ok + 1))
+            else
+                skill_name=$(grep "^name:" "$skill_file" | head -1 | sed 's/^name: *//')
+                echo -e "${RED}ERROR: Missing sub-document '$sub_doc_path' referenced in $skill_name${NC}"
+                echo -e "${RED}       Expected: $full_sub_doc${NC}"
+                ((++errors))
+                sub_doc_missing=$((sub_doc_missing + 1))
+            fi
+        done < <(grep -oE '\(docs/[^)]+\.md\)' "$skill_file" | tr -d '()')
+    fi
+done < <(find "$REPO_ROOT/skills" -name "SKILL.md" 2>/dev/null)
+if [ $sub_doc_ok -gt 0 ] || [ $sub_doc_missing -gt 0 ]; then
+    echo -e "${GREEN}Sub-documents: $sub_doc_ok OK, $sub_doc_missing missing${NC}"
+else
+    echo -e "${GREEN}No sub-documents defined${NC}"
+fi
+
 # Check for unregistered agents
 echo ""
 echo "Checking for unregistered agents..."

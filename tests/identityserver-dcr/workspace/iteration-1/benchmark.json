@@ -1,1 +1,179 @@
-{"metadata":{"skill_name":"identityserver-dcr","iteration":1,"model":"claude-opus-4-20250514","date":"2026-03-23"},"summary":{"with_skill":{"total_assertions":39,"passed":39,"failed":0,"pass_rate":100.0},"without_skill":{"total_assertions":39,"passed":36,"failed":3,"pass_rate":92.3},"delta":{"assertions_improved":3,"delta_pass_rate":7.7}},"evals":[{"eval_id":1,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":4,"failed":1,"total":5,"pass_rate":0.8},"delta":0.2,"without_skill_failures":["Mentions that DCR requires Business Edition or higher license"]},{"eval_id":2,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":3,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":4,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":5,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":2,"failed":2,"total":4,"pass_rate":0.5},"delta":0.5,"without_skill_failures":["Adds or references the Duende.IdentityServer.Configuration.EntityFramework NuGet package","Calls AddClientConfigurationStore() on the IdentityServer configuration builder"]},{"eval_id":6,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":7,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":8,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]}]}
+{
+  "metadata": {
+    "skill_name": "identityserver-dcr",
+    "iteration": 1,
+    "model": "claude-opus-4.6",
+    "date": "2026-03-19"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 39,
+      "passed": 39,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 39,
+      "passed": 35,
+      "failed": 4,
+      "pass_rate": 0.9
+    },
+    "delta": {
+      "assertions_improved": 4,
+      "delta_pass_rate": 0.1
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": "DCR setup with NuGet, services, and endpoint",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Mentions that DCR requires Business Edition or higher license",
+        "The MapDynamicClientRegistration() call includes RequireAuthorization() or the response warns about securing the endpoint"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": "Securing DCR with JWT Bearer auth",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": "Custom DCR validator for grant types/HTTPS/PKCE",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": "Software statement validation",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": "EF-backed client configuration store",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": "Custom IClientConfigurationStore for MongoDB",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Mentions that client secrets should be stored securely (hashed, not plaintext)"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": "Separate DCR host configuration",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": "DCR security hardening guide",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Mentions that client secrets must be stored securely (hashed, not plaintext)"
+      ]
+    }
+  ]
+}

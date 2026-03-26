@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping", "pass": true, "rationale": "The response includes 'options.MapInboundClaims = false;' inside the AddOpenIdConnect configuration with a comment explaining it prevents XML URI mapping."},
-    {"assertion": "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates", "pass": true, "rationale": "The response includes 'options.Scope.Clear();' before adding openid, profile, and api1 scopes."},
-    {"assertion": "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme", "pass": true, "rationale": "The response sets options.DefaultScheme = \"Cookies\" and options.DefaultChallengeScheme = \"oidc\"."},
-    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline", "pass": true, "rationale": "The response shows app.UseAuthentication() followed by app.UseAuthorization() in correct order."},
-    {"assertion": "Program.cs sets ResponseType to 'code' for authorization code flow", "pass": true, "rationale": "The response includes 'options.ResponseType = \"code\";' with a comment about authorization code flow."}
+    {
+      "assertion": "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping",
+      "pass": true,
+      "rationale": "The code explicitly sets options.MapInboundClaims = false on the OIDC handler with a comment explaining it prevents XML claim type mapping."
+    },
+    {
+      "assertion": "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates",
+      "pass": true,
+      "rationale": "The code calls options.Scope.Clear() then adds openid, profile, and api1 individually."
+    },
+    {
+      "assertion": "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme",
+      "pass": true,
+      "rationale": "DefaultScheme = 'Cookies' and DefaultChallengeScheme = 'oidc' are set."
+    },
+    {
+      "assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "UseAuthentication() appears before UseAuthorization() in the middleware pipeline."
+    },
+    {
+      "assertion": "Program.cs sets ResponseType to 'code' for authorization code flow",
+      "pass": true,
+      "rationale": "ResponseType = \"code\" is explicitly set with a comment about authorization code flow."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

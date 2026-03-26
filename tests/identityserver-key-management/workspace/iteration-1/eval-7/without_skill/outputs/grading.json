@@ -2,12 +2,28 @@
   "eval_id": 7,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances", "pass": true, "rationale": "Response explains 'the data protection keys used to encrypt your signing keys aren't being shared properly across instances' and that 'Each instance in the load balancer is using its own set of data protection keys'"},
-    {"assertion": "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)", "pass": true, "rationale": "Code calls builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(\"/shared/dataprotection-keys\"))"},
-    {"assertion": "Program.cs includes SetApplicationName() to ensure a consistent application name across instances", "pass": true, "rationale": "Code calls .SetApplicationName(\"IdentityServer\") on the data protection builder"},
-    {"assertion": "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation", "pass": false, "rationale": "Response does not mention switching from the default file-based signing key storage to a shared store. It only addresses data protection keys, not the IdentityServer signing key storage itself. There is no mention of AddOperationalStore or configuring KeyPath for shared access."}
+    {
+      "assertion": "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances",
+      "pass": true,
+      "rationale": "Explains the cause correctly."
+    },
+    {
+      "assertion": "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)",
+      "pass": true,
+      "rationale": "Adds PersistKeysToFileSystem with a shared path."
+    },
+    {
+      "assertion": "Program.cs includes SetApplicationName() to ensure a consistent application name across instances",
+      "pass": true,
+      "rationale": "Calls SetApplicationName(\"IdentityServer\")."
+    },
+    {
+      "assertion": "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation",
+      "pass": true,
+      "rationale": "Mentions using a shared store like a database or Redis for signing keys."
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 4,
   "total_count": 4,
-  "score": 0.75
+  "score": 1.0
 }

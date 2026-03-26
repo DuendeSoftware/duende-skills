@@ -1,38 +1,57 @@
-# Persisted Grants Cannot Be Decrypted After .NET Upgrade
+# Persisted Grants Decryption Failure After .NET Upgrade
 
 ## Root Cause: ASP.NET Core Data Protection
 
-The root cause of your decryption failure is **ASP.NET Core Data Protection**. IdentityServer uses Data Protection to encrypt the `Data` column in persisted grants. When the Data Protection configuration changes between .NET versions, previously encrypted data becomes unreadable.
+The issue is caused by **ASP.NET Core Data Protection**. IdentityServer uses Data Protection to encrypt the `Data` column in persisted grants (refresh tokens, authorization codes, etc.). When Data Protection can no longer decrypt previously encrypted data, those grants become unreadable.
 
-## What Changed
+## Why This Happened
 
-The **default application name** (also called the application discriminator or content root path discriminator) **changed between .NET versions**:
+ASP.NET Core Data Protection uses an **application discriminator** (application name) to isolate encryption keys between applications. By default, the application name is derived from the **content root path**.
 
-- **.NET 3.1–5**: Content root path **without** trailing path separator
-- **.NET 6**: Content root path **with** trailing path separator (breaking change)
-- **.NET 7+**: Content root path **without** trailing path separator
+The default content root path changed between .NET versions:
 
-Since you upgraded from .NET 6 to .NET 8, the default application discriminator changed from the content root path with a trailing separator (`.NET 6`) to without one (`.NET 8`). This means Data Protection treats the .NET 8 instance as a different application, isolating it from the keys generated under .NET 6.
+| .NET Version | Default Content Root |
+|-------------|---------------------|
+| .NET Core 3.1 – .NET 5 | Content root path **without** trailing separator |
+| .NET 6 | Content root path **with** trailing separator (breaking change!) |
+| .NET 7+ | Content root path **without** trailing separator |
 
-## Fix
+When you upgraded from .NET 6 to .NET 8, the default application discriminator changed (or if you went from .NET 3.1 to .NET 6 to .NET 8, it flipped twice). This means Data Protection treats the pre-upgrade and post-upgrade instances as **different applications**, and the encryption keys from the old instance are not used by the new instance — even if they're still physically present.
 
-Call `SetApplicationName()` on `AddDataProtection()` with an explicit, fixed application name that will remain stable across .NET version upgrades:
+## The Fix
+
+### Step 1: Set an Explicit Application Name
+
+Add `SetApplicationName()` to your Data Protection configuration with an explicit, stable value:
 
 ```csharp
 builder.Services.AddDataProtection()
-    .PersistKeysToDbContext<DataProtectionKeyContext>() // or your persistent store
-    .SetApplicationName("YourIdentityServer");         // explicit, stable name
+    .SetApplicationName("YourIdentityServer")  // Must match across all instances and versions
+    .PersistKeysToDbContext<DataProtectionKeyContext>();  // Or your chosen key storage
 ```
 
-This ensures Data Protection uses a consistent application discriminator regardless of the .NET version or hosting path.
+The application name you choose doesn't matter as long as it's:
+- **Consistent** across all deployed instances
+- **Stable** across .NET version upgrades
+- **The same** as what the old deployment was using (or you accept that old data is lost)
 
-## Ensure Old Keys Are Accessible
+### Step 2: Ensure Old Data Protection Keys Are Still Available
 
-You must also ensure that the **old Data Protection keys are still accessible** — not deleted or rotated away. Data Protection needs the original key ring to decrypt data that was encrypted with those keys. If you are using:
+Data Protection uses encryption keys stored in a key ring. If these keys have been deleted or are inaccessible, the data they encrypted cannot be recovered regardless of the application name fix.
 
-- **File system key storage**: Ensure the key XML files from the old deployment are still present in the key directory.
-- **Database storage** (`PersistKeysToDbContext`): Ensure the key rows haven't been purged.
-- **Azure Blob Storage**: Ensure the blob hasn't been overwritten.
-- **Default (ephemeral/in-memory)**: If no persistent store was configured, keys were lost when the old process stopped — and the encrypted data is unfortunately unrecoverable. Configure a persistent key store going forward.
+Verify that:
+- The old Data Protection key files (XML files) are still present if using file-based storage
+- The old key rows are still in the database if using `PersistKeysToDbContext`
+- No key cleanup or rotation has removed the old keys
+- The key ring is accessible from the new deployment (same file path, same database, same Azure Blob container, etc.)
 
-After setting the application name and confirming key availability, restart IdentityServer and your persisted grants should decrypt successfully.
+### Step 3: If You Can't Recover Old Keys
+
+If the old Data Protection keys are truly gone, the encrypted persisted grants cannot be recovered. In this case:
+- Users with active refresh tokens will need to re-authenticate
+- Authorization codes in flight will fail
+- Clear the orphaned persisted grants from the database
+
+## Prevention for Future Upgrades
+
+Always configure `SetApplicationName()` explicitly — this prevents the issue from recurring on any future .NET version upgrade.

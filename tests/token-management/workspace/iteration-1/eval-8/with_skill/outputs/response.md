@@ -1,55 +1,56 @@
-# gRPC Client with User Access Token
+# gRPC Client with User Access Token — Duende.AccessTokenManagement
 
-To register a gRPC client that automatically attaches the user's access token using Duende.AccessTokenManagement, use `AddGrpcClient<T>()` with the `AddUserAccessTokenHandler()` extension.
+To call a downstream gRPC endpoint using the current user's access token with automatic token management, you need:
+
+1. **Duende.AccessTokenManagement.OpenIdConnect** for user token management
+2. **Grpc.Net.ClientFactory** for gRPC client factory integration
+3. The `.AddUserAccessTokenHandler()` extension on the gRPC client registration
 
 ## Package References
 
 ```xml
-<PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" />
-<PackageReference Include="Grpc.Net.ClientFactory" Version="2.67.0" />
+<PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.*" />
+<PackageReference Include="Grpc.Net.ClientFactory" Version="2.*" />
+<PackageReference Include="Google.Protobuf" Version="3.*" />
+<PackageReference Include="Grpc.Tools" Version="2.*" PrivateAssets="All" />
 ```
 
 ## Program.cs
 
 ```csharp
-using Duende.AccessTokenManagement;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Authentication: cookie + OIDC ──
+// Authentication setup (cookie + OIDC)
 builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "cookie";
+    options.DefaultChallengeScheme = "oidc";
+})
+.AddCookie("cookie", options =>
+{
+    options.Cookie.Name = "web";
+    options.Events.OnSigningOut = async e =>
     {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie", options =>
-    {
-        options.Cookie.Name = "web";
-        options.Events.OnSigningOut = async e =>
-        {
-            await e.HttpContext.RevokeRefreshTokenAsync();
-        };
-    })
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
+        await e.HttpContext.RevokeRefreshTokenAsync();
+    };
+})
+.AddOpenIdConnect("oidc", options =>
+{
+    options.Authority = "https://sts.example.com";
+    options.ClientId = "webapp";
+    options.ClientSecret = "secret";
+    options.ResponseType = "code";
+    options.Scope.Add("openid");
+    options.Scope.Add("profile");
+    options.Scope.Add("grpc.api");
+    options.Scope.Add("offline_access");
+    options.SaveTokens = true; // Required for user token management
+});
 
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("grpc_api");
-        options.Scope.Add("offline_access");
-
-        options.SaveTokens = true;
-    });
-
-// ── Token management ──
+// Register user token management
 builder.Services.AddOpenIdConnectAccessTokenManagement();
 
-// ── gRPC client with user's access token ──
+// Register typed gRPC client with user access token handler
 builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
 {
     o.Address = new Uri("https://grpc.example.com");
@@ -63,7 +64,7 @@ app.UseAuthorization();
 
 app.MapGet("/greet", async (Greeter.GreeterClient grpcClient) =>
 {
-    // ✅ The user's access token is automatically attached to the gRPC call
+    // Token is attached automatically by the handler
     var reply = await grpcClient.SayHelloAsync(new HelloRequest { Name = "World" });
     return Results.Ok(reply.Message);
 }).RequireAuthorization();
@@ -73,7 +74,25 @@ app.Run();
 
 ## How It Works
 
-- `AddGrpcClient<Greeter.GreeterClient>(...)` registers the typed gRPC client with `HttpClientFactory` and sets the downstream endpoint address.
-- `.AddUserAccessTokenHandler()` chains a delegating handler that reads the current user's access token from the OIDC session (via `AddOpenIdConnectAccessTokenManagement()`) and attaches it as a Bearer token on every outgoing gRPC call.
-- Token refresh is automatic — if the access token has expired and a refresh token is available (`offline_access`), the library refreshes it silently before attaching.
-- This works the same way as `AddUserAccessTokenHandler()` on regular HTTP clients. gRPC clients use `HttpClientFactory` under the hood, so all the same token management handlers apply.
+1. **`AddOpenIdConnectAccessTokenManagement()`** registers the user token management services that handle access token retrieval, caching, and refresh token rotation.
+
+2. **`AddGrpcClient<T>()`** registers the typed gRPC client with the gRPC client factory (from `Grpc.Net.ClientFactory`), specifying the downstream service address.
+
+3. **`.AddUserAccessTokenHandler()`** chains a delegating handler onto the gRPC client's HTTP pipeline that:
+   - Retrieves the current user's access token from the authentication session
+   - Attaches it as a Bearer token to outgoing gRPC requests
+   - Automatically refreshes the token using the refresh token if it has expired
+
+This works identically to how `AddUserAccessTokenHandler()` works on regular HTTP clients — gRPC clients in .NET use `HttpClient` under the hood, so the same delegating handler pattern applies.
+
+## Client Credentials Alternative
+
+If you need machine-to-machine authentication for gRPC (no user context), use `AddClientAccessTokenHandler()` instead:
+
+```csharp
+builder.Services.AddGrpcClient<Inventory.InventoryClient>(o =>
+{
+    o.Address = new Uri("https://grpc.example.com");
+})
+.AddClientAccessTokenHandler();
+```

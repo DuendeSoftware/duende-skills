@@ -1,31 +1,19 @@
-# DPoP with Client Credentials
-
-DPoP (Demonstrating Proof-of-Possession) binds tokens to a client key. Here's how to set it up:
+# DPoP with Token Management
 
 ```csharp
-using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Generate RSA key for DPoP
-var rsaKey = new RsaSecurityKey(RSA.Create(2048));
-var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
-jwk.Alg = "PS256";
-var jwkJson = System.Text.Json.JsonSerializer.Serialize(jwk);
+var dpopKey = builder.Configuration["DPoP:JsonWebKey"];
 
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("catalog-client", client =>
+    .AddClient("my-client", client =>
     {
-        client.TokenEndpoint = new Uri("https://sts.example.com/connect/token");
-        client.ClientId = "catalog-worker";
-        client.ClientSecret = "worker-secret";
-        client.Scope = "catalog:read";
-        client.DPoPJsonWebKey = jwkJson;
+        client.TokenEndpoint = "https://sts.example.com/connect/token";
+        client.ClientId = "my-client-id";
+        client.ClientSecret = "my-client-secret";
+        client.Scope = "api1";
+        client.DPoPJsonWebKey = dpopKey;
     });
-
-var app = builder.Build();
-app.Run();
 ```
 
-This generates an RSA key pair and configures it for DPoP-bound tokens.
+Make sure to load the JWK from configuration rather than generating a new key each time. Generating keys on every restart would invalidate previously bound tokens.

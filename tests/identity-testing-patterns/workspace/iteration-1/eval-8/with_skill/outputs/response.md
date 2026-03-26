@@ -1,10 +1,10 @@
-# Common CI Pitfalls for IdentityServer Integration Tests
+# Common IdentityServer Integration Test Pitfalls in CI
 
 ## 1. Key Management Writes to Disk
 
-The most common CI failure. IdentityServer's automatic key management tries to persist signing keys to the file system, which fails in ephemeral CI environments.
+**Problem:** Automatic key management tries to create and write signing key files to disk. In CI containers, the default path may not be writable.
 
-**Fix:** Disable automatic key management and use a non-persisted developer signing key:
+**Fix:** Disable automatic key management in tests:
 
 ```csharp
 services.AddIdentityServer(options =>
@@ -14,40 +14,38 @@ services.AddIdentityServer(options =>
 .AddDeveloperSigningCredential(persistKey: false);
 ```
 
-- `options.KeyManagement.Enabled = false` prevents automatic key rotation.
-- `AddDeveloperSigningCredential(persistKey: false)` generates a static in-memory key on each test run — no disk writes.
+- `KeyManagement.Enabled = false` — prevents the key management system from running entirely
+- `AddDeveloperSigningCredential(persistKey: false)` — creates an in-memory RSA key without writing `tempkey.jwk` to disk
 
 ## 2. Port Conflicts with localhost:5001
 
-Hard-coding `localhost:5001` in test token requests causes port conflicts in CI where multiple agents run simultaneously.
+**Problem:** Hard-coding `https://localhost:5001` in token requests causes port conflicts when multiple test suites run in parallel, or when another process is already using port 5001.
 
 **Fix:** Use `factory.CreateClient()` and its `BaseAddress`:
 
 ```csharp
-// ❌ WRONG — Port conflicts in CI
-new ClientCredentialsTokenRequest
+// ❌ Hard-coded port — causes conflicts in CI
+var request = new ClientCredentialsTokenRequest
 {
-    Address = "http://localhost:5001/connect/token",
+    Address = "https://localhost:5001/connect/token"
 };
 
-// ✅ CORRECT — Use the factory's base address
+// ✅ Use the factory's base address
 var client = factory.CreateClient();
-new ClientCredentialsTokenRequest
+var request = new ClientCredentialsTokenRequest
 {
-    Address = new Uri(client.BaseAddress!, "connect/token").ToString(),
+    Address = new Uri(client.BaseAddress!, "connect/token").ToString()
 };
 ```
 
-`WebApplicationFactory` uses an in-memory test server — there is no real TCP port binding. The `BaseAddress` property provides the correct URL.
+`WebApplicationFactory` creates an in-memory `TestServer` with its own base address. No network port is opened.
 
-## 3. Shared State Across Parallel Tests
+## 3. Shared HttpClient and ClaimsProvider State
 
-If tests share an `HttpClient` or a `TestClaimsProvider` instance, claims set in one test can bleed into another running in parallel.
+**Problem:** When using `TestAuthHandler` with a shared `TestClaimsProvider`, parallel test execution causes one test's claims to bleed into another test.
 
 **Fix:**
-- Create a fresh `HttpClient` per test or per test class.
-- Reset the `ClaimsProvider` at the start of each test (e.g., in an `IAsyncLifetime.InitializeAsync`):
-
+- Reset the `ClaimsProvider` between tests using `IAsyncLifetime`:
 ```csharp
 public async Task InitializeAsync()
 {
@@ -55,18 +53,24 @@ public async Task InitializeAsync()
     await Task.CompletedTask;
 }
 ```
+- Or create a new `HttpClient` per test if needed.
+- Consider using `[Collection("...")]` to serialize tests that share mutable state.
 
-## 4. Missing Test Environment Configuration
+## 4. Missing `persistKey: false` on Developer Signing Credential
 
-If your `Program.cs` reads configuration that doesn't exist in the test environment (like `Authentication:Authority`), requests may fail with discovery errors.
+**Problem:** `AddDeveloperSigningCredential()` without `persistKey: false` writes a `tempkey.jwk` file to the current directory. In CI, this can fail if the working directory is read-only, or cause conflicts between parallel test runs.
 
-**Fix:** Override the relevant services in `ConfigureTestServices` rather than relying on appsettings.
+**Fix:** Always pass `persistKey: false` in test configurations:
+
+```csharp
+.AddDeveloperSigningCredential(persistKey: false)
+```
 
 ## Summary
 
-| Issue | Fix |
-|-------|-----|
-| Key management disk writes | `options.KeyManagement.Enabled = false` + `AddDeveloperSigningCredential(persistKey: false)` |
+| Pitfall | Fix |
+|---------|-----|
+| Key management disk writes | `KeyManagement.Enabled = false` |
+| Developer key persistence | `AddDeveloperSigningCredential(persistKey: false)` |
 | Port conflicts | Use `factory.CreateClient().BaseAddress` |
-| Shared state | Reset `ClaimsProvider` per test, don't share `HttpClient` |
-| Config mismatches | Override in `ConfigureTestServices` |
+| Shared test state | Reset `ClaimsProvider` per test; use `IAsyncLifetime` |

@@ -1,36 +1,63 @@
-# Adding IdentityServer Telemetry to Aspire Service Defaults
+# Adding IdentityServer OpenTelemetry Sources to Aspire Service Defaults
 
-Add IdentityServer's trace sources and metrics to your service defaults project using **string literals only** — do NOT reference any Duende NuGet packages from the shared project.
+In your service defaults project's `Extensions.cs` (or wherever `ConfigureOpenTelemetry` is defined), add the IdentityServer trace sources and meter as string literals:
 
-## Tracing Configuration
-
-In your service defaults `Extensions.cs`, add the IdentityServer activity sources:
+## Tracing
 
 ```csharp
-tracing
-    .AddSource(builder.Environment.ApplicationName)
-    // Duende IdentityServer trace sources (string literals — no Duende package reference)
-    .AddSource("Duende.IdentityServer")
-    .AddSource("Duende.IdentityServer.Cache")
-    .AddSource("Duende.IdentityServer.Services")
-    .AddSource("Duende.IdentityServer.Stores")
-    .AddSource("Duende.IdentityServer.Validation")
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation();
+public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
+{
+    builder.Logging.AddOpenTelemetry(logging =>
+    {
+        logging.IncludeFormattedMessage = true;
+        logging.IncludeScopes = true;
+    });
+
+    builder.Services.AddOpenTelemetry()
+        .WithTracing(tracing =>
+        {
+            tracing
+                .AddSource(builder.Environment.ApplicationName)
+                // Duende IdentityServer trace sources
+                .AddSource("Duende.IdentityServer")
+                .AddSource("Duende.IdentityServer.Cache")
+                .AddSource("Duende.IdentityServer.Services")
+                .AddSource("Duende.IdentityServer.Stores")
+                .AddSource("Duende.IdentityServer.Validation")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation();
+        })
+        .WithMetrics(metrics =>
+        {
+            metrics
+                .AddMeter(builder.Environment.ApplicationName)
+                // Duende IdentityServer meter
+                .AddMeter("Duende.IdentityServer")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation();
+        });
+
+    return builder;
+}
 ```
 
-## Metrics Configuration
+## Source Names
 
-Add the IdentityServer meter:
+### Trace sources (5 total):
+| Source Name | What It Traces |
+|---|---|
+| `Duende.IdentityServer` | Core protocol processing |
+| `Duende.IdentityServer.Cache` | Caching operations |
+| `Duende.IdentityServer.Services` | Service-layer operations (token service, profile service, etc.) |
+| `Duende.IdentityServer.Stores` | Store operations (client store, resource store, etc.) |
+| `Duende.IdentityServer.Validation` | Request validation (token requests, authorize requests, etc.) |
 
-```csharp
-metrics
-    .AddMeter("Duende.IdentityServer")
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation()
-    .AddRuntimeInstrumentation();
-```
+### Meter (1):
+| Meter Name | What It Measures |
+|---|---|
+| `Duende.IdentityServer` | Request counts, token issuance rates, validation results |
 
 ## Why String Literals?
 
-Using string literals instead of constants like `IdentityServerConstants.Tracing.Basic` or `Telemetry.ServiceName` avoids adding a `Duende.IdentityServer` package reference to the shared service defaults project. Only the IdentityServer project itself should reference the Duende package. The service defaults project is shared by all services in the solution.
+All source and meter names are string literals, not constants like `IdentityServerConstants.Tracing.Basic` or `Telemetry.ServiceName`. This is intentional - the service defaults project is shared across all services in the solution, and only the IdentityServer project should reference the Duende.IdentityServer NuGet package. Using string literals avoids adding a Duende package dependency to the shared project.

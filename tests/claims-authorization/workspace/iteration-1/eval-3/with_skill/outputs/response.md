@@ -1,67 +1,64 @@
-# Why 'department' Doesn't Appear in the Access Token
+# Why the 'department' Claim Doesn't Appear in Access Tokens
 
-## Root Cause: Claims Are Opt-In by Scope
+## Root Cause
 
-In Duende IdentityServer, **claims are opt-in by scope**. Even if your `IProfileService` emits a `department` claim, it won't appear in the access token unless:
+Claims in Duende IdentityServer are **opt-in by scope**. Even if your `IProfileService` emits a `department` claim, it won't appear in the access token unless:
 
-1. The claim type is declared in the `UserClaims` collection of an `IdentityResource`, `ApiScope`, or `ApiResource`
+1. The claim type is declared in the `UserClaims` collection of an `ApiScope`, `ApiResource`, or `IdentityResource`
 2. The client requests the scope that contains that claim declaration
 
-Your `IProfileService` uses `context.AddRequestedClaims(claims)`, which filters claims down to only those whose types appear in `context.RequestedClaimTypes`. The `RequestedClaimTypes` collection is built from the `UserClaims` of the scopes the client requested.
+When `IProfileService.GetProfileDataAsync` is called, the `ProfileDataRequestContext.RequestedClaimTypes` contains only claim types from the resources associated with the scopes the client requested. If you use `context.AddRequestedClaims(claims)` (which is the recommended approach), it filters your claims against `RequestedClaimTypes` — so `department` is silently excluded because it's not in the list.
 
-If `department` isn't listed in any scope's `UserClaims`, it won't be in `RequestedClaimTypes`, and `AddRequestedClaims` will filter it out — even though your profile service emitted it.
-
-## The Fix
-
-Add `department` to the `UserClaims` collection on your `ApiScope` (or `ApiResource`):
+## Fix: Declare the Claim on the ApiScope
 
 ```csharp
 public static IEnumerable<ApiScope> ApiScopes =>
 [
     new ApiScope("api1", "My API")
     {
-        UserClaims = { "department" }
+        UserClaims = { "department" }  // Declare that this scope includes the department claim
     }
 ];
 ```
 
-Or on an `ApiResource` if the claim is specific to that API:
+Now when a client requests the `api1` scope, `department` will be included in `RequestedClaimTypes`, and `AddRequestedClaims` will emit it.
+
+## How AddRequestedClaims Works
 
 ```csharp
-new ApiResource("my_api", "My API")
+// In your IProfileService:
+public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
 {
-    Scopes = { "api1" },
-    UserClaims = { "department" }
+    var user = await _users.FindBySubjectIdAsync(context.Subject.GetSubjectId());
+
+    var claims = new List<Claim>
+    {
+        new("department", user.Department),
+        new("name", user.DisplayName),
+    };
+
+    // This ONLY emits claims whose Type is in context.RequestedClaimTypes
+    context.AddRequestedClaims(claims);
+    
+    // If "department" is not in RequestedClaimTypes, it will be silently dropped
 }
 ```
 
-Or on an `IdentityResource` if it's part of the user's identity profile:
-
+`AddRequestedClaims` is essentially:
 ```csharp
-new IdentityResource("department_info", "Department Information", new[] { "department" })
+context.IssuedClaims.AddRange(
+    claims.Where(c => context.RequestedClaimTypes.Contains(c.Type)));
 ```
 
-## Also: Ensure the Client Requests the Scope
+## Also Ensure the Client Requests the Scope
 
-The client must include the scope in its `AllowedScopes` and request it during authorization:
+The client must include `api1` in its `AllowedScopes` and request it at authorization time:
 
 ```csharp
 new Client
 {
     ClientId = "interactive",
-    AllowedScopes = { "openid", "profile", "api1" }, // api1 must be here
+    AllowedScopes = { "openid", "profile", "api1" },  // api1 includes department
     // ...
 }
 ```
-
-## How AddRequestedClaims and RequestedClaimTypes Work
-
-When you call `context.AddRequestedClaims(claims)`, it:
-
-1. Looks at `context.RequestedClaimTypes` — which is populated from the `UserClaims` of all the scopes/resources the client requested
-2. Filters your claims collection to only include claim types present in `RequestedClaimTypes`
-3. Adds the filtered claims to `context.IssuedClaims`
-
-So `AddRequestedClaims` is a convenience method that enforces scope-based claim filtering. If `department` isn't in any requested scope's `UserClaims`, `RequestedClaimTypes` won't contain `"department"`, and the claim is silently dropped.
-
-If you need a claim to always appear regardless of scopes (bypassing this filtering), use `context.IssuedClaims.Add(...)` directly instead.

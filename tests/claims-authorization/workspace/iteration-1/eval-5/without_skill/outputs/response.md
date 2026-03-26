@@ -1,10 +1,14 @@
-# Different Claims for Identity vs Access Tokens
+# Returning Different Claims for Identity vs Access Tokens
 
-You can check what type of token is being generated in your `IProfileService` implementation and return different claims accordingly.
+You can check what type of token is being issued in your `IProfileService` by looking at the context.
 
-## Implementation
+## Profile Service
 
 ```csharp
+using System.Security.Claims;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+
 public class TokenTypeAwareProfileService : IProfileService
 {
     private readonly IUserRepository _users;
@@ -22,7 +26,7 @@ public class TokenTypeAwareProfileService : IProfileService
         var user = await _users.FindBySubjectIdAsync(subjectId);
         if (user == null) return;
 
-        // Check the caller to determine token type
+        // Check if this is for an identity token or access token
         if (context.Caller == "ClaimsProviderIdentityToken")
         {
             // Keep identity tokens small
@@ -30,14 +34,11 @@ public class TokenTypeAwareProfileService : IProfileService
         }
         else
         {
-            // Richer claims for access tokens
-            context.IssuedClaims.AddRange(new[]
-            {
-                new Claim("name", user.DisplayName),
-                new Claim("email", user.Email),
-                new Claim("department", user.Department),
-                new Claim("tenant_id", user.TenantId),
-            });
+            // Access tokens get richer claims
+            context.IssuedClaims.Add(new Claim("name", user.DisplayName));
+            context.IssuedClaims.Add(new Claim("email", user.Email));
+            context.IssuedClaims.Add(new Claim("department", user.Department));
+            context.IssuedClaims.Add(new Claim("role", user.Role));
         }
     }
 
@@ -49,11 +50,8 @@ public class TokenTypeAwareProfileService : IProfileService
 }
 ```
 
-Register it:
-
+Register with:
 ```csharp
 builder.Services.AddIdentityServer()
     .AddProfileService<TokenTypeAwareProfileService>();
 ```
-
-The `context.Caller` property tells you what's requesting the claims, so you can customize the response for each token type.

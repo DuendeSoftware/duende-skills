@@ -1,92 +1,108 @@
-# Blazor Server Token Management
+# Blazor Server Token Expiration Issue
 
-## The Problem
+## What's Happening
 
-In Blazor Server, the `HttpContext` is only available during the initial HTTP request. Once the SignalR circuit is established, `HttpContext` becomes null. If your token management code relies on `HttpContext` (which is the default), token operations will fail after the circuit is set up, leading to 401 errors when tokens expire.
+In Blazor Server, your app runs over a SignalR connection (called a "circuit"). The initial HTTP request has an `HttpContext`, but after the WebSocket connection is established, `HttpContext` is no longer available. This is a well-known Blazor Server limitation.
 
-## Solution
+The default token management relies on the authentication cookie (via `HttpContext`) to read and refresh tokens. Since `HttpContext` is null in the circuit, the library can't access or refresh your tokens, leading to 401 errors when the access token expires.
 
-You need to store tokens outside of the HTTP context so they can be accessed from the circuit. Here's how:
+## Fix
 
-### Program.cs
+You need to store tokens in a persistent store that doesn't depend on `HttpContext`. Here's the approach:
 
-```csharp
-var builder = WebApplication.CreateBuilder(args);
+### 1. Create a Token Store
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie")
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("api1");
-        options.Scope.Add("offline_access");
-        options.SaveTokens = true;
-    });
-
-builder.Services.AddAccessTokenManagement();
-builder.Services.AddHttpContextAccessor();
-
-// Store tokens in a service that can be accessed from the circuit
-builder.Services.AddScoped<TokenProvider>();
-
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
-```
-
-### TokenProvider
+Store tokens in a database or cache that can be accessed without `HttpContext`:
 
 ```csharp
-public class TokenProvider
+public class ServerSideTokenStore : IUserTokenStore
 {
-    public string? AccessToken { get; set; }
-    public string? RefreshToken { get; set; }
-}
-```
+    private readonly IDbContextFactory<AppDbContext> _dbFactory;
 
-### Capturing tokens during initial render
-
-In your `App.razor` or `_Host.cshtml`, capture the tokens during the initial HTTP request:
-
-```csharp
-@inject TokenProvider TokenProvider
-@inject IHttpContextAccessor HttpContextAccessor
-
-@code {
-    protected override async Task OnInitializedAsync()
+    public ServerSideTokenStore(IDbContextFactory<AppDbContext> dbFactory)
     {
-        var httpContext = HttpContextAccessor.HttpContext;
-        if (httpContext != null)
+        _dbFactory = dbFactory;
+    }
+
+    public async Task<UserToken> GetTokenAsync(
+        ClaimsPrincipal user,
+        UserTokenRequestParameters? parameters = null)
+    {
+        var sub = user.FindFirst("sub")?.Value;
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var stored = await db.UserTokens.FindAsync(sub);
+        return new UserToken
         {
-            TokenProvider.AccessToken = await httpContext.GetTokenAsync("access_token");
-            TokenProvider.RefreshToken = await httpContext.GetTokenAsync("refresh_token");
+            AccessToken = stored?.AccessToken,
+            RefreshToken = stored?.RefreshToken,
+            Expiration = stored?.Expiration ?? DateTimeOffset.MinValue
+        };
+    }
+
+    public async Task StoreTokenAsync(
+        ClaimsPrincipal user,
+        UserToken token,
+        UserTokenRequestParameters? parameters = null)
+    {
+        var sub = user.FindFirst("sub")?.Value;
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var stored = await db.UserTokens.FindAsync(sub);
+        if (stored == null)
+        {
+            stored = new StoredUserToken { SubjectId = sub! };
+            db.UserTokens.Add(stored);
+        }
+        stored.AccessToken = token.AccessToken;
+        stored.RefreshToken = token.RefreshToken;
+        stored.Expiration = token.Expiration;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task ClearTokenAsync(
+        ClaimsPrincipal user,
+        UserTokenRequestParameters? parameters = null)
+    {
+        var sub = user.FindFirst("sub")?.Value;
+        using var db = await _dbFactory.CreateDbContextAsync();
+        var stored = await db.UserTokens.FindAsync(sub);
+        if (stored != null)
+        {
+            db.UserTokens.Remove(stored);
+            await db.SaveChangesAsync();
         }
     }
 }
 ```
 
-Then use the `TokenProvider` in your components to access the token when making API calls.
+### 2. Register the Custom Store
 
-## Explanation
+```csharp
+// Register custom token store
+builder.Services.AddSingleton<IUserTokenStore, ServerSideTokenStore>();
 
-- The `TokenProvider` is a scoped service that holds tokens for the duration of the circuit
-- Tokens are captured during the initial HTTP request when `HttpContext` is still available
-- Components inject `TokenProvider` instead of relying on `HttpContext`
-- This avoids the null `HttpContext` problem in Blazor Server circuits
+builder.Services.AddOpenIdConnectAccessTokenManagement();
+```
+
+### 3. Capture Tokens During Authentication
+
+You need to save tokens when the user first authenticates, since that's the only time you have access to them via HTTP:
+
+```csharp
+options.Events.OnTokenValidated = async context =>
+{
+    var store = context.HttpContext.RequestServices
+        .GetRequiredService<IUserTokenStore>();
+
+    var token = new UserToken
+    {
+        AccessToken = context.TokenEndpointResponse?.AccessToken,
+        RefreshToken = context.TokenEndpointResponse?.RefreshToken,
+        Expiration = DateTimeOffset.UtcNow.AddSeconds(
+            int.Parse(context.TokenEndpointResponse?.ExpiresIn ?? "3600"))
+    };
+
+    await store.StoreTokenAsync(context.Principal!, token);
+};
+```
+
+This way, tokens are persisted during the initial OIDC flow and can be accessed later from Blazor components without needing `HttpContext`.

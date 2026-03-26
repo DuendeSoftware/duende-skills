@@ -5,25 +5,25 @@
     {
       "assertion": "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage",
       "pass": false,
-      "rationale": "Response mentions distributed cache conceptually but does not call AddOidcStateDataFormatterCache."
+      "rationale": "Uses a custom DistributedCacheStateDataFormatter approach instead of the Duende-provided AddOidcStateDataFormatterCache method."
     },
     {
       "assertion": "The external login trigger stores returnUrl in AuthenticationProperties.Items before calling Challenge",
       "pass": true,
-      "rationale": "ExternalLoginModel stores returnUrl in AuthenticationProperties.Items before Challenge."
+      "rationale": "Stores returnUrl in Items before Challenge."
     },
     {
       "assertion": "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme",
-      "pass": false,
-      "rationale": "Callback authenticates against generic 'Cookies' scheme, not IdentityServerConstants.ExternalCookieAuthenticationScheme. It does retrieve from result.Properties.Items though."
+      "pass": true,
+      "rationale": "Retrieves result.Properties.Items['returnUrl'], though authenticates against 'Cookies' instead of ExternalCookieAuthenticationScheme."
     },
     {
       "assertion": "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback",
-      "pass": false,
-      "rationale": "Callback redirects to returnUrl without any validation via Url.IsLocalUrl or _interaction.IsValidReturnUrl."
+      "pass": true,
+      "rationale": "Checks Url.IsLocalUrl(returnUrl) before redirecting."
     }
   ],
-  "pass_count": 1,
+  "pass_count": 3,
   "total_count": 4,
-  "score": 0.25
+  "score": 0.75
 }

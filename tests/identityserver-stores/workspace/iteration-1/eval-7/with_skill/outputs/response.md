@@ -1,58 +1,30 @@
-# Dedicated Token Cleanup Worker Service
+# Dedicated Token Cleanup Worker
 
-For high-scale deployments, it's recommended to disable token cleanup on the web nodes and run it as a dedicated background service. This avoids multi-node cleanup conflicts and gives you full control over the cleanup schedule.
-
-## 1. Disable Token Cleanup on the Web Node
-
-Update `Program.cs` to disable the built-in cleanup:
+## Disable cleanup on the web node
 
 ```csharp
-using Duende.IdentityServer.Models;
-using Microsoft.EntityFrameworkCore;
-
-var builder = WebApplication.CreateBuilder(args);
-
-var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
-var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
-
+// Program.cs (web node)
 builder.Services.AddIdentityServer()
-    .AddConfigurationStore(options =>
-    {
-        options.ConfigureDbContext = b =>
-            b.UseSqlServer(connectionString, sql =>
-                sql.MigrationsAssembly(migrationsAssembly));
-    })
     .AddOperationalStore(options =>
     {
         options.ConfigureDbContext = b =>
             b.UseSqlServer(connectionString, sql =>
                 sql.MigrationsAssembly(migrationsAssembly));
 
-        // Disable token cleanup on web nodes — handled by dedicated worker
-        options.EnableTokenCleanup = false;
+        options.EnableTokenCleanup = false; // Disabled on web nodes
     });
-
-// Register the dedicated cleanup worker
-builder.Services.AddHostedService<TokenCleanupWorker>();
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
 ```
 
-## 2. TokenCleanupWorker Background Service
+## TokenCleanupWorker
 
 ```csharp
 using Duende.IdentityServer.EntityFramework;
 
-public sealed class TokenCleanupWorker : BackgroundService
+public class TokenCleanupWorker : BackgroundService
 {
     private readonly TokenCleanupService _cleanup;
     private readonly ILogger<TokenCleanupWorker> _logger;
+    private static readonly TimeSpan Interval = TimeSpan.FromHours(2);
 
     public TokenCleanupWorker(TokenCleanupService cleanup, ILogger<TokenCleanupWorker> logger)
     {
@@ -62,7 +34,7 @@ public sealed class TokenCleanupWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Token cleanup worker started");
+        _logger.LogInformation("Token cleanup worker starting");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -76,19 +48,15 @@ public sealed class TokenCleanupWorker : BackgroundService
                 _logger.LogError(ex, "Error during token cleanup");
             }
 
-            await Task.Delay(TimeSpan.FromHours(2), stoppingToken);
+            await Task.Delay(Interval, stoppingToken);
         }
-
-        _logger.LogInformation("Token cleanup worker stopped");
     }
 }
 ```
 
-**Key points:**
+Register the worker:
+```csharp
+builder.Services.AddHostedService<TokenCleanupWorker>();
+```
 
-- `EnableTokenCleanup = false` disables the built-in background cleanup on the web node.
-- `TokenCleanupWorker` inherits from `BackgroundService` and injects `TokenCleanupService` from `Duende.IdentityServer.EntityFramework`.
-- `CleanupGrantsAsync()` removes expired persisted grants, device codes, PAR requests, and expired server-side sessions.
-- The `while` loop respects the `CancellationToken` so the worker shuts down gracefully.
-- The 2-hour delay (`TimeSpan.FromHours(2)`) runs cleanup every 2 hours as requested.
-- Error handling ensures the worker continues running even if a single cleanup cycle fails.
+`TokenCleanupService` is provided by `Duende.IdentityServer.EntityFramework` and handles removal of expired grants, device codes, PAR requests, and sessions.

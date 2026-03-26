@@ -2,10 +2,26 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "A login page model file exists that injects IIdentityServerInteractionService via constructor", "pass": true, "rationale": "LoginModel class injects IIdentityServerInteractionService via constructor parameter."},
-    {"assertion": "The login page calls GetAuthorizationContextAsync(returnUrl) to retrieve the authorization context rather than parsing returnUrl manually", "pass": true, "rationale": "OnGet calls _interaction.GetAuthorizationContextAsync(returnUrl) to get context."},
-    {"assertion": "The login page creates an IdentityServerUser with the subject ID and calls HttpContext.SignInAsync to establish the session", "pass": true, "rationale": "OnPost creates new IdentityServerUser(user.SubjectId) and calls HttpContext.SignInAsync(isUser)."},
-    {"assertion": "The login page validates returnUrl using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting", "pass": true, "rationale": "OnPost checks _interaction.IsValidReturnUrl(ReturnUrl) || Url.IsLocalUrl(ReturnUrl) before redirect."}
+    {
+      "assertion": "A login page model file exists that injects IIdentityServerInteractionService via constructor",
+      "pass": true,
+      "rationale": "The LoginModel class injects IIdentityServerInteractionService via constructor parameter."
+    },
+    {
+      "assertion": "The login page calls GetAuthorizationContextAsync(returnUrl) to retrieve the authorization context rather than parsing returnUrl manually",
+      "pass": true,
+      "rationale": "OnGet calls _interaction.GetAuthorizationContextAsync(returnUrl) to get the context."
+    },
+    {
+      "assertion": "The login page creates an IdentityServerUser with the subject ID and calls HttpContext.SignInAsync to establish the session",
+      "pass": true,
+      "rationale": "Code creates new IdentityServerUser(user.SubjectId) and calls HttpContext.SignInAsync(isUser)."
+    },
+    {
+      "assertion": "The login page validates returnUrl using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting",
+      "pass": true,
+      "rationale": "Code checks both _interaction.IsValidReturnUrl(ReturnUrl) and Url.IsLocalUrl(ReturnUrl) before redirecting."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

@@ -1,49 +1,119 @@
 {
-  "metadata": {"skill_name": "identity-security-hardening", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "identity-security-hardening",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 34, "passed": 34, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 34, "passed": 25, "failed": 9, "pass_rate": 73.5},
-    "delta": {"assertions_improved": 9, "delta_pass_rate": 26.5}
+    "with_skill": {
+      "total_assertions": 37,
+      "passed": 37,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 37,
+      "passed": 29,
+      "failed": 8,
+      "pass_rate": 78.4
+    },
+    "delta": {
+      "assertions_improved": 8,
+      "delta_pass_rate": 21.6
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
-      "delta": 0.6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
       "without_skill_failures": [
         "Program.cs restricts KnownProxies to the proxy IP address 10.0.0.1 and does not accept forwarded headers from any source",
-        "Program.cs configures HSTS with MaxAge of at least 365 days and IncludeSubDomains = true",
         "Program.cs uses StatusCodes.Status308PermanentRedirect or equivalent 308 status code for HTTPS redirection"
       ]
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
-      "without_skill_failures": [
-        "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)"
-      ]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
       "delta": 0.4,
       "without_skill_failures": [
         "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
@@ -52,22 +122,63 @@
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
-      "delta": 0.6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
       "without_skill_failures": [
         "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
-        "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
         "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true"
       ]
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
       "without_skill_failures": [
-        "All access token lifetimes are 900 seconds or less for interactive clients"
+        "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6667
+      },
+      "delta": 0.3333,
+      "without_skill_failures": [
+        "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow"
       ]
     }
   ]

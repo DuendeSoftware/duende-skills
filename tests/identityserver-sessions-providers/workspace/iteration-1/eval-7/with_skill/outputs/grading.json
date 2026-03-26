@@ -5,22 +5,22 @@
     {
       "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsFrequency to 5 minutes (TimeSpan.FromMinutes(5))",
       "pass": true,
-      "rationale": "Code shows `options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5);`."
+      "rationale": "Sets RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5)."
     },
     {
       "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsBatchSize to 200",
       "pass": true,
-      "rationale": "Code shows `options.ServerSideSessions.RemoveExpiredSessionsBatchSize = 200;`."
+      "rationale": "Sets RemoveExpiredSessionsBatchSize = 200."
     },
     {
       "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false",
       "pass": true,
-      "rationale": "Code shows `options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false;`."
+      "rationale": "Sets ExpiredSessionsTriggerBackchannelLogout = false."
     },
     {
       "assertion": "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)",
       "pass": true,
-      "rationale": "Code explicitly sets `options.ServerSideSessions.FuzzExpiredSessionRemovalStart = true;` and notes it is the default."
+      "rationale": "Explicitly sets FuzzExpiredSessionRemovalStart = true."
     }
   ],
   "pass_count": 4,

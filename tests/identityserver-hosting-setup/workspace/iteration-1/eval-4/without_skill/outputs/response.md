@@ -1,12 +1,6 @@
-# Fixing IdentityServer Behind an Nginx Reverse Proxy
+# Fixing HTTP URLs Behind Nginx
 
-## The Problem
-
-When your IdentityServer is behind a reverse proxy like nginx, the proxy handles HTTPS termination and forwards requests internally over HTTP. This means your application sees HTTP requests, so the discovery document and cookies reflect HTTP instead of HTTPS.
-
-## Solution
-
-You need to configure the forwarded headers middleware to restore the original scheme and host:
+Add forwarded headers middleware:
 
 ```csharp
 using Microsoft.AspNetCore.HttpOverrides;
@@ -19,24 +13,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
                                 ForwardedHeaders.XForwardedProto;
 });
 
-builder.Services.AddIdentityServer();
+builder.Services.AddIdentityServer()
+    .AddInMemoryIdentityResources(Config.IdentityResources)
+    .AddInMemoryApiScopes(Config.ApiScopes)
+    .AddInMemoryClients(Config.Clients);
 
 var app = builder.Build();
 
 app.UseForwardedHeaders();
 app.UseIdentityServer();
+app.UseAuthorization();
 
 app.Run();
 ```
 
-## Nginx Config
-
-Make sure nginx sends the proper headers:
-
-```nginx
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $scheme;
-proxy_set_header Host $host;
-```
-
-The `ForwardedHeaders` middleware reads the `X-Forwarded-Proto` header and updates `HttpContext.Request.Scheme` accordingly. This fixes the discovery document URLs and cookie attributes.
+This tells ASP.NET Core to read the X-Forwarded-Proto header from Nginx to determine the original scheme.

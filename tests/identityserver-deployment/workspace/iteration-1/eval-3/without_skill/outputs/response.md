@@ -1,27 +1,19 @@
 # Adding Health Checks to IdentityServer
 
-## Overview
+You can add health checks using ASP.NET Core's built-in health check framework.
 
-You can use ASP.NET Core's built-in health check framework to verify that your IdentityServer endpoints are working. We'll create health checks that verify the discovery and JWKS endpoints are accessible.
-
-## Step 1: Create the Health Checks
-
-### Discovery Endpoint Health Check
+## Implementation
 
 ```csharp
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-public class DiscoveryEndpointHealthCheck : IHealthCheck
+public class IdentityServerHealthCheck : IHealthCheck
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
 
-    public DiscoveryEndpointHealthCheck(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration)
+    public IdentityServerHealthCheck(IHttpClientFactory httpClientFactory)
     {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
+        _httpClient = httpClientFactory.CreateClient();
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(
@@ -30,82 +22,33 @@ public class DiscoveryEndpointHealthCheck : IHealthCheck
     {
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var authority = _configuration["IdentityServer:Authority"]
-                ?? "https://localhost:5001";
-            var response = await client.GetAsync(
-                $"{authority}/.well-known/openid-configuration",
+            var discoveryResponse = await _httpClient.GetAsync(
+                "https://localhost:5001/.well-known/openid-configuration",
                 cancellationToken);
 
-            if (response.IsSuccessStatusCode)
+            if (discoveryResponse.IsSuccessStatusCode)
             {
-                return HealthCheckResult.Healthy("Discovery endpoint is accessible.");
+                var jwksResponse = await _httpClient.GetAsync(
+                    "https://localhost:5001/.well-known/openid-configuration/jwks",
+                    cancellationToken);
+
+                if (jwksResponse.IsSuccessStatusCode)
+                    return HealthCheckResult.Healthy();
             }
 
-            return HealthCheckResult.Unhealthy(
-                $"Discovery endpoint returned {response.StatusCode}");
+            return HealthCheckResult.Unhealthy("Discovery or JWKS endpoint failed");
         }
         catch (Exception ex)
         {
-            return HealthCheckResult.Unhealthy("Discovery endpoint check failed.", ex);
+            return HealthCheckResult.Unhealthy("Health check failed", ex);
         }
     }
 }
 ```
 
-### JWKS Endpoint Health Check
+## Registration
 
 ```csharp
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-public class JwksEndpointHealthCheck : IHealthCheck
-{
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
-
-    public JwksEndpointHealthCheck(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration)
-    {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
-    }
-
-    public async Task<HealthCheckResult> CheckHealthAsync(
-        HealthCheckContext context,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-            var authority = _configuration["IdentityServer:Authority"]
-                ?? "https://localhost:5001";
-            var response = await client.GetAsync(
-                $"{authority}/.well-known/openid-configuration/jwks",
-                cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return HealthCheckResult.Healthy("JWKS endpoint is accessible.");
-            }
-
-            return HealthCheckResult.Unhealthy(
-                $"JWKS endpoint returned {response.StatusCode}");
-        }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Unhealthy("JWKS endpoint check failed.", ex);
-        }
-    }
-}
-```
-
-## Step 2: Register in Program.cs
-
-```csharp
-using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
@@ -116,18 +59,14 @@ builder.Services.AddIdentityServer()
     .AddInMemoryClients(Config.Clients);
 
 builder.Services.AddHealthChecks()
-    .AddCheck<DiscoveryEndpointHealthCheck>("discovery")
-    .AddCheck<JwksEndpointHealthCheck>("jwks");
+    .AddCheck<IdentityServerHealthCheck>("identityserver");
 
 var app = builder.Build();
 
 app.UseIdentityServer();
-
 app.MapHealthChecks("/health");
-
-app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-This will expose a `/health` endpoint that returns HTTP 200 when both the discovery and JWKS endpoints are accessible and working.
+This makes an HTTP request to the discovery and JWKS endpoints to verify they're working.

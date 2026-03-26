@@ -1,55 +1,52 @@
 # SAML Signing Behaviors in Duende IdentityServer
 
-Duende IdentityServer supports four SAML signing behaviors via the `SamlSigningBehavior` enum:
+Duende IdentityServer supports four signing behaviors for SAML responses, controlled via `SamlSigningBehavior`:
 
-## All Four Signing Behaviors
+## The Four Signing Behaviors
 
-| Behavior | What Gets Signed | Notes |
-|----------|-----------------|-------|
-| **`SignAssertion`** | Assertion only | **Default** and most interoperable. Recommended for most SPs. |
-| **`SignResponse`** | Entire SAML response envelope | Some SPs require this instead of assertion signing. |
-| **`SignBoth`** | Both the assertion AND the response | Maximum security. Use when the SP requires both to be signed. |
-| **`DoNotSign`** | Nothing | **Testing only** — never use in production. Responses without signatures can be tampered with. |
+| Behavior | What Gets Signed | Use Case |
+|---|---|---|
+| **`SignAssertion`** | Assertion only | **Default and most interoperable.** Works with the widest range of SPs. |
+| **`SignResponse`** | Entire SAML response | Some SPs require the full response to be signed rather than just the assertion. |
+| **`SignBoth`** | Both assertion and response | Maximum security. Signs both the inner assertion and the outer response envelope. |
+| **`DoNotSign`** | Nothing | **Testing only — never use in production.** Useful for debugging assertion content without signature validation issues. |
 
-## Your Requirement: Sign Both Assertion and Response
+## Recommendation for Your Case
 
 Since your SP requires both the assertion and the full response to be signed, use **`SignBoth`**:
-
-### Per-Service Provider Configuration
 
 ```csharp
 var sp = new SamlServiceProvider
 {
     EntityId = "https://sp.example.com",
-    DisplayName = "SP Requiring Both Signatures",
+    DisplayName = "SP Requiring Dual Signing",
     AssertionConsumerServiceUrls =
     [
         new Uri("https://sp.example.com/saml/acs")
     ],
-    // Sign both the assertion and the response
     SigningBehavior = SamlSigningBehavior.SignBoth
 };
 ```
 
-### Global Default Configuration
+## Setting a Default for All SPs
 
-You can also set the default signing behavior for all service providers via `IdentityServerOptions.Saml.DefaultSigningBehavior`:
+You can set the default signing behavior for all service providers via `IdentityServerOptions.Saml.DefaultSigningBehavior`:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
-    // Set default signing behavior for all SPs
     options.Saml.DefaultSigningBehavior = SamlSigningBehavior.SignBoth;
 })
     .AddSaml()
     .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-Per-SP `SigningBehavior` overrides the global default.
+Per-SP `SigningBehavior` overrides the default.
 
-## Recommendations
+## Key Considerations
 
-- **`SignAssertion`** (default) is the most interoperable and recommended for most scenarios
-- **`SignBoth`** provides maximum security when the SP supports it — use it for your specific case
-- **`SignResponse`** is needed by some SPs that validate response-level signatures only
-- **`DoNotSign`** should **only be used for testing** — never in production. Unsigned responses provide no integrity guarantees and are vulnerable to tampering.
+- **`SignAssertion`** (default) is recommended as the baseline — it's the most interoperable option and sufficient for most SPs
+- **`SignBoth`** provides maximum security but generates larger responses and uses more CPU for signature computation
+- **`DoNotSign`** should **never** be used in production — it removes all cryptographic proof of assertion authenticity
+- **`SignResponse`** is for SPs that validate the response signature but not the assertion signature (less common)
+- The signing key used is IdentityServer's configured signing credential (same key used for JWT signing)

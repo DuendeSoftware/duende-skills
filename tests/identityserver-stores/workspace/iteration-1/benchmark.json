@@ -1,92 +1,258 @@
 {
-  "metadata": {"skill_name": "identityserver-stores", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "identityserver-stores",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 56, "passed": 56, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 56, "passed": 40, "failed": 16, "pass_rate": 71.4},
-    "delta": {"assertions_improved": 16, "delta_pass_rate": 28.6}
+    "with_skill": {
+      "total_assertions": 56,
+      "passed": 56,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 56,
+      "passed": 47,
+      "failed": 9,
+      "pass_rate": 83.9
+    },
+    "delta": {
+      "assertions_improved": 9,
+      "delta_pass_rate": 16.1
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
-      "without_skill_failures": ["Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)"]
+      "without_skill_failures": [
+        "Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)"
+      ]
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
-      "delta": 0.6,
-      "without_skill_failures": ["The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)", "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching", "ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)",
+        "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching"
+      ]
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
-      "without_skill_failures": ["AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
-      "delta": 0.6,
-      "without_skill_failures": ["ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration", "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching", "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration"
+      ]
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["Client entities are added using the .ToEntity() extension method to convert from the IdentityServer model to the EF entity"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
       "delta": 0.4,
-      "without_skill_failures": ["The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework", "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken"]
+      "without_skill_failures": [
+        "The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework",
+        "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken"
+      ]
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
-      "without_skill_failures": ["The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient"]
+      "without_skill_failures": [
+        "The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient"
+      ]
     },
     {
       "eval_id": 9,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["Program.cs does not call AddOperationalStore for EF Core since custom stores replace it"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 10,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
-      "without_skill_failures": ["Program.cs sets ConsumedTokenCleanupDelay = 600 on the operational store options", "Program.cs sets FuzzTokenCleanupStart = true on the operational store options"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Program.cs sets FuzzTokenCleanupStart = true on the operational store options"
+      ]
     },
     {
       "eval_id": 11,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
-      "without_skill_failures": ["Program.cs calls MigrationsHistoryTable for at least one of the stores with a custom table name and schema"]
+      "without_skill_failures": [
+        "Program.cs calls MigrationsHistoryTable for at least one of the stores with a custom table name and schema"
+      ]
     },
     {
       "eval_id": 12,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     }

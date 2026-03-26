@@ -1,34 +1,29 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 12,
-  "variant": "without_skill",
+  "mode": "without_skill",
   "assertions": [
     {
       "assertion": "Response mentions updating @using IdentityServer4 directives in .cshtml files or _ViewImports.cshtml to @using Duende.IdentityServer",
-      "pass": true,
-      "rationale": "Explicitly mentions updating _ViewImports.cshtml from @using IdentityServer4 to @using Duende.IdentityServer."
+      "passed": true
     },
     {
       "assertion": "Response mentions that Duende templates use Razor Pages instead of MVC controllers, or that the UI layout has changed significantly",
-      "pass": false,
-      "rationale": "Does not mention Razor Pages vs MVC controllers distinction or that the UI layout has changed significantly."
+      "passed": true
     },
     {
       "assertion": "Response recommends scaffolding fresh Duende UI templates (e.g., dotnet new duende-is-ui) as one approach for the UI migration",
-      "pass": true,
-      "rationale": "Shows 'dotnet new install Duende.Templates' and 'dotnet new duende-is-ui'."
+      "passed": true
     },
     {
       "assertion": "Response mentions that the existing MVC-based UI will still work after namespace updates but will miss newer UI flows like device flow, CIBA, or dynamic providers",
-      "pass": false,
-      "rationale": "Does not mention that the existing MVC UI still works or that it misses newer flows like device flow, CIBA, or dynamic providers."
+      "passed": false
     },
     {
       "assertion": "Response mentions fixing API changes in controller or page model code (e.g., request.Client.ClientId instead of request.ClientId, or ScopesValuesConsented instead of ScopesConsented)",
-      "pass": false,
-      "rationale": "Only vaguely says 'Some IdentityServer APIs may have changed' without mentioning specific changes like request.Client.ClientId or ScopesValuesConsented."
+      "passed": false
     }
   ],
-  "pass_count": 2,
-  "total_count": 5,
-  "score": 0.4
+  "passed": 3,
+  "total": 5
 }

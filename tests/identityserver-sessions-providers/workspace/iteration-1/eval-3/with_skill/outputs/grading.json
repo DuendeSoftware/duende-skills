@@ -5,27 +5,27 @@
     {
       "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and Authentication.CookieSlidingExpiration to false",
       "pass": true,
-      "rationale": "Code shows `options.Authentication.CookieLifetime = TimeSpan.FromHours(8);` and `options.Authentication.CookieSlidingExpiration = false;`."
+      "rationale": "Sets CookieLifetime = TimeSpan.FromHours(8) and CookieSlidingExpiration = false."
     },
     {
       "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
       "pass": true,
-      "rationale": "Code shows `options.Authentication.CoordinateClientLifetimesWithUserSession = true;`."
+      "rationale": "Sets options.Authentication.CoordinateClientLifetimesWithUserSession = true."
     },
     {
       "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
       "pass": true,
-      "rationale": "Code shows `.AddServerSideSessions()` chained on the IdentityServer builder."
+      "rationale": ".AddServerSideSessions() is chained on the builder."
     },
     {
       "assertion": "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'",
       "pass": true,
-      "rationale": "Code shows `BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\"` on the web.app client."
+      "rationale": "web.app client has BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\"."
     },
     {
       "assertion": "The web.app client has AccessTokenLifetime set to 300 (5 minutes)",
       "pass": true,
-      "rationale": "Code shows `AccessTokenLifetime = 300` on the web.app client with a comment '5 minutes'."
+      "rationale": "web.app client has AccessTokenLifetime = 300."
     }
   ],
   "pass_count": 5,

@@ -2,11 +2,31 @@
   "eval_id": 5,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs does not call AddDeveloperSigningCredential()", "pass": true, "rationale": "AddDeveloperSigningCredential() is not present in the code"},
-    {"assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)", "pass": false, "rationale": "No SigningAlgorithms configuration present; response mentions considering RS256 or ES256 but doesn't configure them"},
-    {"assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days", "pass": true, "rationale": "RotationInterval = TimeSpan.FromDays(90) and PropagationTime = TimeSpan.FromDays(14) are set"},
-    {"assertion": "Program.cs configures DataProtectKeys = true for key management", "pass": false, "rationale": "DataProtectKeys is not configured in the code"},
-    {"assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName", "pass": true, "rationale": "AddDataProtection().PersistKeysToFileSystem(\"/var/identity/dp-keys\").SetApplicationName(\"identity-server\")"}
+    {
+      "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential is not present in the code"
+    },
+    {
+      "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+      "pass": false,
+      "rationale": "Does not configure SigningAlgorithms at all \u2014 mentions it's version-dependent but provides no code"
+    },
+    {
+      "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+      "pass": true,
+      "rationale": "RotationInterval = 90 days and PropagationTime = 14 days are configured"
+    },
+    {
+      "assertion": "Program.cs configures DataProtectKeys = true for key management",
+      "pass": false,
+      "rationale": "DataProtectKeys is not configured \u2014 the response does not mention this property"
+    },
+    {
+      "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+      "pass": true,
+      "rationale": "AddDataProtection with PersistKeysToFileSystem and SetApplicationName are present"
+    }
   ],
   "pass_count": 3,
   "total_count": 5,

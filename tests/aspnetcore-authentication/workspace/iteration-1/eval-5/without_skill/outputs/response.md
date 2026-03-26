@@ -1,16 +1,8 @@
-# Adding Custom Parameters and Error Handling to OIDC
+# Adding Custom OIDC Parameters
 
-Here's how to customize the OIDC authentication flow:
+You can customize the OIDC authorize request using events:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "oidc";
-})
-.AddCookie("Cookies")
 .AddOpenIdConnect("oidc", options =>
 {
     options.Authority = "https://identity.example.com";
@@ -27,7 +19,6 @@ builder.Services.AddAuthentication(options =>
             context.ProtocolMessage.SetParameter("login_hint", "user@example.com");
             return Task.CompletedTask;
         },
-
         OnRemoteFailure = context =>
         {
             context.HandleResponse();
@@ -36,21 +27,6 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-
-builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/", () => "Hello World!");
-app.MapGet("/auth-error", () => "Authentication failed");
-
-app.Run();
 ```
 
-## Explanation
-
-- **OnRedirectToIdentityProvider**: This event fires before the user is redirected to the identity provider. You can modify the protocol message to add custom parameters like `acr_values` and `login_hint`.
-- **OnRemoteFailure**: This event fires when authentication fails. By calling `HandleResponse()` and redirecting, you prevent the default error behavior and show a custom page instead.
+The `OnRedirectToIdentityProvider` event lets you modify the protocol message before the redirect. `OnRemoteFailure` handles failures by redirecting to a custom error page.

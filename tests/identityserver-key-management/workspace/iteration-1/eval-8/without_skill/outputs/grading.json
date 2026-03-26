@@ -2,10 +2,26 @@
   "eval_id": 8,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'", "pass": true, "rationale": "Code contains options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\""},
-    {"assertion": "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)", "pass": true, "rationale": "Code contains options.KeyManagement.KeyCacheDuration = TimeSpan.FromHours(1)"},
-    {"assertion": "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'", "pass": true, "rationale": "Code contains options.KeyManagement.RsaKeySize = 4096"},
-    {"assertion": "Program.cs does not disable automatic key management", "pass": true, "rationale": "Code does not set KeyManagement.Enabled to false. Automatic key management remains enabled by default."}
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'",
+      "pass": true,
+      "rationale": "Sets the KeyPath correctly."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)",
+      "pass": true,
+      "rationale": "Sets KeyCacheDuration to 1 hour."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'",
+      "pass": true,
+      "rationale": "Sets RsaKeySize = 4096."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management",
+      "pass": true,
+      "rationale": "KeyManagement.Enabled is not set to false."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

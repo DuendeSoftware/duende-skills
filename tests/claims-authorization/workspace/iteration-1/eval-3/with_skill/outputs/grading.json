@@ -2,10 +2,26 @@
   "eval_id": 3,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource", "pass": true, "rationale": "Explicitly states all three: IdentityResource, ApiScope, and ApiResource UserClaims collections"},
-    {"assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource", "pass": true, "rationale": "Shows code for ApiScope with UserClaims = { \"department\" } and also ApiResource example"},
-    {"assertion": "Mentions that the client must also request the scope that contains the claim", "pass": true, "rationale": "Dedicated section 'Also: Ensure the Client Requests the Scope' with code example"},
-    {"assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types", "pass": true, "rationale": "Detailed explanation of how AddRequestedClaims filters based on RequestedClaimTypes, with step-by-step description"}
+    {
+      "assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+      "pass": true,
+      "rationale": "Clearly explains claims are opt-in by scope and must be in UserClaims of ApiScope/ApiResource/IdentityResource"
+    },
+    {
+      "assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+      "pass": true,
+      "rationale": "Shows new ApiScope(\"api1\") { UserClaims = { \"department\" } }"
+    },
+    {
+      "assertion": "Mentions that the client must also request the scope that contains the claim",
+      "pass": true,
+      "rationale": "Explicitly shows AllowedScopes with api1 and explains client must request it"
+    },
+    {
+      "assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes \u2014 AddRequestedClaims filters to only requested claim types",
+      "pass": true,
+      "rationale": "Detailed explanation of how AddRequestedClaims filters against RequestedClaimTypes, including pseudo-code"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

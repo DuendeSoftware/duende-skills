@@ -1,8 +1,8 @@
-# Configuring Duende IdentityServer License Key
+# Configuring the Duende IdentityServer License Key
 
 ## Configuration
 
-Duende IdentityServer is a commercial product and requires a license for production use. You can configure it in your service registration:
+Set the license key in your IdentityServer configuration:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
@@ -13,18 +13,14 @@ builder.Services.AddIdentityServer(options =>
 
 ## Storage Recommendations
 
-For security, you should load the license key from a secure configuration source rather than hardcoding it:
+Don't hardcode the license key in your source code. Use:
 
-- **Environment variables**: Set `IdentityServer__LicenseKey` as an environment variable
-- **User Secrets**: Use `dotnet user-secrets` for local development
-- **Azure Key Vault** or similar secret management service for production
+- **User Secrets** for local development
+- **Environment variables** for CI/CD
+- **Azure Key Vault** or similar secret manager for production
 
-Avoid committing the license key to source control. Don't put it directly in `appsettings.json` if that file is checked into your repository.
+Avoid putting the license key in `appsettings.json` since it would be checked into source control.
 
-## Without a License Key
+## Without a License
 
-If you don't provide a license key, Duende IdentityServer will still run but in a limited or evaluation capacity. You'll likely see warnings in the logs indicating that no license has been configured. For production deployments, you should purchase and configure the appropriate license from Duende Software.
-
-## Pricing
-
-Duende offers different license tiers based on your needs — check [duendesoftware.com](https://duendesoftware.com) for current pricing and edition details.
+If you don't provide a license key, IdentityServer will still work but will operate in a community or evaluation mode and will log warnings at startup.

@@ -1,6 +1,6 @@
 ---
 name: token-management
-description: Token management patterns using Duende.AccessTokenManagement. Covers client credential token caching, user token refresh, token storage, HttpClientFactory integration, DPoP support, and common configuration pitfalls.
+description: Token management patterns using Duende.AccessTokenManagement. Covers client credential token caching, user token refresh, token storage, HttpClientFactory integration, DPoP support, and common configuration pitfalls. Also includes Blazor Server token management.
 invocable: false
 ---
 
@@ -477,137 +477,17 @@ builder.Services.AddUserAccessTokenHttpClient(
 
 ## Pattern 5: DPoP (Demonstrating Proof-of-Possession)
 
-DPoP binds an access token to an asymmetric key so that the token cannot be replayed by an attacker who steals it — they would also need the private key.
+DPoP binds an access token to a client-held asymmetric key, preventing replay attacks even if the token is stolen. Configure it by setting `DPoPJsonWebKey` on the client credentials client or `UserTokenManagementOptions`, and optionally implement `IDPoPKeyStore` for runtime key rotation.
 
-### Generate a JWK
-
-```csharp
-using System.Security.Cryptography;
-using System.Text.Json;
-using Microsoft.IdentityModel.Tokens;
-
-// ✅ Generate once and store securely (Key Vault, configuration secrets)
-var rsaKey = new RsaSecurityKey(RSA.Create(2048));
-var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
-jwkKey.Alg = "PS256";
-var jwk = JsonSerializer.Serialize(jwkKey);
-```
-
-Supported algorithms: RS, PS, and ES family keys (any JWK-compatible asymmetric key).
-
-### Configure DPoP — User Token (OpenIdConnect)
-
-```csharp
-// ✅ Set the JWK at startup; the library handles everything else automatically
-builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
-{
-    options.DPoPJsonWebKey = jwk;
-});
-```
-
-The library automatically:
-- Adds `dpop_jkt` to the authorize endpoint request
-- Sends a DPoP proof token on every token endpoint call (including token refreshes)
-- Sends a DPoP proof token on every outgoing API call made via factory clients
-
-### Configure DPoP — Client Credentials
-
-```csharp
-// ✅ Per-client DPoP key
-services.AddClientCredentialsTokenManagement()
-    .AddClient("catalog.client", client =>
-    {
-        client.TokenEndpoint = new Uri("https://sts.company.com/connect/token");
-        client.ClientId = ClientId.Parse("...");
-        client.ClientSecret = ClientSecret.Parse("...");
-        client.DPoPJsonWebKey = jwk;
-    });
-```
-
-### Custom DPoP Key Store
-
-Implement `IDPoPKeyStore` to load or rotate the key at runtime rather than at startup:
-
-```csharp
-// ✅ Dynamic key resolution (e.g., from Azure Key Vault)
-public sealed class KeyVaultDPoPKeyStore : IDPoPKeyStore
-{
-    private readonly IKeyVaultClient _keyVault;
-
-    public KeyVaultDPoPKeyStore(IKeyVaultClient keyVault)
-    {
-        _keyVault = keyVault;
-    }
-
-    public async Task<string?> GetKeyAsync(string clientName, CancellationToken ct)
-    {
-        return await _keyVault.GetSecretAsync($"dpop-key-{clientName}", ct);
-    }
-}
-
-// Registration
-services.AddSingleton<IDPoPKeyStore, KeyVaultDPoPKeyStore>();
-```
-
-> **DPoP and user session size** — When using DPoP with `AddOpenIdConnectAccessTokenManagement`, the DPoP proof key is stored per user session inside the OIDC `state` parameter and the authentication cookie. This increases cookie and state size. Configure `StateDataFormat` on the OIDC options and `SessionStore` on the cookie options if this becomes a concern.
+> **Full details in sub-document** — See [`docs/dpop.md`](docs/dpop.md) for JWK generation, per-client configuration, `IDPoPKeyStore`, session size implications, and the key-persistence pitfall.
 
 ---
 
 ## Pattern 6: API-to-API Token Delegation
 
-An API that receives a user request and needs to call a downstream API can use either the user's access token (delegation) or a client credentials token (machine identity). Both approaches integrate cleanly with `IHttpClientFactory`.
+An API can either forward the user's access token to a downstream API (when the downstream accepts the same audience) or use a dedicated client credentials token (when the downstream requires a service identity).
 
-### Approach A — Forward the User Token (Downstream API Trusts Upstream's Token)
-
-When the downstream API accepts the same audience as the upstream token, forward it directly:
-
-```csharp
-// In the calling API's Program.cs
-builder.Services.AddOpenIdConnectAccessTokenManagement();
-
-builder.Services.AddUserAccessTokenHttpClient(
-    "downstream",
-    configureClient: client =>
-    {
-        client.BaseAddress = new Uri("https://downstream.company.com/api/");
-    });
-```
-
-```csharp
-// In the controller
-public sealed class UpstreamController(IHttpClientFactory factory) : ControllerBase
-{
-    [HttpGet("data")]
-    public async Task<IActionResult> GetData(CancellationToken ct)
-    {
-        // ✅ Forwards the current user's access token to the downstream API
-        var client = factory.CreateClient("downstream");
-        var response = await client.GetAsync("resource", ct);
-        return Ok(await response.Content.ReadAsStringAsync(ct));
-    }
-}
-```
-
-### Approach B — Use a Dedicated Client Credentials Token
-
-When the downstream API requires a service identity rather than a user identity:
-
-```csharp
-// In the calling API's Program.cs
-services.AddClientCredentialsTokenManagement()
-    .AddClient("downstream.client", client =>
-    {
-        client.TokenEndpoint = new Uri("https://sts.company.com/connect/token");
-        client.ClientId = ClientId.Parse("upstream-service");
-        client.ClientSecret = ClientSecret.Parse("...");
-        client.Scope = Scope.Parse("downstream:read");
-    });
-
-services.AddClientCredentialsHttpClient(
-    "downstream",
-    ClientCredentialsClientName.Parse("downstream.client"),
-    client => { client.BaseAddress = new Uri("https://downstream.company.com/api/"); });
-```
+> **Full details in sub-document** — See [`docs/api-delegation.md`](docs/api-delegation.md) for both approaches with complete code examples and a decision guide.
 
 ---
 
@@ -665,286 +545,47 @@ services.AddSingleton<IClientCredentialsTokenCache, MyCustomTokenCache>();
 
 ## Pattern 9: Blazor Server Token Management
 
-Blazor Server circuits outlive the initial HTTP request. Once a circuit is established, `HttpContext` is `null`, making the default cookie-based `IUserTokenStore` unusable. The library provides a dedicated extension for this scenario.
+Blazor Server circuits outlive the initial HTTP request. Once a circuit is established, `HttpContext` is `null`, making the default cookie-based `IUserTokenStore` unusable. Use `AddBlazorServerAccessTokenManagement<T>()` with a persistent `IUserTokenStore` (e.g., database-backed), and capture tokens in `OnTokenValidated` during the initial OIDC flow.
 
-### Registration
-
-```csharp
-// Program.cs
-builder.Services.AddOpenIdConnectAccessTokenManagement()
-    .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>();
-```
-
-### Custom `IUserTokenStore` Implementation
-
-You must implement `IUserTokenStore` backed by persistent storage (e.g., a database) so that tokens survive across circuit reconnections:
-
-```csharp
-public class ServerSideTokenStore : IUserTokenStore
-{
-    private readonly IDbContextFactory<AppDbContext> _dbFactory;
-
-    public ServerSideTokenStore(IDbContextFactory<AppDbContext> dbFactory)
-    {
-        _dbFactory = dbFactory;
-    }
-
-    public async Task<UserToken> GetTokenAsync(
-        ClaimsPrincipal user,
-        UserTokenRequestParameters? parameters = null)
-    {
-        var sub = user.FindFirst("sub")?.Value;
-        using var db = await _dbFactory.CreateDbContextAsync();
-        var stored = await db.UserTokens.FindAsync(sub);
-        return new UserToken
-        {
-            AccessToken = stored?.AccessToken,
-            RefreshToken = stored?.RefreshToken,
-            Expiration = stored?.Expiration ?? DateTimeOffset.MinValue
-        };
-    }
-
-    public async Task StoreTokenAsync(
-        ClaimsPrincipal user,
-        UserToken token,
-        UserTokenRequestParameters? parameters = null)
-    {
-        var sub = user.FindFirst("sub")?.Value;
-        using var db = await _dbFactory.CreateDbContextAsync();
-        var stored = await db.UserTokens.FindAsync(sub);
-        if (stored == null)
-        {
-            stored = new StoredUserToken { SubjectId = sub! };
-            db.UserTokens.Add(stored);
-        }
-        stored.AccessToken = token.AccessToken;
-        stored.RefreshToken = token.RefreshToken;
-        stored.Expiration = token.Expiration;
-        await db.SaveChangesAsync();
-    }
-
-    public async Task ClearTokenAsync(
-        ClaimsPrincipal user,
-        UserTokenRequestParameters? parameters = null)
-    {
-        var sub = user.FindFirst("sub")?.Value;
-        using var db = await _dbFactory.CreateDbContextAsync();
-        var stored = await db.UserTokens.FindAsync(sub);
-        if (stored != null)
-        {
-            db.UserTokens.Remove(stored);
-            await db.SaveChangesAsync();
-        }
-    }
-}
-```
-
-### Initializing Tokens via `OnTokenValidated`
-
-Tokens must be captured during the initial OIDC authentication flow — the only point where `HttpContext` is available. Capture them in `OnTokenValidated` and persist to the custom store:
-
-```csharp
-// Program.cs
-builder.Services.AddAuthentication()
-    .AddOpenIdConnect("oidc", options =>
-    {
-        // ... other OIDC config ...
-        options.SaveTokens = true;
-        options.Scope.Add("offline_access");
-
-        options.Events.OnTokenValidated = async context =>
-        {
-            var store = context.HttpContext.RequestServices
-                .GetRequiredService<IUserTokenStore>();
-            var token = new UserToken
-            {
-                AccessToken = context.TokenEndpointResponse?.AccessToken,
-                RefreshToken = context.TokenEndpointResponse?.RefreshToken,
-                Expiration = DateTimeOffset.UtcNow.AddSeconds(
-                    int.Parse(context.TokenEndpointResponse?.ExpiresIn ?? "3600"))
-            };
-            await store.StoreTokenAsync(context.Principal!, token);
-        };
-    });
-```
-
-> **Why `HttpContext` is unavailable in Blazor circuits** — A Blazor Server circuit is a long-lived SignalR connection. The initial HTTP request that establishes the circuit has an `HttpContext`, but all subsequent interactions happen over the SignalR channel without one. Any code that reads `IHttpContextAccessor.HttpContext` or the authentication cookie store after circuit setup will find `null` or stale data.
+> **Full details in sub-document** — See [`docs/blazor-server.md`](docs/blazor-server.md) for the full `IUserTokenStore` implementation, `OnTokenValidated` setup, and the `HttpContext`-null pitfall.
 
 ---
 
-## Pattern 10: Client Assertions
+## Pattern 10: Client Assertions (private_key_jwt)
 
-Use `IClientAssertionService` to authenticate with signed JWTs instead of shared client secrets. This is recommended for production deployments.
+Use `IClientAssertionService` to authenticate with signed JWTs instead of shared client secrets. **CRITICAL**: set the JWT `Audience` to the authorization server's issuer URL — NOT the token endpoint URL. Using the token endpoint URL was the root cause of CVE-2025-27370 and CVE-2025-27371.
 
-```csharp
-public class JwtClientAssertionService : IClientAssertionService
-{
-    private readonly SigningCredentials _signingCredentials;
-
-    public JwtClientAssertionService(SigningCredentials signingCredentials)
-    {
-        _signingCredentials = signingCredentials;
-    }
-
-    public Task<ClientAssertion?> GetClientAssertionAsync(
-        string? clientName = null,
-        TokenRequestParameters? parameters = null)
-    {
-        var now = DateTime.UtcNow;
-
-        var token = new SecurityTokenDescriptor
-        {
-            Issuer = "my_client_id",
-            // ✅ CRITICAL: Audience must be the authorization server's issuer URL,
-            // NOT the token endpoint URL — see CVE-2025-27370 / CVE-2025-27371
-            Audience = "https://identity.example.com",
-            Expires = now.AddMinutes(5),
-            IssuedAt = now,
-            NotBefore = now,
-            SigningCredentials = _signingCredentials,
-            Claims = new Dictionary<string, object>
-            {
-                ["sub"] = "my_client_id",
-                ["jti"] = Guid.NewGuid().ToString()
-            }
-        };
-
-        var handler = new JsonWebTokenHandler();
-        var jwt = handler.CreateToken(token);
-
-        return Task.FromResult<ClientAssertion?>(new ClientAssertion
-        {
-            Type = OidcConstants.ClientAssertionTypes.JwtBearer,
-            Value = jwt
-        });
-    }
-}
-
-// Registration
-builder.Services.AddSingleton<IClientAssertionService, JwtClientAssertionService>();
-```
-
-### CRITICAL: Audience for Client Assertions
-
-```csharp
-// ❌ WRONG: Audience set to the token endpoint URL
-// Root cause of CVE-2025-27370 and CVE-2025-27371
-Audience = "https://identity.example.com/connect/token"
-
-// ✅ CORRECT: Audience must be the authorization server's issuer URL
-Audience = "https://identity.example.com"
-```
-
-> **CVE-2025-27370 / CVE-2025-27371** — These vulnerabilities were caused by setting the client assertion JWT audience to the token endpoint URL rather than the issuer URL. Authorization servers that accept both values are susceptible to token endpoint confusion attacks. Always set `Audience` to the issuer URL obtained from the OIDC discovery document (`issuer` claim).
+> **Full details in sub-document** — See [`docs/client-assertions.md`](docs/client-assertions.md) for the full `IClientAssertionService` implementation, correct audience configuration, and CVE context.
 
 ---
 
 ## Pattern 11: Custom Token Request Customization
 
-Use `ITokenRequestCustomizer` (v4) to dynamically modify token request parameters per outgoing HTTP request — useful for multi-tenant scenarios where different tenants require different API resources or scopes.
+Use `ITokenRequestCustomizer` (v4) to dynamically modify token request parameters per outgoing HTTP request — useful for multi-tenant scenarios where different tenants require different API resources or scopes. Use the `with` expression to create a modified copy of `baseParameters`; do not mutate it.
 
-```csharp
-public class TenantTokenRequestCustomizer : ITokenRequestCustomizer
-{
-    private readonly ITenantResolver _tenantResolver;
-    private readonly ITenantConfigStore _tenantConfigStore;
-
-    public TenantTokenRequestCustomizer(
-        ITenantResolver tenantResolver,
-        ITenantConfigStore tenantConfigStore)
-    {
-        _tenantResolver = tenantResolver;
-        _tenantConfigStore = tenantConfigStore;
-    }
-
-    public async Task<TokenRequestParameters> Customize(
-        HttpRequestMessage httpRequest,
-        TokenRequestParameters baseParameters,
-        CancellationToken cancellationToken)
-    {
-        var tenantId = await _tenantResolver.GetTenantIdAsync(httpRequest, cancellationToken);
-        var tenantConfig = await _tenantConfigStore.GetConfigurationAsync(tenantId, cancellationToken);
-
-        // ✅ Use 'with' expression to create a modified copy — do not mutate baseParameters
-        return baseParameters with
-        {
-            Resource = Resource.Parse(tenantConfig.ApiResource),
-            Scope = Scope.Parse(tenantConfig.RequiredScopes),
-        };
-    }
-}
-```
-
-### Registration
-
-Pass the customizer instance to the `Add*Handler` registration methods:
-
-```csharp
-var customizer = new TenantTokenRequestCustomizer(tenantResolver, tenantConfigStore);
-
-// ✅ Client credentials client with customizer
-services.AddHttpClient("client-credentials-http-client")
-    .AddClientCredentialsTokenHandler(customizer,
-        ClientCredentialsClientName.Parse("api-client"));
-
-// ✅ User access token client with customizer
-services.AddHttpClient("user-access-http-client")
-    .AddUserAccessTokenHandler(customizer);
-```
+> **Full details in sub-document** — See [`docs/customization.md`](docs/customization.md) for the full `ITokenRequestCustomizer` implementation and registration pattern.
 
 ---
 
 ## Pattern 12: Custom Token Retrieval
 
-Implement `AccessTokenRequestHandler.ITokenRetriever` to completely replace the default token retrieval logic — for example, to combine custom selection logic with the standard token manager:
+Implement `AccessTokenRequestHandler.ITokenRetriever` to completely replace the default token retrieval logic with custom selection or caching behavior.
 
-```csharp
-public class CustomTokenRetriever(
-    IClientCredentialsTokenManager clientCredentialsTokenManager,
-    ClientCredentialsClientName clientName) : AccessTokenRequestHandler.ITokenRetriever
-{
-    public async Task<TokenResult<AccessTokenRequestHandler.IToken>> GetTokenAsync(
-        HttpRequestMessage request, CancellationToken ct)
-    {
-        var param = new TokenRequestParameters
-        {
-            ForceTokenRenewal = request.GetForceRenewal() // for retry policies
-        };
+> **Full details in sub-document** — See [`docs/customization.md`](docs/customization.md) for the full `ITokenRetriever` implementation and `AddHttpMessageHandler` registration pattern.
 
-        var result = await clientCredentialsTokenManager
-            .GetAccessTokenAsync(clientName, param, ct);
+---
 
-        if (!result.Succeeded)
-        {
-            return result.FailedResult;
-        }
+## Sub-Documents
 
-        return TokenResult.Success(result.Token);
-    }
-}
-```
+Load these sub-documents when the user's question specifically targets one of these areas:
 
-### Registration via `AddHttpMessageHandler`
-
-```csharp
-services.AddHttpClient<ApiClient>()
-    .AddDefaultAccessTokenResiliency()
-    .AddHttpMessageHandler(provider =>
-    {
-        var retriever = new CustomTokenRetriever(
-            provider.GetRequiredService<IClientCredentialsTokenManager>(),
-            ClientCredentialsClientName.Parse("api-client"));
-        var logger = provider.GetRequiredService<ILogger<AccessTokenRequestHandler>>();
-        var dPoPProofService = provider.GetRequiredService<IDPoPProofService>();
-        var dPoPNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
-
-        return new AccessTokenRequestHandler(
-            tokenRetriever: retriever,
-            dPoPNonceStore: dPoPNonceStore,
-            dPoPProofService: dPoPProofService,
-            logger: logger);
-    });
-```
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/dpop.md](docs/dpop.md) | DPoP proof-of-possession token binding | DPoP, `DPoPJsonWebKey`, `IDPoPKeyStore`, key generation, key rotation |
+| [docs/blazor-server.md](docs/blazor-server.md) | Blazor Server circuit-scoped token management | Blazor, SignalR circuit, `HttpContext` null, `AddBlazorServerAccessTokenManagement` |
+| [docs/client-assertions.md](docs/client-assertions.md) | Client assertions (private_key_jwt) + CVE guidance | `IClientAssertionService`, JWT client auth, CVE-2025-27370, CVE-2025-27371 |
+| [docs/customization.md](docs/customization.md) | `ITokenRequestCustomizer` & `ITokenRetriever` | Multi-tenant token params, custom token retrieval, `AccessTokenRequestHandler` |
+| [docs/api-delegation.md](docs/api-delegation.md) | API-to-API delegation patterns | Downstream API calls, forwarding user tokens, service identity |
 
 ---
 

@@ -2,11 +2,31 @@
   "eval_id": 6,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)", "pass": true, "rationale": "Code includes opt.KeyManagement.SigningAlgorithms.Add(new SigningAlgorithmOptions(SecurityAlgorithms.RsaSsaPssSha256))."},
-    {"assertion": "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms", "pass": true, "rationale": "Code sets opt.DPoP.SupportedDPoPSigningAlgorithms with all six PS/ES algorithms."},
-    {"assertion": "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0", "pass": true, "rationale": "Code sets opt.JwtValidationClockSkew = TimeSpan.FromSeconds(10)."},
-    {"assertion": "Client has RequireDPoP = true AND RequirePushedAuthorization = true", "pass": true, "rationale": "Client has both RequireDPoP = true and RequirePushedAuthorization = true."},
-    {"assertion": "Client uses a JsonWebKey secret (not shared secret) for authentication, consistent with FAPI 2.0 requirement for private_key_jwt or mTLS", "pass": true, "rationale": "Client secret has Type = IdentityServerConstants.SecretTypes.JsonWebKey."}
+    {
+      "assertion": "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)",
+      "pass": true,
+      "rationale": "opt.KeyManagement.SigningAlgorithms.Add(new SigningAlgorithmOptions(SecurityAlgorithms.RsaSsaPssSha256)) is configured."
+    },
+    {
+      "assertion": "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms",
+      "pass": true,
+      "rationale": "All six PS and ES algorithms are configured on DPoP.SupportedDPoPSigningAlgorithms."
+    },
+    {
+      "assertion": "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0",
+      "pass": true,
+      "rationale": "opt.JwtValidationClockSkew = TimeSpan.FromSeconds(10) is set."
+    },
+    {
+      "assertion": "Client has RequireDPoP = true AND RequirePushedAuthorization = true",
+      "pass": true,
+      "rationale": "Both RequireDPoP = true and RequirePushedAuthorization = true on fapi_client."
+    },
+    {
+      "assertion": "Client uses a JsonWebKey secret (not shared secret) for authentication, consistent with FAPI 2.0 requirement for private_key_jwt or mTLS",
+      "pass": true,
+      "rationale": "Client uses IdentityServerConstants.SecretTypes.JsonWebKey secret."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

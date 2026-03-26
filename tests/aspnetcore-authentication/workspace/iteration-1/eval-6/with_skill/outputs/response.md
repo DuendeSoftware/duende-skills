@@ -1,68 +1,24 @@
 # Sign-Out Endpoint
 
-Here's how to add a `/logout` endpoint that properly signs out from both the local cookie session and IdentityServer:
+Here's how to implement proper sign-out from both the local cookie session and IdentityServer:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "oidc";
-})
-.AddCookie("Cookies")
-.AddOpenIdConnect("oidc", options =>
-{
-    // ... OIDC configuration ...
-});
-
-builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/", () => "Hello World!");
-
-// Sign-out endpoint
 app.MapGet("/logout", async (HttpContext ctx) =>
 {
-    // Step 1: Clear the local cookie session
+    // 1. Clear the local authentication cookie
     await ctx.SignOutAsync("Cookies");
 
-    // Step 2: Redirect to IdentityServer's end session endpoint
+    // 2. Redirect to IdentityServer's end_session endpoint
     await ctx.SignOutAsync("oidc");
 });
-
-app.Run();
 ```
 
 ## The Sign-Out Flow
 
-The full sign-out flow involves multiple steps:
+1. **`SignOutAsync("Cookies")`** — Deletes the local authentication cookie, ending the user's session in your app.
+2. **`SignOutAsync("oidc")`** — Triggers the OIDC handler to redirect the browser to IdentityServer's `/connect/endsession` endpoint.
+3. **IdentityServer clears its session** — The user's session at the IdP is terminated.
+4. **Back-channel/front-channel logout** — IdentityServer notifies other relying party applications about the logout.
+5. **Redirect to PostLogoutRedirectUri** — IdentityServer redirects the user back to your app's configured post-logout URI.
 
-```
-1. User visits /logout
-2. SignOutAsync("Cookies")       → Clears the local authentication cookie
-3. SignOutAsync("oidc")          → Redirects to IdentityServer's /connect/endsession endpoint
-4. IdentityServer clears its session cookie
-5. IdentityServer notifies other client applications (via front-channel or back-channel logout)
-6. IdentityServer redirects back to PostLogoutRedirectUri (if configured)
-```
-
-### Important Notes
-
-- **You MUST call SignOutAsync for both schemes.** Calling only `SignOutAsync("Cookies")` clears the local session but leaves the IdentityServer session active. On the next challenge, the user would be silently re-authenticated without being asked to log in again.
-
-- **SignOutAsync("oidc")** triggers the OIDC handler to redirect the browser to IdentityServer's end session endpoint. This is what ensures the user is also logged out of IdentityServer and any other applications sharing that session.
-
-- The `PostLogoutRedirectUri` can be configured on the OIDC handler options to control where the user lands after sign-out from IdentityServer:
-
-```csharp
-.AddOpenIdConnect("oidc", options =>
-{
-    options.SignedOutCallbackPath = "/signout-callback-oidc"; // default
-    // After IdentityServer processes the logout, user is redirected here
-});
-```
+**Important:** If you only call `SignOutAsync("Cookies")` without `SignOutAsync("oidc")`, the IdentityServer session remains active. On the next authentication challenge, the user will be silently re-authenticated without seeing a login prompt.

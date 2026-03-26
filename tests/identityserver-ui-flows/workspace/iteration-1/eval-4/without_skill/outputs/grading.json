@@ -5,30 +5,30 @@
     {
       "assertion": "Program.cs configures opt.UserInteraction.LogoutUrl to a specific logout path",
       "pass": true,
-      "rationale": "Program.cs sets options.UserInteraction.LogoutUrl = \"/Account/Logout\"."
+      "rationale": "Sets opt.UserInteraction.LogoutUrl = '/Account/Logout'."
     },
     {
       "assertion": "A logout page calls GetLogoutContextAsync(logoutId) to retrieve the logout context",
-      "pass": false,
-      "rationale": "The logout page does not inject IIdentityServerInteractionService or call GetLogoutContextAsync."
+      "pass": true,
+      "rationale": "Calls _interaction.GetLogoutContextAsync(logoutId)."
     },
     {
       "assertion": "The logout page calls HttpContext.SignOutAsync to end the authentication session",
       "pass": true,
-      "rationale": "OnGet calls await HttpContext.SignOutAsync()."
+      "rationale": "Calls HttpContext.SignOutAsync()."
     },
     {
       "assertion": "The logout page uses context.SignOutIFrameUrl for front-channel logout iframe rendering",
-      "pass": false,
-      "rationale": "The page does not use SignOutIFrameUrl or render any iframe."
+      "pass": true,
+      "rationale": "Uses context.SignOutIFrameUrl in iframe."
     },
     {
       "assertion": "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'",
-      "pass": false,
-      "rationale": "The web.app client does not have BackChannelLogoutUri configured."
+      "pass": true,
+      "rationale": "Client configured with BackChannelLogoutUri = 'https://app.example.com/bff/backchannel'."
     }
   ],
-  "pass_count": 2,
+  "pass_count": 5,
   "total_count": 5,
-  "score": 0.4
+  "score": 1.0
 }

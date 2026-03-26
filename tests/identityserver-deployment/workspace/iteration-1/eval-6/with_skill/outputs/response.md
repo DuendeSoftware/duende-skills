@@ -1,45 +1,28 @@
-# Configuring Distributed Caching for Multi-Instance IdentityServer
+# Distributed Caching for Multi-Instance IdentityServer
 
-## Why Your OIDC Login Flows Are Failing
+## Why Your OIDC External Login Flows Are Failing
 
-The intermittent failures in your external OIDC provider login flows are caused by **the OIDC state data formatter storing state in `IDistributedCache`**. When a user starts an OIDC login flow on instance A, the state data (correlation ID, nonce, PKCE verifier, etc.) is stored in the cache on instance A. When the callback returns and is routed to instance B, it cannot find the state data because the default `MemoryDistributedCache` is local to each instance.
+The intermittent failures in external OIDC login flows are caused by the **OIDC state data formatter** storing state data in `IDistributedCache`. Here's what happens:
 
-This is the classic multi-instance distributed cache problem with IdentityServer.
+1. User clicks "Login with Google" on **instance A**
+2. Instance A generates a state parameter and stores the corresponding state data in its **local in-memory cache**
+3. After Google authenticates the user, the callback hits **instance B**
+4. Instance B tries to read the state data from its **local in-memory cache** — but it's not there
+5. The OIDC authentication fails with a correlation error
 
-## What Requires IDistributedCache
+The default `IDistributedCache` implementation in ASP.NET Core is `MemoryDistributedCache`, which is **in-process only** and not actually distributed. For multi-instance deployments, you must replace it with a truly distributed implementation.
 
-Several IdentityServer features rely on ASP.NET Core's `IDistributedCache`:
-
-| Feature | Why It Needs Distributed Cache |
-|---------|-------------------------------|
-| **OIDC state data formatter** | Stores external provider state (correlation, nonce, PKCE) server-side instead of in the URL |
-| **JWT replay cache** | Prevents replay of JWT client credential assertions across instances |
-| **Device flow throttling** | Rate-limits device code polling consistently across instances |
-| **PAR authorization parameter store** | Stores Pushed Authorization Request data for retrieval during the authorization request |
-
-Without a shared cache, any of these features will malfunction in a multi-instance deployment.
-
-## Solution: Configure a Shared Distributed Cache
-
-### Step 1: Add the Redis Cache Package
-
-```bash
-dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
-```
-
-### Step 2: Configure Redis in Program.cs
+## Solution: Configure Redis Distributed Cache
 
 ```csharp
 using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure distributed cache with Redis
+// Configure a REAL distributed cache (not the default in-memory)
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis")
-        ?? "redis-service:6379";
+    options.Configuration = "redis-service:6379";
     options.InstanceName = "IdentityServer:";
 });
 
@@ -57,48 +40,24 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-### Step 3: Add Connection String
+## Features That Require Distributed Cache
 
-Update your `appsettings.json`:
+IdentityServer uses `IDistributedCache` for several features. All of these will fail or behave incorrectly in a multi-instance deployment without a shared cache:
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=IdentityServer;Trusted_Connection=True;MultipleActiveResultSets=true",
-    "Redis": "redis-service:6379"
-  }
-}
-```
+| Feature | Why It Needs Distributed Cache |
+|---------|-------------------------------|
+| **OIDC state data formatter** | Stores external provider state server-side instead of in the URL. State created on instance A can't be validated on instance B without shared cache. |
+| **JWT replay cache** | Prevents JWT client credential replay attacks. Without shared cache, a replayed JWT might hit a different instance that hasn't seen it. |
+| **Device flow throttling** | Rate-limits polling across instances. Without shared cache, each instance tracks polling independently. |
+| **PAR authorization parameter store** | Stores Pushed Authorization Request data. Without shared cache, the authorization endpoint on instance B can't find PAR data created on instance A. |
 
-## Important: Do NOT Use In-Memory Cache
+## Important: Do NOT Use MemoryDistributedCache
 
-The default `MemoryDistributedCache` (registered by `AddDistributedMemoryCache()`) is local to each process. It does **not** share data across instances. In a multi-instance deployment, you **must** use a real distributed cache like Redis, SQL Server, or NCache.
+The default `MemoryDistributedCache` is **not suitable for multi-instance deployments**. It stores data in the local process memory of each instance. You must use a shared implementation:
 
-Alternatives to Redis:
+- **`AddStackExchangeRedisCache`** — Redis (recommended for most deployments)
+- **`AddSqlServerCache`** — SQL Server
+- **`AddCosmosCache`** — Azure Cosmos DB
+- **`AddNMemoryCache`** — NCache
 
-```csharp
-// SQL Server
-builder.Services.AddDistributedSqlServerCache(options =>
-{
-    options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.SchemaName = "dbo";
-    options.TableName = "DistributedCache";
-});
-
-// NCache
-builder.Services.AddNCacheDistributedCache(options =>
-{
-    options.CacheName = "identityserver-cache";
-});
-```
-
-## How the Fix Works
-
-Once `AddStackExchangeRedisCache()` is registered, it replaces the default `IDistributedCache` implementation. IdentityServer's OIDC state data formatter and other features automatically use this shared cache. When a user starts an OIDC login on instance A and the callback hits instance B, instance B can read the state from Redis and complete the flow successfully.
-
-## Verification
-
-After deploying:
-1. Verify Redis connectivity from all instances
-2. Test external OIDC provider login flows multiple times — all should succeed regardless of which instance handles the callback
-3. Monitor Redis for the cache entries (you should see keys prefixed with `IdentityServer:`)
+Ensure the cache storage itself is durable (e.g., Redis with persistence enabled).

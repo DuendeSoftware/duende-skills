@@ -5,22 +5,22 @@
     {
       "assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection",
       "pass": true,
-      "rationale": "Response includes new IdentityResources.OpenId() in the AddInMemoryIdentityResources list."
+      "rationale": "Present in the array"
     },
     {
       "assertion": "Output includes new IdentityResources.Profile() in the identity resources collection",
       "pass": true,
-      "rationale": "Response includes new IdentityResources.Profile() in the AddInMemoryIdentityResources list."
+      "rationale": "Present in the array"
     },
     {
       "assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
       "pass": true,
-      "rationale": "Response defines new IdentityResource(name: \"organization\", displayName: \"Your organization info\", userClaims: new[] { \"org_id\", \"org_name\", \"org_role\" })."
+      "rationale": "Custom resource defined with all three claims"
     },
     {
       "assertion": "The custom 'organization' identity resource has Required set to true",
       "pass": true,
-      "rationale": "Response sets Required = true on the custom organization identity resource."
+      "rationale": "Required = true is set"
     }
   ],
   "pass_count": 4,

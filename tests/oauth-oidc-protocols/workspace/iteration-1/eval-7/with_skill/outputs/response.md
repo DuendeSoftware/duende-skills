@@ -2,20 +2,19 @@
 
 ## How Refresh Token Rotation Works
 
-When a client uses a refresh token to obtain a new access token, the authorization server can issue a **new refresh token** along with the new access token. With refresh token rotation enabled (`OneTimeOnly`):
+With `OneTimeOnly` refresh token usage:
 
-1. The client sends the current refresh token to the token endpoint
-2. The server validates the refresh token and issues a new access token
-3. The server also issues a **new refresh token** and **invalidates the old one**
-4. If someone tries to use the old (invalidated) refresh token, the server rejects it
+1. Client obtains an initial refresh token during the authorization code flow
+2. When the access token expires, client sends the refresh token to the token endpoint
+3. IdentityServer returns a **new access token AND a new refresh token**
+4. The **old refresh token is invalidated** — it can never be used again
+5. The client must store and use the new refresh token for the next exchange
 
-This is a critical security measure: if an attacker steals a refresh token, the legitimate client's next refresh will fail (because the stolen token was used first), alerting the system to the compromise. The attacker's use of the stolen token will also eventually fail when the legitimate client uses the newer token.
+This rotation mechanism provides a security benefit: if a refresh token is stolen, the attacker can use it at most once. When either the legitimate client or the attacker uses the token, the other's copy becomes invalid. The next use attempt by the party holding the stale token will fail, signaling a potential compromise.
 
 ## Client Configuration
 
 ```csharp
-using Duende.IdentityServer.Models;
-
 new Client
 {
     ClientId = "web.app",
@@ -23,16 +22,10 @@ new Client
     AllowedGrantTypes = GrantTypes.Code,
     RequirePkce = true,
 
-    ClientSecrets = { new Secret("secret".Sha256()) },
-
-    RedirectUris = { "https://app.example.com/callback" },
-    PostLogoutRedirectUris = { "https://app.example.com/" },
-
-    // Enable offline_access scope so the client can request refresh tokens
+    // Enable refresh tokens
     AllowOfflineAccess = true,
 
-    // Refresh token rotation — each use returns a new refresh token
-    // and invalidates the previous one
+    // Rotation: each refresh returns a new refresh token
     RefreshTokenUsage = TokenUsage.OneTimeOnly,
 
     // Optional: configure refresh token lifetime
@@ -40,39 +33,41 @@ new Client
     SlidingRefreshTokenLifetime = 1296000, // 15 days
     AbsoluteRefreshTokenLifetime = 2592000, // 30 days
 
+    ClientSecrets = { new Secret("secret".Sha256()) },
+    RedirectUris = { "https://webapp.example.com/callback" },
+    PostLogoutRedirectUris = { "https://webapp.example.com" },
+
     AllowedScopes =
     {
         "openid",
         "profile",
-        "email",
         "api1",
-        "offline_access"
+        "offline_access"  // Required for refresh tokens
     }
-};
+}
 ```
 
 ## Key Configuration Points
 
-1. **`RefreshTokenUsage = TokenUsage.OneTimeOnly`** — This enables refresh token rotation. Each refresh token exchange returns a new refresh token and invalidates the old one. **Important**: the default changed to `ReUse` in IdentityServer v7.0, so `OneTimeOnly` must be set explicitly if you want rotation.
+### `AllowOfflineAccess = true`
+This allows the client to request the `offline_access` scope, which is required for the server to issue refresh tokens. Without this, no refresh token is returned even if `offline_access` is in `AllowedScopes`.
 
-2. **`AllowOfflineAccess = true`** — This is required for the `offline_access` scope to be allowed. Without it, the client cannot request refresh tokens.
+### `RefreshTokenUsage = TokenUsage.OneTimeOnly`
+This enables rotation. Each time the refresh token is used, a new one is issued and the old one is invalidated.
 
-3. **`offline_access` in `AllowedScopes`** — The scope must be explicitly listed in the client's allowed scopes.
+**Important:** The default changed to `ReUse` in Duende IdentityServer v7.0. If you want rotation, you must explicitly set `OneTimeOnly`. In `ReUse` mode, the same refresh token can be used repeatedly without being replaced.
 
-4. The client must request the `offline_access` scope during the authorization request:
+### `offline_access` in `AllowedScopes`
+The client must include `offline_access` in its `AllowedScopes` to be able to request refresh tokens.
 
-```csharp
-options.Scope.Add("offline_access");
-```
-
-## Protocol-Level Exchange
+## The Token Exchange
 
 ```
 POST /connect/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=refresh_token
-&refresh_token=old_rt_value
+&refresh_token=old_refresh_token_value
 &client_id=web.app
 &client_secret=secret
 ```
@@ -80,11 +75,11 @@ grant_type=refresh_token
 Response:
 ```json
 {
-    "access_token": "new_at",
-    "refresh_token": "new_rt",
+    "access_token": "new_access_token",
+    "refresh_token": "new_refresh_token",  // New! Store this for next use
     "token_type": "Bearer",
     "expires_in": 3600
 }
 ```
 
-The old `old_rt_value` is now invalidated and cannot be used again.
+The client must update its stored refresh token with the new value from each response.

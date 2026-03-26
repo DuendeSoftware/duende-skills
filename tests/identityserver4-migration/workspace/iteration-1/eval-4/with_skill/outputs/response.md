@@ -1,57 +1,65 @@
 # Database Migrations: IdentityServer4 to Duende IdentityServer v7
 
-## Creating Migrations
+## Creating and Applying Migrations
 
-After updating NuGet packages and namespaces, create EF Core migrations for both contexts:
+After updating your NuGet packages and namespaces, create EF Core migrations for both database contexts:
 
 ```bash
+# Migration for the operational store (persisted grants, device codes, keys, sessions)
 dotnet ef migrations add UpdateToDuende_v7 -c PersistedGrantDbContext \
     -o Data/Migrations/IdentityServer/PersistedGrantDb
 
+# Migration for the configuration store (clients, resources, scopes, identity providers)
 dotnet ef migrations add UpdateToDuende_v7 -c ConfigurationDbContext \
     -o Data/Migrations/IdentityServer/ConfigurationDb
 ```
 
-Apply:
+Apply the migrations:
 
 ```bash
 dotnet ef database update -c PersistedGrantDbContext
 dotnet ef database update -c ConfigurationDbContext
 ```
 
-## New Tables and Columns in Duende IdentityServer v7
+## New Tables in Duende IdentityServer v7
 
 ### Operational Store (PersistedGrantDbContext)
 
-| Change | Purpose |
-|--------|---------|
-| **`Keys` table** (new) | Automatic key management — stores signing and validation keys |
-| **`ServerSideSessions` table** (new) | Server-side session management |
-| **`PushedAuthorizationRequests` table** (new) | PAR (Pushed Authorization Requests) support |
-| `ConsumedTime` index on `PersistedGrants` | Performance optimization |
+| New Table | Purpose |
+|-----------|---------|
+| **`Keys`** | Stores signing keys for **automatic key management**. Duende automatically creates, rotates, and retires signing keys — this table persists them across restarts and instances. |
+| **`ServerSideSessions`** | Stores **server-side session** data. Enables session management, querying active sessions, and coordinating logout across clients. |
+| **`PushedAuthorizationRequests`** | Stores **Pushed Authorization Requests (PAR)**. Clients push authorization parameters to this endpoint before redirecting the user, improving security by keeping parameters server-side. |
 
 ### Configuration Store (ConfigurationDbContext)
 
-| Change | Purpose |
-|--------|---------|
-| **`IdentityProviders` table** (new) | Dynamic OIDC provider configuration |
-| `RequireResourceIndicator` column on `ApiResources` | Resource indicator support |
-| Timestamp columns on entities | Created, updated, last accessed tracking |
+| New Table | Purpose |
+|-----------|---------|
+| **`IdentityProviders`** | Stores **dynamic OIDC provider** configuration. Allows adding/removing external identity providers at runtime without redeploying. |
 
-### Client Configuration
+## New Client Columns
 
-New columns on `Clients`:
+Several new columns on the `Clients` table support advanced security features:
 
 | Column | Purpose |
 |--------|---------|
-| **`RequireDPoP`** | DPoP (Demonstration of Proof-of-Possession) enforcement |
-| `DPoPValidationMode`, `DPoPClockSkew` | DPoP configuration |
-| **`RequirePushedAuthorization`** | PAR requirement per client |
-| `PushedAuthorizationLifetime` | PAR lifetime |
-| `InitiateLoginUri` | Third-party initiated login |
+| `RequireDPoP` | Enforces **Demonstrating Proof-of-Possession (DPoP)** for this client — tokens are bound to the client's key pair |
+| `DPoPValidationMode` | Controls DPoP validation strictness |
+| `DPoPClockSkew` | Allowed clock skew for DPoP proof timestamps |
+| `RequirePushedAuthorization` | Requires this client to use **PAR** (Pushed Authorization Requests) |
+| `PushedAuthorizationLifetime` | How long a pushed authorization request remains valid |
+| `InitiateLoginUri` | URI for third-party initiated login |
+
+## Additional Schema Changes
+
+- **`RequireResourceIndicator`** column on `ApiResources` — supports RFC 8707 resource indicators
+- **Timestamp columns** added to many entities (Created, Updated, LastAccessed) for auditing
+- **Unique constraints** added to child tables to prevent duplicate entries
+- **`ConsumedTime` index** on `PersistedGrants` for performance optimization
+- **`RedirectUri` column length** reduced from 2000 to 400 characters (safe unless you have extremely long redirect URIs)
 
 ## Important Notes
 
-- Review the generated migration carefully before applying to production.
-- The `RedirectUri` column length was reduced from 2000 to 400 characters.
-- These migrations add new tables/columns and should be non-destructive.
+- These migrations are safe for the v4 → Duende path (unlike the v3 → v4 migration which requires custom SQL scripts to avoid data loss)
+- Review the generated migration code before applying — verify it does not drop existing tables or columns
+- If you have a multi-instance deployment, apply migrations once to a shared database before deploying updated code

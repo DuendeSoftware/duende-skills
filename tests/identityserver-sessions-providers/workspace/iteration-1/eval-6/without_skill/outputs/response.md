@@ -1,91 +1,68 @@
-# Configuring CIBA for the Kiosk App
+# Configuring CIBA for the Kiosk Client
 
-CIBA (Client Initiated Backchannel Authentication) enables authentication on a separate device from the client application. Here's how to configure it for the kiosk app.
+CIBA (Client Initiated Backchannel Authentication) allows authentication on a separate device. Here's how to set it up.
 
-## 1. Update the kiosk.app Client
+## Update the Client
 
 ```csharp
 new Client
 {
     ClientId = "kiosk.app",
     ClientName = "Bank Kiosk Application",
-    AllowedGrantTypes = { GrantType.Ciba },
-
+    AllowedGrantTypes = { "urn:openid:params:grant-type:ciba" },
     ClientSecrets = { new Secret("KioskSecret".Sha256()) },
     AllowedScopes = { "openid", "profile", "catalog.read" }
 }
 ```
 
-## 2. User Validator
-
-You need to implement an interface to validate and identify the user from the CIBA request:
+## User Validator
 
 ```csharp
-using Duende.IdentityServer.Validation;
-using System.Security.Claims;
-
 public class CibaUserValidator : IBackchannelAuthenticationUserValidator
 {
-    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(
+    public async Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(
         BackchannelAuthenticationUserValidatorContext context)
     {
         var result = new BackchannelAuthenticationUserValidationResult();
 
-        // Identify user by login_hint
-        if (!string.IsNullOrEmpty(context.LoginHint))
+        if (context.LoginHint != null)
         {
-            // Look up user by login_hint (e.g., username or email)
-            result.Subject = new ClaimsPrincipal(new ClaimsIdentity(
-                new[]
+            // Look up user by login_hint
+            result.Subject = new ClaimsPrincipal(
+                new ClaimsIdentity(new[]
                 {
-                    new Claim("sub", context.LoginHint),
-                    new Claim("name", "User " + context.LoginHint)
-                },
-                "ciba"
-            ));
+                    new Claim("sub", context.LoginHint)
+                }, "ciba"));
         }
 
-        return Task.FromResult(result);
+        return result;
     }
 }
 ```
 
-## 3. Notification Service
-
-You need to implement a service that notifies the user about the authentication request:
+## Notification Service
 
 ```csharp
-using Duende.IdentityServer.Services;
-
 public class CibaNotificationService : IBackchannelAuthenticationUserNotificationService
 {
-    public Task SendLoginRequestAsync(BackchannelUserLoginRequest request)
+    public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request)
     {
-        // Send push notification, SMS, email, etc. to the user
-        // request.InternalId — unique ID to reference this request
-        // request.Subject — the user to notify
-        // request.Client — the requesting client
-
-        Console.WriteLine($"CIBA request {request.InternalId} for user {request.Subject.FindFirst("sub")?.Value}");
-
-        return Task.CompletedTask;
+        // Send push notification, email, or SMS to the user
+        // Include the request ID for approval
+        Console.WriteLine($"CIBA request {request.InternalId} for user {request.Subject}");
     }
 }
 ```
 
-## 4. Register Services
+## Registration
 
 ```csharp
 builder.Services.AddTransient<IBackchannelAuthenticationUserValidator, CibaUserValidator>();
 builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, CibaNotificationService>();
 ```
 
-## Flow
+## Notes
 
-1. Kiosk sends a request to `/connect/ciba` with `login_hint`
-2. IdentityServer validates the user via your `IBackchannelAuthenticationUserValidator`
-3. IdentityServer notifies the user via your `IBackchannelAuthenticationUserNotificationService`
-4. User approves/denies on their device
-5. Kiosk polls the token endpoint to get the result
-
-The poll mode is used by default — the kiosk application periodically checks the token endpoint for the authentication result.
+- CIBA uses poll mode by default for clients to check the token endpoint
+- The user validator identifies who needs to authenticate
+- The notification service tells them about the request

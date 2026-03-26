@@ -1,0 +1,25 @@
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 13,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that v4 uses HybridCache for token caching (not the old IDistributedCache directly)",
+      "passed": true
+    },
+    {
+      "assertion": "Explains the two-tier L1 (in-memory) + L2 (distributed) cache architecture",
+      "passed": true
+    },
+    {
+      "assertion": "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4",
+      "passed": true
+    },
+    {
+      "assertion": "Mentions CacheLifetimeBuffer as a configuration option for controlling token refresh timing",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

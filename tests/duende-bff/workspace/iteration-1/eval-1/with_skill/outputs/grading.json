@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Calls AddBff() on builder.Services", "pass": true, "rationale": "Shows builder.Services.AddBff()"},
-    {"assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true", "pass": true, "rationale": "Shows .ConfigureOpenIdConnect with all required properties"},
-    {"assertion": "Adds 'offline_access' to the OIDC scopes", "pass": true, "rationale": "Shows options.Scope.Add(\"offline_access\")"},
-    {"assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization", "pass": true, "rationale": "Correct middleware order: UseRouting, UseAuthentication, UseBff, UseAuthorization"},
-    {"assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead", "pass": true, "rationale": "Uses ConfigureOpenIdConnect and ConfigureCookies, no manual AddAuthentication/AddCookie/AddOpenIdConnect"}
+    {
+      "assertion": "Calls AddBff() on builder.Services",
+      "pass": true,
+      "rationale": "builder.Services.AddBff() is called"
+    },
+    {
+      "assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+      "pass": true,
+      "rationale": "ConfigureOpenIdConnect has Authority, ClientId, ClientSecret, ResponseType='code', SaveTokens=true"
+    },
+    {
+      "assertion": "Adds 'offline_access' to the OIDC scopes",
+      "pass": true,
+      "rationale": "options.Scope.Add(\"offline_access\") is present"
+    },
+    {
+      "assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization",
+      "pass": true,
+      "rationale": "Correct order: UseRouting, UseAuthentication, UseBff, UseAuthorization"
+    },
+    {
+      "assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() \u2014 uses the v4 fluent API instead",
+      "pass": true,
+      "rationale": "Uses AddBff().ConfigureOpenIdConnect().ConfigureCookies() \u2014 no manual AddAuthentication chain"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

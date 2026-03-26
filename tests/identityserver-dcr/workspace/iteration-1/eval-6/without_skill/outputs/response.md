@@ -1,106 +1,43 @@
-# Custom MongoDB Client Store for DCR
-
-To store dynamically registered clients in MongoDB instead of SQL Server, you'll need to implement the store interface that Duende IdentityServer uses for DCR.
-
-## Interface Implementation
+# Custom MongoDB Client Store
 
 ```csharp
-using Duende.IdentityServer.Models;
-using MongoDB.Driver;
-
-public interface IClientConfigurationStore
+public class MongoClientStore : IClientConfigurationStore
 {
-    Task AddAsync(Client client);
-    Task<Client?> FindByClientIdAsync(string clientId);
-    Task UpdateAsync(Client client);
-    Task DeleteAsync(string clientId);
-}
+    private readonly IMongoCollection<BsonDocument> _collection;
 
-public class MongoClientConfigurationStore : IClientConfigurationStore
-{
-    private readonly IMongoCollection<ClientDocument> _clients;
-
-    public MongoClientConfigurationStore(IMongoDatabase database)
+    public MongoClientStore(IMongoDatabase db)
     {
-        _clients = database.GetCollection<ClientDocument>("clients");
+        _collection = db.GetCollection<BsonDocument>("clients");
     }
 
     public async Task AddAsync(Client client)
     {
-        var doc = MapToDocument(client);
-        await _clients.InsertOneAsync(doc);
+        var doc = client.ToBsonDocument();
+        await _collection.InsertOneAsync(doc);
     }
 
     public async Task<Client?> FindByClientIdAsync(string clientId)
     {
-        var doc = await _clients.Find(c => c.ClientId == clientId)
-            .FirstOrDefaultAsync();
-        return doc != null ? MapToClient(doc) : null;
+        var filter = Builders<BsonDocument>.Filter.Eq("ClientId", clientId);
+        var doc = await _collection.Find(filter).FirstOrDefaultAsync();
+        return doc == null ? null : BsonSerializer.Deserialize<Client>(doc);
     }
 
     public async Task UpdateAsync(Client client)
     {
-        var doc = MapToDocument(client);
-        await _clients.ReplaceOneAsync(
-            c => c.ClientId == client.ClientId, doc);
+        var filter = Builders<BsonDocument>.Filter.Eq("ClientId", client.ClientId);
+        await _collection.ReplaceOneAsync(filter, client.ToBsonDocument());
     }
 
     public async Task DeleteAsync(string clientId)
     {
-        await _clients.DeleteOneAsync(c => c.ClientId == clientId);
+        var filter = Builders<BsonDocument>.Filter.Eq("ClientId", clientId);
+        await _collection.DeleteOneAsync(filter);
     }
-
-    private ClientDocument MapToDocument(Client client)
-    {
-        return new ClientDocument
-        {
-            ClientId = client.ClientId,
-            ClientName = client.ClientName,
-            AllowedGrantTypes = client.AllowedGrantTypes.ToList(),
-            RedirectUris = client.RedirectUris.ToList(),
-            AllowedScopes = client.AllowedScopes.ToList(),
-            RequirePkce = client.RequirePkce
-        };
-    }
-
-    private Client MapToClient(ClientDocument doc)
-    {
-        return new Client
-        {
-            ClientId = doc.ClientId,
-            ClientName = doc.ClientName,
-            AllowedGrantTypes = doc.AllowedGrantTypes,
-            RedirectUris = doc.RedirectUris,
-            AllowedScopes = doc.AllowedScopes,
-            RequirePkce = doc.RequirePkce
-        };
-    }
-}
-
-public class ClientDocument
-{
-    public string ClientId { get; set; } = null!;
-    public string? ClientName { get; set; }
-    public List<string> AllowedGrantTypes { get; set; } = new();
-    public List<string> RedirectUris { get; set; } = new();
-    public List<string> AllowedScopes { get; set; } = new();
-    public bool RequirePkce { get; set; }
 }
 ```
 
-## Registration
-
+Register it:
 ```csharp
-builder.Services.AddSingleton<IMongoClient>(
-    new MongoClient("mongodb://localhost:27017"));
-builder.Services.AddSingleton(sp =>
-    sp.GetRequiredService<IMongoClient>().GetDatabase("IdentityServer"));
-
-builder.Services.AddScoped<IClientConfigurationStore, MongoClientConfigurationStore>();
+builder.Services.AddSingleton<IClientConfigurationStore, MongoClientStore>();
 ```
-
-## Notes
-
-- Make sure to hash client secrets before storing them
-- The store should be registered in DI so that the DCR middleware can use it
-- You may want to add indexes on the `ClientId` field for performance

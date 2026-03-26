@@ -1,87 +1,91 @@
-Here's a review of each issue in the client configuration, along with the fixes:
+# Client Configuration Review and Fixes
 
-### Issue 1: Missing `.Sha256()` on the Client Secret
+Here are all the issues in the original configuration, with explanations and fixes:
+
+## Issue 1: Missing .Sha256() on Client Secret
 
 ```csharp
-// ❌ Original — plaintext secret stored directly
+// WRONG
 ClientSecrets = { new Secret("super-secret-password") }
 
-// ✅ Fixed — secret must be hashed with Sha256
+// FIXED
 ClientSecrets = { new Secret("super-secret-password".Sha256()) }
 ```
 
-**Why:** Duende IdentityServer stores secrets as SHA-256 hashes. The `new Secret(value)` constructor expects a pre-hashed value. Without `.Sha256()`, the raw string is stored as-is, and when a client authenticates, IdentityServer hashes the incoming secret and compares it — the comparison will always fail because the stored value was never hashed.
+**Problem:** The `Secret` constructor expects a hashed value. Without `.Sha256()`, the raw string is stored as the secret value, and client authentication will fail because IdentityServer compares the hash of the incoming secret against the stored value.
 
-### Issue 2: Trailing Slash on Redirect URI
+## Issue 2: Trailing Slash on Redirect URI
 
 ```csharp
-// ❌ Original — trailing slash
+// WRONG - trailing slash
 RedirectUris = { "https://app.example.com/signin-oidc/" }
 
-// ✅ Fixed — exact match required, no trailing slash
+// FIXED - exact match required
 RedirectUris = { "https://app.example.com/signin-oidc" }
 ```
 
-**Why:** Redirect URI validation is an exact string match (per the OAuth 2.0 spec). The ASP.NET Core OIDC middleware sends `https://app.example.com/signin-oidc` (no trailing slash) as the `redirect_uri` parameter. If the registered URI has a trailing slash, IdentityServer returns an `invalid_redirect_uri` error and the login flow fails.
+**Problem:** Redirect URI matching is exact. The ASP.NET Core OIDC middleware sends `https://app.example.com/signin-oidc` (no trailing slash). The trailing slash causes an `invalid_redirect_uri` error during the authorization flow.
 
-### Issue 3: Missing `openid` Scope
+## Issue 3: Missing 'openid' Scope
 
 ```csharp
-// ❌ Original — no openid scope
+// WRONG - missing openid scope
 AllowedScopes = { "profile", "email", "api1" }
 
-// ✅ Fixed — openid is mandatory for OIDC
+// FIXED - openid is required for OIDC
 AllowedScopes =
 {
-    IdentityServerConstants.StandardScopes.OpenId,  // Required
+    IdentityServerConstants.StandardScopes.OpenId,
     IdentityServerConstants.StandardScopes.Profile,
     IdentityServerConstants.StandardScopes.Email,
     "api1"
 }
 ```
 
-**Why:** The `openid` scope is mandatory for any OpenID Connect authentication request. It tells IdentityServer to issue an identity token containing the `sub` (subject ID) claim. Without it, the request is treated as a plain OAuth 2.0 request — no identity token is issued, and user authentication fails.
+**Problem:** The `openid` scope is mandatory for any OpenID Connect authentication request. Without it, the client can't authenticate users - it's required by the OIDC specification. The `profile` and `email` scopes depend on `openid` being present.
 
-### Issue 4: `AllowOfflineAccess` Should Be `true`
+## Issue 4: AllowOfflineAccess Should Be True
 
 ```csharp
-// ❌ Original — refresh tokens disabled
+// WRONG - can't get refresh tokens
 AllowOfflineAccess = false
 
-// ✅ Fixed — enable refresh tokens
+// FIXED - enables refresh token issuance
 AllowOfflineAccess = true
 ```
 
-**Why:** `AllowOfflineAccess` controls whether the `offline_access` scope is permitted and whether refresh tokens are issued. Setting it to `false` (the default) means the client will never receive a refresh token, even if it requests the `offline_access` scope. Since the requirement states the app needs refresh tokens, this must be `true`.
+**Problem:** The app needs refresh tokens for long-lived API access. `AllowOfflineAccess = false` means the client won't receive a refresh token even if it requests the `offline_access` scope.
 
-### Issue 5: Hardcoded Secret in Source Code
+## Issue 5: Hardcoded Secret (Security Concern)
 
 ```csharp
-// ⚠️ Security concern — secret is hardcoded in source code
+// WRONG - secret in source code
 ClientSecrets = { new Secret("super-secret-password".Sha256()) }
 
-// ✅ Better — load from configuration or a secrets vault
-ClientSecrets = { new Secret(configuration["Clients:MyWebApp:Secret"].Sha256()) }
+// BETTER - load from configuration or vault
+ClientSecrets = { new Secret(configuration["Clients:WebApp:Secret"].Sha256()) }
 ```
 
-**Why:** Hardcoding secrets in source code means they end up in version control, build artifacts, and logs. In production, secrets should be loaded from configuration (environment variables, Azure Key Vault, AWS Secrets Manager, etc.) or replaced entirely with asymmetric credentials (e.g., private_key_jwt client authentication).
+**Problem:** Hardcoding secrets in source code is a security risk. Secrets should be loaded from configuration, environment variables, or a secret vault (like Azure Key Vault or HashiCorp Vault). Source code is often committed to version control, making secrets visible to anyone with repo access.
 
-### Complete Fixed Configuration
+## Complete Fixed Client
 
 ```csharp
 new Client
 {
     ClientId = "my-web-app",
     AllowedGrantTypes = GrantTypes.Code,
-    ClientSecrets = { new Secret(configuration["Clients:MyWebApp:Secret"].Sha256()) },
+    RequirePkce = true,
+    ClientSecrets = { new Secret(configuration["Clients:WebApp:Secret"].Sha256()) },
     RedirectUris = { "https://app.example.com/signin-oidc" },
+    PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
+    AllowOfflineAccess = true,
     AllowedScopes =
     {
         IdentityServerConstants.StandardScopes.OpenId,
         IdentityServerConstants.StandardScopes.Profile,
         IdentityServerConstants.StandardScopes.Email,
         "api1"
-    },
-    AllowOfflineAccess = true
+    }
 }
 ```

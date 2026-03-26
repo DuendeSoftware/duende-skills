@@ -1,27 +1,43 @@
 # Configuring Server-Side Sessions
 
-Here's how to configure sessions with specific lifetimes:
+## Session Configuration
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
     options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
     options.Authentication.CookieSlidingExpiration = false;
-})
-.AddInMemoryClients(new List<Client>
-{
-    new Client
-    {
-        ClientId = "web.app",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
-        BackChannelLogoutSessionRequired = true,
-        // other settings...
-    }
 });
 ```
 
-For server-side sessions, you'd need to configure session storage. Duende IdentityServer supports server-side sessions that can track and manage active sessions.
+## Enable Server-Side Sessions
 
-You should also configure the cleanup of expired sessions and consider back-channel logout for when sessions expire on the server side.
+You'll need to call a method to enable server-side sessions. In Duende IdentityServer, this is typically done on the builder:
+
+```csharp
+var idsvrBuilder = builder.Services.AddIdentityServer(options =>
+{
+    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
+    options.Authentication.CookieSlidingExpiration = false;
+});
+
+idsvrBuilder.AddServerSideSessions();
+```
+
+## Back-Channel Logout
+
+For the web.app client, add back-channel logout support:
+
+```csharp
+new Client
+{
+    ClientId = "web.app",
+    // ... other settings ...
+    BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
+    BackChannelLogoutSessionRequired = true
+}
+```
+
+## Expired Session Cleanup
+
+You should configure cleanup of expired sessions. I believe there are server-side session options for this in IdentityServer, but the exact property names may vary by version.

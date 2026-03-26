@@ -1,4 +1,6 @@
-Here's how to set up a basic Duende IdentityServer host with in-memory stores, a `weatherapi` API scope, the standard `openid` and `profile` identity resources, and full event diagnostics:
+# Basic IdentityServer Host Setup
+
+Here's the complete `Program.cs` with in-memory stores, an API scope, identity resources, and event diagnostics:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -11,32 +13,39 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
 })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
+    .AddInMemoryIdentityResources(new IdentityResource[]
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile()
     })
-    .AddInMemoryApiScopes(new List<ApiScope>
+    .AddInMemoryApiScopes(new ApiScope[]
     {
         new ApiScope("weatherapi", "Weather API")
-    })
-    .AddInMemoryClients(Array.Empty<Client>());
+    });
 
 var app = builder.Build();
 
-app.UseIdentityServer(); // Includes UseAuthentication() — do NOT call UseAuthentication() separately
+app.UseIdentityServer(); // Includes UseAuthentication() internally
 app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-Key points:
+## What Each Part Does
 
-1. **`AddIdentityServer`** registers all IdentityServer services. The options lambda configures `IdentityServerOptions`.
-2. **Event raising** — all four event types are enabled (`RaiseErrorEvents`, `RaiseInformationEvents`, `RaiseFailureEvents`, `RaiseSuccessEvents`) for full diagnostics.
-3. **`AddInMemoryIdentityResources`** registers the standard `openid` (maps to the `sub` claim) and `profile` (maps to `name`, `family_name`, etc.) identity resources.
-4. **`AddInMemoryApiScopes`** registers the `weatherapi` scope that clients can request.
-5. **`UseIdentityServer()`** replaces `UseAuthentication()` — it registers both the IdentityServer middleware and the authentication middleware internally. Calling `UseAuthentication()` separately is unnecessary and should be avoided.
-6. **No clients** — we pass an empty client array since client definitions will be added later.
+### AddIdentityServer Options
+
+The `options` lambda configures `IdentityServerOptions`. Enabling all four event types gives full visibility into protocol flows, errors, and token issuance in production.
+
+### Identity Resources
+
+- `IdentityResources.OpenId()` — Required by the OpenID Connect specification. Maps to the `sub` (subject ID) claim.
+- `IdentityResources.Profile()` — Maps to `name`, `family_name`, `given_name`, and other profile claims.
+
+### API Scopes
+
+The `weatherapi` scope represents a permission to access the Weather API. Clients will request this scope when obtaining access tokens.
+
+### Middleware
+
+`UseIdentityServer()` registers both the IdentityServer middleware and the ASP.NET Core authentication middleware. Do not call `UseAuthentication()` separately — it's already included.

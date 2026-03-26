@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Identifies RequirePkce = true as required, though doesn't explicitly warn against setting to false"
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Identifies exact redirect URIs with no wildcards"
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": false,
+      "rationale": "Lists short-lived access tokens as #3 instead of grant type restrictions \u2014 does not mention principle of least grant or removing implicit flow"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 3,
+  "score": 0.667
+}

@@ -1,11 +1,9 @@
-# Integration Test Fixture for Aspire
+# Integration Test Fixture for Aspire with IdentityServer
 
-Here's a test fixture for testing an Aspire solution:
+Here's a test fixture using xUnit's `IAsyncLifetime`:
 
 ```csharp
-using Aspire.Hosting.Testing;
-
-public sealed class AppFixture : IAsyncLifetime
+public class AspireTestFixture : IAsyncLifetime
 {
     private DistributedApplication? _app;
 
@@ -17,23 +15,28 @@ public sealed class AppFixture : IAsyncLifetime
         _app = await builder.BuildAsync();
         await _app.StartAsync();
 
-        // Wait for resources to be ready
-        await _app.ResourceNotifications
-            .WaitForResourceHealthyAsync("identity-server");
+        // Give IdentityServer time to start
+        await Task.Delay(TimeSpan.FromSeconds(10));
     }
 
-    public HttpClient CreateApiClient() =>
-        _app!.CreateHttpClient("weather-api");
+    public HttpClient CreateApiClient()
+    {
+        return _app!.CreateHttpClient("weather-api");
+    }
+
+    public string GetAuthorityUrl()
+    {
+        return "https://localhost:5001";
+    }
 
     public async Task DisposeAsync()
     {
         if (_app is not null)
         {
-            await _app.StopAsync();
             await _app.DisposeAsync();
         }
     }
 }
 ```
 
-This fixture starts the entire Aspire AppHost, waits for resources to be healthy, and provides methods to create HTTP clients for testing individual services.
+This creates the AppHost, starts all services, waits a bit for everything to be ready, and provides helper methods for tests. The `CreateApiClient` method gives you an `HttpClient` configured for the weather API.

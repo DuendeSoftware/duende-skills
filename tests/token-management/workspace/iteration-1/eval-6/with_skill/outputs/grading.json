@@ -1,1 +1,29 @@
-{"eval_id":6,"variant":"with_skill","assertions":[{"assertion":"Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier","pass":true,"rationale":"AddStackExchangeRedisCache is called with Configuration from builder.Configuration.GetConnectionString(\"Redis\")."},{"assertion":"Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options","pass":true,"rationale":"options.CacheLifetimeBuffer = 120 is set in AddClientCredentialsTokenManagement options."},{"assertion":"Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption","pass":true,"rationale":"EncryptedHybridCacheSerializer class implements IHybridCacheSerializer<ClientCredentialsToken> with IDataProtector for Serialize/Deserialize."},{"assertion":"Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()","pass":true,"rationale":"builder.Services.AddHybridCache().AddSerializer<ClientCredentialsToken, EncryptedHybridCacheSerializer>() is called."},{"assertion":"Output calls AddDataProtection() to enable the data protection provider","pass":true,"rationale":"builder.Services.AddDataProtection() is called."}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 6,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier",
+      "passed": true
+    },
+    {
+      "assertion": "Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options",
+      "passed": true
+    },
+    {
+      "assertion": "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+      "passed": true
+    },
+    {
+      "assertion": "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()",
+      "passed": true
+    },
+    {
+      "assertion": "Output calls AddDataProtection() to enable the data protection provider",
+      "passed": true
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

@@ -2,10 +2,26 @@
   "eval_id": 6,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Calls AddLocalApiAuthentication() to set up local API authentication", "pass": true, "rationale": "Code shows builder.Services.AddLocalApiAuthentication()"},
-    {"assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints", "pass": true, "rationale": "Code uses .RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName) and [Authorize(Policy = IdentityServerConstants.LocalApi.PolicyName)]"},
-    {"assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes", "pass": true, "rationale": "Explicitly states clients must include IdentityServerApi in AllowedScopes with code example showing AllowedScopes = { \"openid\", \"profile\", \"IdentityServerApi\" }"},
-    {"assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts", "pass": true, "rationale": "Explicitly warns: 'Local API authentication only works when the API is co-hosted with IdentityServer' and recommends JWT bearer or introspection for separate hosts"}
+    {
+      "assertion": "Calls AddLocalApiAuthentication() to set up local API authentication",
+      "pass": true,
+      "rationale": "Response calls AddLocalApiAuthentication()"
+    },
+    {
+      "assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+      "pass": true,
+      "rationale": "Response uses IdentityServerConstants.LocalApi.PolicyName in RequireAuthorization"
+    },
+    {
+      "assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+      "pass": true,
+      "rationale": "Response shows client with IdentityServerApi in AllowedScopes"
+    },
+    {
+      "assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts",
+      "pass": true,
+      "rationale": "Response explicitly warns about co-hosting requirement"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

@@ -2,12 +2,28 @@
   "eval_id": 8,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Response explains that the default Microsoft OIDC/JWT handler maps 'sub' to the long XML URI 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'", "pass": true, "rationale": "The response explains that 'sub' is renamed to 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'."},
-    {"assertion": "Response recommends setting MapInboundClaims = false on the OIDC or JWT Bearer handler to preserve original claim names", "pass": true, "rationale": "The response shows options.MapInboundClaims = false on both OIDC and JWT Bearer handlers."},
-    {"assertion": "Response shows setting TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role' so User.Identity.Name and role checks still work", "pass": true, "rationale": "The response includes TokenValidationParameters with NameClaimType = \"name\" and RoleClaimType = \"role\"."},
-    {"assertion": "Response explains this is a common pitfall where claims are silently renamed by the handler", "pass": true, "rationale": "The response states 'This is a common pitfall when working with OpenID Connect - the default mapping silently renames claims'."}
+    {
+      "assertion": "Response explains that the default Microsoft OIDC/JWT handler maps 'sub' to the long XML URI 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'",
+      "pass": true,
+      "rationale": "The response mentions the mapping to http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier."
+    },
+    {
+      "assertion": "Response recommends setting MapInboundClaims = false on the OIDC or JWT Bearer handler to preserve original claim names",
+      "pass": true,
+      "rationale": "MapInboundClaims = false is recommended."
+    },
+    {
+      "assertion": "Response shows setting TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role' so User.Identity.Name and role checks still work",
+      "pass": true,
+      "rationale": "TokenValidationParameters with NameClaimType and RoleClaimType are shown."
+    },
+    {
+      "assertion": "Response explains this is a common pitfall where claims are silently renamed by the handler",
+      "pass": false,
+      "rationale": "The response explains the mapping but doesn't explicitly call it a common pitfall or emphasize the silent nature of the rename."
+    }
   ],
-  "pass_count": 4,
+  "pass_count": 3,
   "total_count": 4,
-  "score": 1.0
+  "score": 0.75
 }

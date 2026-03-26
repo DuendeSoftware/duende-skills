@@ -5,27 +5,27 @@
     {
       "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
       "pass": true,
-      "rationale": "spa.legacy uses GrantTypes.Code with RequirePkce = true; no implicit flow remains"
+      "rationale": "Response identifies implicit flow and PKCE issues and shows the fix"
     },
     {
       "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
       "pass": true,
-      "rationale": "All URIs are exact-match: https://app.example.com/signin-oidc, https://spa.example.com/callback"
+      "rationale": "Response identifies wildcard redirect URIs as an issue to fix"
     },
     {
       "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
-      "pass": true,
-      "rationale": "AddDeveloperSigningCredential removed; KeyManagement.RotationInterval configured"
+      "pass": false,
+      "rationale": "Response says to replace developer signing credential but does not provide actual key management configuration code"
     },
     {
       "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
-      "pass": false,
-      "rationale": "web.app has AccessTokenLifetime = 3600 (1 hour), exceeding the 900-second maximum"
+      "pass": true,
+      "rationale": "AccessTokenLifetime = 900 (15 minutes) meets the <= 900 requirement"
     },
     {
       "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
       "pass": true,
-      "rationale": "Lists 6 issues found with explanations of fixes applied"
+      "rationale": "Includes a summary section listing all findings"
     }
   ],
   "pass_count": 4,

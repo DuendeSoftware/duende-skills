@@ -2,11 +2,31 @@
   "eval_id": 5,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "A class extending DefaultRefreshTokenService is defined", "pass": true, "rationale": "ResilientRefreshTokenService extends DefaultRefreshTokenService."},
-    {"assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime", "pass": true, "rationale": "AcceptConsumedTokenAsync checks ConsumedTime and compares against TimeSpan.FromSeconds(30)."},
-    {"assertion": "The service is registered as IRefreshTokenService in the DI container", "pass": true, "rationale": "Code registers via builder.Services.AddTransient<IRefreshTokenService, ResilientRefreshTokenService>()."},
-    {"assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly", "pass": true, "rationale": "mobile_app client has RefreshTokenUsage = TokenUsage.OneTimeOnly."},
-    {"assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options", "pass": false, "rationale": "The response mentions that consumed tokens should not be immediately deleted but does not actually show code setting DeleteOneTimeOnlyRefreshTokensOnUse = false. It says 'configure the operational store settings accordingly' without providing the actual configuration."}
+    {
+      "assertion": "A class extending DefaultRefreshTokenService is defined",
+      "pass": true,
+      "rationale": "GracefulRefreshTokenService extends DefaultRefreshTokenService."
+    },
+    {
+      "assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime",
+      "pass": true,
+      "rationale": "Overrides AcceptConsumedTokenAsync with 30-second grace period using ConsumedTime."
+    },
+    {
+      "assertion": "The service is registered as IRefreshTokenService in the DI container",
+      "pass": true,
+      "rationale": "builder.Services.AddTransient<IRefreshTokenService, GracefulRefreshTokenService>()."
+    },
+    {
+      "assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "RefreshTokenUsage = TokenUsage.OneTimeOnly on mobile_app."
+    },
+    {
+      "assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options",
+      "pass": false,
+      "rationale": "Missing entirely. Without this setting, consumed tokens are deleted immediately and the grace period check can never work. This is a critical Duende-specific detail."
+    }
   ],
   "pass_count": 4,
   "total_count": 5,

@@ -1,9 +1,10 @@
-# Multi-Instance IdentityServer with EF Store and Data Protection
+# Load-Balanced IdentityServer with SQL Server Key Storage
 
-Here's the updated `Program.cs` with Entity Framework operational store for key storage and data protection configured for multiple instances:
+For multi-instance deployment, you need to share signing keys and data protection keys across all instances.
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,16 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Data protection for multi-instance
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/shared/dataprotection-keys"));
+    .PersistKeysToFileSystem(new DirectoryInfo("/shared/dp-keys"))
+    .SetApplicationName("IdentityServer");
 
 builder.Services.AddIdentityServer()
-    .AddOperationalStore(options =>
-    {
-        options.ConfigureDbContext = b =>
-            b.UseSqlServer(connectionString);
-    })
     .AddInMemoryClients(new List<Client>
     {
         new Client
@@ -47,6 +43,11 @@ builder.Services.AddIdentityServer()
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile()
+    })
+    .AddOperationalStore(options =>
+    {
+        options.ConfigureDbContext = b =>
+            b.UseSqlServer(connectionString);
     });
 
 var app = builder.Build();
@@ -58,10 +59,4 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-This configures:
-
-1. **Entity Framework Operational Store**: The `AddOperationalStore` method sets up SQL Server-backed storage for IdentityServer's operational data including signing keys. This ensures all instances behind the load balancer share the same keys.
-
-2. **Data Protection**: `AddDataProtection()` with `PersistKeysToFileSystem` pointed to a shared directory ensures all instances can encrypt/decrypt data protection keys consistently.
-
-Make sure the shared directory `/shared/dataprotection-keys` is accessible by all instances and that you run EF migrations to create the necessary database tables.
+This stores operational data (including signing keys) in SQL Server and shares data protection keys via a shared file system path.

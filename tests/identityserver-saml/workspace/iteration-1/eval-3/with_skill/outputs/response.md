@@ -1,17 +1,18 @@
-# Custom SAML Claim-to-Attribute Mapping
+# Custom Claim-to-Attribute Mapping in Duende IdentityServer SAML
 
-To customize how claims are mapped to SAML attributes in Duende IdentityServer, implement the `ISamlClaimsMapper` interface. This gives you full control over the attribute names and values in SAML assertions.
+To customize how claims are mapped to SAML attributes, implement the `ISamlClaimsMapper` interface. This gives you full control over which SAML attributes appear in assertions and how they're named.
 
-> **Important Warning**: Implementing `ISamlClaimsMapper` **completely replaces** the default claim mapping. The default mappings configured in `IdentityServerOptions.Saml.DefaultClaimMappings` are **not applied** when you provide a custom mapper. You must handle all claims yourself.
+## Important Warning
 
-## Custom ISamlClaimsMapper Implementation
+**Implementing `ISamlClaimsMapper` completely replaces the default claim mapping.** The default mappings configured in `IdentityServerOptions.Saml.DefaultClaimMappings` are **not applied** when you provide a custom mapper. You must handle all claims yourself.
+
+## Custom Mapper Implementation
 
 ```csharp
 using System.Security.Claims;
-using Duende.IdentityServer.Models.Saml;
-using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Models;
 
-public class LegacySamlClaimsMapper : ISamlClaimsMapper
+public class CustomSamlClaimsMapper : ISamlClaimsMapper
 {
     public Task<IEnumerable<SamlAttribute>> MapClaimsAsync(
         IEnumerable<Claim> claims,
@@ -21,15 +22,14 @@ public class LegacySamlClaimsMapper : ISamlClaimsMapper
 
         foreach (var claim in claims)
         {
-            // Map to custom URN format for the legacy SP
             var attributeName = claim.Type switch
             {
                 "email" => "urn:custom:email",
-                "name" => "urn:custom:name",
-                "given_name" => "urn:custom:firstName",
-                "family_name" => "urn:custom:lastName",
+                "name" => "urn:custom:displayname",
+                "given_name" => "urn:custom:firstname",
+                "family_name" => "urn:custom:lastname",
                 "role" => "urn:custom:role",
-                _ => $"urn:custom:{claim.Type}" // fallback for any other claims
+                _ => $"urn:custom:{claim.Type}"
             };
 
             attributes.Add(new SamlAttribute
@@ -46,52 +46,35 @@ public class LegacySamlClaimsMapper : ISamlClaimsMapper
 
 ## Registration
 
-Register the custom mapper as a transient service in your DI container:
+Register the custom mapper as a transient service:
 
 ```csharp
-builder.Services.AddTransient<ISamlClaimsMapper, LegacySamlClaimsMapper>();
+builder.Services.AddTransient<ISamlClaimsMapper, CustomSamlClaimsMapper>();
 ```
 
-## Per-SP Mapping
+## Per-SP Custom Mapping
 
-If only some SPs need custom mapping, you can use the `serviceProvider` parameter to branch:
+The `MapClaimsAsync` method receives the `SamlServiceProvider` as a parameter, so you can customize mappings per service provider:
 
 ```csharp
 public Task<IEnumerable<SamlAttribute>> MapClaimsAsync(
     IEnumerable<Claim> claims,
     SamlServiceProvider serviceProvider)
 {
-    var attributes = new List<SamlAttribute>();
-
-    foreach (var claim in claims)
+    if (serviceProvider.EntityId == "https://legacy-sp.example.com")
     {
-        if (serviceProvider.EntityId == "https://legacy-crm.example.com")
-        {
-            // Legacy SP expects urn:custom:* format
-            attributes.Add(new SamlAttribute
-            {
-                Name = $"urn:custom:{claim.Type}",
-                Values = [claim.Value]
-            });
-        }
-        else
-        {
-            // Standard mapping for other SPs
-            attributes.Add(new SamlAttribute
-            {
-                Name = claim.Type,
-                Values = [claim.Value]
-            });
-        }
+        // Legacy SP expects urn:custom:* format
+        return MapLegacyAttributes(claims);
     }
 
-    return Task.FromResult<IEnumerable<SamlAttribute>>(attributes);
+    // Standard mapping for other SPs
+    return MapStandardAttributes(claims);
 }
 ```
 
 ## Key Points
 
-- `ISamlClaimsMapper` **completely replaces** all default claim mapping — `DefaultClaimMappings` are not applied when a custom mapper is registered
-- The mapper receives the `SamlServiceProvider` so you can customize per-SP
-- Each `SamlAttribute` has a `Name` (the attribute name in the SAML assertion) and `Values` (list of attribute values)
-- Register as transient via `AddTransient<ISamlClaimsMapper, YourMapper>()`
+- `ISamlClaimsMapper` **completely replaces** default mapping — `DefaultClaimMappings` are not applied
+- The mapper receives the `SamlServiceProvider` so you can vary behavior per SP
+- `SamlAttribute` has `Name` (the attribute name in the assertion) and `Values` (list of values)
+- Register as transient with `AddTransient<ISamlClaimsMapper, YourMapper>()`

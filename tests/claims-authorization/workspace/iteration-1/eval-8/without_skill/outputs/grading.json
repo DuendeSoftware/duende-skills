@@ -2,13 +2,33 @@
   "eval_id": 8,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false", "pass": true, "rationale": "Shows MapInboundClaims = false in the OIDC handler"},
-    {"assertion": "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones", "pass": false, "rationale": "Does not call ClaimActions.Clear() before adding mappings"},
-    {"assertion": "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'", "pass": true, "rationale": "Uses MapJsonKey for oid and groups"},
-    {"assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme", "pass": false, "rationale": "Does not set SignInScheme at all"},
-    {"assertion": "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions", "pass": true, "rationale": "Shows mapping groups to roles in the callback via MapGroupToRole"}
+    {
+      "assertion": "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false",
+      "pass": true,
+      "rationale": "options.MapInboundClaims = false is set"
+    },
+    {
+      "assertion": "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones",
+      "pass": false,
+      "rationale": "ClaimActions.Clear() is NOT called \u2014 default claim mappings are still active"
+    },
+    {
+      "assertion": "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'",
+      "pass": true,
+      "rationale": "MapJsonKey is used for oid, email, and name"
+    },
+    {
+      "assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": false,
+      "rationale": "SignInScheme is not set \u2014 without this, the external authentication won't integrate correctly with IdentityServer's external cookie flow"
+    },
+    {
+      "assertion": "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions",
+      "pass": false,
+      "rationale": "Groups are read but not actually mapped to role claims \u2014 just selected as values without creating role Claim objects"
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 2,
   "total_count": 5,
-  "score": 0.6
+  "score": 0.4
 }

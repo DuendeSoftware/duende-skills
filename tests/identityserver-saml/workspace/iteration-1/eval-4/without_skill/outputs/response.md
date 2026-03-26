@@ -1,39 +1,43 @@
-# Fixing SAML "Response Has Expired" Errors
+# Fixing "Response Has Expired" SAML Errors
 
-When a SAML service provider reports "response has expired" errors, it's usually due to clock skew between the Identity Provider and the Service Provider. Here are the settings to look at:
+This is a common issue in SAML integrations and is usually related to time synchronization between systems.
 
-## Token Lifetime Settings
+## Check Token Lifetime
 
-You can adjust the token lifetime and validity window:
+The SAML assertion may have too short a lifetime. You can increase the token lifetime in your IdentityServer configuration:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
-    // Increase the allowed clock skew for token validation
-    options.Authentication.CookieLifetime = TimeSpan.FromHours(10);
-})
-    .AddSaml();
-```
-
-## SAML Response Validity
-
-Check your SAML response configuration:
-
-```csharp
-builder.Services.Configure<Saml2Options>(options =>
-{
-    options.MaxClockSkew = TimeSpan.FromMinutes(10);
-    options.TokenLifetime = TimeSpan.FromMinutes(15);
+    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
+    options.Authentication.CookieSlidingExpiration = true;
 });
 ```
 
-## Recommendations
+## Verify Clock Synchronization
 
-1. **Increase the clock skew tolerance** from the default (usually 5 minutes) to something larger like 10 minutes
-2. **Check NTP**: Ensure both the IdP and SP have synchronized clocks
-3. **Review response validity**: Make sure the response `NotOnOrAfter` conditions allow enough time
-4. **Network latency**: Factor in network transit time between the IdP and SP
+Even if your server's clock seems fine, make sure:
 
-## On the SP Side
+1. NTP is properly configured on your IdentityServer host
+2. The time zone settings are correct
+3. The SP's server clock is also synchronized
 
-Ask the SP administrator to check their clock skew tolerance settings as well. Most SAML libraries have a configurable maximum clock skew.
+## Increase Token Validity
+
+If using SAML assertions, you might need to adjust the assertion lifetime or add tolerance:
+
+```csharp
+// If your SAML library supports it, increase assertion validity
+builder.Services.Configure<SamlOptions>(options =>
+{
+    options.AssertionLifetime = TimeSpan.FromMinutes(30);
+    options.AllowedClockSkew = TimeSpan.FromMinutes(10);
+});
+```
+
+## Other Considerations
+
+- Check if there's a proxy or load balancer that's adding latency
+- Verify the assertion `NotBefore` and `NotOnOrAfter` conditions
+- Some SPs have their own clock skew settings — check their documentation
+- Consider using NTP monitoring to alert on clock drift

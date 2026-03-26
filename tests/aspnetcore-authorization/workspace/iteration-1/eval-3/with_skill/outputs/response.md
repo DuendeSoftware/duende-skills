@@ -1,8 +1,8 @@
-# Custom Scope Handler for Space-Delimited JWT Scopes
+# Custom ScopeRequirement and ScopeHandler for Space-Delimited JWT Scopes
 
-When IdentityServer is configured with `EmitScopesAsSpaceDelimitedStringInJwt = true`, scopes arrive in the JWT as a single space-delimited string rather than an array of claims. The built-in `RequireClaim` won't match individual scopes in that case. You need a custom `IAuthorizationRequirement` and `IAuthorizationHandler`.
+When IdentityServer is configured with `EmitScopesAsSpaceDelimitedStringInJwt = true`, scopes arrive in the JWT as a single space-delimited string (e.g., `"catalog.read catalog.write profile"`) rather than as individual claims. The built-in `RequireClaim("scope", "catalog.read")` checks for an exact match against the full claim value, so it won't work in this scenario. You need a custom authorization handler that splits the string and checks for the individual scope.
 
-## ScopeRequirement.cs
+## ScopeRequirement
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
@@ -10,15 +10,13 @@ using Microsoft.AspNetCore.Authorization;
 public class ScopeRequirement : IAuthorizationRequirement
 {
     public string Scope { get; }
-
-    public ScopeRequirement(string scope)
-    {
-        Scope = scope;
-    }
+    public ScopeRequirement(string scope) => Scope = scope;
 }
 ```
 
-## ScopeHandler.cs
+The requirement is a simple data class that implements `IAuthorizationRequirement` and holds the expected scope value.
+
+## ScopeHandler
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
@@ -29,35 +27,39 @@ public class ScopeHandler : AuthorizationHandler<ScopeRequirement>
         AuthorizationHandlerContext context,
         ScopeRequirement requirement)
     {
-        // Find the scope claim
         var scopeClaim = context.User.FindFirst("scope");
         if (scopeClaim is null)
         {
-            // No scope claim at all — don't call Fail(), just return.
+            // No scope claim present — return without calling Succeed or Fail.
             // Not calling Succeed() means "I have no opinion" — other handlers
-            // for this requirement can still attempt to satisfy it.
+            // can still satisfy the requirement.
             return Task.CompletedTask;
         }
 
-        // Handle both space-delimited string and individual claim values
+        // Handle both array claims and space-delimited string
         var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
         if (scopes.Contains(requirement.Scope))
         {
             context.Succeed(requirement);
         }
 
-        // Important: do NOT call context.Fail() here.
-        // Fail() is a hard veto that prevents any other handler from satisfying
-        // this requirement. Simply not calling Succeed() means "I couldn't satisfy
-        // this requirement" and lets other handlers try.
-
+        // Important: Do NOT call context.Fail() here.
+        // Fail() is a hard veto that blocks all other handlers.
+        // Simply not calling Succeed() means "I don't know" — other handlers may still succeed.
         return Task.CompletedTask;
     }
 }
 ```
 
-## Updated Program.cs
+### Key Design Decisions
+
+1. **`Split(' ', StringSplitOptions.RemoveEmptyEntries)`** — Handles the space-delimited format. This also handles edge cases like double spaces.
+
+2. **No `context.Fail()` call** — This is critical. `context.Fail()` is a **hard veto** that prevents any other handler from satisfying the requirement, even if they would succeed. By not calling `Succeed()`, the handler expresses "no opinion", leaving the door open for other handlers. Only call `Fail()` when you need to guarantee denial (e.g., a security blocklist check).
+
+3. **`context.Succeed(requirement)`** — Called only when the scope matches. This signals that this handler has determined the requirement is satisfied.
+
+## Registration in Program.cs
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -72,7 +74,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Audience = builder.Configuration["Authentication:Audience"];
     });
 
-// Register the custom scope handler in DI
+// Register the custom handler in DI
 builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
 
 builder.Services.AddAuthorization(options =>
@@ -87,7 +89,6 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Apply the policy to endpoints
 app.MapGet("/products", () => Results.Ok(new[]
 {
     new { Id = 1, Name = "Widget", Price = 9.99 },
@@ -109,10 +110,10 @@ app.MapGet("/health", () => Results.Ok("healthy"));
 app.Run();
 ```
 
-## Key Design Decisions
+## How It All Fits Together
 
-1. **`ScopeRequirement` implements `IAuthorizationRequirement`** with a `Scope` property that specifies which scope to check for.
-2. **`ScopeHandler` extends `AuthorizationHandler<ScopeRequirement>`** — the generic base class provides the typed `HandleRequirementAsync` method.
-3. **`Split(' ')` handles space-delimited strings** — when IdentityServer emits scopes as `"openid profile catalog.read"`, this correctly parses each individual scope.
-4. **No `context.Fail()` on mismatch** — this is critical. `Fail()` is a hard veto that blocks all other handlers. By simply not calling `Succeed()`, we express "no opinion" and allow other handlers (if any) to satisfy the requirement.
-5. **Registered as `IAuthorizationHandler` in DI** — without this registration, the policy would silently deny all requests because no handler would ever evaluate the requirement.
+1. The `ScopeRequirement` defines *what* needs to be checked (the scope name).
+2. The `ScopeHandler` defines *how* to check it (split the claim, look for a match).
+3. The handler is registered in DI as `IAuthorizationHandler` so the authorization system discovers it.
+4. The policy uses `policy.Requirements.Add(new ScopeRequirement("catalog.read"))` instead of `RequireClaim`, connecting the requirement to the handler.
+5. When a request arrives, the authorization middleware finds all handlers for `ScopeRequirement`, invokes them, and checks if any called `Succeed()`.

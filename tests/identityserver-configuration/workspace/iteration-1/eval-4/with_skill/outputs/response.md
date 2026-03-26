@@ -1,46 +1,53 @@
-Here's how to configure automatic key management for a load-balanced production deployment with your specified rotation policy and shared key storage:
+# Production Key Management Configuration
+
+Here's the key management configuration for a load-balanced deployment:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
-    options.Events.RaiseErrorEvents = true;
-    options.Events.RaiseInformationEvents = true;
-    options.Events.RaiseFailureEvents = true;
-    options.Events.RaiseSuccessEvents = true;
+    // Key rotation policy
+    options.KeyManagement.RotationInterval = TimeSpan.FromDays(60);
+    options.KeyManagement.PropagationTime = TimeSpan.FromDays(7);
+    options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21);
 
-    // Key management configuration for load-balanced deployment
-    options.KeyManagement.RotationInterval = TimeSpan.FromDays(60);     // New key every 60 days
-    options.KeyManagement.PropagationTime = TimeSpan.FromDays(7);       // Announce new key 7 days before activation
-    options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21);    // Keep retired keys 21 days for validation
-    options.KeyManagement.DataProtectKeys = true;                       // Encrypt keys at rest via Data Protection
+    // Encrypt keys at rest via ASP.NET Data Protection
+    options.KeyManagement.DataProtectKeys = true;
 
-    // Shared file path for all load-balanced instances
+    // Shared key storage path for all load-balanced instances
     options.KeyManagement.KeyPath = "/mnt/shared/identity-keys";
 });
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
 ```
 
-### Key Lifecycle with These Settings
+## Key Lifecycle
 
-Keys move through four phases:
+With these settings, keys move through four phases:
 
-1. **Announced** (Day 0–7) — The new key is published in the JWKS discovery document but not yet used for signing. This gives API consumers 7 days (`PropagationTime`) to refresh their cached keys.
-2. **Active** (Day 7–67) — The key is used to sign all new tokens for 60 days (`RotationInterval`).
-3. **Retired** (Day 67–88) — A new key takes over signing. The retired key remains in discovery for 21 days (`RetentionDuration`) so tokens signed with it can still be validated.
-4. **Deleted** — The key is removed from discovery after retention expires (if `DeleteRetiredKeys` is true, which defaults to true).
+1. **Announced** (days 53-60): New key is added to the JWKS discovery document but not yet used for signing. This gives clients and APIs 7 days (`PropagationTime`) to refresh their cached JWKS and learn about the new key.
 
-### Important Notes
+2. **Active** (days 0-60): Key is used to sign all new tokens for 60 days (`RotationInterval`).
 
-- **`DataProtectKeys = true`** encrypts signing keys at rest using ASP.NET Core Data Protection. Make sure Data Protection is also configured for shared storage across your load-balanced instances (e.g., with a shared file system or database-backed key ring).
-- **`KeyPath`** points to the shared network path `/mnt/shared/identity-keys`. All instances read and write keys from this location, ensuring consistent signing across the cluster.
-- **Automatic key management is enabled by default** — no need to set `options.KeyManagement.Enabled = true`.
+3. **Retired** (21 days after rotation): Key is no longer used for signing, but remains in the JWKS document so APIs can still validate tokens signed with it during its `RetentionDuration`.
+
+4. **Deleted**: Key is removed from discovery after retention period expires.
+
+## Load Balancer Considerations
+
+The `KeyPath` points to `/mnt/shared/identity-keys`, which must be a network-accessible path readable/writable by all IdentityServer instances. This ensures all instances use the same signing keys.
+
+With `DataProtectKeys = true`, the key material is encrypted at rest using ASP.NET Data Protection. Make sure Data Protection is also configured with a shared key ring (e.g., via database or Redis) so all instances can decrypt the keys.
+
+## Alternative: Database-Backed Key Storage
+
+Instead of a shared file path, you can use the EF Core operational store for key storage, which is often simpler in containerized environments:
+
+```csharp
+idsvrBuilder.AddOperationalStore(options =>
+{
+    options.ConfigureDbContext = b =>
+        b.UseSqlServer(connectionString);
+});
+```
+
+The operational store automatically handles signing key persistence.

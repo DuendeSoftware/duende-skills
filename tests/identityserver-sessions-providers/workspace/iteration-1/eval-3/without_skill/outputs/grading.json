@@ -5,27 +5,27 @@
     {
       "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and Authentication.CookieSlidingExpiration to false",
       "pass": true,
-      "rationale": "Code shows `options.Authentication.CookieLifetime = TimeSpan.FromHours(8);` and `options.Authentication.CookieSlidingExpiration = false;`."
+      "rationale": "Sets CookieLifetime = TimeSpan.FromHours(8) and CookieSlidingExpiration = false."
     },
     {
       "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
       "pass": false,
-      "rationale": "The without_skill response does not include `CoordinateClientLifetimesWithUserSession = true`. It sets cookie lifetime and sliding expiration but misses the critical coordination setting."
+      "rationale": "Does not set CoordinateClientLifetimesWithUserSession. This critical setting is missing."
     },
     {
       "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
       "pass": true,
-      "rationale": "Code shows `.AddServerSideSessions()` chained on the IdentityServer builder."
+      "rationale": ".AddServerSideSessions() is present."
     },
     {
       "assertion": "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'",
       "pass": true,
-      "rationale": "Code shows `BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\"` on the web.app client."
+      "rationale": "BackChannelLogoutUri set correctly on web.app client."
     },
     {
       "assertion": "The web.app client has AccessTokenLifetime set to 300 (5 minutes)",
       "pass": true,
-      "rationale": "Code shows `AccessTokenLifetime = 300` on the web.app client."
+      "rationale": "AccessTokenLifetime = 300 on web.app client."
     }
   ],
   "pass_count": 4,

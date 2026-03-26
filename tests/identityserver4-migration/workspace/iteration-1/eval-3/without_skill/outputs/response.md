@@ -1,15 +1,34 @@
-# Namespace Changes for Duende IdentityServer
+# Namespace Changes: IdentityServer4 to Duende IdentityServer
 
-The main namespace change is straightforward:
+The namespace migration is straightforward — replace the `IdentityServer4` prefix with `Duende.IdentityServer`:
 
 | Old | New |
-|---|---|
+|-----|-----|
 | `IdentityServer4` | `Duende.IdentityServer` |
 | `IdentityServer4.Models` | `Duende.IdentityServer.Models` |
 | `IdentityServer4.Services` | `Duende.IdentityServer.Services` |
 | `IdentityServer4.EntityFramework.DbContexts` | `Duende.IdentityServer.EntityFramework.DbContexts` |
 | `IdentityServer4.EntityFramework.Mappers` | `Duende.IdentityServer.EntityFramework.Mappers` |
 
-You can do a global find-and-replace of `IdentityServer4` with `Duende.IdentityServer` across your codebase.
+For `IdentityModel`, the replacement is:
 
-For `IdentityModel`, you may also need to update to `Duende.IdentityModel` if you're using it as a client library.
+| Old | New |
+|-----|-----|
+| `IdentityModel` | `Duende.IdentityModel` |
+
+## Quick Replace
+
+You can do a global find-and-replace:
+
+```
+Find:    IdentityServer4
+Replace: Duende.IdentityServer
+```
+
+And separately:
+```
+Find:    using IdentityModel;
+Replace: using Duende.IdentityModel;
+```
+
+This covers all the sub-namespaces automatically since the prefix replacement cascades.

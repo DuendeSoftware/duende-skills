@@ -2,13 +2,33 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection", "pass": true, "rationale": "Shows .AsBffApiEndpoint()"},
-    {"assertion": "Local endpoint uses .RequireAuthorization()", "pass": true, "rationale": "Shows .RequireAuthorization()"},
-    {"assertion": "Calls AddRemoteApis() on the BFF builder", "pass": false, "rationale": "Does not show AddRemoteApis() in service registration"},
-    {"assertion": "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api", "pass": true, "rationale": "Shows MapRemoteBffApiEndpoint with correct path and URI"},
-    {"assertion": "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)", "pass": false, "rationale": "Uses .RequireAccessToken(TokenType.User) which is the v3 syntax, not .WithAccessToken(RequiredTokenType.User)"}
+    {
+      "assertion": "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection",
+      "pass": false,
+      "rationale": ".AsBffApiEndpoint() is NOT present on the local endpoint \u2014 missing CSRF protection"
+    },
+    {
+      "assertion": "Local endpoint uses .RequireAuthorization()",
+      "pass": true,
+      "rationale": ".RequireAuthorization() is present"
+    },
+    {
+      "assertion": "Calls AddRemoteApis() on the BFF builder",
+      "pass": false,
+      "rationale": "AddRemoteApis() is not called \u2014 required for MapRemoteBffApiEndpoint to work"
+    },
+    {
+      "assertion": "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api",
+      "pass": true,
+      "rationale": "MapRemoteBffApiEndpoint is used with correct URI"
+    },
+    {
+      "assertion": "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)",
+      "pass": false,
+      "rationale": "Uses .RequireAccessToken(TokenType.User) \u2014 this is the v3 API, not the v4 .WithAccessToken(RequiredTokenType.User)"
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 2,
   "total_count": 5,
-  "score": 0.6
+  "score": 0.4
 }

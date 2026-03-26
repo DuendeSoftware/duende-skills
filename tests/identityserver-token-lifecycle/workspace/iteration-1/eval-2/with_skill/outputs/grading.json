@@ -2,10 +2,26 @@
   "eval_id": 2,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "The web_app client has AccessTokenType = AccessTokenType.Reference", "pass": true, "rationale": "Code explicitly sets AccessTokenType = AccessTokenType.Reference on the web_app client."},
-    {"assertion": "The web_app client has AccessTokenLifetime set to 900 (15 minutes)", "pass": true, "rationale": "AccessTokenLifetime = 900 is explicitly set on the web_app client."},
-    {"assertion": "The ApiResource api1_resource has ApiSecrets with at least one Secret configured", "pass": true, "rationale": "The ApiResource has ApiSecrets = { new Secret(\"api1_introspection_secret\".Sha256()) }."},
-    {"assertion": "The Secret uses Sha256() hashing", "pass": true, "rationale": "The secret uses .Sha256() hashing method."}
+    {
+      "assertion": "The web_app client has AccessTokenType = AccessTokenType.Reference",
+      "pass": true,
+      "rationale": "AccessTokenType = AccessTokenType.Reference is set on web_app."
+    },
+    {
+      "assertion": "The web_app client has AccessTokenLifetime set to 900 (15 minutes)",
+      "pass": true,
+      "rationale": "AccessTokenLifetime = 900 is set."
+    },
+    {
+      "assertion": "The ApiResource api1_resource has ApiSecrets with at least one Secret configured",
+      "pass": true,
+      "rationale": "ApiSecrets = { new Secret(\"api1_secret\".Sha256()) } is configured on api1_resource."
+    },
+    {
+      "assertion": "The Secret uses Sha256() hashing",
+      "pass": true,
+      "rationale": "The secret uses .Sha256() hashing method."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

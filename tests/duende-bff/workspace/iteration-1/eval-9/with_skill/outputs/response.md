@@ -1,19 +1,8 @@
-# Migrating BFF V3 to V4
+# Migrating from BFF v3 to v4
 
-Here's your code migrated to BFF V4 conventions. The key changes are:
-
-1. **Replace manual `AddAuthentication`/`AddCookie`/`AddOpenIdConnect`** with the V4 fluent API: `AddBff().ConfigureOpenIdConnect().ConfigureCookies()`
-2. **Remove `MapBffManagementEndpoints()`** — management endpoints are auto-registered in V4
-3. **Update `.RequireAccessToken(TokenType.User)`** to `.WithAccessToken(RequiredTokenType.User)`
-4. **Add `.AddRemoteApis()`** — required in V4 for remote API endpoint support
-
-## Migrated Program.cs
+Here's the migrated code:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-// V4: AddBff() with fluent OIDC and cookie configuration
-// replaces manual AddAuthentication + AddCookie + AddOpenIdConnect
 builder.Services.AddBff()
     .ConfigureOpenIdConnect(options =>
     {
@@ -21,17 +10,15 @@ builder.Services.AddBff()
         options.ClientId = "spa";
         options.ClientSecret = "secret";
         options.ResponseType = "code";
-        options.Scope.Add("api1");
         options.SaveTokens = true;
+        options.Scope.Add("api1");
     })
     .ConfigureCookies(options =>
     {
         options.Cookie.Name = "__Host-bff";
         options.Cookie.SameSite = SameSiteMode.Strict;
     })
-    .AddRemoteApis(); // V4: required for MapRemoteBffApiEndpoint
-
-builder.Services.AddAuthorization();
+    .AddRemoteApis();
 
 var app = builder.Build();
 
@@ -40,21 +27,25 @@ app.UseAuthentication();
 app.UseBff();
 app.UseAuthorization();
 
-// V4: MapBffManagementEndpoints() is removed — endpoints are auto-registered
-
 app.MapRemoteBffApiEndpoint("/api/data", new Uri("https://api.example.com"))
-    .WithAccessToken(RequiredTokenType.User); // V4: replaces .RequireAccessToken(TokenType.User)
+    .WithAccessToken(RequiredTokenType.User);
 
 app.Run();
 ```
 
-## Summary of Changes
+## What Changed
 
-| V3 Code | V4 Replacement |
+| V3 | V4 |
 |---|---|
 | `AddAuthentication().AddCookie().AddOpenIdConnect()` | `AddBff().ConfigureOpenIdConnect().ConfigureCookies()` |
 | `MapBffManagementEndpoints()` | Removed — auto-registered by `AddBff()` |
 | `.RequireAccessToken(TokenType.User)` | `.WithAccessToken(RequiredTokenType.User)` |
-| `AddBff()` alone | `AddBff().AddRemoteApis()` for remote API support |
+| `AddBff()` alone | `AddBff().AddRemoteApis()` for remote endpoints |
 
-All original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes, SaveTokens) and cookie settings (Name, SameSite) are preserved in the V4 configuration.
+## Key Migration Points
+
+- **`ConfigureOpenIdConnect`** replaces the manual auth handler setup. All original settings (Authority, ClientId, etc.) are preserved.
+- **`ConfigureCookies`** replaces the manual `AddCookie` call. Cookie settings are preserved.
+- **`MapBffManagementEndpoints()`** is removed — v4 registers management endpoints automatically.
+- **`AddRemoteApis()`** must be added since v4 requires explicit opt-in for remote API support.
+- **`.WithAccessToken(RequiredTokenType.User)`** replaces `.RequireAccessToken(TokenType.User)`.

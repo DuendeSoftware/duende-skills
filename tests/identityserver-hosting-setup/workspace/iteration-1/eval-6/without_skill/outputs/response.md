@@ -1,13 +1,22 @@
-# Custom Claims and Inactive User Handling in IdentityServer
+# Custom Claims and Inactive Users
 
-Here's how to add custom claims and disable tokens for inactive users.
-
-## Custom Claims Principal Factory
-
-First, create your custom claims principal factory (assuming you already have it):
+## Register Custom Factory
 
 ```csharp
-public class CustomClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>();
+
+builder.Services.AddIdentityServer()
+    .AddAspNetIdentity<ApplicationUser>();
+```
+
+## Custom Claims Factory
+
+```csharp
+public class CustomClaimsPrincipalFactory
+    : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>
 {
     public CustomClaimsPrincipalFactory(
         UserManager<ApplicationUser> userManager,
@@ -18,39 +27,13 @@ public class CustomClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applicati
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
     {
         var identity = await base.GenerateClaimsAsync(user);
-        identity.AddClaim(new Claim("custom_claim", user.CustomValue ?? ""));
+        identity.AddClaim(new Claim("custom", "value"));
         return identity;
     }
 }
 ```
 
-## Registration in Program.cs
-
-```csharp
-using Microsoft.AspNetCore.Identity;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddIdentityServer()
-    .AddAspNetIdentity<ApplicationUser>();
-
-var app = builder.Build();
-
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.Run();
-```
-
-## Handling Inactive Users
-
-To disable tokens for inactive users, you can implement a custom profile service:
+## Profile Service for Inactive Users
 
 ```csharp
 public class CustomProfileService : IProfileService
@@ -65,14 +48,7 @@ public class CustomProfileService : IProfileService
     public async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         var user = await _userManager.GetUserAsync(context.Subject);
-        if (user != null)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim("name", user.UserName)
-            };
-            context.IssuedClaims.AddRange(claims);
-        }
+        // Add claims...
     }
 
     public async Task IsActiveAsync(IsActiveContext context)
@@ -83,7 +59,4 @@ public class CustomProfileService : IProfileService
 }
 ```
 
-Register it:
-```csharp
-builder.Services.AddTransient<IProfileService, CustomProfileService>();
-```
+Register it: `builder.Services.AddTransient<IProfileService, CustomProfileService>();`

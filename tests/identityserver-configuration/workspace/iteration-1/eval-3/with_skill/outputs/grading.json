@@ -5,22 +5,22 @@
     {
       "assertion": "Output defines ApiScope entries for at least 'read' and 'write'",
       "pass": true,
-      "rationale": "Response defines ApiScope(\"read\", \"Read Access\") and ApiScope(\"write\", \"Write Access\")."
+      "rationale": "Defines both ApiScope(\"read\") and ApiScope(\"write\")"
     },
     {
       "assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes collection",
       "pass": true,
-      "rationale": "Response defines ApiResource(\"catalog-api\", ...) with Scopes = { \"read\", \"write\" }."
+      "rationale": "ApiResource 'catalog-api' has Scopes { \"read\", \"write\" }"
     },
     {
       "assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' in its Scopes collection but not 'write'",
       "pass": true,
-      "rationale": "Response defines ApiResource(\"orders-api\", ...) with Scopes = { \"read\" } only."
+      "rationale": "ApiResource 'orders-api' has Scopes { \"read\" } only"
     },
     {
       "assertion": "Output calls AddInMemoryApiResources to register the API resources with IdentityServer",
       "pass": true,
-      "rationale": "Response calls .AddInMemoryApiResources(new List<ApiResource>{...})."
+      "rationale": "Code shows .AddInMemoryApiResources(new ApiResource[] { ... })"
     }
   ],
   "pass_count": 4,

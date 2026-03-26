@@ -1,16 +1,8 @@
-# Custom OIDC Authorize Parameters and Error Handling
+# Custom OIDC Parameters and Error Handling
 
-Here's how to add custom parameters to the OIDC authorize request and handle authentication failures with a custom error page:
+Here's how to add custom parameters to the authorize request and handle authentication failures:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "oidc";
-})
-.AddCookie("Cookies")
 .AddOpenIdConnect("oidc", options =>
 {
     options.Authority = "https://identity.example.com";
@@ -18,67 +10,39 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = "secret";
     options.ResponseType = "code";
     options.MapInboundClaims = false;
-    options.SaveTokens = true;
 
     options.Scope.Clear();
     options.Scope.Add("openid");
     options.Scope.Add("profile");
+    options.SaveTokens = true;
 
-    // Configure OIDC handler events for customization
     options.Events = new OpenIdConnectEvents
     {
-        // Customize the authorize request
+        // Add custom parameters to the authorize request
         OnRedirectToIdentityProvider = context =>
         {
-            // Add acr_values to request specific authentication methods or tenant
+            // Add acr_values for tenant selection
             context.ProtocolMessage.AcrValues = "tenant:myorg";
 
-            // Add login_hint to pre-fill the username field
+            // Add login_hint with the user's email
             context.ProtocolMessage.LoginHint = "user@example.com";
 
             return Task.CompletedTask;
         },
 
-        // Handle authentication failures (remote failures from IdentityServer)
+        // Handle authentication failures with a custom error page
         OnRemoteFailure = context =>
         {
-            // Prevent the default exception handling
             context.HandleResponse();
-
-            // Redirect to custom error page
-            context.Response.Redirect("/auth-error");
-
+            context.Response.Redirect("/auth-error?message=" +
+                Uri.EscapeDataString(context.Failure?.Message ?? "Authentication failed"));
             return Task.CompletedTask;
         }
     };
 });
-
-builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/", () => "Hello World!");
-app.MapGet("/auth-error", () => Results.Content("Authentication failed. Please try again.", "text/html"));
-
-app.Run();
 ```
 
-## How Events Work
+## How It Works
 
-The OIDC handler fires events at specific points during the authentication flow:
-
-| Event | When It Fires | Common Use Cases |
-|-------|--------------|------------------|
-| `OnRedirectToIdentityProvider` | Before redirecting to the authorize endpoint | Add `acr_values`, `login_hint`, custom parameters |
-| `OnTokenValidated` | After the ID token is validated | Transform claims, load additional user data |
-| `OnRemoteFailure` | When authentication fails | Custom error pages, logging |
-| `OnSignedOutCallbackRedirect` | After sign-out callback | Custom post-logout behavior |
-
-### Key Points
-
-- **`context.ProtocolMessage.AcrValues`**: Passes authentication context class reference values. IdentityServer uses these for things like tenant selection or step-up authentication.
-- **`context.ProtocolMessage.LoginHint`**: Pre-fills the login form with the user's email or username.
-- **`context.HandleResponse()`**: Tells the middleware that you've handled the response yourself — without this, the default error handling would throw an exception.
+- **`OnRedirectToIdentityProvider`** fires just before the browser is redirected to IdentityServer. You can modify `context.ProtocolMessage` to add custom parameters like `acr_values` and `login_hint`.
+- **`OnRemoteFailure`** fires when the external authentication process fails (e.g., user cancels, token validation fails). `context.HandleResponse()` prevents the default error behavior, and you redirect to your custom error page.

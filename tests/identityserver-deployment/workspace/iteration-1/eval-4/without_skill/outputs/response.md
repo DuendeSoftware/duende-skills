@@ -1,64 +1,41 @@
 # Adding OpenTelemetry to IdentityServer
 
-## Install Packages
+## Packages
 
 ```bash
 dotnet add package OpenTelemetry.Extensions.Hosting
 dotnet add package OpenTelemetry.Instrumentation.AspNetCore
 dotnet add package OpenTelemetry.Exporter.Prometheus.AspNetCore
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
 ```
 
-## Configure OpenTelemetry
-
-Update your `Program.cs`:
+## Configuration
 
 ```csharp
-using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var otel = builder.Services.AddOpenTelemetry();
-
-otel.ConfigureResource(r => r
-    .AddService(builder.Environment.ApplicationName));
-
-// Metrics
-otel.WithMetrics(m => m
-    .AddAspNetCoreInstrumentation()
-    .AddRuntimeInstrumentation()
-    .AddPrometheusExporter());
-
-// Tracing
-otel.WithTracing(t => t
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation()
-    .AddOtlpExporter());
 
 builder.Services.AddIdentityServer()
     .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
     .AddInMemoryClients(Config.Clients);
 
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(m => m
+        .AddAspNetCoreInstrumentation()
+        .AddPrometheusExporter())
+    .WithTracing(t => t
+        .AddAspNetCoreInstrumentation()
+        .AddSource("Duende.IdentityServer")
+        .AddOtlpExporter());
+
 var app = builder.Build();
 
 app.UseIdentityServer();
-
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
-
-app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-## Notes
-
-- The `AddPrometheusExporter()` configures metrics to be exposed in Prometheus format
-- `UseOpenTelemetryPrometheusScrapingEndpoint()` maps the `/metrics` endpoint for scraping
-- `AddAspNetCoreInstrumentation()` captures HTTP request metrics and traces
-- `AddOtlpExporter()` sends traces to an OpenTelemetry Collector via OTLP protocol
-- For production, keep trace sampling reasonable to avoid excessive data volume
-
-Configure Prometheus to scrape the `/metrics` endpoint at your service address.
+This adds ASP.NET Core metrics with Prometheus export and distributed tracing for your IdentityServer.

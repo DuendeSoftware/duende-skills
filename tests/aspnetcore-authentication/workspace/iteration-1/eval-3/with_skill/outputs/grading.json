@@ -2,10 +2,26 @@
   "eval_id": 3,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection", "pass": true, "rationale": "The response includes 'options.ForwardDefaultSelector = Selector.ForwardReferenceToken(\"introspection\");' in the JWT Bearer handler."},
-    {"assertion": "Program.cs configures AddOAuth2Introspection with ClientId and ClientSecret for the API", "pass": true, "rationale": "The response includes AddOAuth2Introspection with ClientId = \"catalog-api\" and ClientSecret = \"api-secret\"."},
-    {"assertion": "Program.cs registers two authentication scheme handlers (JWT Bearer and introspection)", "pass": true, "rationale": "The response registers both AddJwtBearer(\"Bearer\", ...) and AddOAuth2Introspection(\"introspection\", ...)."},
-    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": true, "rationale": "The response includes 'options.MapInboundClaims = false;' inside the AddJwtBearer configuration."}
+    {
+      "assertion": "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection",
+      "pass": true,
+      "rationale": "The code uses options.ForwardDefaultSelector = Selector.ForwardReferenceToken('introspection')."
+    },
+    {
+      "assertion": "Program.cs configures AddOAuth2Introspection with ClientId and ClientSecret for the API",
+      "pass": true,
+      "rationale": "AddOAuth2Introspection is configured with ClientId = 'catalog-api' and ClientSecret = 'api-secret'."
+    },
+    {
+      "assertion": "Program.cs registers two authentication scheme handlers (JWT Bearer and introspection)",
+      "pass": true,
+      "rationale": "Both AddJwtBearer('Bearer') and AddOAuth2Introspection('introspection') are registered."
+    },
+    {
+      "assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler",
+      "pass": true,
+      "rationale": "MapInboundClaims = false is set on the JWT Bearer handler."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

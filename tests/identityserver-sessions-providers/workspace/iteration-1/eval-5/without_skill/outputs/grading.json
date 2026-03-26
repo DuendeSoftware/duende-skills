@@ -5,27 +5,27 @@
     {
       "assertion": "Code defines a GoogleIdentityProvider class that extends IdentityProvider with a 'google' provider type constant",
       "pass": true,
-      "rationale": "Code defines `public class GoogleIdentityProvider : IdentityProvider` with `public const string ProviderType = \"google\";` and constructor `base(ProviderType)`."
+      "rationale": "GoogleIdentityProvider extends IdentityProvider with const ProviderType = 'google'."
     },
     {
       "assertion": "GoogleIdentityProvider uses the indexer pattern (this[\"ClientId\"]) for property storage",
       "pass": false,
-      "rationale": "The without_skill response uses standard auto-properties `public string? ClientId { get; set; }` rather than the indexer pattern `this[\"ClientId\"]`. The indexer pattern is required for the Properties dictionary serialization."
+      "rationale": "Uses regular properties (get; set;) instead of the indexer pattern this[\"ClientId\"]."
     },
     {
       "assertion": "Program.cs calls AddProviderType with GoogleHandler, GoogleOptions, and GoogleIdentityProvider type parameters",
       "pass": true,
-      "rationale": "Code shows `options.DynamicProviders.AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>(GoogleIdentityProvider.ProviderType);`."
+      "rationale": "AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>() is called."
     },
     {
       "assertion": "Code includes a ConfigureAuthenticationOptions-derived class that maps GoogleIdentityProvider properties to GoogleOptions",
       "pass": false,
-      "rationale": "The without_skill response uses `IConfigureNamedOptions<GoogleOptions>` instead of deriving from `ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider>`. It does not have access to the GoogleIdentityProvider context."
+      "rationale": "Uses IConfigureNamedOptions<GoogleOptions> instead of ConfigureAuthenticationOptions."
     },
     {
       "assertion": "The configure class sets SignInScheme and CallbackPath on the GoogleOptions",
       "pass": false,
-      "rationale": "The without_skill response's configure class has empty method bodies and does not set SignInScheme or CallbackPath."
+      "rationale": "Does not set SignInScheme or CallbackPath. Only maps ClientId and ClientSecret."
     }
   ],
   "pass_count": 2,

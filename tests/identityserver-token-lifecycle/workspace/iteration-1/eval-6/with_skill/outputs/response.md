@@ -1,6 +1,8 @@
 # Adding Client Claims to m2m_client
 
-Here's how to add `tenant_id` and `department` claims to the `m2m_client` without the default `client_` prefix:
+Client claims are static claims defined on the client that get embedded into access tokens. For client credentials flow, they are included by default.
+
+## Updated m2m_client Configuration
 
 ```csharp
 new Client
@@ -23,6 +25,32 @@ new Client
 }
 ```
 
-By default, client claims are prefixed with `client_` (e.g., `client_tenant_id`). Setting `ClientClaimsPrefix = ""` removes this prefix so the claims appear as `tenant_id` and `department` directly in the access token.
+## How It Works
 
-For client credentials flow, client claims are sent by default — you don't need to set `AlwaysSendClientClaims = true`. That property is only needed when you want client claims emitted in flows that involve user authentication (authorization code, hybrid, etc.).
+### ClientClaimsPrefix
+
+By default, Duende IdentityServer prefixes all client claims with `client_` to avoid collisions with user claims. For example, a claim named `tenant_id` would appear as `client_tenant_id` in the access token.
+
+Setting `ClientClaimsPrefix = ""` removes this prefix, so the claims appear exactly as defined:
+- `tenant_id` = `"42"`
+- `department` = `"billing"`
+
+### AlwaysSendClientClaims
+
+You might wonder about `AlwaysSendClientClaims`. For client credentials flow (`GrantTypes.ClientCredentials`), client claims are **always included** in the access token by default — there's no user context to conflict with. The `AlwaysSendClientClaims` property only matters for interactive flows (authorization code, hybrid) where you want client claims included alongside user claims.
+
+### Resulting Access Token Claims
+
+The JWT access token will contain:
+
+```json
+{
+    "iss": "https://localhost:5001",
+    "client_id": "m2m_client",
+    "scope": "api1",
+    "tenant_id": "42",
+    "department": "billing",
+    "exp": 1609936401,
+    "iat": 1609932801
+}
+```

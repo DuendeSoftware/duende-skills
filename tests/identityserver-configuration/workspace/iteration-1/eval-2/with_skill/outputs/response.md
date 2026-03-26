@@ -1,8 +1,8 @@
-Here are the two client definitions — a machine-to-machine client and an interactive web application client:
+# M2M and Interactive Client Configuration
+
+Here are the two client definitions with the corresponding scope and resource registrations:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
     options.Events.RaiseErrorEvents = true;
@@ -10,47 +10,46 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
 })
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("orders.read", "Read Orders"),
-        new ApiScope("inventory.write", "Write Inventory")
-    })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
+    .AddInMemoryIdentityResources(new IdentityResource[]
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile(),
         new IdentityResources.Email()
     })
-    .AddInMemoryClients(new List<Client>
+    .AddInMemoryApiScopes(new ApiScope[]
     {
-        // Machine-to-machine client using client credentials
+        new ApiScope("orders.read", "Read orders"),
+        new ApiScope("inventory.write", "Write inventory")
+    })
+    .AddInMemoryClients(new Client[]
+    {
+        // Machine-to-machine client
         new Client
         {
             ClientId = "batch-processor",
             ClientName = "Batch Processor Service",
 
             AllowedGrantTypes = GrantTypes.ClientCredentials,
-            ClientSecrets = { new Secret("batch-processor-secret".Sha256()) },
+            ClientSecrets = { new Secret("batch-secret".Sha256()) },
 
             AllowedScopes = { "orders.read", "inventory.write" }
         },
 
-        // Interactive web application using authorization code + PKCE
+        // Interactive web application
         new Client
         {
             ClientId = "admin-portal",
             ClientName = "Admin Portal",
 
             AllowedGrantTypes = GrantTypes.Code,
-            RequirePkce = true, // Default is true in Duende IS, but explicit for clarity
+            RequirePkce = true, // Default in Duende, explicit for clarity
 
-            ClientSecrets = { new Secret("admin-portal-secret".Sha256()) },
+            ClientSecrets = { new Secret("admin-secret".Sha256()) },
 
             RedirectUris = { "https://admin.example.com/signin-oidc" },
             PostLogoutRedirectUris = { "https://admin.example.com/signout-callback-oidc" },
 
-            // Enable refresh tokens
-            AllowOfflineAccess = true,
+            AllowOfflineAccess = true, // Enable refresh tokens
 
             AllowedScopes =
             {
@@ -61,22 +60,20 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
             }
         }
     });
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
 ```
 
-Key points:
+## Client Details
 
-1. **`batch-processor`** — Uses `GrantTypes.ClientCredentials` for service-to-service communication with no interactive user. It only accesses API scopes (`orders.read`, `inventory.write`).
+### batch-processor (M2M)
 
-2. **`admin-portal`** — Uses `GrantTypes.Code` with `RequirePkce = true` (default in Duende IdentityServer). It authenticates users and calls APIs.
-   - `AllowOfflineAccess = true` enables refresh token issuance
-   - `IdentityServerConstants.StandardScopes.OpenId` is required for any OpenID Connect request
-   - Redirect URIs must exactly match what the client application sends — no trailing slashes
+- **Grant type**: `ClientCredentials` — no interactive user, service-to-service only.
+- **Scopes**: `orders.read` and `inventory.write` — the exact permissions the batch processor needs.
+- **Secret**: Hashed with `.Sha256()` — in production, load from configuration or a vault.
+
+### admin-portal (Interactive)
+
+- **Grant type**: `Code` (Authorization Code) — the only recommended flow for interactive clients.
+- **PKCE**: Required by default in Duende IdentityServer (`RequirePkce = true`).
+- **Refresh tokens**: Enabled via `AllowOfflineAccess = true`.
+- **Scopes**: Includes `openid` (required by OIDC spec), `profile`, `email`, and the `orders.read` API scope.
+- **Redirect URIs**: Must exactly match what the client sends — no trailing slashes, no wildcards.

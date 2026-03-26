@@ -1,1 +1,34 @@
-{"eval_id":3,"variant":"with_skill","assertions":[{"assertion":"AddConfigurationStore sets options.DefaultSchema to \"idscfg\"","pass":true,"rationale":"options.DefaultSchema = \"idscfg\""},{"assertion":"AddOperationalStore sets options.DefaultSchema to \"idsop\"","pass":true,"rationale":"options.DefaultSchema = \"idsop\""},{"assertion":"Configuration store calls MigrationsHistoryTable with the schema parameter set to \"idscfg\"","pass":true,"rationale":"MigrationsHistoryTable(\"__ConfigMigrationsHistory\", \"idscfg\")"},{"assertion":"Operational store calls MigrationsHistoryTable with the schema parameter set to \"idsop\"","pass":true,"rationale":"MigrationsHistoryTable(\"__OperationalMigrationsHistory\", \"idsop\")"},{"assertion":"Both store registrations include MigrationsAssembly pointing to the host project","pass":true,"rationale":"Both call sql.MigrationsAssembly(migrationsAssembly)"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "AddConfigurationStore sets options.DefaultSchema to \"idscfg\"",
+      "pass": true,
+      "rationale": "DefaultSchema = \"idscfg\" on configuration store."
+    },
+    {
+      "assertion": "AddOperationalStore sets options.DefaultSchema to \"idsop\"",
+      "pass": true,
+      "rationale": "DefaultSchema = \"idsop\" on operational store."
+    },
+    {
+      "assertion": "Configuration store calls MigrationsHistoryTable with the schema parameter set to \"idscfg\"",
+      "pass": true,
+      "rationale": "MigrationsHistoryTable(\"__ConfigMigrationsHistory\", \"idscfg\")."
+    },
+    {
+      "assertion": "Operational store calls MigrationsHistoryTable with the schema parameter set to \"idsop\"",
+      "pass": true,
+      "rationale": "MigrationsHistoryTable(\"__OperationalMigrationsHistory\", \"idsop\")."
+    },
+    {
+      "assertion": "Both store registrations include MigrationsAssembly pointing to the host project",
+      "pass": true,
+      "rationale": "Both use sql.MigrationsAssembly(migrationsAssembly)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

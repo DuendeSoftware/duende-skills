@@ -39,6 +39,16 @@ Use this skill when:
 
 ---
 
+## Sub-Documents
+
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/cors-csp.md](docs/cors-csp.md) | CORS `ICorsPolicyService` implementation and CSP middleware with header examples | CORS origins, Content-Security-Policy, X-Frame-Options, clickjacking, custom CORS policy |
+| [docs/rate-limiting.md](docs/rate-limiting.md) | ASP.NET Core `AddRateLimiter` configuration for token and authorization endpoints | Rate limiting, brute force, 429, sliding window, fixed window, token endpoint protection |
+| [docs/session-hardening.md](docs/session-hardening.md) | Server-side sessions, cookie lifetime configuration, back-channel logout client setup | Session security, CookieSlidingExpiration, BackChannelLogoutUri, session fixation, inactivity |
+
+---
+
 ## Pattern 1: Transport Security — HTTPS, HSTS, and TLS
 
 IdentityServer handles credentials and tokens. Every byte must travel over TLS. ASP.NET Core provides the pipeline middleware to enforce this.
@@ -654,227 +664,33 @@ public sealed class TokenExchangeGrantValidator : IExtensionGrantValidator
 
 ## Pattern 8: CORS Configuration
 
-CORS for the token endpoint must be locked to known client origins. Never use `AllowAnyOrigin` for IdentityServer endpoints.
+Set `AllowedCorsOrigins` per client with exact scheme+host+port — no trailing slashes, no wildcards. For dynamic tenant scenarios, implement `ICorsPolicyService` with a custom repository. Never use `AllowAnyOrigin` for IdentityServer endpoints.
 
-### Per-Client CORS Origins
-
-```csharp
-// ✅ Restrict CORS to the specific origin of each client
-new Client
-{
-    ClientId = "spa.bff",
-    AllowedCorsOrigins =
-    {
-        "https://app.example.com"
-        // No trailing slash, no wildcards, exact scheme+host+port
-    }
-}
-```
-
-### Custom CORS Policy Service
-
-For dynamic tenant scenarios, implement `ICorsPolicyService`:
-
-```csharp
-// ✅ Custom CORS policy — validates against a database of allowed origins
-public sealed class TenantCorsPolicyService : ICorsPolicyService
-{
-    // NOTE: IClientStore only exposes FindClientByIdAsync(string clientId).
-    // There is no FindEnabledClientsAsync() method. To enumerate all clients for
-    // CORS origin checks you need a custom repository or direct DB query.
-    // The example below uses a hypothetical IClientRepository; replace with your
-    // own abstraction (e.g. direct EF Core DbContext query).
-    private readonly IClientRepository _clientRepository;
-    private readonly ILogger<TenantCorsPolicyService> _logger;
-
-    public TenantCorsPolicyService(
-        IClientRepository clientRepository,
-        ILogger<TenantCorsPolicyService> logger)
-    {
-        _clientRepository = clientRepository;
-        _logger = logger;
-    }
-
-    public async Task<bool> IsOriginAllowedAsync(string origin)
-    {
-        // Normalize: strip trailing slash, lowercase
-        var normalizedOrigin = origin.TrimEnd('/').ToLowerInvariant();
-
-        var allClients = await _clientRepository.GetAllClientsAsync();
-        var isAllowed = allClients
-            .SelectMany(c => c.AllowedCorsOrigins)
-            .Select(o => o.TrimEnd('/').ToLowerInvariant())
-            .Contains(normalizedOrigin);
-
-        if (!isAllowed)
-            _logger.LogWarning("CORS request from unlisted origin: {Origin}", origin);
-
-        return isAllowed;
-    }
-}
-```
-
-Register it:
-
-```csharp
-// ✅ Replace the default CORS policy service
-builder.Services.AddTransient<ICorsPolicyService, TenantCorsPolicyService>();
-```
+> See [docs/cors-csp.md](docs/cors-csp.md) for the complete `ICorsPolicyService` implementation and CORS configuration examples.
 
 ---
 
 ## Pattern 9: Content Security Policy
 
-IdentityServer's login, consent, and logout UI pages must carry a strong Content Security Policy to prevent XSS and clickjacking attacks.
+Add a middleware that appends `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy` headers to all IdentityServer UI paths (`/account`, `/consent`, `/connect`, `/diagnostics`). Use `frame-ancestors 'none'` and `object-src 'none'` as the minimum bar.
 
-```csharp
-// ✅ Add CSP middleware for IdentityServer UI pages
-app.Use(async (context, next) =>
-{
-    // Apply CSP only to IdentityServer UI paths
-    var path = context.Request.Path.Value ?? string.Empty;
-    var isIdentityUiPath =
-        path.StartsWith("/account", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/consent", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/connect", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/diagnostics", StringComparison.OrdinalIgnoreCase);
-
-    if (isIdentityUiPath)
-    {
-        context.Response.Headers.Append("Content-Security-Policy",
-            "default-src 'self'; " +
-            "script-src 'self'; " +          // No inline scripts
-            "style-src 'self'; " +           // No inline styles
-            "img-src 'self' data:; " +       // Allow data: for favicons
-            "font-src 'self'; " +
-            "frame-ancestors 'none'; " +      // Block embedding in iframes
-            "form-action 'self'; " +          // Forms only POST to self
-            "base-uri 'self'; " +
-            "object-src 'none'");             // No plugins
-
-        // Clickjacking defense — belt-and-suspenders with CSP frame-ancestors
-        context.Response.Headers.Append("X-Frame-Options", "DENY");
-
-        // Force MIME type sniffing protection
-        context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-
-        // Referrer control
-        context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    }
-
-    await next();
-});
-```
-
-> **Note:** If your IdentityServer UI uses a CDN for Bootstrap or other assets, add those origins to `style-src` and `script-src` with explicit `sha256-` or `nonce-` values rather than broad origins.
+> See [docs/cors-csp.md](docs/cors-csp.md) for the complete CSP middleware implementation with inline examples.
 
 ---
 
 ## Pattern 10: Rate Limiting
 
-Protect the token endpoint from brute-force, credential stuffing, and enumeration attacks using ASP.NET Core's built-in rate limiting middleware.
+Use `AddRateLimiter` with a sliding window policy (e.g., 20 requests/minute per IP) for `/connect/token` and a fixed window policy (e.g., 10 requests/minute) for `/connect/authorize`. Set `RejectionStatusCode = 429`. In load-balanced deployments, use `X-Forwarded-For` (after `ForwardedHeaders` middleware) for accurate IP partitioning.
 
-```csharp
-// ✅ Rate limiting for the token endpoint
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-    // Global sliding window limit for the token endpoint
-    options.AddPolicy("token-endpoint", context =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            // Partition by client IP address
-            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new SlidingWindowRateLimiterOptions
-            {
-                // 20 token requests per minute per IP
-                PermitLimit = 20,
-                Window = TimeSpan.FromMinutes(1),
-                SegmentsPerWindow = 4,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0 // No queuing — reject immediately when limit is reached
-            }));
-
-    // Stricter policy for authorization endpoint (interactive login)
-    options.AddPolicy("authorize-endpoint", context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 10,
-                Window = TimeSpan.FromMinutes(1),
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0
-            }));
-});
-
-app.UseRateLimiter();
-```
-
-Apply the rate limiter policies to specific routes:
-
-```csharp
-// ✅ Apply rate limit policies to IdentityServer endpoints
-app.MapGroup("/connect/token")
-    .RequireRateLimiting("token-endpoint");
-
-app.MapGroup("/connect/authorize")
-    .RequireRateLimiting("authorize-endpoint");
-```
-
-> **Tip:** In cloud deployments behind a load balancer, the `RemoteIpAddress` is the proxy address. Use `X-Forwarded-For` (after configuring `ForwardedHeaders`) or a client identifier claim for more accurate partitioning.
+> See [docs/rate-limiting.md](docs/rate-limiting.md) for the complete rate limiter configuration and route application code.
 
 ---
 
 ## Pattern 11: Session Security
 
-Server-side sessions provide centralized session control with absolute lifetimes, idle timeouts, and back-channel logout propagation.
+Enable server-side sessions via `idsvrBuilder.AddServerSideSessions()`. Set `CookieSlidingExpiration = false` and a fixed `CookieLifetime` (e.g., 8 hours). Configure `ExpiredSessionsTriggerBackchannelLogout = true` and `CoordinateClientLifetimesWithUserSession = true`. Set `BackChannelLogoutUri` on each client for server-to-server session termination notification.
 
-```csharp
-// ✅ Server-side session configuration with hardened lifetimes
-builder.Services.AddIdentityServer(options =>
-{
-    // NOTE: Server-side sessions are enabled by calling AddServerSideSessions()
-    // on the IdentityServer builder (see below) — there is no Enabled property here.
-    options.ServerSideSessions.RemoveExpiredSessions = true;
-    options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(10);
-
-    // Trigger back-channel logout when a session expires server-side
-    options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
-
-    // Tie client token lifetimes to the user session
-    options.Authentication.CoordinateClientLifetimesWithUserSession = true;
-
-    // Absolute cookie lifetime — session cannot outlive this
-    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
-
-    // No sliding expiration — prevents indefinitely-extended sessions
-    options.Authentication.CookieSlidingExpiration = false;
-});
-
-// Enable server-side sessions (Business/Enterprise edition) — call on the builder
-idsvrBuilder.AddServerSideSessions();
-```
-
-### Back-Channel Logout
-
-Configure clients for back-channel logout so that IdentityServer can notify them when a session ends:
-
-```csharp
-// ✅ Client with back-channel logout
-new Client
-{
-    ClientId = "web.app",
-    AllowedGrantTypes = GrantTypes.Code,
-    RequirePkce = true,
-
-    // Back-channel logout: server-to-server notification (preferred over front-channel)
-    BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
-    BackChannelLogoutSessionRequired = true,
-
-    CoordinateLifetimeWithUserSession = true
-}
-```
+> See [docs/session-hardening.md](docs/session-hardening.md) for the complete session configuration and back-channel logout client setup.
 
 ---
 

@@ -1,36 +1,26 @@
-# Server-Side Sessions with SQL Server
+# Server-Side Sessions with EF Core
 
-To use server-side sessions backed by SQL Server, you'll need the Entity Framework integration package:
-
-```bash
-dotnet add package Duende.BFF.EntityFramework
-```
-
-## Configuration
+To persist BFF sessions in SQL Server:
 
 ```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddBff();
+
+builder.Services.AddDbContext<SessionDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BffSessions")));
+
 builder.Services.AddBff()
-    .AddServerSideSessions()
-    .AddEntityFrameworkServerSideSessions(options =>
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("BffSessions"));
-    });
+    .AddServerSideSessions();
+
+var app = builder.Build();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseBff();
+app.UseAuthorization();
+
+app.Run();
 ```
 
-You'll also want to set up session cleanup:
-
-```csharp
-builder.Services.AddBff(options =>
-{
-    options.SessionCleanupInterval = TimeSpan.FromMinutes(10);
-});
-```
-
-Then run EF migrations:
-
-```bash
-dotnet ef migrations add InitialCreate -c SessionDbContext
-dotnet ef database update
-```
-
-This stores sessions in SQL Server instead of in-memory, which is important for production deployments where you need sessions to survive restarts and be shared across multiple instances.
+This configures server-side sessions backed by a SQL Server database. You'll need to create migrations for the session store.

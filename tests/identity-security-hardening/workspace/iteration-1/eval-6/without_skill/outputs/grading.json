@@ -5,17 +5,17 @@
     {
       "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
       "pass": true,
-      "rationale": "CookieLifetime = TimeSpan.FromHours(8) and CookieSlidingExpiration = false both present"
+      "rationale": "CookieLifetime = TimeSpan.FromHours(8), CookieSlidingExpiration = false"
     },
     {
       "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
       "pass": false,
-      "rationale": "ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout is not configured in the code"
+      "rationale": "Does not configure ExpiredSessionsTriggerBackchannelLogout \u2014 mentions expired session cleanup vaguely but doesn't provide the specific property"
     },
     {
       "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
-      "pass": false,
-      "rationale": "AddServerSideSessions() is not called; response mentions it conceptually but doesn't show the code"
+      "pass": true,
+      "rationale": "idsvrBuilder.AddServerSideSessions() is called"
     },
     {
       "assertion": "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
@@ -25,10 +25,10 @@
     {
       "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
       "pass": false,
-      "rationale": "CoordinateClientLifetimesWithUserSession is not set in the code"
+      "rationale": "CoordinateClientLifetimesWithUserSession is not configured anywhere in the response"
     }
   ],
-  "pass_count": 2,
+  "pass_count": 3,
   "total_count": 5,
-  "score": 0.4
+  "score": 0.6
 }

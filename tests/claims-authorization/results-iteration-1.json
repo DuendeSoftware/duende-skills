@@ -1,0 +1,250 @@
+{
+  "skill_name": "claims-authorization",
+  "iteration": 1,
+  "timestamp": "2026-03-26T00:00:00Z",
+  "evals": [
+    {
+      "id": 1,
+      "assertions": [
+        {
+          "assertion": "Implements IProfileService or extends DefaultProfileService",
+          "pass": true,
+          "reasoning": "SKILL.md documents implementing IProfileService extending DefaultProfileService with full code examples."
+        },
+        {
+          "assertion": "Uses context.AddRequestedClaims for scope-filtered claims like 'department'",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents context.AddRequestedClaims for scope-filtered claims that respect UserClaims declarations."
+        },
+        {
+          "assertion": "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering",
+          "pass": true,
+          "reasoning": "SKILL.md documents context.IssuedClaims.Add for mandatory claims that must bypass scope filtering."
+        },
+        {
+          "assertion": "Implements IsActiveAsync to check whether the user is still active",
+          "pass": true,
+          "reasoning": "SKILL.md documents implementing IsActiveAsync and checking user activity status."
+        },
+        {
+          "assertion": "Registers the profile service with AddProfileService<T>() on the IdentityServer builder",
+          "pass": true,
+          "reasoning": "SKILL.md documents registering custom profile services with AddProfileService<T>() on the builder."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 2,
+      "assertions": [
+        {
+          "assertion": "Identifies MapInboundClaims as the root cause — the JWT bearer handler renames 'sub' to the long Microsoft XML namespace URI",
+          "pass": true,
+          "reasoning": "SKILL.md identifies MapInboundClaims = true as the root cause of the 'sub' claim renaming issue."
+        },
+        {
+          "assertion": "Shows setting options.MapInboundClaims = false on the JWT bearer handler",
+          "pass": true,
+          "reasoning": "SKILL.md documents setting MapInboundClaims = false as the fix for claim renaming."
+        },
+        {
+          "assertion": "Mentions JwtClaimTypes.Subject or the short name 'sub' vs the long http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier URI",
+          "pass": true,
+          "reasoning": "SKILL.md explains the difference between short claim names and the long WS-Federation URI names."
+        },
+        {
+          "assertion": "Does NOT suggest the claim is missing from the token itself",
+          "pass": true,
+          "reasoning": "SKILL.md correctly identifies this as a client-side mapping issue, not a missing claim in the token."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 3,
+      "assertions": [
+        {
+          "assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents the UserClaims mechanism and that claims are opt-in by scope declaration."
+        },
+        {
+          "assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+          "pass": true,
+          "reasoning": "SKILL.md shows adding custom claims to ApiScope.UserClaims with code examples."
+        },
+        {
+          "assertion": "Mentions that the client must also request the scope that contains the claim",
+          "pass": true,
+          "reasoning": "SKILL.md documents that clients must request the scope that declares the claim in its UserClaims."
+        },
+        {
+          "assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddRequestedClaims filtering to only claim types in RequestedClaimTypes derived from UserClaims."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 4,
+      "assertions": [
+        {
+          "assertion": "Implements IClaimsTransformation with a TransformAsync method",
+          "pass": true,
+          "reasoning": "SKILL.md documents IClaimsTransformation with TransformAsync for post-validation claim enrichment in APIs."
+        },
+        {
+          "assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly warns not to mutate the existing identity and shows creating a new ClaimsIdentity added via AddIdentity()."
+        },
+        {
+          "assertion": "Loads roles from a local repository or database based on the user's subject claim",
+          "pass": true,
+          "reasoning": "SKILL.md documents loading application roles from a local repository using the subject claim as the lookup key."
+        },
+        {
+          "assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)",
+          "pass": true,
+          "reasoning": "SKILL.md documents registering IClaimsTransformation as a transient service in DI."
+        },
+        {
+          "assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly warns that IClaimsTransformation on the IdentityServer host affects the sign-in principal, not issued tokens."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 5,
+      "assertions": [
+        {
+          "assertion": "Uses context.Caller to differentiate between token types",
+          "pass": true,
+          "reasoning": "SKILL.md documents context.Caller as the mechanism to differentiate between identity token and access token issuance."
+        },
+        {
+          "assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+          "pass": true,
+          "reasoning": "SKILL.md documents checking context.Caller against ProfileDataCallers.ClaimsProviderIdentityToken."
+        },
+        {
+          "assertion": "Emits a minimal claim set (e.g. just name) for identity tokens",
+          "pass": true,
+          "reasoning": "SKILL.md documents emitting a minimal claim set for identity tokens to keep them small."
+        },
+        {
+          "assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering",
+          "pass": true,
+          "reasoning": "SKILL.md documents emitting richer claims for access tokens using AddRequestedClaims."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 6,
+      "assertions": [
+        {
+          "assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'",
+          "pass": true,
+          "reasoning": "The extension-grant-claims.md sub-document documents IExtensionGrantValidator with the token exchange grant type URI."
+        },
+        {
+          "assertion": "Extracts and validates the subject_token from the request",
+          "pass": true,
+          "reasoning": "The extension-grant-claims.md sub-document shows extracting and validating the subject_token from the validation context."
+        },
+        {
+          "assertion": "Returns a GrantValidationResult with a subject ID and custom claims array",
+          "pass": true,
+          "reasoning": "The extension-grant-claims.md sub-document documents returning GrantValidationResult with subject and custom claims."
+        },
+        {
+          "assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder",
+          "pass": true,
+          "reasoning": "The extension-grant-claims.md sub-document documents registering with AddExtensionGrantValidator<T>()."
+        },
+        {
+          "assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further",
+          "pass": true,
+          "reasoning": "The extension-grant-claims.md sub-document explains that IProfileService runs after the grant validator for additional claim enrichment."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 7,
+      "assertions": [
+        {
+          "assertion": "Adds ClientClaim objects to the Client.Claims collection with 'customer_id' and 'region'",
+          "pass": true,
+          "reasoning": "SKILL.md documents adding ClientClaim objects to Client.Claims for static per-client claims."
+        },
+        {
+          "assertion": "Sets ClientClaimsPrefix to an empty string to remove the 'client_' prefix",
+          "pass": true,
+          "reasoning": "SKILL.md documents ClientClaimsPrefix = string.Empty to remove the default 'client_' prefix."
+        },
+        {
+          "assertion": "Uses GrantTypes.ClientCredentials for the client",
+          "pass": true,
+          "reasoning": "SKILL.md documents that client claims are emitted by default in client credentials flow."
+        },
+        {
+          "assertion": "Mentions that client claims are emitted by default only in client credentials flow, or requires AlwaysSendClientClaims = true for other flows",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents that client claims require AlwaysSendClientClaims = true for non-client-credentials flows."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 9,
+      "assertions": [
+        {
+          "assertion": "Explains that IProfileService.GetProfileDataAsync receives ProfileDataRequestContext with RequestedClaimTypes",
+          "pass": true,
+          "reasoning": "SKILL.md documents ProfileDataRequestContext.RequestedClaimTypes as the filtered list of claim types needed."
+        },
+        {
+          "assertion": "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes",
+          "pass": true,
+          "reasoning": "SKILL.md explains AddRequestedClaims as a filter that only emits claims matching RequestedClaimTypes."
+        },
+        {
+          "assertion": "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types",
+          "pass": true,
+          "reasoning": "SKILL.md documents declaring UserClaims on ApiScope/ApiResource to populate RequestedClaimTypes."
+        },
+        {
+          "assertion": "Does NOT require sub-documents — this is answered entirely from the core SKILL.md",
+          "pass": true,
+          "reasoning": "The core SKILL.md fully covers the UserClaims/RequestedClaimTypes relationship without requiring sub-documents."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    }
+  ],
+  "total_evals": 8,
+  "passed_evals": 8,
+  "total_assertions": 35,
+  "passed_assertions": 35
+}

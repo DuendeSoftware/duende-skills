@@ -1,8 +1,8 @@
 # Resource-Based Authorization for Documents
 
-Here's how to implement resource-based authorization for documents using ASP.NET Core.
+For resource-based authorization, you need a handler that can inspect the actual resource to make access decisions. Here's how to implement it.
 
-## Document.cs
+## Document Model
 
 ```csharp
 public class Document
@@ -14,7 +14,7 @@ public class Document
 }
 ```
 
-## Operations.cs
+## Operations Class
 
 ```csharp
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -28,7 +28,7 @@ public static class Operations
 }
 ```
 
-## DocumentAuthorizationHandler.cs
+## DocumentAuthorizationHandler
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
@@ -42,18 +42,17 @@ public class DocumentAuthorizationHandler
         OperationAuthorizationRequirement requirement,
         Document resource)
     {
-        if (requirement.Name == nameof(Operations.Read))
+        if (requirement.Name == Operations.Read.Name)
         {
-            var department = context.User.FindFirst("department")?.Value;
-            if (department == resource.Department)
+            if (context.User.HasClaim("department", resource.Department))
             {
                 context.Succeed(requirement);
             }
         }
-        else if (requirement.Name == nameof(Operations.Edit))
+        else if (requirement.Name == Operations.Edit.Name)
         {
             var userId = context.User.FindFirst("sub")?.Value;
-            if (userId == resource.OwnerId)
+            if (resource.OwnerId == userId)
             {
                 context.Succeed(requirement);
             }
@@ -70,14 +69,11 @@ public class DocumentAuthorizationHandler
 builder.Services.AddSingleton<IAuthorizationHandler, DocumentAuthorizationHandler>();
 ```
 
-## Usage in Endpoint
+Then in your endpoints, inject `IAuthorizationService` and call `AuthorizeAsync` with the resource and the operation:
 
 ```csharp
-app.MapGet("/documents/{id}", async (int id, IAuthorizationService authz, HttpContext ctx) =>
-{
-    var document = new Document { Id = id, Title = "Report", Department = "finance", OwnerId = "user-1" };
-    var result = await authz.AuthorizeAsync(ctx.User, document, Operations.Read);
-    if (!result.Succeeded) return Results.Forbid();
-    return Results.Ok(document);
-});
+var result = await authorizationService.AuthorizeAsync(User, document, Operations.Read);
+if (!result.Succeeded) return Results.Forbid();
 ```
+
+The handler checks the operation name and applies the appropriate logic - department matching for reads, owner matching for edits.

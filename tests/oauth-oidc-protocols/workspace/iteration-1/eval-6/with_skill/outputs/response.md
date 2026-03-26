@@ -1,119 +1,141 @@
-# Debugging Token Endpoint Failures — Systematic Checklist
+# Systematic Debugging for Token Endpoint Failures
 
-Getting an `invalid_client` error from the token endpoint means the authorization server cannot authenticate or identify your client. Here's a systematic debugging approach, following the protocol debugging checklist:
+You're getting `invalid_client` from the token endpoint. Here's a systematic checklist to diagnose the issue:
 
-## Step 1: Verify the Discovery Document
+## 1. Discovery Document
 
-Check that `/.well-known/openid-configuration` at `https://identity.example.com` is reachable and returns valid JSON:
+First, verify the token endpoint is reachable:
 
-```bash
-curl https://identity.example.com/.well-known/openid-configuration | jq .
+```
+GET https://identity.example.com/.well-known/openid-configuration
 ```
 
-Verify the `token_endpoint`, `authorization_endpoint`, and `issuer` values are correct. If this fails, all subsequent steps are moot — the server may be down or misconfigured.
+- Does it return valid JSON?
+- Is the `token_endpoint` value what you expect?
+- Is the server using HTTPS?
 
-## Step 2: Verify Client ID Match
+## 2. Client ID Verification
 
-Ensure the client ID `web.app` in your request **exactly matches** the server registration. This is case-sensitive. Common issues:
-- Extra whitespace or invisible characters
-- Copy-paste encoding issues
-- Different environments using different client IDs
+Check that the `client_id` in your request **exactly matches** the server-side client registration:
 
 ```csharp
-// Check: does this match the server's client registration exactly?
+// Your request
 ClientId = "web.app"
+
+// Server registration — check for typos, case sensitivity, extra spaces
+new Client { ClientId = "web.app" }  // Must match exactly
 ```
 
-## Step 3: Check the Client Secret
+## 3. Client Secret Verification
 
-The `invalid_client` error most commonly means the secret is wrong. Check:
-
-- **Encoding issues** — Is the secret hashed with SHA256 on the server? If the server stores `"secret".Sha256()`, you must send the plaintext `"correct-secret"` — IdentityModel and the token endpoint handle the hashing. But if the server registration has the plaintext and you're sending a hash, it won't match.
-- **Plaintext vs. Sha256 hash mismatch** — On the server side:
+The `invalid_client` error often means the client secret doesn't match. Common issues:
 
 ```csharp
-// Server registration — the secret is stored as a SHA256 hash
+// ❌ Server expects Sha256 hash, but you're sending plaintext
 ClientSecrets = { new Secret("correct-secret".Sha256()) }
+// The client must send "correct-secret" in the request
+// IdentityServer hashes it and compares to the stored hash
 
-// The client must send the plaintext secret; the server hashes it for comparison
-// If the client sends a pre-hashed value, it will be double-hashed and fail
+// ❌ Secret has leading/trailing whitespace
+ClientSecret = " correct-secret "  // trim this
+
+// ❌ URL encoding issues — special characters in the secret
+// If using form POST, the secret must be properly URL-encoded
 ```
 
-- **Client credential style** — Is the secret sent in the Authorization header (default) or as a POST body parameter? The server and client must agree.
+Also check:
+- Is the secret expired? (secrets can have expiration dates)
+- Was the secret recently changed on the server?
 
-## Step 4: Verify Allowed Grant Types
+## 4. Grant Type
 
-Check that the grant type you're requesting is allowed on the client:
+Verify that the grant type in the request is allowed for this client:
 
 ```csharp
-// Server configuration
 new Client
 {
     ClientId = "web.app",
-    AllowedGrantTypes = GrantTypes.Code, // Does this include the grant type you're using?
+    AllowedGrantTypes = GrantTypes.Code,  // Must include the grant type you're requesting
     // ...
 }
 ```
 
-If you're sending `grant_type=authorization_code`, the client must have `GrantTypes.Code` (or `GrantTypes.CodeAndClientCredentials`). If you're sending `grant_type=client_credentials`, it must have `GrantTypes.ClientCredentials`.
+If you're sending `grant_type=authorization_code` but the client only allows `client_credentials`, you'll get an error.
 
-## Step 5: Verify Allowed Scopes
+## 5. Scopes
 
-Ensure all requested scopes are registered in `AllowedScopes` on the client:
-
-```csharp
-AllowedScopes = { "openid", "profile", "api1" }
-// If you request a scope not in this list, the request will fail
-```
-
-## Step 6: Check Redirect URI (Exact String Match)
-
-For authorization code flows, the redirect URI must be an **exact string match** including:
-- Scheme (`https://` vs `http://`)
-- Host and port (`localhost:5001` vs `localhost:5000`)
-- Path (`/callback` vs `/callback/`)
-- **Trailing slash matters!**
+Check that all requested scopes are in the client's `AllowedScopes`:
 
 ```csharp
-// Server
-RedirectUris = { "https://app.example.com/callback" }
-
-// Client — must match exactly
-options.CallbackPath = "/callback"; // becomes https://app.example.com/callback
+new Client
+{
+    ClientId = "web.app",
+    AllowedScopes = { "openid", "profile", "api1" }
+    // If you request "api2" which isn't here, you'll get an error
+}
 ```
 
-## Step 7: Verify PKCE
+Also verify the scopes actually exist as registered `ApiScope` or `IdentityResource` objects on the server.
 
-Duende IdentityServer requires PKCE by default (`RequirePkce = true`). If your client isn't sending `code_challenge` and `code_verifier`, the request will be rejected. ASP.NET Core's OIDC handler sends PKCE automatically since .NET 7.
+## 6. Redirect URI
 
-## Step 8: Check Clock Skew
-
-Token validation allows a default clock skew of 5 minutes. If the server and client clocks are significantly out of sync, tokens may be rejected as expired before they're used.
-
-## Step 9: Verify HTTPS
-
-Ensure the authorize redirect is using HTTPS. Mixed content (HTTP/HTTPS mismatch) can cause silent failures, especially in browsers that block mixed content.
-
-## Step 10: Check CORS (Browser Clients)
-
-If calling the token endpoint from a browser (e.g., SPA), verify the origin is registered in `AllowedCorsOrigins` on the client:
+For authorization code flows, the `redirect_uri` in the token request must **exactly match** one of the registered redirect URIs:
 
 ```csharp
-AllowedCorsOrigins = { "https://app.example.com" }
+// Server registration
+RedirectUris = { "https://webapp.example.com/callback" }
+
+// ❌ These will ALL fail:
+redirect_uri = "https://webapp.example.com/callback/"  // trailing slash
+redirect_uri = "http://webapp.example.com/callback"     // HTTP vs HTTPS
+redirect_uri = "https://WEBAPP.example.com/callback"    // case mismatch in path
+redirect_uri = "https://webapp.example.com:443/callback" // explicit port
 ```
 
-Without proper CORS configuration, the browser will block the response with a CORS error that may manifest as a cryptic failure.
+The match is an **exact string comparison** — scheme, host, port, path, and trailing slash must all match.
 
-## Quick Diagnostic Commands
+## 7. PKCE
 
-```bash
-# Test discovery document
-curl -s https://identity.example.com/.well-known/openid-configuration | jq .
+Duende IdentityServer requires PKCE by default (`RequirePkce = true`). If your client isn't sending `code_challenge` in the authorize request and `code_verifier` in the token request, the flow will fail.
 
-# Test token endpoint directly
-curl -s -X POST https://identity.example.com/connect/token \
-  -d "grant_type=client_credentials&client_id=web.app&client_secret=correct-secret&scope=api1"
+## 8. Client Authentication Method
 
-# Check server logs — Duende IdentityServer logs detailed error information
-# Look for the Duende.IdentityServer category in your logging output
+Check how the client is sending credentials:
+- **POST body**: `client_id` and `client_secret` in the form body
+- **Basic auth**: Base64-encoded `client_id:client_secret` in the Authorization header
+
+If the server expects one method but the client uses another, authentication fails.
+
+## 9. Clock Skew
+
+If token validation involves timestamps (e.g., JWT assertions for client authentication), check that server and client clocks are synchronized. The default allowed skew is 5 minutes.
+
+## 10. CORS (Browser Clients)
+
+If calling the token endpoint from a browser (e.g., SPA), verify the origin is in `AllowedCorsOrigins`:
+
+```csharp
+new Client
+{
+    ClientId = "web.app",
+    AllowedCorsOrigins = { "https://spa.example.com" }
+}
 ```
+
+## Quick Diagnostic
+
+Enable detailed logging on the IdentityServer side:
+
+```json
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Override": {
+        "Duende.IdentityServer": "Debug"
+      }
+    }
+  }
+}
+```
+
+The IdentityServer logs will tell you exactly why the client authentication failed.

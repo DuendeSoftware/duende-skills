@@ -2,10 +2,26 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource", "pass": true, "rationale": "Mentions UserClaims on API scope, though doesn't explicitly name all three (IdentityResource, ApiScope, ApiResource)"},
-    {"assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource", "pass": true, "rationale": "Shows ApiScope with UserClaims = { \"department\" }"},
-    {"assertion": "Mentions that the client must also request the scope that contains the claim", "pass": true, "rationale": "States 'make sure the client is requesting the api1 scope'"},
-    {"assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types", "pass": false, "rationale": "Does not mention AddRequestedClaims or RequestedClaimTypes at all"}
+    {
+      "assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+      "pass": true,
+      "rationale": "Mentions claims need to be associated with a scope or resource and shows UserClaims"
+    },
+    {
+      "assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+      "pass": true,
+      "rationale": "Shows new ApiScope with UserClaims = { \"department\" }"
+    },
+    {
+      "assertion": "Mentions that the client must also request the scope that contains the claim",
+      "pass": true,
+      "rationale": "Shows AllowedScopes and mentions client must request the scope"
+    },
+    {
+      "assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes \u2014 AddRequestedClaims filters to only requested claim types",
+      "pass": false,
+      "rationale": "Does not explain AddRequestedClaims or RequestedClaimTypes filtering mechanism at all"
+    }
   ],
   "pass_count": 3,
   "total_count": 4,

@@ -13,7 +13,6 @@ for dir in tests/*/workspace/iteration-1; do [ -d "$dir" ] && echo "Removing: $d
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identity-testing-patterns"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-api-protection"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-aspire"
-./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-clients-resources"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-configuration"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-dcr"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-deployment"

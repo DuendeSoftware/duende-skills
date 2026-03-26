@@ -1,37 +1,31 @@
-# Migrating the IdentityServer4 Quickstart UI
+# Migrating the UI from IdentityServer4 to Duende IdentityServer
 
-When migrating your IdentityServer4 Quickstart UI to Duende IdentityServer, you'll need to make several changes:
+## Update Razor View Namespaces
 
-## 1. Update Namespace References
+Update `@using IdentityServer4` to `@using Duende.IdentityServer` in your view files:
 
-Update all `@using IdentityServer4` directives in your Razor files to `@using Duende.IdentityServer`:
+### _ViewImports.cshtml
+```cshtml
+@using Duende.IdentityServer
+```
 
-- `_ViewImports.cshtml`: Change `@using IdentityServer4` to `@using Duende.IdentityServer`
-- Check individual `.cshtml` files for any additional IdentityServer4 namespace references
+Check all `.cshtml` files for these namespace references.
 
-## 2. Update Controller Namespaces
+## Consider Using Duende Templates
 
-In your `AccountController.cs`, `ConsentController.cs`, and other controllers, update `using` statements from `IdentityServer4.*` to `Duende.IdentityServer.*`.
-
-## 3. Consider Using Updated Templates
-
-Duende provides updated UI templates that you can scaffold into your project. Consider starting fresh with the Duende templates and porting your customizations over:
+Duende provides updated UI templates that you can scaffold:
 
 ```bash
 dotnet new install Duende.Templates
 dotnet new duende-is-ui
 ```
 
-This will give you the latest version of the UI that's designed for Duende IdentityServer.
+The Duende templates are based on Razor Pages rather than MVC controllers, which is a significant architectural change from the IdentityServer4 Quickstart UI.
 
-## 4. Review for API Changes
+## Keep Existing MVC UI
 
-Some IdentityServer APIs may have changed between versions. Review your controllers for any breaking changes in the interaction service or model types.
+Your existing MVC controllers and views will still work after updating namespaces. The core APIs for login, consent, and logout are similar. You may need to update some property names that changed between versions.
 
-## 5. Test Thoroughly
+## New Flows
 
-After making the changes:
-- Test login/logout flows
-- Test consent screens
-- Test error handling pages
-- Verify all styling and customizations still work correctly
+Duende IdentityServer supports additional flows like device authorization that the old Quickstart UI didn't include.

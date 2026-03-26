@@ -1,1 +1,196 @@
-{"metadata":{"skill_name":"identityserver-deployment","iteration":1,"model":"claude-opus-4-20250514","date":"2026-03-23"},"summary":{"with_skill":{"total_assertions":33,"passed":33,"failed":0,"pass_rate":100.0},"without_skill":{"total_assertions":33,"passed":23,"failed":10,"pass_rate":69.7},"delta":{"assertions_improved":10,"delta_pass_rate":30.3}},"evals":[{"eval_id":1,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":2,"with_skill":{"passed":5,"failed":0,"total":5,"pass_rate":1.0},"without_skill":{"passed":4,"failed":1,"total":5,"pass_rate":0.8},"delta":0.2,"without_skill_failures":["Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments"]},{"eval_id":3,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":1,"failed":3,"total":4,"pass_rate":0.25},"delta":0.75,"without_skill_failures":["Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler","Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler","Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes"]},{"eval_id":4,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":2,"failed":2,"total":4,"pass_rate":0.5},"delta":0.5,"without_skill_failures":["Output adds the 'Duende.IdentityServer' meter (or Telemetry.ServiceName) to the metrics configuration","Output adds only IdentityServerConstants.Tracing.Basic as the tracing source for production, and does NOT include Stores, Validation, Cache, or Services sources"]},{"eval_id":5,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":3,"failed":1,"total":4,"pass_rate":0.75},"delta":0.25,"without_skill_failures":["Output configures options.Logging.UnhandledExceptionLoggingFilter to return false for OperationCanceledException when ctx.RequestAborted.IsCancellationRequested is true"]},{"eval_id":6,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":2,"failed":2,"total":4,"pass_rate":0.5},"delta":0.5,"without_skill_failures":["Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B","Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store"]},{"eval_id":7,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"delta":0.0,"without_skill_failures":[]},{"eval_id":8,"with_skill":{"passed":4,"failed":0,"total":4,"pass_rate":1.0},"without_skill":{"passed":3,"failed":1,"total":4,"pass_rate":0.75},"delta":0.25,"without_skill_failures":["Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy"]}]}
+{
+  "metadata": {
+    "skill_name": "identityserver-deployment",
+    "iteration": 1,
+    "model": "claude-opus-4.6",
+    "date": "2026-03-19"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 33,
+      "passed": 33,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 33,
+      "passed": 16,
+      "failed": 17,
+      "pass_rate": 0.48
+    },
+    "delta": {
+      "assertions_improved": 17,
+      "delta_pass_rate": 0.52
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": "Reverse proxy ForwardedHeaders for HTTPS discovery",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Output mentions that the ForwardedHeaders middleware must run before IdentityServer middleware in the pipeline",
+        "Output includes adding proxy IP addresses to KnownProxies or KnownNetworks for production, or explains the default localhost-only trust"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": "Data Protection for Kubernetes multi-instance",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": "Health checks for discovery and JWKS endpoints",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler",
+        "Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler",
+        "Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": "OpenTelemetry with Prometheus and production tracing",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Output adds the 'Duende.IdentityServer' meter (or Telemetry.ServiceName) to the metrics configuration",
+        "Output adds only IdentityServerConstants.Tracing.Basic as the tracing source for production, and does NOT include Stores, Validation, Cache, or Services sources"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": "Production logging and OperationCanceledException filtering",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Output changes the logging level for Duende.IdentityServer to Warning (or higher) in the appsettings.json or production appsettings",
+        "Output explains that Trace and Debug levels expose sensitive data like tokens and must not be used in production",
+        "Output configures options.Logging.UnhandledExceptionLoggingFilter to return false for OperationCanceledException when ctx.RequestAborted.IsCancellationRequested is true"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": "Distributed caching for multi-instance OIDC flows",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B",
+        "Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": "Events system with Seq IEventSink",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": "Multiple proxies in chain (Cloudflare -> Nginx)",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+        "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+        "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+        "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed"
+      ]
+    }
+  ]
+}

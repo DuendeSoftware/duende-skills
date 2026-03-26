@@ -1,53 +1,125 @@
 {
-  "metadata": {"skill_name": "claims-authorization", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "claims-authorization",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 36, "passed": 36, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 36, "passed": 24, "failed": 12, "pass_rate": 66.7},
-    "delta": {"assertions_improved": 12, "delta_pass_rate": 33.3}
+    "with_skill": {
+      "total_assertions": 40,
+      "passed": 40,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 40,
+      "passed": 26,
+      "failed": 14,
+      "pass_rate": 65.0
+    },
+    "delta": {
+      "assertions_improved": 14,
+      "delta_pass_rate": 35.0
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
       "without_skill_failures": [
         "Uses context.AddRequestedClaims for scope-filtered claims like 'department'",
-        "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering"
+        "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering",
+        "Implements IsActiveAsync to check whether the user is still active"
       ]
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": [
-        "Mentions JwtClaimTypes.Subject or the short name 'sub' vs the long http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier URI"
-      ]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
       "without_skill_failures": [
-        "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types"
+        "Explains the relationship between AddRequestedClaims and RequestedClaimTypes \u2014 AddRequestedClaims filters to only requested claim types"
       ]
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
       "delta": 0.4,
       "without_skill_failures": [
-        "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place",
+        "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() \u2014 does NOT mutate the existing identity in-place",
         "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims"
       ]
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
       "delta": 0.5,
       "without_skill_failures": [
         "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
@@ -56,17 +128,39 @@
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
       "without_skill_failures": [
         "Mentions that IProfileService is called after the grant validator and can augment claims further"
       ]
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
       "without_skill_failures": [
         "Mentions that client claims are emitted by default only in client credentials flow, or requires AlwaysSendClientClaims = true for other flows"
@@ -74,12 +168,44 @@
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
       "without_skill_failures": [
         "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones",
-        "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme"
+        "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+        "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes"
       ]
     }
   ]

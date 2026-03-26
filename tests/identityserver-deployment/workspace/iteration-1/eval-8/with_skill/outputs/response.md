@@ -1,55 +1,37 @@
-# Fixing ForwardedHeaders with Multiple Reverse Proxies (Cloudflare -> Nginx -> IdentityServer)
+# Fixing ForwardedHeaders with Multiple Proxies (Cloudflare -> Nginx -> IdentityServer)
 
-## The Problem
+## The Issue
 
-With two proxies in the chain, the default ForwardedHeaders configuration fails because:
+With two proxies in the chain (Cloudflare -> Nginx -> IdentityServer), the default `ForwardLimit` of `1` only processes forwarded headers from the last proxy (Nginx). But the correct original values may be set by the first proxy (Cloudflare), and you need the middleware to process both layers.
 
-1. **`ForwardLimit` defaults to 1** — This means the middleware only processes forwarded headers from a single proxy. With Cloudflare in front of Nginx, there are two sets of forwarded headers. The middleware only reads the innermost proxy's headers (Nginx), but if Nginx doesn't rewrite the `X-Forwarded-Host` header, the original host from Cloudflare is lost.
-
-2. **Only trusted proxies are processed** — Both Cloudflare and Nginx must be added to `KnownProxies` or `KnownNetworks`. If either is missing, the middleware skips its forwarded headers.
-
-3. **XForwardedHost must be included** — If the discovery document shows the wrong *host* (not just wrong scheme), you need `ForwardedHeaders.XForwardedHost` in addition to `XForwardedProto`.
+Additionally, both proxy IP addresses must be trusted (added to `KnownProxies` or `KnownNetworks`), otherwise the middleware ignores headers from untrusted sources.
 
 ## Solution
 
-Configure ForwardedHeaders to handle the full proxy chain:
-
 ```csharp
-using Duende.IdentityServer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    // Include both XForwardedProto (for HTTPS) and XForwardedHost (for correct hostname)
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto |
-                                ForwardedHeaders.XForwardedHost;
-
-    // Set ForwardLimit to 2 — matching the number of proxies in the chain
-    // Default is 1, which only processes headers from a single proxy
+    // Process headers from BOTH proxies in the chain
     options.ForwardLimit = 2;
 
-    // Add BOTH proxy IP addresses to KnownProxies
-    // Nginx (your internal proxy)
-    options.KnownProxies.Add(IPAddress.Parse("10.0.0.5"));  // Replace with Nginx IP
+    // Include XForwardedHost to fix incorrect host name in discovery
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto |
+                                ForwardedHeaders.XForwardedHost |
+                                ForwardedHeaders.XForwardedFor;
 
-    // Cloudflare (external proxy) — use their IP ranges
-    // Cloudflare publishes their IP ranges at https://www.cloudflare.com/ips/
-    // You can add specific IPs or use KnownNetworks for ranges
+    // Trust BOTH proxy IP addresses
+    // Cloudflare IP ranges (example — use actual Cloudflare ranges)
     options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("173.245.48.0"), 20));
     options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("103.21.244.0"), 22));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("103.22.200.0"), 22));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("103.31.4.0"), 22));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("141.101.64.0"), 18));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("108.162.192.0"), 18));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("190.93.240.0"), 20));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("188.114.96.0"), 20));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("197.234.240.0"), 22));
-    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("198.41.128.0"), 17));
-    // ... add all Cloudflare ranges
+    // ... add all Cloudflare IP ranges from https://www.cloudflare.com/ips/
+
+    // Nginx proxy IP
+    options.KnownProxies.Add(IPAddress.Parse("10.0.1.50"));
 });
 
 builder.Services.AddIdentityServer()
@@ -59,7 +41,7 @@ builder.Services.AddIdentityServer()
 
 var app = builder.Build();
 
-// ForwardedHeaders MUST come before IdentityServer middleware
+// Must run before IdentityServer
 app.UseForwardedHeaders();
 
 app.UseIdentityServer();
@@ -69,35 +51,35 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## Why ForwardLimit = 2 Is Required
+## Key Configuration Points
 
-The `ForwardLimit` property controls how many entries the middleware processes from the `X-Forwarded-*` headers. Each proxy in the chain appends its own entry:
+### 1. ForwardLimit = 2
+
+The `ForwardLimit` controls how many proxy hops the middleware processes from right to left in the `X-Forwarded-*` headers. The default is `1`, meaning it only processes the most recent proxy entry.
+
+With Cloudflare -> Nginx -> IdentityServer, you have **2 proxies**, so `ForwardLimit` must be `2`. If set to `1`, the middleware only processes Nginx's entry and may still see incorrect values because Cloudflare's original values are ignored.
+
+### 2. Trust Both Proxies
+
+Each proxy in the chain must be trusted by adding its IP to `KnownProxies` or its network range to `KnownNetworks`. The ForwardedHeaders middleware skips entries from untrusted IPs:
+
+- **Cloudflare**: Uses dynamic IP ranges. Add them via `KnownNetworks` using the ranges from Cloudflare's published IP list.
+- **Nginx**: Use the internal IP of your Nginx instance in `KnownProxies`.
+
+If a proxy IP isn't in `KnownProxies` or `KnownNetworks`, its forwarded header entry is **silently ignored**, which explains why your current configuration isn't working.
+
+### 3. XForwardedHost for Correct Host Name
+
+Including `ForwardedHeaders.XForwardedHost` is important when the discovery document shows the wrong host name. Cloudflare and Nginx may set `X-Forwarded-Host` to the original public hostname, and the middleware needs to read this to restore the correct `Request.Host`.
+
+### Header Flow Example
 
 ```
-Client -> Cloudflare -> Nginx -> IdentityServer
+Client -> Cloudflare (203.0.113.1) -> Nginx (10.0.1.50) -> IdentityServer
 
 X-Forwarded-Proto: https, https
-X-Forwarded-Host: myapp.example.com, myapp.example.com
-X-Forwarded-For: <client-ip>, <cloudflare-ip>
+X-Forwarded-Host: identity.example.com, identity.example.com
+X-Forwarded-For: client-ip, 203.0.113.1
 ```
 
-With the default `ForwardLimit = 1`, the middleware only processes the rightmost entry (from Nginx). If Nginx doesn't set `X-Forwarded-Host`, the host is not corrected. With `ForwardLimit = 2`, both proxy entries are processed, ensuring the original client values from Cloudflare are used.
-
-## Why Both Proxies Must Be Trusted
-
-The ForwardedHeaders middleware processes headers from right to left. For each entry, it checks whether the source IP is in `KnownProxies` or `KnownNetworks`. If an untrusted IP is encountered, processing stops. So:
-
-1. **Nginx** must be trusted — otherwise the middleware won't process any forwarded headers
-2. **Cloudflare** must be trusted — otherwise processing stops after Nginx's entry, and the original values from Cloudflare are ignored
-
-Each proxy in the chain must be explicitly trusted for the forwarded headers to be fully processed.
-
-## Verification
-
-After deploying:
-
-```bash
-curl https://myapp.example.com/.well-known/openid-configuration | jq '{issuer, authorization_endpoint}'
-```
-
-Both the issuer and all endpoints should show the correct `https://myapp.example.com` host.
+With `ForwardLimit = 2`, the middleware processes both entries and correctly sets `Request.Scheme = "https"` and `Request.Host = "identity.example.com"`.

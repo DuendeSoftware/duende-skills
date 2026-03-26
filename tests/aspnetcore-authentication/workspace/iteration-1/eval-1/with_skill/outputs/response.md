@@ -1,8 +1,10 @@
-# Configuring OIDC Authentication for Your Web App
+# OIDC Authentication Configuration
 
-Here's the updated `Program.cs` with full OIDC authentication configured for your web app:
+Here's your complete `Program.cs` configured with OIDC authentication:
 
 ```csharp
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthentication(options =>
@@ -12,35 +14,30 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie("Cookies", options =>
 {
-    options.Cookie.Name = "webapp";
+    options.Cookie.Name = "myapp";
     options.Cookie.SameSite = SameSiteMode.Lax;
-    options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    options.SlidingExpiration = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 })
 .AddOpenIdConnect("oidc", options =>
 {
     options.Authority = "https://identity.example.com";
     options.ClientId = "web.app";
     options.ClientSecret = "secret";
-    options.ResponseType = "code"; // Authorization code flow (PKCE is automatic in .NET 7+)
+    options.ResponseType = "code"; // Authorization code flow with PKCE
 
-    // Clear default scopes to avoid duplicates, then add the ones we need
+    // Disable Microsoft's JWT claim type mapping
+    options.MapInboundClaims = false;
+
+    // Clear default scopes and add only what we need
     options.Scope.Clear();
     options.Scope.Add("openid");
     options.Scope.Add("profile");
     options.Scope.Add("api1");
 
-    // Save tokens in the authentication cookie for later API calls
+    // Store tokens in the authentication cookie
     options.SaveTokens = true;
 
-    // CRITICAL: Disable Microsoft's JWT claim type mapping
-    // Without this, 'sub' gets mapped to the long XML URI
-    // 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
-    options.MapInboundClaims = false;
-
-    options.GetClaimsFromUserInfoEndpoint = true;
-
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         NameClaimType = "name",
         RoleClaimType = "role"
@@ -51,7 +48,6 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Authentication MUST come before Authorization in the middleware pipeline
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -60,14 +56,10 @@ app.MapGet("/", () => "Hello World!");
 app.Run();
 ```
 
-## Key Settings Explained
+## Key Points
 
-| Setting | Why |
-|---------|-----|
-| `DefaultScheme = "Cookies"` | Cookie handler reads existing sessions for every request |
-| `DefaultChallengeScheme = "oidc"` | Unauthenticated users redirect to IdentityServer |
-| `MapInboundClaims = false` | Prevents silent renaming of `sub`, `name`, `role` to XML URIs |
-| `Scope.Clear()` | The OIDC handler adds `openid` and `profile` by default — clearing first prevents duplicates |
-| `SaveTokens = true` | Stores access/refresh/ID tokens in the cookie for later API calls |
-| `ResponseType = "code"` | Authorization code flow with PKCE (automatic in .NET 7+) |
-| `UseAuthentication()` before `UseAuthorization()` | Authentication must establish identity before authorization can check it |
+1. **`MapInboundClaims = false`** prevents renaming `sub` to `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`.
+2. **`Scope.Clear()`** before adding scopes prevents duplicates (OIDC handler adds `openid` and `profile` by default).
+3. **`ResponseType = "code"`** uses Authorization Code flow with PKCE (automatic in .NET 7+).
+4. **`SaveTokens = true`** stores access/refresh tokens in the cookie for later API calls.
+5. **Middleware ordering**: `UseAuthentication()` before `UseAuthorization()`.

@@ -1,15 +1,16 @@
 # Differentiating Claims by Token Type Using context.Caller
 
-You can use `context.Caller` in your `IProfileService.GetProfileDataAsync` to check which token type is being built, and emit different claim sets accordingly.
+The `ProfileDataRequestContext.Caller` property tells you what type of token is being issued. You can use the `IdentityServerConstants.ProfileDataCallers` constants to differentiate between identity tokens and access tokens.
 
-## Implementation
+## Profile Service with Caller-Based Logic
 
 ```csharp
 using System.Security.Claims;
-using Duende.IdentityModel;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using IdentityModel;
 
 public sealed class CallerAwareProfileService : DefaultProfileService
 {
@@ -34,21 +35,21 @@ public sealed class CallerAwareProfileService : DefaultProfileService
         if (context.Caller == IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken)
         {
             // Identity tokens go to the browser — keep them small
+            // Only include the user's display name
             context.IssuedClaims.Add(new Claim(JwtClaimTypes.Name, user.DisplayName));
             return;
         }
 
-        // Access tokens and userinfo can include richer application claims
+        // Access tokens and userinfo get the full claim set
+        // Use AddRequestedClaims so only scope-requested claims are emitted
         var claims = new List<Claim>
         {
             new(JwtClaimTypes.Name, user.DisplayName),
             new(JwtClaimTypes.Email, user.Email),
             new("department", user.Department),
-            new("tenant_id", user.TenantId),
             new("subscription_tier", user.SubscriptionTier),
+            new(JwtClaimTypes.Role, user.Role),
         };
-
-        // Use AddRequestedClaims so scope-based filtering still applies
         context.AddRequestedClaims(claims);
     }
 
@@ -68,12 +69,12 @@ builder.Services.AddIdentityServer()
     .AddProfileService<CallerAwareProfileService>();
 ```
 
-## context.Caller Values
+## Caller Constants
 
-| Caller Constant | When It's Called |
-|---|---|
-| `IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken` | Building an identity token |
-| `IdentityServerConstants.ProfileDataCallers.ClaimsProviderAccessToken` | Building an access token |
-| `IdentityServerConstants.ProfileDataCallers.UserInfoEndpoint` | Responding to userinfo request |
+| Constant | When Called |
+|----------|------------|
+| `ClaimsProviderIdentityToken` | Building an identity token |
+| `ClaimsProviderAccessToken` | Building an access token |
+| `UserInfoEndpoint` | Handling a userinfo request |
 
-This pattern keeps identity tokens lean (just the user's name for the client) while allowing access tokens to carry the richer claim set that APIs need for authorization.
+By checking `context.Caller`, you can emit a minimal claim set for identity tokens (keeping them small for browser transport) while providing richer application claims for access tokens consumed by APIs.

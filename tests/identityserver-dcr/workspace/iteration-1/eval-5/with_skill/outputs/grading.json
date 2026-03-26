@@ -1,1 +1,29 @@
-{"eval_id":5,"variant":"with_skill","assertions":[{"assertion":"Adds or references the Duende.IdentityServer.Configuration.EntityFramework NuGet package","pass":true,"rationale":"Shows 'dotnet add package Duende.IdentityServer.Configuration.EntityFramework'"},{"assertion":"Calls AddClientConfigurationStore() on the IdentityServer configuration builder","pass":true,"rationale":"Code shows 'AddIdentityServerConfiguration().AddClientConfigurationStore()'"},{"assertion":"Warns against using in-memory stores for dynamically registered clients in production","pass":true,"rationale":"Explicit warning: 'Do not use in-memory stores for dynamically registered clients in production'"},{"assertion":"Does NOT suggest implementing IClientConfigurationStore from scratch when the EF package is available","pass":true,"rationale":"Only suggests the EF package approach, does not suggest implementing IClientConfigurationStore from scratch"}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration.EntityFramework NuGet package",
+      "pass": true,
+      "rationale": "Shows dotnet add package command"
+    },
+    {
+      "assertion": "Calls AddClientConfigurationStore() on the IdentityServer configuration builder",
+      "pass": true,
+      "rationale": "AddClientConfigurationStore() called on AddIdentityServerConfiguration()"
+    },
+    {
+      "assertion": "Warns against using in-memory stores for dynamically registered clients in production",
+      "pass": true,
+      "rationale": "Dedicated section explaining why in-memory is not suitable"
+    },
+    {
+      "assertion": "Does NOT suggest implementing IClientConfigurationStore from scratch when the EF package is available",
+      "pass": true,
+      "rationale": "Points to the EF package, no custom implementation suggested"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

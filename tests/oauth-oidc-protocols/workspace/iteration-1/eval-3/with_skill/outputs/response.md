@@ -2,101 +2,71 @@
 
 ## What Are Reference Tokens?
 
-Reference tokens are **not self-contained JWTs**. Instead, a reference token is an opaque identifier (a random string) stored server-side by IdentityServer. When your API receives a reference token, it cannot validate it locally — it must call the **introspection endpoint** on IdentityServer to look up the token and determine whether it's valid, what claims it contains, and whether it has been revoked.
+Reference tokens are **opaque identifiers** — they are not self-contained JWTs. When an API receives a reference token, it cannot validate it locally by checking the signature and claims. Instead, the API must call the IdentityServer's **introspection endpoint** to determine if the token is valid, who it belongs to, and what scopes it has.
 
-### Why Use Reference Tokens?
+**Key advantage:** Reference tokens enable **immediate revocation**. Unlike JWTs, which are valid until their expiry time regardless of server-side state, revoking a reference token takes effect immediately because the introspection endpoint checks the current token status on every call.
 
-- **Immediate revocation** — Unlike JWTs, which are valid until expiry (there's no way to invalidate a JWT before its `exp` claim), reference tokens can be revoked immediately because the authorization server checks its database on every introspection call.
-- **Sensitive claims** — Token contents are never exposed to intermediaries (proxies, logs, browser dev tools).
-- **Token size** — Reference tokens are small opaque strings, whereas JWTs can be large.
-
-## Validating with IdentityModel
-
-Here's how to validate a reference token using the introspection endpoint with IdentityModel:
+## Introspection Code
 
 ```csharp
 using IdentityModel.Client;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddAuthorization();
-var app = builder.Build();
+var httpClient = new HttpClient();
 
-app.MapGet("/validate-token", async (string accessToken) =>
+// Step 1: Fetch the discovery document to find the introspection endpoint
+var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
+
+if (disco.IsError)
 {
-    using var httpClient = new HttpClient();
-
-    // Step 1: Fetch the discovery document to resolve the introspection endpoint
-    var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
-
-    if (disco.IsError)
-    {
-        return Results.Problem($"Discovery document error: {disco.Error}");
-    }
-
-    // Step 2: Call the introspection endpoint
-    // The API authenticates itself with its own client ID and secret
-    var introspectionResponse = await httpClient.IntrospectTokenAsync(
-        new TokenIntrospectionRequest
-        {
-            Address = disco.IntrospectionEndpoint,
-            ClientId = "catalog-api",
-            ClientSecret = "api-secret",
-            Token = accessToken
-        });
-
-    if (introspectionResponse.IsError)
-    {
-        return Results.Problem($"Introspection error: {introspectionResponse.Error}");
-    }
-
-    // Step 3: Check if the token is active
-    if (!introspectionResponse.IsActive)
-    {
-        // Token is invalid, expired, or has been revoked
-        return Results.Unauthorized();
-    }
-
-    // Token is valid — extract claims
-    var claims = introspectionResponse.Claims;
-    var sub = claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-    var scope = claims.FirstOrDefault(c => c.Type == "scope")?.Value;
-
-    return Results.Ok(new { Subject = sub, Scope = scope, Active = true });
-});
-
-app.Run();
-```
-
-## Key Points
-
-1. **Discovery-based endpoint resolution** — The introspection endpoint URL is resolved from `disco.IntrospectionEndpoint` rather than hardcoded, following the same best practice as token endpoint resolution.
-
-2. **API authenticates with its own credentials** — The `ClientId` and `ClientSecret` in the introspection request are the API's credentials, not the end-user's. The API must be registered as a resource with a secret in IdentityServer.
-
-3. **`IsActive` is the critical check** — The `active` field in the introspection response (exposed as `IsActive`) is what determines token validity. A token may be inactive because it expired, was revoked, or was never valid.
-
-4. **Reference tokens vs JWTs** — Reference tokens are opaque identifiers; they contain no claims themselves. The server stores the token data internally and returns it via introspection. JWTs, by contrast, are self-contained and can be validated locally. The tradeoff is that reference tokens enable immediate revocation, while JWTs are valid until their `exp` claim regardless of revocation.
-
-## Raw HTTP Request
-
-For reference, here's what the introspection call looks like at the protocol level:
-
-```
-POST /connect/introspect
-Content-Type: application/x-www-form-urlencoded
-Authorization: Basic Y2F0YWxvZy1hcGk6YXBpLXNlY3JldA==
-
-token=<reference_token_value>&token_type_hint=access_token
-```
-
-The response:
-```json
-{
-    "active": true,
-    "sub": "818727",
-    "client_id": "web.app",
-    "scope": "catalog.read",
-    "exp": 1311284570,
-    "iss": "https://identity.example.com"
+    Console.WriteLine($"Discovery error: {disco.Error}");
+    return;
 }
+
+// Step 2: Introspect the reference token
+var introspectionResponse = await httpClient.IntrospectTokenAsync(
+    new TokenIntrospectionRequest
+    {
+        Address = disco.IntrospectionEndpoint,
+        ClientId = "catalog-api",
+        ClientSecret = "api-secret",
+        Token = referenceToken  // The opaque token string received from the client
+    });
+
+if (introspectionResponse.IsError)
+{
+    Console.WriteLine($"Introspection error: {introspectionResponse.Error}");
+    return;
+}
+
+// Step 3: Check if the token is active
+if (!introspectionResponse.IsActive)
+{
+    Console.WriteLine("Token is not active (expired, revoked, or invalid)");
+    return;
+}
+
+// Token is valid — read claims
+var sub = introspectionResponse.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+var scope = introspectionResponse.Claims.FirstOrDefault(c => c.Type == "scope")?.Value;
+var clientId = introspectionResponse.Claims.FirstOrDefault(c => c.Type == "client_id")?.Value;
+
+Console.WriteLine($"Subject: {sub}, Scope: {scope}, Client: {clientId}");
 ```
+
+## How It Works
+
+1. **Discovery**: The introspection endpoint URL is resolved from the discovery document (`disco.IntrospectionEndpoint`), not hardcoded.
+
+2. **API Authentication**: The API authenticates itself to the introspection endpoint using its own `ClientId` and `ClientSecret`. This ensures that only authorized APIs can introspect tokens.
+
+3. **Token Validation**: The `IsActive` property is the critical check — it returns `true` only if the token is valid, not expired, and not revoked.
+
+## JWT vs Reference Tokens
+
+| | JWT | Reference Token |
+|---|---|---|
+| **Format** | Self-contained signed JSON | Opaque string identifier |
+| **Validation** | Local (signature + claims check) | Server-side (introspection) |
+| **Revocation** | Not revocable until expiry | Immediately revocable |
+| **Network** | No extra calls needed | Requires introspection call per request |
+| **Size** | Can be large (many claims) | Small (opaque handle) |

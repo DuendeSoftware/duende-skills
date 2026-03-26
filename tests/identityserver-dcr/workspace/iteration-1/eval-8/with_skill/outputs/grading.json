@@ -1,1 +1,34 @@
-{"eval_id":8,"variant":"with_skill","assertions":[{"assertion":"Warns against exposing the DCR endpoint without authentication or authorization","pass":true,"rationale":"Section 1 explicitly warns against exposing DCR without authentication and shows RequireAuthorization"},{"assertion":"Warns against allowing dynamically registered clients to use any grant type — should restrict and enforce PKCE","pass":true,"rationale":"Section 2 warns about unrestricted grant types and shows enforcing PKCE with RequirePkce = true"},{"assertion":"Warns against using in-memory stores for DCR clients in production","pass":true,"rationale":"Section 3 explicitly warns about in-memory stores losing data on restart"},{"assertion":"Mentions that client secrets must be stored securely (hashed, not plaintext)","pass":true,"rationale":"Section 4 warns about plaintext secret storage and recommends hashing"},{"assertion":"Mentions that software statements must be validated against trusted signing keys — never accept unknown issuers","pass":true,"rationale":"Section 5 warns about accepting software statements from unknown issuers and shows validation code"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against exposing the DCR endpoint without authentication or authorization",
+      "pass": true,
+      "rationale": "Section 1 covers unauthenticated endpoints"
+    },
+    {
+      "assertion": "Warns against allowing dynamically registered clients to use any grant type - should restrict and enforce PKCE",
+      "pass": true,
+      "rationale": "Section 2 covers unrestricted grant types with code example"
+    },
+    {
+      "assertion": "Warns against using in-memory stores for DCR clients in production",
+      "pass": true,
+      "rationale": "Section 3 covers in-memory store issues"
+    },
+    {
+      "assertion": "Mentions that client secrets must be stored securely (hashed, not plaintext)",
+      "pass": true,
+      "rationale": "Section 4 covers plaintext secret storage"
+    },
+    {
+      "assertion": "Mentions that software statements must be validated against trusted signing keys - never accept unknown issuers",
+      "pass": true,
+      "rationale": "Section 5 covers software statement validation"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

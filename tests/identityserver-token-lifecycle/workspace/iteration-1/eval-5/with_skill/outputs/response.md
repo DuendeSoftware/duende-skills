@@ -1,6 +1,6 @@
 # Resilient Refresh Token Service with Grace Period
 
-Here's how to implement a resilient refresh token service that accepts consumed tokens within a 30-second grace period, along with the necessary configuration changes.
+When using one-time refresh tokens (`RefreshTokenUsage = TokenUsage.OneTimeOnly`), network failures during token refresh can strand the client: the old token was consumed but the response with the new token was lost. To handle this, subclass `DefaultRefreshTokenService` and implement a grace period.
 
 ## ResilientRefreshTokenService
 
@@ -28,6 +28,8 @@ public class ResilientRefreshTokenService : DefaultRefreshTokenService
         {
             return Task.FromResult(true);
         }
+
+        // Outside grace period — reject (possible replay attack)
         return Task.FromResult(false);
     }
 }
@@ -38,32 +40,21 @@ public class ResilientRefreshTokenService : DefaultRefreshTokenService
 ```csharp
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddIdentityServer()
+// Register the resilient refresh token service
+builder.Services.TryAddTransient<IRefreshTokenService, ResilientRefreshTokenService>();
+
+var idsvrBuilder = builder.Services.AddIdentityServer(options =>
+{
+    // CRITICAL: Don't delete consumed tokens — mark them instead
+    // This allows the grace period check to work
+    options.PersistentGrants.DeleteOneTimeOnlyRefreshTokensOnUse = false;
+})
     .AddInMemoryClients(new List<Client>
     {
-        new Client
-        {
-            ClientId = "web_app",
-            ClientName = "Web Application",
-            AllowedGrantTypes = GrantTypes.Code,
-            ClientSecrets = { new Secret("secret".Sha256()) },
-            RedirectUris = { "https://localhost:5002/signin-oidc" },
-            PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
-            AllowedScopes = { "openid", "profile", "api1" },
-            AccessTokenLifetime = 3600
-        },
-        new Client
-        {
-            ClientId = "m2m_client",
-            ClientName = "Machine to Machine Client",
-            AllowedGrantTypes = GrantTypes.ClientCredentials,
-            ClientSecrets = { new Secret("m2m_secret".Sha256()) },
-            AllowedScopes = { "api1" }
-        },
+        // ... other clients ...
         new Client
         {
             ClientId = "mobile_app",
@@ -74,78 +65,30 @@ builder.Services.AddIdentityServer()
             PostLogoutRedirectUris = { "myapp://signout" },
             AllowedScopes = { "openid", "profile", "api1" },
             RequirePkce = true,
-            AllowOfflineAccess = true,
 
-            // One-time use refresh tokens
+            // One-time refresh tokens with our resilient service
+            AllowOfflineAccess = true,
             RefreshTokenUsage = TokenUsage.OneTimeOnly
         }
     })
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("api1", "API 1")
-    })
-    .AddInMemoryApiResources(new List<ApiResource>
-    {
-        new ApiResource("api1_resource")
-        {
-            Scopes = { "api1" }
-        }
-    })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
-    {
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile()
-    })
-    .AddTestUsers(new List<Duende.IdentityServer.Test.TestUser>
-    {
-        new Duende.IdentityServer.Test.TestUser
-        {
-            SubjectId = "1",
-            Username = "alice",
-            Password = "password"
-        }
-    })
-    .AddOperationalStore(options =>
-    {
-        // IMPORTANT: Do not delete consumed tokens immediately
-        // This is required for the grace period to work
-        options.DeleteOneTimeOnlyRefreshTokensOnUse = false;
-    });
-
-// Register the resilient refresh token service
-builder.Services.TryAddTransient<IRefreshTokenService, ResilientRefreshTokenService>();
+    // ... rest of configuration ...
+    ;
 
 var app = builder.Build();
-
 app.UseIdentityServer();
-
 app.MapGet("/", () => "IdentityServer is running");
-
 app.Run();
 ```
 
-## Key Points
+## How the Grace Period Works
 
-### Why This Is Needed
+1. Client uses refresh token → IdentityServer marks it as consumed (sets `ConsumedTime`) and issues a new one
+2. Network drops → client never receives the response with the new token
+3. Client retries with the **same** (now consumed) refresh token
+4. `AcceptConsumedTokenAsync` checks: was it consumed less than 30 seconds ago?
+5. Yes → accept it and issue a new token
+6. No (more than 30 seconds) → reject as potential replay attack
 
-When using `OneTimeOnly` refresh tokens, the token is consumed (marked as used) on the first use and a new token is issued in the response. But if the network drops during the response, the client:
+### Why `DeleteOneTimeOnlyRefreshTokensOnUse = false`?
 
-1. Successfully sent the refresh token request (so the server consumed the old token)
-2. Never received the response (so the client doesn't have the new token)
-3. The client is stuck — it has a consumed token and no new one
-
-The grace period allows the client to retry with the consumed token within 30 seconds.
-
-### `DeleteOneTimeOnlyRefreshTokensOnUse = false`
-
-By default, consumed one-time-use tokens are **deleted** from the store. Setting `DeleteOneTimeOnlyRefreshTokensOnUse = false` changes the behavior to **mark** tokens as consumed (setting `ConsumedTime`) rather than deleting them. This is essential because:
-
-- If the token is deleted, `AcceptConsumedTokenAsync` is never called (the token doesn't exist)
-- If the token is marked as consumed, the grace period logic can check `ConsumedTime` and decide whether to accept it
-
-### `RefreshTokenUsage = TokenUsage.OneTimeOnly`
-
-The `mobile_app` client is configured with `TokenUsage.OneTimeOnly` which means:
-- Each refresh token can only be used once
-- A new refresh token is issued with each access token refresh
-- The old token is consumed (not deleted, thanks to our configuration)
+By default, when a one-time refresh token is used, it's **deleted** from the store immediately. With deletion, there's no consumed token to check during the grace period. Setting this to `false` makes IdentityServer **mark** the token as consumed (setting `ConsumedTime`) instead of deleting it. The token cleanup job will eventually remove these consumed tokens.

@@ -1,1 +1,34 @@
-{"eval_id":10,"variant":"without_skill","assertions":[{"assertion":"Program.cs sets TokenCleanupBatchSize = 500 on the operational store options","pass":true,"rationale":"options.TokenCleanupBatchSize = 500"},{"assertion":"Program.cs sets ConsumedTokenCleanupDelay = 600 on the operational store options","pass":false,"rationale":"ConsumedTokenCleanupDelay is not set at all. RemoveConsumedTokens is enabled but no delay is configured."},{"assertion":"Program.cs sets FuzzTokenCleanupStart = true on the operational store options","pass":false,"rationale":"FuzzTokenCleanupStart is not configured. The response mentions database-level locking instead."},{"assertion":"Program.cs sets DefaultSchema to 'identity_ops' on the operational store options","pass":true,"rationale":"options.DefaultSchema = \"identity_ops\""},{"assertion":"Program.cs sets TokenCleanupInterval = 900 and EnableTokenCleanup = true","pass":true,"rationale":"options.EnableTokenCleanup = true and options.TokenCleanupInterval = 900"}],"pass_count":3,"total_count":5,"score":0.6}
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets TokenCleanupBatchSize = 500 on the operational store options",
+      "pass": true,
+      "rationale": "TokenCleanupBatchSize = 500."
+    },
+    {
+      "assertion": "Program.cs sets ConsumedTokenCleanupDelay = 600 on the operational store options",
+      "pass": true,
+      "rationale": "ConsumedTokenCleanupDelay = 600."
+    },
+    {
+      "assertion": "Program.cs sets FuzzTokenCleanupStart = true on the operational store options",
+      "pass": false,
+      "rationale": "Does not set FuzzTokenCleanupStart. This is important for the 3-instance deployment."
+    },
+    {
+      "assertion": "Program.cs sets DefaultSchema to 'identity_ops' on the operational store options",
+      "pass": true,
+      "rationale": "DefaultSchema = \"identity_ops\"."
+    },
+    {
+      "assertion": "Program.cs sets TokenCleanupInterval = 900 and EnableTokenCleanup = true",
+      "pass": true,
+      "rationale": "Both values set correctly."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

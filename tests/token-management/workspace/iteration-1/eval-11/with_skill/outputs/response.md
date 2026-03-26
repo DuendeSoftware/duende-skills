@@ -1,12 +1,10 @@
-# Multi-Tenant Token Request Customization
+# Multi-Tenant Token Request Customization with Duende.AccessTokenManagement v4
 
-In Duende.AccessTokenManagement v4, `ITokenRequestCustomizer` lets you dynamically modify token request parameters per outgoing HTTP request. This is ideal for multi-tenant SaaS apps where different tenants require different API resources or scopes.
+In a multi-tenant SaaS app where each tenant has different API resources and scopes, you can use `ITokenRequestCustomizer` to dynamically modify token request parameters based on which tenant's API you're calling.
 
 ## ITokenRequestCustomizer Implementation
 
 ```csharp
-using Duende.AccessTokenManagement;
-
 public class TenantTokenRequestCustomizer : ITokenRequestCustomizer
 {
     private readonly ITenantResolver _tenantResolver;
@@ -25,7 +23,6 @@ public class TenantTokenRequestCustomizer : ITokenRequestCustomizer
         TokenRequestParameters baseParameters,
         CancellationToken cancellationToken)
     {
-        // Resolve tenant from the outgoing HTTP request (e.g., from a custom header or URL pattern)
         var tenantId = await _tenantResolver.GetTenantIdAsync(httpRequest, cancellationToken);
         var tenantConfig = await _tenantConfigStore.GetConfigurationAsync(tenantId, cancellationToken);
 
@@ -39,89 +36,74 @@ public class TenantTokenRequestCustomizer : ITokenRequestCustomizer
 }
 ```
 
+### Key Points
+
+1. **`ITokenRequestCustomizer` interface** — The `Customize` method receives the outgoing `HttpRequestMessage`, the base `TokenRequestParameters`, and a `CancellationToken`.
+
+2. **`with` expression** — Use the C# record `with` expression to create a modified copy of `baseParameters`. Do **not** mutate the original — it may be shared across requests.
+
+3. **Per-request customization** — The customizer runs on every outgoing HTTP request, so you can inspect the request URL, headers, or other properties to determine the tenant.
+
 ## Registration
 
-Pass the customizer instance to the `Add*Handler` registration methods:
+Pass the customizer instance directly to the `Add*Handler` methods:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Authentication and token management ──
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie")
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-        options.Scope.Add("openid");
-        options.Scope.Add("offline_access");
-    });
-
-builder.Services.AddOpenIdConnectAccessTokenManagement();
-
-// ── Register tenant services ──
-builder.Services.AddSingleton<ITenantResolver, HeaderBasedTenantResolver>();
+// Register tenant services
+builder.Services.AddSingleton<ITenantResolver, HeaderTenantResolver>();
 builder.Services.AddSingleton<ITenantConfigStore, DatabaseTenantConfigStore>();
 
-// ── Build the customizer ──
-var serviceProvider = builder.Services.BuildServiceProvider();
+// Build the customizer
+var sp = builder.Services.BuildServiceProvider();
 var customizer = new TenantTokenRequestCustomizer(
-    serviceProvider.GetRequiredService<ITenantResolver>(),
-    serviceProvider.GetRequiredService<ITenantConfigStore>());
+    sp.GetRequiredService<ITenantResolver>(),
+    sp.GetRequiredService<ITenantConfigStore>());
 
-// ── Client credentials client with customizer ──
+// Client credentials setup
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("api-client", client =>
+    .AddClient("api.client", client =>
     {
         client.TokenEndpoint = new Uri("https://sts.example.com/connect/token");
-        client.ClientId = ClientId.Parse("webapp");
+        client.ClientId = ClientId.Parse("saas-app");
         client.ClientSecret = ClientSecret.Parse("secret");
+        // Base scope — customizer will override per tenant
+        client.Scope = Scope.Parse("api.base");
     });
 
-builder.Services.AddHttpClient("tenant-api", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com/");
-})
-.AddClientCredentialsTokenHandler(customizer,
-    ClientCredentialsClientName.Parse("api-client"));
+// Register HTTP client with customizer for client credentials
+builder.Services.AddHttpClient("tenant-api")
+    .AddClientCredentialsTokenHandler(customizer,
+        ClientCredentialsClientName.Parse("api.client"));
 
-// ── User access token client with customizer ──
-builder.Services.AddHttpClient("user-tenant-api", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com/");
-})
-.AddUserAccessTokenHandler(customizer);
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/tenant-data", async (IHttpClientFactory factory, CancellationToken ct) =>
-{
-    // The customizer resolves the tenant and modifies the token request
-    // with the correct Resource and Scope automatically
-    var client = factory.CreateClient("tenant-api");
-    var response = await client.GetAsync("data", ct);
-    return Results.Ok(await response.Content.ReadAsStringAsync(ct));
-});
-
-app.Run();
+// Or for user access tokens:
+builder.Services.AddHttpClient("user-tenant-api")
+    .AddUserAccessTokenHandler(customizer);
 ```
 
 ## How It Works
 
-1. **`ITokenRequestCustomizer`** — The interface has a single `Customize` method that receives the outgoing `HttpRequestMessage`, the base `TokenRequestParameters`, and a `CancellationToken`. It returns a (potentially modified) `TokenRequestParameters`.
+1. When an HTTP request is made through the registered client, the token handler intercepts it.
+2. Before requesting a token, it calls `Customize()` with the outgoing request and base parameters.
+3. The customizer resolves the tenant (e.g., from a request header, URL segment, or ambient context).
+4. It creates a modified copy of the parameters using `with`, setting tenant-specific `Resource` and `Scope`.
+5. The modified parameters are used for the token request, and the resulting token is cached with a cache key that includes the scope and resource, so different tenants get separate cached tokens.
 
-2. **`with` expression** — Use `baseParameters with { ... }` to create a new copy with modified properties. Never mutate the original `baseParameters` as it may be shared.
+## Tenant Resolver Example
 
-3. **Registration** — Pass the customizer instance directly to `AddClientCredentialsTokenHandler(customizer, clientName)` or `AddUserAccessTokenHandler(customizer)`. The customizer is invoked before every token acquisition, allowing per-request tenant-specific scopes and resources.
-
-4. **Tenant resolution** — The `HttpRequestMessage` gives the customizer access to the outgoing request (URL, headers, etc.), so you can determine the tenant from the request context without relying on `HttpContext`.
+```csharp
+public class HeaderTenantResolver : ITenantResolver
+{
+    public Task<string> GetTenantIdAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Headers.TryGetValues("X-Tenant-Id", out var values))
+        {
+            return Task.FromResult(values.First());
+        }
+        throw new InvalidOperationException("No tenant ID found in request headers");
+    }
+}
+```

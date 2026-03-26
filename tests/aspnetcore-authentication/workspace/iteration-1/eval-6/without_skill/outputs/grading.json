@@ -2,9 +2,21 @@
   "eval_id": 6,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs maps a /logout endpoint (via MapGet, controller action, or Razor page)", "pass": true, "rationale": "The response includes 'app.MapGet(\"/logout\", async (HttpContext ctx) => { ... });'"},
-    {"assertion": "The logout handler calls SignOutAsync for the cookie authentication scheme to clear the local session", "pass": true, "rationale": "The response includes 'await ctx.SignOutAsync(\"Cookies\");'"},
-    {"assertion": "The logout handler calls SignOutAsync for the OIDC scheme to trigger redirect to IdentityServer's end session endpoint", "pass": true, "rationale": "The response includes 'await ctx.SignOutAsync(\"oidc\");' and explains the redirect to the identity provider's end session endpoint."}
+    {
+      "assertion": "Program.cs maps a /logout endpoint (via MapGet, controller action, or Razor page)",
+      "pass": true,
+      "rationale": "app.MapGet('/logout', ...) is defined."
+    },
+    {
+      "assertion": "The logout handler calls SignOutAsync for the cookie authentication scheme to clear the local session",
+      "pass": true,
+      "rationale": "SignOutAsync('Cookies') is called."
+    },
+    {
+      "assertion": "The logout handler calls SignOutAsync for the OIDC scheme to trigger redirect to IdentityServer's end session endpoint",
+      "pass": true,
+      "rationale": "SignOutAsync('oidc') is called."
+    }
   ],
   "pass_count": 3,
   "total_count": 3,

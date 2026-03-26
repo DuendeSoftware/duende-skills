@@ -1,1 +1,25 @@
-{"eval_id":5,"variant":"without_skill","assertions":[{"assertion":"Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens","pass":true,"rationale":"States access tokens should be treated as opaque strings by clients."},{"assertion":"Response recommends using the ID token for user identity claims (name, email) in the client application","pass":true,"rationale":"Recommends reading claims from ClaimsPrincipal populated from ID token."},{"assertion":"Response mentions the userinfo endpoint as an alternative for retrieving user claims","pass":true,"rationale":"Mentions userinfo endpoint as alternative with code examples."},{"assertion":"Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)","pass":true,"rationale":"States ID token is for the client (identity) and access token is for the API (authorization)."}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 5,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens",
+      "passed": true
+    },
+    {
+      "assertion": "Response recommends using the ID token for user identity claims (name, email) in the client application",
+      "passed": true
+    },
+    {
+      "assertion": "Response mentions the userinfo endpoint as an alternative for retrieving user claims",
+      "passed": true
+    },
+    {
+      "assertion": "Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

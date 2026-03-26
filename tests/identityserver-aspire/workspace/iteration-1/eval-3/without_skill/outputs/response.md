@@ -1,24 +1,31 @@
 # Adding IdentityServer Telemetry to Aspire
 
-To capture IdentityServer traces and metrics in the Aspire dashboard, you need to add the appropriate sources in your service defaults project.
-
-## Tracing
+To see IdentityServer traces and metrics in the Aspire dashboard, you need to register the appropriate sources. In your service defaults project:
 
 ```csharp
-tracing
-    .AddSource(builder.Environment.ApplicationName)
-    .AddSource("Duende.IdentityServer")
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation();
+public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder builder)
+{
+    builder.Services.AddOpenTelemetry()
+        .WithTracing(tracing =>
+        {
+            tracing
+                .AddSource(builder.Environment.ApplicationName)
+                .AddSource("Duende.IdentityServer")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation();
+        })
+        .WithMetrics(metrics =>
+        {
+            metrics
+                .AddMeter(builder.Environment.ApplicationName)
+                .AddMeter("Duende.IdentityServer")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation();
+        });
+
+    return builder;
+}
 ```
 
-## Metrics
-
-```csharp
-metrics
-    .AddMeter("Duende.IdentityServer")
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation();
-```
-
-This will capture the main IdentityServer traces and metrics in the Aspire dashboard.
+This adds the main `Duende.IdentityServer` trace source and meter. The Aspire dashboard will now show IdentityServer traces alongside your other services.

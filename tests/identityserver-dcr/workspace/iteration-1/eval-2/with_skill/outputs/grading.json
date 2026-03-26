@@ -1,1 +1,34 @@
-{"eval_id":2,"variant":"with_skill","assertions":[{"assertion":"Configures AddJwtBearer with an Authority and Audience for the DCR scheme","pass":true,"rationale":"Code shows AddJwtBearer('dcr', options => { options.Authority = '...'; options.Audience = '...'; })"},{"assertion":"Creates an authorization policy that requires an authenticated user and a specific scope claim","pass":true,"rationale":"Policy requires RequireAuthenticatedUser() and RequireClaim('scope', 'IdentityServer.Configuration')"},{"assertion":"Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()","pass":true,"rationale":"Code shows MapDynamicClientRegistration().RequireAuthorization('dcr')"},{"assertion":"Uses AddAuthentication() and AddAuthorization() with proper policy configuration","pass":true,"rationale":"Both AddAuthentication() and AddAuthorization() are called with proper configuration"},{"assertion":"Does NOT expose MapDynamicClientRegistration() without authorization","pass":true,"rationale":"MapDynamicClientRegistration() always has .RequireAuthorization('dcr') and warns about not exposing without authorization"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Configures AddJwtBearer with an Authority and Audience for the DCR scheme",
+      "pass": true,
+      "rationale": "AddJwtBearer(\"dcr\") with Authority and Audience configured"
+    },
+    {
+      "assertion": "Creates an authorization policy that requires an authenticated user and a specific scope claim",
+      "pass": true,
+      "rationale": "Policy requires authenticated user and scope claim IdentityServer.Configuration"
+    },
+    {
+      "assertion": "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()",
+      "pass": true,
+      "rationale": "MapDynamicClientRegistration().RequireAuthorization(\"dcr\")"
+    },
+    {
+      "assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy configuration",
+      "pass": true,
+      "rationale": "Both are configured properly"
+    },
+    {
+      "assertion": "Does NOT expose MapDynamicClientRegistration() without authorization",
+      "pass": true,
+      "rationale": "RequireAuthorization is applied"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

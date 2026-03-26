@@ -1,22 +1,22 @@
 # Fixing CryptographicException in Load-Balanced Deployment
 
-## What's Happening
+The error `The key was not found in the key ring` typically occurs when data protection keys aren't shared across instances in a load-balanced setup.
 
-The `CryptographicException: The key was not found in the key ring` error typically means that the data protection keys used to encrypt your signing keys aren't being shared properly across instances. Each instance in the load balancer is using its own set of data protection keys, so when one instance tries to read a signing key that was encrypted by another instance, it can't find the matching data protection key.
+## Problem
+
+Each instance has its own set of data protection keys. When one instance creates signing keys encrypted with its data protection keys, other instances can't decrypt them.
 
 ## Fix
 
-You need to configure ASP.NET Core Data Protection to use a shared storage so all instances can encrypt and decrypt with the same keys:
-
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure shared data protection
+// Share data protection keys across instances
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/shared/dataprotection-keys"))
+    .PersistKeysToFileSystem(new DirectoryInfo("/shared/dp-keys"))
     .SetApplicationName("IdentityServer");
 
 builder.Services.AddIdentityServer()
@@ -49,14 +49,9 @@ builder.Services.AddIdentityServer()
     });
 
 var app = builder.Build();
-
 app.UseIdentityServer();
-
 app.MapGet("/", () => "IdentityServer is running");
-
 app.Run();
 ```
 
-Make sure `/shared/dataprotection-keys` is a path accessible by all instances (e.g., a network share or mounted volume). You could also use `PersistKeysToDbContext` or a cloud provider like `PersistKeysToAzureBlobStorage` for more robust storage.
-
-The `SetApplicationName` call ensures all instances use the same application name, which is important for data protection key isolation.
+You should also consider using a shared store like a database or Redis for the signing keys directory, and make sure the key directory path is accessible to all instances.

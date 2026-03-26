@@ -5,22 +5,22 @@
     {
       "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder chain",
       "pass": true,
-      "rationale": "Code shows `.AddServerSideSessions()` chained on the IdentityServer builder."
+      "rationale": ".AddServerSideSessions() is chained on the IdentityServer builder."
     },
     {
       "assertion": "Program.cs configures AddOperationalStore with UseSqlServer using the connection string from configuration",
       "pass": true,
-      "rationale": "Code shows `.AddOperationalStore(options => { options.ConfigureDbContext = b => b.UseSqlServer(connectionString, ...); });` where connectionString comes from `builder.Configuration.GetConnectionString(\"IdentityServer\")`."
+      "rationale": "AddOperationalStore uses UseSqlServer(connectionString) where connectionString comes from Configuration."
     },
     {
       "assertion": "Program.cs sets ServerSideSessions.UserDisplayNameClaimType to 'name'",
       "pass": true,
-      "rationale": "Code shows `options.ServerSideSessions.UserDisplayNameClaimType = \"name\";`."
+      "rationale": "Sets options.ServerSideSessions.UserDisplayNameClaimType = \"name\"."
     },
     {
       "assertion": "Program.cs does not rely on the default in-memory session store for production use",
       "pass": true,
-      "rationale": "The code adds both `AddServerSideSessions()` and `AddOperationalStore()` with SQL Server, replacing the in-memory default. The response also explicitly warns that in-memory is not suitable for production."
+      "rationale": "Uses EF Core operational store with SQL Server, not in-memory."
     }
   ],
   "pass_count": 4,

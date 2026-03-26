@@ -2,12 +2,28 @@
   "eval_id": 5,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)", "pass": true, "rationale": "Code does not set KeyManagement.Enabled at all, which means it defaults to true. The response also mentions that automatic key management is enabled by default."},
-    {"assertion": "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)", "pass": true, "rationale": "Code calls idsvrBuilder.AddSigningCredential(signingKey, SecurityAlgorithms.RsaSha256) where signingKey = GetSigningKeyFromVault()"},
-    {"assertion": "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)", "pass": false, "rationale": "Code incorrectly calls idsvrBuilder.AddValidationKey(signingKey, SecurityAlgorithms.RsaSha256) for the same static key. This is a Phase 2 pattern, not Phase 1. In Phase 1, only AddSigningCredential should be used for the static key."},
-    {"assertion": "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management", "pass": false, "rationale": "The response title mentions 'Phase 1' but the code itself has no comments indicating this is Phase 1 of a migration. The code comments only say 'Keep the current static key for signing' and 'Also add the key for validation' which doesn't clearly indicate a phased migration plan."}
+    {
+      "assertion": "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)",
+      "pass": true,
+      "rationale": "Does not set KeyManagement.Enabled to false, so it defaults to true."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)",
+      "pass": true,
+      "rationale": "Calls AddSigningCredential with key from GetSigningKeyFromVault() and RS256."
+    },
+    {
+      "assertion": "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)",
+      "pass": true,
+      "rationale": "AddValidationKey is not called."
+    },
+    {
+      "assertion": "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management",
+      "pass": false,
+      "rationale": "No explicit Phase 1 comments or structured migration indication."
+    }
   ],
-  "pass_count": 2,
+  "pass_count": 3,
   "total_count": 4,
-  "score": 0.5
+  "score": 0.75
 }

@@ -1,4 +1,4 @@
-# Running Multiple IdentityServer Replicas in Aspire
+# Running 3 Replicas of IdentityServer in Aspire
 
 ## AppHost Configuration
 
@@ -13,34 +13,79 @@ var identityServer = builder.AddProject<Projects.IdentityServer>("identity-serve
     .WaitFor(sqlServer)
     .WithReplicas(3);
 
+var api = builder.AddProject<Projects.WeatherApi>("weather-api")
+    .WithReference(identityServer)
+    .WaitFor(identityServer);
+
 builder.Build().Run();
 ```
 
 ## Shared State Requirements
 
-Running 3 replicas of IdentityServer requires all instances to share state. Without this, you'll get token validation failures, lost sessions, and authentication cookie errors.
+Running multiple IdentityServer replicas requires that all instances share the following state. Without shared state, you will experience authentication failures, lost sessions, and token validation errors.
 
-### 1. Shared Signing Key Store
-All instances must access the same signing keys via a shared `ISigningKeyStore`. Use the EF Core operational store backed by the shared database, or a custom implementation. **Do NOT use file-based signing keys** — each replica would generate its own keys, causing tokens signed by one instance to fail validation on another.
+### 1. Shared Signing Key Store (Critical)
 
-### 2. Shared ASP.NET Data Protection Keys
-All instances must share Data Protection keys (used for encrypting cookies, OIDC state, etc.). Store them in a shared location:
-- Redis: `PersistKeysToStackExchangeRedis()`
-- Database: `PersistKeysToDbContext()`
-- Blob storage: `PersistKeysToAzureBlobStorage()`
+All instances must access the same signing keys via a shared `ISigningKeyStore`. If each instance generates its own signing keys, tokens issued by one instance will fail validation by another.
 
-Without shared Data Protection keys, authentication cookies encrypted by one instance can't be decrypted by another, causing users to lose their sessions.
+Use the EF Core operational store or a custom implementation backed by a shared database:
 
-### 3. Shared Operational Store
-Persisted grants (refresh tokens, authorization codes), device codes, and server-side sessions must be in a shared database. All replicas need to read/write to the same operational store. **In-memory stores will not work** — each instance would have its own isolated state.
+```csharp
+builder.Services.AddIdentityServer()
+    .AddOperationalStore(options =>
+    {
+        options.ConfigureDbContext = b =>
+            b.UseSqlServer(connectionString);
+    });
+```
+
+**Do NOT use file-based signing keys or in-memory key stores with multiple replicas.** The default automatic key management stores keys in the operational database, which is correct for multi-instance.
+
+### 2. Shared ASP.NET Data Protection Keys (Critical)
+
+All instances must share Data Protection keys so that authentication cookies encrypted by one instance can be decrypted by another. Without this, users will get logged out when their request hits a different replica.
+
+```csharp
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<DataProtectionDbContext>()
+    .SetApplicationName("identity-server");
+```
+
+Or use Redis:
+
+```csharp
+builder.Services.AddDataProtection()
+    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
+    .SetApplicationName("identity-server");
+```
+
+### 3. Shared Operational Store (Critical)
+
+Persisted grants, device codes, and server-side sessions must be stored in a shared database. All replicas read and write from the same store:
+
+```csharp
+builder.Services.AddIdentityServer()
+    .AddOperationalStore(options =>
+    {
+        options.ConfigureDbContext = b =>
+            b.UseSqlServer(connectionString);
+    });
+```
 
 ### 4. Distributed Cache
-If using features like OIDC state data formatter, JWT replay cache, or Pushed Authorization Requests (PAR), a distributed cache (e.g., Redis) is required.
+
+Required if using the OIDC state data formatter, JWT replay cache, or Pushed Authorization Requests (PAR). Use Redis or SQL Server:
+
+```csharp
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+});
+```
 
 ## Warning
 
-Do NOT use `.WithReplicas(n)` without first configuring shared state. Multiple instances with file-based signing keys or in-memory stores will produce:
+**Do NOT use `.WithReplicas(n)` without first configuring all of the above.** Multiple instances with file-based signing keys or in-memory stores will produce:
 - Token validation failures (different signing keys per instance)
-- Lost sessions (Data Protection key mismatch)
-- Authentication cookie errors
-- Missing persisted grants
+- Lost sessions (server-side sessions not shared)
+- Authentication cookie errors (data protection keys not shared)

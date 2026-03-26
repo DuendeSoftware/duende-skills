@@ -2,13 +2,33 @@
   "eval_id": 4,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Sets options.PushedAuthorization.Required = true in AddIdentityServer options", "pass": true, "rationale": "Code sets options.PushedAuthorization.Required = true."},
-    {"assertion": "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)", "pass": false, "rationale": "Code sets options.PushedAuthorization.Lifetime = TimeSpan.FromMinutes(5) instead of the correct int value 300. PushedAuthorization.Lifetime is an int (seconds), not a TimeSpan."},
-    {"assertion": "Sets RequirePushedAuthorization = true on the banking_app client", "pass": true, "rationale": "The banking_app client has RequirePushedAuthorization = true."},
-    {"assertion": "Sets PushedAuthorizationLifetime = 900 on the banking_app client to override global lifetime", "pass": true, "rationale": "The banking_app client has PushedAuthorizationLifetime = 900."},
-    {"assertion": "Mentions PAR requires Business or Enterprise edition (version >= 7.0)", "pass": false, "rationale": "The response does not mention any edition requirements or minimum version for PAR."}
+    {
+      "assertion": "Sets options.PushedAuthorization.Required = true in AddIdentityServer options",
+      "pass": true,
+      "rationale": "options.PushedAuthorization.Required = true is set."
+    },
+    {
+      "assertion": "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)",
+      "pass": true,
+      "rationale": "Lifetime = 300 is set as int."
+    },
+    {
+      "assertion": "Sets RequirePushedAuthorization = true on the banking_app client",
+      "pass": true,
+      "rationale": "RequirePushedAuthorization = true on banking_app."
+    },
+    {
+      "assertion": "Sets PushedAuthorizationLifetime = 900 on the banking_app client to override global lifetime",
+      "pass": true,
+      "rationale": "PushedAuthorizationLifetime = 900 on banking_app."
+    },
+    {
+      "assertion": "Mentions PAR requires Business or Enterprise edition (version >= 7.0)",
+      "pass": false,
+      "rationale": "No mention of edition requirements or version requirements."
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 4,
   "total_count": 5,
-  "score": 0.6
+  "score": 0.8
 }

@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI", "pass": true, "rationale": "Response includes builder.Services.AddIdentityServer() in the code"},
-    {"assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'", "pass": true, "rationale": "Code calls AddInMemoryApiScopes with new ApiScope(\"api1\", \"My API\")"},
-    {"assertion": "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials", "pass": true, "rationale": "Code includes ClientId = \"m2m.client\" and AllowedGrantTypes = GrantTypes.ClientCredentials"},
-    {"assertion": "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()", "pass": false, "rationale": "UseIdentityServer() is placed AFTER UseAuthorization() in the pipeline - incorrect order"},
-    {"assertion": "Program.cs calls app.UseRouting() before app.UseIdentityServer()", "pass": true, "rationale": "UseRouting() appears before UseIdentityServer() in the pipeline"}
+    {
+      "assertion": "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI",
+      "pass": true,
+      "rationale": "builder.Services.AddIdentityServer() is present"
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'",
+      "pass": true,
+      "rationale": "AddInMemoryApiScopes with ApiScope('api1')"
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials",
+      "pass": true,
+      "rationale": "Client with ClientId 'm2m.client' and GrantTypes.ClientCredentials"
+    },
+    {
+      "assertion": "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()",
+      "pass": true,
+      "rationale": "UseIdentityServer() before UseAuthorization()"
+    },
+    {
+      "assertion": "Program.cs calls app.UseRouting() before app.UseIdentityServer()",
+      "pass": false,
+      "rationale": "UseRouting() is not called at all in the pipeline"
+    }
   ],
   "pass_count": 4,
   "total_count": 5,

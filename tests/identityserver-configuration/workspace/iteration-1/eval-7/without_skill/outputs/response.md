@@ -1,31 +1,19 @@
-Here's how to configure IdentityServer for deployment behind Nginx:
+# Production IdentityServer Configuration
+
+Here's the configuration for deploying behind Nginx:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddIdentityServer(options =>
 {
-    // Set issuer for reverse proxy
     options.IssuerUri = "https://id.mycompany.com";
-
-    // Cookie settings
     options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
     options.Authentication.CookieSlidingExpiration = false;
+
+    options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(10);
+    options.Caching.ResourceStoreExpiration = TimeSpan.FromMinutes(10);
 });
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.Run();
 ```
 
-This sets:
-- The `IssuerUri` to match your external domain so tokens have the correct `iss` claim
-- Cookie lifetime of 8 hours with no sliding expiration
-- The middleware pipeline
+Set the IssuerUri to the external URL so tokens have the correct issuer. Configure cookie lifetime to 8 hours with no sliding expiration. Enable caching for client and resource stores.
 
-For PAR (Pushed Authorization Requests), clients would need to send authorization requests to the PAR endpoint first. You can enforce this at the client level by setting `RequirePushedAuthorization = true` on individual client configurations.
-
-For caching, you can add `IDistributedCache` and configure the caching middleware to reduce database lookups for client and resource stores.
+For Nginx, make sure to configure the `X-Forwarded-For` and `X-Forwarded-Proto` headers so IdentityServer correctly detects HTTPS.

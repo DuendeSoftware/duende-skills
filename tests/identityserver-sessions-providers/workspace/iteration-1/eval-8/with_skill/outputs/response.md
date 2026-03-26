@@ -1,56 +1,27 @@
 # Custom IServerSideSessionStore with Redis
 
-Here's how to register a custom `IServerSideSessionStore` implementation backed by Redis, showing both the one-step and two-step registration patterns.
+There are two patterns for registering a custom session store, plus important details about what data is stored and what indices are available.
 
-## Registration Patterns
-
-### One-Step Registration
+## Registration Pattern 1: One-Step
 
 ```csharp
-// Program.cs — one-step: pass the custom store type directly
 builder.Services.AddIdentityServer()
     .AddServerSideSessions<RedisSessionStore>();
 ```
 
-This registers server-side sessions and your custom store in a single call.
+This enables server-side sessions and registers your custom store in one call.
 
-### Two-Step Registration
+## Registration Pattern 2: Two-Step
 
 ```csharp
-// Program.cs — two-step: enable sessions first, then register the store
 builder.Services.AddIdentityServer()
     .AddServerSideSessions()
     .AddServerSideSessionStore<RedisSessionStore>();
 ```
 
-This first enables the default server-side session infrastructure, then replaces the default store with your custom implementation. The two-step approach is useful when you have other chained calls between `AddServerSideSessions()` and the store registration.
+This first enables server-side sessions (with the default in-memory store), then replaces the store with your custom implementation.
 
-## What Data Is Stored
-
-The session stores the serialized ASP.NET Core `AuthenticationTicket`, which includes all claims and `AuthenticationProperties.Items`. The data is **protected using ASP.NET Core's Data Protection API** — your Redis store receives encrypted bytes, not plaintext.
-
-## Queryable Indices
-
-The session record exposes three queryable indices that are extracted from the ticket:
-
-| Index | Source | Notes |
-|-------|--------|-------|
-| **SubjectId** | `sub` claim value | Always available; identifies the user |
-| **SessionId** | `sid` claim value | Always available; identifies the specific session |
-| **DisplayName** | Configurable claim type | **Null by default due to PII concerns** |
-
-The `UserDisplayNameClaimType` is **unset (null) by default** because display names often contain PII (names, emails). You must explicitly opt in:
-
-```csharp
-builder.Services.AddIdentityServer(options =>
-{
-    options.ServerSideSessions.UserDisplayNameClaimType = "name";
-}).AddServerSideSessions<RedisSessionStore>();
-```
-
-## Custom Store Implementation Skeleton
-
-Your `RedisSessionStore` must implement `IServerSideSessionStore`:
+## Implementing IServerSideSessionStore
 
 ```csharp
 using Duende.IdentityServer.Stores;
@@ -64,57 +35,55 @@ public class RedisSessionStore : IServerSideSessionStore
         _redis = redis;
     }
 
-    public Task CreateSessionAsync(ServerSideSession session, CancellationToken cancellationToken = default)
+    public async Task CreateSessionAsync(ServerSideSession session,
+        CancellationToken cancellationToken = default)
     {
-        // Store the session in Redis
-        // session.Key — unique identifier
-        // session.SubjectId — sub claim
-        // session.SessionId — sid claim
-        // session.DisplayName — configurable claim (may be null)
-        // session.Ticket — the serialized/protected AuthenticationTicket
-        // session.Created, session.Renewed, session.Expires — timestamps
-        throw new NotImplementedException();
+        var db = _redis.GetDatabase();
+        var data = JsonSerializer.Serialize(session);
+        await db.StringSetAsync($"session:{session.Key}", data,
+            session.Expires.HasValue
+                ? session.Expires.Value - DateTime.UtcNow
+                : null);
+
+        // Maintain queryable indices
+        await db.SetAddAsync($"sessions:sub:{session.SubjectId}", session.Key);
+        await db.SetAddAsync($"sessions:sid:{session.SessionId}", session.Key);
+        if (session.DisplayName != null)
+            await db.SetAddAsync($"sessions:name:{session.DisplayName}", session.Key);
     }
 
-    public Task<ServerSideSession?> GetSessionAsync(string key, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateSessionAsync(ServerSideSession session, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task DeleteSessionAsync(string key, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task DeleteSessionsAsync(SessionFilter filter, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<GetSessionsResults> QuerySessionsAsync(SessionQuery filter, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+    // ... implement other IServerSideSessionStore methods
 }
 ```
 
-## Important Considerations
+## What Data Is Stored in a Session
 
-- **Data Protection keys** must be shared across all instances that access the session store (since the ticket is encrypted with Data Protection)
-- The `Ticket` property on `ServerSideSession` contains the Data Protection-encrypted `AuthenticationTicket` — your store just needs to persist it as-is
-- Use Redis data structures that support efficient queries by SubjectId and SessionId (e.g., secondary indices or hash sets)
+The session contains the serialized ASP.NET Core `AuthenticationTicket`, which includes all claims and `AuthenticationProperties.Items`. The data is **protected using ASP.NET Core's Data Protection API** — your store receives opaque encrypted bytes.
+
+## Queryable Indices
+
+The store must maintain three queryable indices extracted from the session:
+
+| Index | Source | Purpose |
+|---|---|---|
+| **SubjectId** | `sub` claim value | Find all sessions for a user |
+| **SessionId** | `sid` claim value | Find a specific session |
+| **DisplayName** | Configurable claim type | Human-readable session identification |
+
+**Important**: `UserDisplayNameClaimType` is **null by default** due to PII concerns. If you want display names in the session index, you must explicitly configure it:
+
+```csharp
+builder.Services.AddIdentityServer(options =>
+{
+    options.ServerSideSessions.UserDisplayNameClaimType = "name";
+});
+```
+
+Without this configuration, the `DisplayName` field on stored sessions will always be null.
+
+## Key Considerations
+
+- Data Protection keys must be shared across all instances that read/write sessions
+- The `AuthenticationTicket` is encrypted — you cannot inspect its contents in your store
+- Sessions have a `Renewed` timestamp that is updated on each activity
+- The `Expires` field corresponds to the cookie lifetime configured on the IdentityServer host

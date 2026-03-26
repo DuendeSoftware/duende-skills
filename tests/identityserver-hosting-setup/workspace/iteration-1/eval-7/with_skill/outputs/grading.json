@@ -2,10 +2,26 @@
   "eval_id": 7,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API", "pass": true, "rationale": "Response explicitly states 'Do not co-host IdentityServer with your main API' and recommends separate dedicated host"},
-    {"assertion": "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs", "pass": true, "rationale": "Response explicitly lists 'Increased attack surface' and 'Conflicting middleware' as problems with co-hosting"},
-    {"assertion": "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default", "pass": true, "rationale": "Response states 'Do not set IssuerUri explicitly unless you have a specific need' and shows the default behavior"},
-    {"assertion": "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)", "pass": true, "rationale": "Response explains the Kubernetes scenario where internal address differs from external URL"}
+    {
+      "assertion": "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API",
+      "pass": true,
+      "rationale": "Clear recommendation: 'Do not co-host IdentityServer with your API' with comparison table"
+    },
+    {
+      "assertion": "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs",
+      "pass": true,
+      "rationale": "Lists both attack surface increase and conflicting middleware needs as explicit reasons"
+    },
+    {
+      "assertion": "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default",
+      "pass": true,
+      "rationale": "States 'Do not set IssuerUri explicitly' and recommends inference"
+    },
+    {
+      "assertion": "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)",
+      "pass": true,
+      "rationale": "Explains internal Kubernetes address scenario as the primary use case for manual IssuerUri"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

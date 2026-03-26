@@ -1,11 +1,11 @@
 # Content Security Policy and Rate Limiting for IdentityServer
 
-## 1. Content Security Policy (CSP) Middleware
+## 1. Content Security Policy Middleware
 
-Add CSP headers to protect login, consent, and IdentityServer UI pages against XSS and clickjacking:
+Add CSP headers to protect login, consent, and other IdentityServer UI pages against XSS and clickjacking:
 
 ```csharp
-// Add CSP middleware for IdentityServer UI pages — place before UseIdentityServer()
+// Add after UseRouting(), before UseIdentityServer()
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value ?? string.Empty;
@@ -28,13 +28,8 @@ app.Use(async (context, next) =>
             "base-uri 'self'; " +
             "object-src 'none'");
 
-        // Clickjacking defense — belt-and-suspenders with CSP frame-ancestors
         context.Response.Headers.Append("X-Frame-Options", "DENY");
-
-        // Force MIME type sniffing protection
         context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-
-        // Referrer control
         context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     }
 
@@ -42,17 +37,23 @@ app.Use(async (context, next) =>
 });
 ```
 
+### Key CSP Directives
+
+- `frame-ancestors 'none'` — prevents the page from being embedded in iframes (clickjacking defense)
+- `object-src 'none'` — blocks plugins like Flash/Java
+- `form-action 'self'` — ensures login forms only POST to the same origin
+- `X-Frame-Options: DENY` — belt-and-suspenders with `frame-ancestors`
+
 ## 2. Rate Limiting Configuration
 
-Configure rate limiting with ASP.NET Core's built-in `AddRateLimiter`:
+### Service Registration
 
 ```csharp
-// Add rate limiting services
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Sliding window for token endpoint — 20 requests/minute per IP
+    // Token endpoint: sliding window — 20 requests/minute per IP
     options.AddPolicy("token-endpoint", context =>
         RateLimitPartition.GetSlidingWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -65,7 +66,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             }));
 
-    // Fixed window for authorize endpoint — 10 requests/minute per IP
+    // Authorize endpoint: fixed window — 10 requests/minute per IP
     options.AddPolicy("authorize-endpoint", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -79,39 +80,41 @@ builder.Services.AddRateLimiter(options =>
 });
 ```
 
-## 3. Middleware Pipeline and Route Mapping
+### Middleware Pipeline
 
 ```csharp
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+app.UseHttpsRedirection();
+app.UseHsts();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Rate limiter middleware
+// Rate limiting before IdentityServer
 app.UseRateLimiter();
 
-// CSP middleware (inline above)
-// ... CSP app.Use() here ...
+// CSP middleware
+app.Use(async (context, next) => { /* CSP headers as above */ });
 
 app.UseIdentityServer();
 app.UseAuthorization();
+app.MapRazorPages();
+```
 
-// Apply rate limit policies to specific IdentityServer endpoints
+### Apply Rate Limit Policies to Endpoints
+
+```csharp
 app.MapGroup("/connect/token")
     .RequireRateLimiting("token-endpoint");
 
 app.MapGroup("/connect/authorize")
     .RequireRateLimiting("authorize-endpoint");
-
-app.MapRazorPages();
-
-app.Run();
 ```
 
-## Summary
+## Why Rate Limiting Matters
 
-- **CSP** protects UI pages with `frame-ancestors 'none'`, `object-src 'none'`, and strict `default-src 'self'`
-- **X-Frame-Options: DENY** provides clickjacking defense as a fallback
-- **Token endpoint**: 20 requests/minute per IP via sliding window
-- **Authorize endpoint**: 10 requests/minute per IP via fixed window
-- Both partitioned by `RemoteIpAddress`
+- **Token endpoint**: Credential stuffing and brute-force attacks target `/connect/token` with automated password guessing
+- **Authorize endpoint**: Abuse of the authorization endpoint can lead to session fixation or redirect URI manipulation at scale
+- The sliding window for the token endpoint allows bursts within the window while maintaining the overall limit
+- The fixed window for authorize is stricter since interactive logins have lower legitimate throughput

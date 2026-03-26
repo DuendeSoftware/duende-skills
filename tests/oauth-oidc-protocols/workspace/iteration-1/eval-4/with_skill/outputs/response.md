@@ -1,81 +1,62 @@
-# Implicit Flow Is Insecure — Use BFF with Authorization Code + PKCE
+# Implicit Flow is Deprecated — Use BFF Pattern Instead
 
-Your colleague is correct — **the implicit flow is deprecated and should not be used**. Here's why and what to do instead.
+## Your Colleague is Correct
 
-## Why Implicit Flow Is Insecure
+The implicit flow is **deprecated** and should not be used. The OAuth 2.0 Security Best Current Practice (BCP) and the OAuth 2.0 for Browser-Based Apps draft specification explicitly recommend against it.
 
-The implicit flow (`response_type=token`) returns the access token directly in the **URL fragment** of the redirect (e.g., `https://app.example.com/callback#access_token=eyJ...`). This creates several critical security issues:
+## Why Implicit Flow is Insecure
 
-1. **Token exposure in URL fragments** — Access tokens appear in browser history, referrer headers, and server logs. Anyone with access to these can steal the token.
-2. **No PKCE protection** — The implicit flow has no mechanism to prove that the entity receiving the token is the same one that initiated the request.
-3. **No refresh tokens** — The implicit flow cannot issue refresh tokens, forcing users to re-authenticate frequently or use silent renewal hacks (hidden iframes) that are fragile and have their own security issues.
-4. **The OAuth 2.0 Security BCP explicitly deprecates it** — The current best practice document (draft-ietf-oauth-security-topics) states: "The implicit grant MUST NOT be used."
-
-## What to Do Instead: Backend-for-Frontend (BFF) Pattern
-
-The recommended approach for SPAs is the **Backend-for-Frontend (BFF) pattern**:
-
-1. Add a lightweight server-side component (ASP.NET Core) that acts as the BFF
-2. The BFF uses **authorization code flow with PKCE** to authenticate with IdentityServer
-3. **Tokens are kept server-side** in the BFF's session — they never reach the browser
-4. The **SPA uses HTTP-only session cookies** to communicate with its BFF backend
-5. The BFF proxies API calls, attaching the access token from its server-side session
+In the implicit flow, tokens are returned **directly in the URL fragment** (after the `#`):
 
 ```
-┌──────┐  Cookie  ┌──────┐  Access Token  ┌──────┐
-│  SPA │ ◄──────► │  BFF │ ──────────────► │  API │
-│React │          │  .NET│                  │      │
-└──────┘          └──────┘                  └──────┘
-                      │
-                      │ Auth Code + PKCE
-                      ▼
-               ┌──────────────┐
-               │IdentityServer│
-               └──────────────┘
+https://your-spa.example.com/callback#access_token=eyJ...&token_type=bearer&expires_in=3600
 ```
 
-### Why BFF Is Better
+Problems:
+1. **Tokens in browser history** — The URL fragment containing the token is stored in browser history
+2. **Tokens in referrer headers** — If the page has any external resources, the token can leak via the `Referer` header
+3. **No PKCE protection** — The implicit flow has no mechanism for proof-key validation
+4. **Token exposure in logs** — URL fragments may be logged by proxies, CDNs, or browser extensions
+5. **No refresh tokens** — The implicit flow cannot issue refresh tokens, forcing the client to use hidden iframes for silent renew (which is fragile and has been broken by third-party cookie restrictions)
 
-- **Tokens never reach the browser** — No XSS attack can steal them
-- **Authorization code + PKCE** is used instead of implicit — code interception is prevented
-- **Refresh tokens are stored server-side** — The BFF silently refreshes tokens without user interaction
-- **HTTP-only secure cookies** prevent JavaScript access to the session
+## The Correct Approach: Backend-for-Frontend (BFF) Pattern
 
-### Duende BFF Library
+For SPAs, the recommended architecture is the **Backend-for-Frontend (BFF)** pattern:
 
-Duende provides a dedicated BFF library (`Duende.BFF`) that implements this pattern with minimal configuration:
+```
+┌──────────┐     cookies      ┌──────────┐    access token    ┌──────────┐
+│  React   │ ◄──────────────► │ BFF Host │ ◄───────────────► │   API    │
+│  (SPA)   │   same-site      │ (server) │                    │          │
+└──────────┘                   └──────────┘                    └──────────┘
+                                    │
+                        authorization code + PKCE
+                                    │
+                              ┌──────────────┐
+                              │IdentityServer│
+                              └──────────────┘
+```
+
+How it works:
+1. The BFF server-side component performs the **authorization code flow with PKCE** against IdentityServer
+2. **Tokens are kept server-side** in the BFF's session — they never reach the browser
+3. The **SPA communicates with its BFF backend using HTTP-only, secure, same-site session cookies**
+4. The BFF proxies API calls, attaching the access token from its session
+5. Refresh tokens are handled server-side — no need for silent renew iframes
+
+### Duende BFF
+
+Duende provides the `Duende.BFF` NuGet package that implements this pattern:
 
 ```csharp
-// Program.cs
 builder.Services.AddBff();
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = "cookie";
-    options.DefaultChallengeScheme = "oidc";
-})
-.AddCookie("cookie", options =>
-{
-    options.Cookie.Name = "__Host-bff";
-    options.Cookie.SameSite = SameSiteMode.Strict;
-})
-.AddOpenIdConnect("oidc", options =>
-{
-    options.Authority = "https://identity.example.com";
-    options.ClientId = "spa-bff";
-    options.ClientSecret = "secret";
-    options.ResponseType = "code"; // authorization code + PKCE
-    options.SaveTokens = true;
-    options.Scope.Add("api1");
-    options.Scope.Add("offline_access");
-});
-
-var app = builder.Build();
+// ... OIDC configuration with authorization code + PKCE ...
 app.UseBff();
-app.UseAuthentication();
-app.UseAuthorization();
-
-// API endpoints are proxied through the BFF
-app.MapRemoteBffApiEndpoint("/api/catalog", "https://api.example.com/catalog")
-    .RequireAccessToken();
 ```
+
+This gives you session management, API proxying with automatic token attachment, and CSRF protection — all without exposing tokens to the browser.
+
+## Key Takeaway
+
+- **Never use implicit flow** — it's deprecated
+- **Use authorization code flow with PKCE** — via a BFF server-side component
+- **Keep tokens server-side** — the SPA communicates via session cookies, not bearer tokens

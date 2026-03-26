@@ -1,1 +1,34 @@
-{"eval_id":2,"variant":"without_skill","assertions":[{"assertion":"Output identifies the root cause as Data Protection keys not being shared across replicated instances","pass":true,"rationale":"States 'each pod generates its own Data Protection keys' and explains the sharing problem"},{"assertion":"Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)","pass":true,"rationale":"Shows PersistKeysToStackExchangeRedis(redis, \"DataProtection-Keys\")"},{"assertion":"Output includes .SetApplicationName() with a consistent explicit name across all instances","pass":true,"rationale":"Shows .SetApplicationName(\"IdentityServer\") and explains the importance"},{"assertion":"Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments","pass":false,"rationale":"Does not mention IdentityServer signing keys needing shared storage; only covers Data Protection keys"},{"assertion":"Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance","pass":true,"rationale":"States 'The default stores keys on the local file system or in memory, which doesn't work across multiple pods'"}],"pass_count":4,"total_count":5,"score":0.8}
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+      "pass": true,
+      "rationale": "States each pod generates its own keys and they can't decrypt each other's data"
+    },
+    {
+      "assertion": "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+      "pass": true,
+      "rationale": "Shows PersistKeysToStackExchangeRedis"
+    },
+    {
+      "assertion": "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+      "pass": true,
+      "rationale": "Shows SetApplicationName('IdentityServer')"
+    },
+    {
+      "assertion": "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+      "pass": false,
+      "rationale": "No mention of IdentityServer signing keys needing shared storage"
+    },
+    {
+      "assertion": "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+      "pass": true,
+      "rationale": "Implicitly avoids recommending defaults by showing Redis, though no explicit warning"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

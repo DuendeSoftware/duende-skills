@@ -1,42 +1,47 @@
-# BFF Behind Nginx Reverse Proxy — OIDC Callback Failures
+# BFF Behind Nginx Reverse Proxy with Sub-Path
 
-## Root Cause
+## Problem
 
-When the BFF is behind a reverse proxy, the OIDC callback URL is constructed using the request's scheme and host. If forwarded headers aren't configured, the BFF thinks it's running on `http://localhost:5000` instead of `https://your-domain.com/app`, causing redirect URI mismatches and cookie failures.
+When a BFF is behind a reverse proxy, the OIDC callback URL is constructed using the wrong scheme/host/path because the BFF sees the internal request, not the external URL. The authentication callback fails, and the session cookie isn't set.
 
-## Fix: Forwarded Headers and Path Base
+## Fix
+
+### 1. Configure Forwarded Headers
+
+Add `UseForwardedHeaders` **before** `UseAuthentication` so the OIDC handler constructs callback URLs using the external scheme and host:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure forwarded headers to trust the proxy
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // In production, restrict to known proxy networks:
-    // options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
+    // In production, restrict KnownProxies or KnownNetworks
 });
 
 builder.Services.AddBff()
     .ConfigureOpenIdConnect(options =>
     {
-        // ... OIDC config
+        options.Authority = "https://idp.example.com";
+        options.ClientId = "spa-bff-client";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.SaveTokens = true;
     })
     .ConfigureCookies(options =>
     {
-        // Use Lax when IDP is on a different domain (cross-site redirect)
+        // Use Lax when the IDP is on a different domain
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// These MUST come before UseAuthentication
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+// Must be FIRST — before any auth middleware
+app.UseForwardedHeaders();
 
-// Sub-path mount — must also come before auth
+// Path base for sub-path mount
 app.UsePathBase("/app");
 
 app.UseRouting();
@@ -47,15 +52,7 @@ app.UseAuthorization();
 app.Run();
 ```
 
-## Key Points
-
-- **`UseForwardedHeaders`** with `XForwardedFor` and `XForwardedProto` must be placed **before** `UseAuthentication`. This ensures the OIDC handler constructs redirect URIs using the external scheme (`https`) and host, not the internal container/pod address.
-- **`UsePathBase("/app")`** tells ASP.NET Core that the app is mounted at `/app`. Without this, the OIDC callback path (`/signin-oidc`) won't match the path the proxy forwards.
-- **SameSite cookie issue**: After the OIDC redirect back from the IDP (a cross-site navigation), the browser won't send the cookie if `SameSite=Strict` is set. Use `SameSite=Lax` when the IDP is on a different domain.
-
-## Nginx Configuration
-
-Ensure nginx forwards the necessary headers:
+### 2. Nginx Configuration
 
 ```nginx
 location /app {
@@ -65,3 +62,7 @@ location /app {
     proxy_set_header Host $host;
 }
 ```
+
+### 3. SameSite Cookie Issue
+
+If the IDP is on a different domain (cross-site), use `SameSite = Lax`. With `Strict`, the browser won't send the cookie on the first request after the OIDC redirect from the IDP, causing the session to appear lost.

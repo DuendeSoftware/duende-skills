@@ -1,1 +1,25 @@
-{"eval_id":5,"variant":"with_skill","assertions":[{"assertion":"Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens","pass":true,"rationale":"Explicitly states clients should treat access tokens as opaque with code examples showing wrong and correct approaches."},{"assertion":"Response recommends using the ID token for user identity claims (name, email) in the client application","pass":true,"rationale":"Recommends ID token and shows how claims are available via User.FindFirst from the OIDC middleware."},{"assertion":"Response mentions the userinfo endpoint as an alternative for retrieving user claims","pass":true,"rationale":"Shows userinfo endpoint usage with code examples and GetClaimsFromUserInfoEndpoint option."},{"assertion":"Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)","pass":true,"rationale":"Summary table and text clearly distinguish ID tokens (identity, client) from access tokens (authorization, API)."}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 5,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens",
+      "passed": true
+    },
+    {
+      "assertion": "Response recommends using the ID token for user identity claims (name, email) in the client application",
+      "passed": true
+    },
+    {
+      "assertion": "Response mentions the userinfo endpoint as an alternative for retrieving user claims",
+      "passed": true
+    },
+    {
+      "assertion": "Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

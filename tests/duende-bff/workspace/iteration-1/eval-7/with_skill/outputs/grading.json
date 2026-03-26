@@ -2,10 +2,26 @@
   "eval_id": 7,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Identifies Data Protection key ring as the root cause — each instance generates its own keys", "pass": true, "rationale": "Clearly states 'each BFF instance generates its own ASP.NET Core Data Protection key ring by default' and explains the cookie decryption failure"},
-    {"assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)", "pass": true, "rationale": "Shows three options: PersistKeysToDbContext, PersistKeysToAzureBlobStorage, and PersistKeysToStackExchangeRedis"},
-    {"assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions", "pass": true, "rationale": "Shows AddEntityFrameworkServerSideSessions with UseSqlServer and warns against AddServerSideSessions without EF"},
-    {"assertion": "Shows code for AddDataProtection() with a persistent key store", "pass": true, "rationale": "Shows builder.Services.AddDataProtection().PersistKeysToDbContext<ApplicationDbContext>() and two other options with full code"}
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "Clearly explains each instance has its own key ring and can't decrypt other instances' cookies"
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Shows PersistKeysToDbContext and mentions Azure Blob, Redis alternatives"
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "Uses AddEntityFrameworkServerSideSessions with SQL Server and explains why in-memory won't work"
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "builder.Services.AddDataProtection().PersistKeysToDbContext<DataProtectionDbContext>() is shown"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

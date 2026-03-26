@@ -1,8 +1,8 @@
-# Custom Authorization Handler for Space-Delimited Scopes
+# Custom Scope Authorization Handler
 
-When JWT scopes come as a space-delimited string, you need a custom handler to parse them.
+When JWT scopes come as a space-delimited string, you need a custom authorization handler to parse them properly. Here's how to implement it.
 
-## ScopeRequirement.cs
+## ScopeRequirement
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +14,7 @@ public class ScopeRequirement : IAuthorizationRequirement
 }
 ```
 
-## ScopeHandler.cs
+## ScopeHandler
 
 ```csharp
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +47,9 @@ public class ScopeHandler : AuthorizationHandler<ScopeRequirement>
 }
 ```
 
-## Program.cs Registration
+## Registration
+
+In your `Program.cs`, register the handler and create the policy:
 
 ```csharp
 builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
@@ -59,9 +61,6 @@ builder.Services.AddAuthorization(options =>
 });
 ```
 
-## Explanation
+The `ScopeHandler` is registered as an `IAuthorizationHandler` in DI so the authorization system can discover and invoke it. The policy uses `Requirements.Add` to wire up the custom requirement.
 
-- `ScopeRequirement` defines what scope is needed.
-- `ScopeHandler` parses the space-delimited scope string and checks if the required scope is present.
-- The handler is registered in DI as `IAuthorizationHandler`.
-- The policy uses the custom requirement instead of `RequireClaim`.
+When a request comes in, the handler will extract the `scope` claim from the JWT, split it by spaces, and check if the required scope is present.

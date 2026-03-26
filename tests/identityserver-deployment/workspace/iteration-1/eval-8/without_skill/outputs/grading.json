@@ -1,1 +1,29 @@
-{"eval_id":8,"variant":"without_skill","assertions":[{"assertion":"Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy","pass":false,"rationale":"Does not set ForwardLimit at all and does not mention the default of 1 being the root cause of the issue"},{"assertion":"Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks","pass":true,"rationale":"Shows adding Nginx IP and Cloudflare IP to KnownProxies, and Cloudflare ranges to KnownNetworks"},{"assertion":"Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name","pass":true,"rationale":"Shows ForwardedHeaders.XForwardedHost in addition to XForwardedProto and XForwardedFor"},{"assertion":"Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed","pass":true,"rationale":"States 'Both Cloudflare and Nginx need to be in KnownProxies or KnownNetworks' and 'The middleware only processes headers from trusted sources'"}],"pass_count":3,"total_count":4,"score":0.75}
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+      "pass": false,
+      "rationale": "Sets ForwardLimit to null (no limit) instead of 2; doesn't explain the default of 1"
+    },
+    {
+      "assertion": "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+      "pass": false,
+      "rationale": "Clears KnownProxies and KnownNetworks instead of adding specific proxy IPs \u2014 insecure approach"
+    },
+    {
+      "assertion": "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+      "pass": false,
+      "rationale": "Only includes XForwardedFor and XForwardedProto; missing XForwardedHost"
+    },
+    {
+      "assertion": "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed",
+      "pass": false,
+      "rationale": "Takes the opposite approach by trusting all proxies, doesn't explain per-proxy trust"
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

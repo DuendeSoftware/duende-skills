@@ -1,25 +1,19 @@
 # Phase 2: Manual Key Rotation — Switch Signing to New Key
 
-Here's the updated `Program.cs` for Phase 2 of manual key rotation — the new key has been announced and caches have refreshed, so we swap signing to the new key and keep the old key for validation:
+In Phase 2, the new key has been announced and caches have refreshed. Now we switch signing to the new key and keep the old key for validation of existing tokens.
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// Phase 2: Manual Key Rotation
-// - New key is now the active signing credential
-// - Old key remains as validation key for existing tokens
-// - After all tokens signed with the old key expire (default: 1 hour),
-//   proceed to Phase 3 (remove the old validation key entirely)
-// ============================================================
-
+// Phase 2: New key signs, old key validates
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
-    // Disable automatic key management — we're managing keys manually
+    // Disable automatic key management — using static keys
     options.KeyManagement.Enabled = false;
 })
     .AddInMemoryClients(new List<Client>
@@ -50,11 +44,11 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
         new IdentityResources.Profile()
     });
 
-// NEW key is now the active signing credential
+// NEW key is now the signing credential
 var newKey = LoadNewKey();
 idsvrBuilder.AddSigningCredential(newKey, SecurityAlgorithms.RsaSha256);
 
-// OLD key remains for validation of existing tokens
+// OLD key is kept for validation of existing tokens
 var oldKey = LoadOldKey();
 idsvrBuilder.AddValidationKey(oldKey, SecurityAlgorithms.RsaSha256);
 
@@ -67,19 +61,9 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## What Changed from Phase 1
+## Phase 2 Key Points
 
-In Phase 1, the **old key** was the signing credential and the **new key** was the validation key (announced for caching). Now in Phase 2:
-
-- **`AddSigningCredential(newKey, ...)`** — The new key is now the active signing credential. All new tokens are signed with this key.
-- **`AddValidationKey(oldKey, ...)`** — The old key remains in the discovery document so clients and APIs can still validate tokens that were signed with it.
-
-## Next Steps (Phase 3)
-
-After all tokens signed with the old key have expired (the default access token lifetime is 1 hour, but consider refresh tokens and longer-lived tokens), remove the old validation key:
-
-```csharp
-// Phase 3: Only the new key remains
-idsvrBuilder.AddSigningCredential(newKey, SecurityAlgorithms.RsaSha256);
-// No more AddValidationKey for oldKey
-```
+- `AddSigningCredential(newKey, ...)` — the NEW key now signs all new tokens
+- `AddValidationKey(oldKey, ...)` — the OLD key remains in the JWKS discovery document for token validation
+- Wait until all tokens signed with the old key have expired before moving to Phase 3 (removing the old key entirely)
+- The default access token lifetime is 1 hour, so wait at least that long after Phase 2

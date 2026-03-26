@@ -2,11 +2,31 @@
   "eval_id": 5,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs does not call AddDeveloperSigningCredential()", "pass": true, "rationale": "AddDeveloperSigningCredential() is removed; comment explicitly states it's not used"},
-    {"assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)", "pass": true, "rationale": "SigningAlgorithms array has SecurityAlgorithms.EcdsaSha256 first, then SecurityAlgorithms.RsaSha256"},
-    {"assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days", "pass": true, "rationale": "RotationInterval = TimeSpan.FromDays(90) and PropagationTime = TimeSpan.FromDays(14)"},
-    {"assertion": "Program.cs configures DataProtectKeys = true for key management", "pass": true, "rationale": "options.KeyManagement.DataProtectKeys = true is set"},
-    {"assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName", "pass": true, "rationale": "AddDataProtection().PersistKeysToFileSystem(\"/var/identity/dp-keys\").SetApplicationName(\"identity-server\")"}
+    {
+      "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential() is explicitly removed with comments noting its absence"
+    },
+    {
+      "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+      "pass": true,
+      "rationale": "SigningAlgorithms array has EcdsaSha256 first, RsaSha256 second"
+    },
+    {
+      "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+      "pass": true,
+      "rationale": "RotationInterval = TimeSpan.FromDays(90), PropagationTime = TimeSpan.FromDays(14)"
+    },
+    {
+      "assertion": "Program.cs configures DataProtectKeys = true for key management",
+      "pass": true,
+      "rationale": "options.KeyManagement.DataProtectKeys = true is set"
+    },
+    {
+      "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+      "pass": true,
+      "rationale": "AddDataProtection().PersistKeysToFileSystem(\"/var/identity/dp-keys\").SetApplicationName(\"identity-server\")"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

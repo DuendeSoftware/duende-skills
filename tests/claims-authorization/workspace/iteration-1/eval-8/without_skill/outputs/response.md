@@ -1,6 +1,6 @@
-# Azure AD External Login Configuration
+# Setting Up Azure AD External Login with IdentityServer
 
-## OIDC Handler Setup
+## OIDC Handler Configuration
 
 ```csharp
 builder.Services.AddAuthentication()
@@ -12,38 +12,25 @@ builder.Services.AddAuthentication()
         options.ResponseType = "code";
         options.MapInboundClaims = false;
 
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("email");
-
-        // Map claims from AAD
         options.ClaimActions.MapJsonKey("oid", "oid");
-        options.ClaimActions.MapJsonKey("groups", "groups");
+        options.ClaimActions.MapJsonKey("email", "email");
+        options.ClaimActions.MapJsonKey("name", "name");
 
-        options.SaveTokens = true;
-        options.GetClaimsFromUserInfoEndpoint = true;
+        options.Scope.Add("email");
+        options.Scope.Add("profile");
     });
 ```
 
-## Callback Claim Mapping
-
-In your external login callback, you can map AAD claims to your internal types:
+Then in your login callback, you can read the external authentication result and map the claims to your local user model.
 
 ```csharp
-public async Task<IActionResult> Callback()
-{
-    var result = await HttpContext.AuthenticateAsync("aad");
-    if (!result.Succeeded) return BadRequest();
+var result = await HttpContext.AuthenticateAsync("aad");
+var claims = result.Principal.Claims;
 
-    var claims = result.Principal.Claims;
-    var oid = claims.FirstOrDefault(c => c.Type == "oid")?.Value;
-    var groups = claims.Where(c => c.Type == "groups").Select(c => c.Value);
-
-    // Map groups to roles
-    var roleClaims = groups.Select(g => new Claim("role", MapGroupToRole(g)));
-
-    // Create user and sign in...
-}
+// Map oid claim
+var oid = claims.FirstOrDefault(c => c.Type == "oid")?.Value;
+// Map groups to roles
+var groups = claims.Where(c => c.Type == "groups").Select(c => c.Value);
 ```
 
-This will let your IdentityServer process Azure AD claims and map them to your internal claim types.
+This sets up Azure AD as an external provider and allows you to access the AAD-specific claims for mapping.

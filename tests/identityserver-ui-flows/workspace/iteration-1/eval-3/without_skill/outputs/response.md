@@ -1,15 +1,10 @@
-# Consent Page for IdentityServer
-
-Here's how to implement a consent page using Razor Pages.
-
-## Pages/Consent.cshtml.cs
+# Consent Page Implementation
 
 ```csharp
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
 
 public class ConsentModel : PageModel
 {
@@ -20,87 +15,50 @@ public class ConsentModel : PageModel
         _interaction = interaction;
     }
 
-    public string ClientName { get; set; }
-    public IEnumerable<string> Scopes { get; set; }
-
     [BindProperty]
     public string ReturnUrl { get; set; }
-
     [BindProperty]
-    public List<string> SelectedScopes { get; set; } = new();
+    public List<string> ConsentedScopes { get; set; } = new();
 
-    [BindProperty]
-    public string Action { get; set; }
+    public string ClientName { get; set; }
+    public IEnumerable<string> Scopes { get; set; }
 
     public async Task<IActionResult> OnGet(string returnUrl)
     {
         ReturnUrl = returnUrl;
-
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-        if (context == null)
-            return RedirectToPage("/Error");
-
-        ClientName = context.Client.ClientName;
-        Scopes = context.ValidatedResources.RawScopeValues;
-
+        if (context != null)
+        {
+            ClientName = context.Client.ClientName;
+            Scopes = context.ValidatedResources.RawScopeValues;
+        }
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAccept()
     {
         var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
-        if (context == null)
-            return RedirectToPage("/Error");
+        if (context == null) return BadRequest();
 
-        if (Action == "allow")
+        var consent = new ConsentResponse
         {
-            // Grant consent with selected scopes
-            var consent = new Duende.IdentityServer.Models.ConsentResponse
-            {
-                ScopesValuesConsented = SelectedScopes,
-                RememberConsent = true
-            };
-            await _interaction.GrantConsentAsync(context, consent);
-        }
-        else
-        {
-            // Deny consent
-            await _interaction.DenyAuthorizationAsync(context,
-                Duende.IdentityServer.Models.AuthorizationError.AccessDenied);
-        }
+            ScopesValuesConsented = ConsentedScopes,
+            RememberConsent = true
+        };
 
+        await _interaction.GrantConsentAsync(context, consent);
+        return Redirect(ReturnUrl);
+    }
+
+    public async Task<IActionResult> OnPostDeny()
+    {
+        var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
+        if (context == null) return BadRequest();
+
+        await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
         return Redirect(ReturnUrl);
     }
 }
 ```
 
-## Pages/Consent.cshtml
-
-```html
-@page
-@model IdentityServer.Pages.ConsentModel
-
-<h1>Consent</h1>
-<p><strong>@Model.ClientName</strong> wants access to:</p>
-
-<form method="post">
-    <input type="hidden" asp-for="ReturnUrl" />
-
-    @foreach (var scope in Model.Scopes)
-    {
-        <div>
-            <input type="checkbox" name="SelectedScopes" value="@scope" checked />
-            <label>@scope</label>
-        </div>
-    }
-
-    <button type="submit" name="Action" value="allow">Allow</button>
-    <button type="submit" name="Action" value="deny">Deny</button>
-</form>
-```
-
-### Notes
-
-- Use `IIdentityServerInteractionService` to get the authorization context and handle consent.
-- Call `GrantConsentAsync` with the user's scope selections.
-- Call `DenyAuthorizationAsync` when the user denies access.
+This implements a basic consent flow. The interaction service provides the authorization context with client and scope info. Users can grant or deny consent.

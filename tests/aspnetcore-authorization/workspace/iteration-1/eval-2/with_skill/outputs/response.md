@@ -1,8 +1,10 @@
-# Scope-Based Authorization Policies for Products API
+# Adding Scope-Based Authorization Policies for Products API
 
-To protect your products API with scope-based authorization, define named policies using `RequireClaim("scope", ...)` and apply them to the appropriate endpoints.
+To protect your products API with scope-based authorization, you need to define named authorization policies that check for specific scope claims, then apply those policies to the corresponding endpoints.
 
-## Updated Program.cs
+In an OAuth 2.0 / OpenID Connect setup with IdentityServer, scopes represent what the **client application** is permitted to do. When an access token is issued with a particular scope, it arrives as a `scope` claim in the JWT. You can use `RequireClaim("scope", ...)` to validate it.
+
+Here is the updated `Program.cs`:
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,11 +20,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    // Scope-based policies: scopes represent what the CLIENT is allowed to do
-    options.AddPolicy("catalog:read", policy =>
+    // Policy requiring the 'catalog.read' scope — for read operations
+    options.AddPolicy("catalog.read", policy =>
         policy.RequireClaim("scope", "catalog.read"));
 
-    options.AddPolicy("catalog:write", policy =>
+    // Policy requiring the 'catalog.write' scope — for write operations
+    options.AddPolicy("catalog.write", policy =>
         policy.RequireClaim("scope", "catalog.write"));
 });
 
@@ -31,16 +34,16 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// GET /products — requires 'catalog.read' scope
+// GET /products — requires the 'catalog.read' scope
 app.MapGet("/products", () => Results.Ok(new[]
 {
     new { Id = 1, Name = "Widget", Price = 9.99 },
     new { Id = 2, Name = "Gadget", Price = 19.99 }
-})).RequireAuthorization("catalog:read");
+})).RequireAuthorization("catalog.read");
 
-// POST /products — requires 'catalog.write' scope
+// POST /products — requires the 'catalog.write' scope
 app.MapPost("/products", (object product) => Results.Created("/products/3", product))
-    .RequireAuthorization("catalog:write");
+    .RequireAuthorization("catalog.write");
 
 app.MapDelete("/products/{id}", (int id) => Results.NoContent());
 
@@ -61,11 +64,27 @@ app.Run();
 
 ## How It Works
 
-1. **`RequireClaim("scope", "catalog.read")`** checks that the access token contains a `scope` claim with the value `catalog.read`. This validates what the *client application* is permitted to do.
-2. **`.RequireAuthorization("catalog:read")`** on the endpoint applies that named policy, so the framework evaluates it before the endpoint handler runs.
-3. **Scope vs. user claims**: Scopes represent client-level permissions (what the application is allowed to request). For full API security, you should also check user-level claims (roles, department, etc.) in addition to scopes. This example only checks client scopes — see the skill guidance on combining both for production APIs.
+1. **`builder.Services.AddAuthorization(options => { ... })`** — Registers the authorization services and defines two named policies:
+   - `"catalog.read"` — requires the access token to contain a `scope` claim with value `catalog.read`
+   - `"catalog.write"` — requires the access token to contain a `scope` claim with value `catalog.write`
 
-## Important Notes
+2. **`.RequireAuthorization("catalog.read")`** on the GET endpoint — applies the `catalog.read` policy. Only requests with a valid token containing this scope will be allowed through.
 
-- `RequireClaim` does an **exact match** on the claim value. If your IdentityServer emits scopes as a single space-delimited string (when `EmitScopesAsSpaceDelimitedStringInJwt = true`), you'll need a custom `IAuthorizationHandler` that splits the string. See the custom scope handler pattern.
-- Policy names are arbitrary strings — use a naming convention that makes sense for your domain.
+3. **`.RequireAuthorization("catalog.write")`** on the POST endpoint — applies the `catalog.write` policy. Only clients that have been granted the `catalog.write` scope can create products.
+
+## Important: Scope vs User Claims
+
+Remember that **scopes represent client permissions, not user permissions**. The `scope` claim tells you what the client application is allowed to do — it doesn't tell you what the individual user is allowed to do. For comprehensive authorization, consider combining scope checks with user-level claims:
+
+```csharp
+// Example: combine scope + user role for production use
+options.AddPolicy("catalog.write", policy =>
+{
+    policy.RequireClaim("scope", "catalog.write"); // Client permission
+    policy.RequireRole("editor");                   // User permission
+});
+```
+
+## Space-Delimited Scopes
+
+If your IdentityServer is configured with `EmitScopesAsSpaceDelimitedStringInJwt = true`, the scopes arrive as a single space-separated string rather than individual claims. In that case, `RequireClaim("scope", "catalog.read")` will check for an exact match against the entire string, which won't work. You'd need a custom `IAuthorizationHandler` that splits the string. See the skill reference for a `ScopeHandler` implementation that handles this case.

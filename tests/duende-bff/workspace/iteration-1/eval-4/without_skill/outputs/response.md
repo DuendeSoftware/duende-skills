@@ -1,31 +1,29 @@
-# SPA Getting 401 Errors on BFF API Calls
+# 401 Errors on BFF API Calls
 
-## Likely Cause
+If you're getting 401 errors when calling BFF endpoints despite being authenticated, the issue is likely that you're missing the anti-forgery header.
 
-If your users are authenticated and can see data on `/bff/user` but get 401 errors on API endpoints, the most likely cause is the missing CSRF protection header. Duende BFF requires an `X-CSRF: 1` header on all API requests for anti-forgery protection.
-
-## Fix
-
-Add the `X-CSRF: 1` header to your fetch calls:
+Duende BFF requires a CSRF protection header on API calls. Add the `X-CSRF: 1` header to your fetch requests:
 
 ```javascript
-async function apiFetch(url, options = {}) {
-    const response = await fetch(url, {
+const response = await fetch('/api/orders', {
+    headers: {
+        'X-CSRF': '1'
+    }
+});
+```
+
+You can create a wrapper function:
+
+```javascript
+function apiFetch(url, options = {}) {
+    return fetch(url, {
         ...options,
         headers: {
             'X-CSRF': '1',
             ...options.headers,
         },
     });
-
-    if (response.status === 401) {
-        // Redirect to login
-        window.location.href = '/bff/login';
-        return;
-    }
-
-    return response;
 }
 ```
 
-Make sure to use this wrapper for all your API calls. The login and logout endpoints (`/bff/login` and `/bff/logout`) should be navigated to via `window.location.href`, not via fetch, since they trigger full page redirects.
+If you get a 401 response, the user's session may have expired and they need to log in again.

@@ -1,14 +1,12 @@
 # Custom Profile Service with Scope-Based Claims and Token Exchange Support
 
-Here's how to create a profile service that loads claims from a database, emits only scope-requested claims, and handles the `act` claim for token exchange flows.
-
-## CustomProfileService
+## ProfileService Implementation
 
 ```csharp
-using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using System.Security.Claims;
 
 public class CustomProfileService : DefaultProfileService
 {
@@ -18,13 +16,15 @@ public class CustomProfileService : DefaultProfileService
 
     public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
-        // Load claims from database (hypothetical)
-        var claims = await GetClaimsFromDatabaseAsync(context.Subject.GetSubjectId());
+        // Load claims from your database based on the user's subject ID
+        var subjectId = context.Subject.FindFirst("sub")?.Value;
+        var allClaims = await LoadClaimsFromDatabaseAsync(subjectId);
 
         // Only emit claims that are requested by the client's scopes
-        context.AddRequestedClaims(claims);
+        // This respects the scope-to-claims mapping and consent decisions
+        context.AddRequestedClaims(allClaims);
 
-        // For token exchange flows, forward the 'act' claim
+        // For token exchange flows, pass through the act claim
         if (context.Subject.GetAuthenticationMethod() == OidcConstants.GrantTypes.TokenExchange)
         {
             var actClaim = context.Subject.FindFirst(JwtClaimTypes.Actor);
@@ -35,17 +35,16 @@ public class CustomProfileService : DefaultProfileService
         }
     }
 
-    private Task<IEnumerable<Claim>> GetClaimsFromDatabaseAsync(string subjectId)
+    private Task<IEnumerable<Claim>> LoadClaimsFromDatabaseAsync(string? subjectId)
     {
-        // In a real application, this would query a database
+        // Replace with actual database call
         var claims = new List<Claim>
         {
             new Claim(JwtClaimTypes.Name, "Alice Smith"),
             new Claim(JwtClaimTypes.Email, "alice@example.com"),
             new Claim(JwtClaimTypes.Role, "admin"),
-            new Claim("tenant_id", "42")
+            new Claim("department", "engineering")
         };
-
         return Task.FromResult<IEnumerable<Claim>>(claims);
     }
 }
@@ -54,82 +53,30 @@ public class CustomProfileService : DefaultProfileService
 ## Registration in Program.cs
 
 ```csharp
-using Duende.IdentityServer.Models;
-
-var builder = WebApplication.CreateBuilder(args);
-
 var idsvrBuilder = builder.Services.AddIdentityServer()
-    .AddInMemoryClients(new List<Client>
-    {
-        new Client
-        {
-            ClientId = "web_app",
-            ClientName = "Web Application",
-            AllowedGrantTypes = GrantTypes.Code,
-            ClientSecrets = { new Secret("secret".Sha256()) },
-            RedirectUris = { "https://localhost:5002/signin-oidc" },
-            PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
-            AllowedScopes = { "openid", "profile", "api1" },
-            AccessTokenLifetime = 3600
-        },
-        // ... other clients
-    })
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("api1", "API 1")
-    })
-    .AddInMemoryApiResources(new List<ApiResource>
-    {
-        new ApiResource("api1_resource")
-        {
-            Scopes = { "api1" }
-        }
-    })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
-    {
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile()
-    })
-    .AddTestUsers(new List<Duende.IdentityServer.Test.TestUser>
-    {
-        new Duende.IdentityServer.Test.TestUser
-        {
-            SubjectId = "1",
-            Username = "alice",
-            Password = "password"
-        }
-    });
+    // ... existing configuration ...
+    ;
 
 // Register the custom profile service
 idsvrBuilder.AddProfileService<CustomProfileService>();
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
 ```
 
 ## Key Design Decisions
 
-### Using `AddRequestedClaims` Instead of Direct Addition
+### `AddRequestedClaims` vs Direct Assignment
 
-The `context.AddRequestedClaims(claims)` method is the recommended approach because it:
+Using `context.AddRequestedClaims(claims)` is the recommended approach because it:
 
-- **Respects scopes**: Only claims that are associated with scopes the client requested will be emitted
-- **Supports consent**: If the user didn't consent to certain scopes, those claims won't be emitted
-- **Avoids token bloat**: Prevents all user claims from being dumped into every token
+- Only emits claims that the client's requested scopes map to
+- Respects consent decisions (if the user didn't consent to a scope, its claims are excluded)
+- Works with the identity resource and API scope claim type mappings
 
-If you use `context.IssuedClaims.AddRange(claims)` instead, all claims would be emitted regardless of which scopes were requested. This can lead to bloated tokens and information disclosure.
+If you used `context.IssuedClaims.AddRange(claims)` instead, **all** claims would be emitted regardless of which scopes were requested, which could leak sensitive information.
 
-### Extending `DefaultProfileService`
+### Token Exchange Act Claim
 
-By extending `DefaultProfileService` rather than implementing `IProfileService` directly, you inherit the default behavior for claims filtering and can focus on adding custom logic. The base class handles standard claim types like `sub`, `auth_time`, etc.
+When a token exchange flow occurs, the subject's authentication method is set to `urn:ietf:params:oauth:grant-type:token-exchange`. The `act` (actor) claim from the exchange validator needs to be explicitly forwarded to the issued token. Without this check, the call chain information would be lost.
 
-### Token Exchange `act` Claim Handling
+### Extending DefaultProfileService
 
-When the authentication method is `urn:ietf:params:oauth:grant-type:token-exchange` (the token exchange grant type), the profile service checks for an `act` (actor) claim on the subject and forwards it to the issued claims. This preserves the delegation chain in the new token.
-
-The check uses `context.Subject.GetAuthenticationMethod()` which returns the `amr` claim value — for token exchange, this is the grant type string itself.
+By extending `DefaultProfileService` rather than implementing `IProfileService` directly, you get the default behavior for `IsActiveAsync` (which always returns true) and can focus on just the claims logic. Override `IsActiveAsync` if you need to check user status.

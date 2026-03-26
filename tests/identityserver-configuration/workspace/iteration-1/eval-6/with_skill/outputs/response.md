@@ -1,8 +1,8 @@
-Here's how to define a custom `organization` identity resource alongside the standard `openid` and `profile` resources:
+# Custom Identity Resource with Required Claims
+
+Here's the identity resources configuration including the custom 'organization' resource:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
     options.Events.RaiseErrorEvents = true;
@@ -10,10 +10,10 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
 })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
+    .AddInMemoryIdentityResources(new IdentityResource[]
     {
-        // Standard identity resources
-        new IdentityResources.OpenId(),   // Required — maps to "sub" claim
+        // Standard OIDC resources
+        new IdentityResources.OpenId(),   // Required - returns sub claim
         new IdentityResources.Profile(),  // name, family_name, given_name, etc.
 
         // Custom identity resource for organization membership
@@ -22,42 +22,42 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
             displayName: "Your organization info",
             userClaims: new[] { "org_id", "org_name", "org_role" })
         {
-            Required = true  // Not optional on consent screen
+            Required = true // Not optional on consent screen
         }
-    })
-    .AddInMemoryApiScopes(Array.Empty<ApiScope>())
-    .AddInMemoryClients(Array.Empty<Client>());
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
+    });
 ```
 
-### How It Works
+## How It Works
 
-1. **`new IdentityResources.OpenId()`** — The mandatory identity resource for any OpenID Connect request. Maps to the `sub` (subject ID) claim.
+### Standard Resources
 
-2. **`new IdentityResources.Profile()`** — Standard profile claims (`name`, `family_name`, `given_name`, etc.).
+- `IdentityResources.OpenId()` — Mandatory per the OIDC specification. Returns the `sub` (subject ID) claim.
+- `IdentityResources.Profile()` — Returns `name`, `family_name`, `given_name`, and other standard profile claims.
 
-3. **Custom `organization` resource** — Created using the `IdentityResource` constructor that takes a name, display name, and array of user claim types. When a client requests the `organization` scope:
-   - The `org_id`, `org_name`, and `org_role` claims are included in the identity token (and available from the userinfo endpoint)
-   - These claims must be populated by your `IProfileService` implementation
+### Custom 'organization' Resource
 
-4. **`Required = true`** — Marks this resource as required on the consent screen. Instead of being shown as an optional checkbox the user can uncheck, it's always included when the client requests it. This is appropriate for claims that are fundamental to the application's operation.
+The custom `IdentityResource` with name `"organization"` maps three claims:
 
-### Using It in a Client
+| Claim | Purpose |
+|-------|---------|
+| `org_id` | Organization identifier |
+| `org_name` | Organization display name |
+| `org_role` | User's role within the organization |
 
-Clients that need organization info add `"organization"` to their `AllowedScopes`:
+When a client requests the `organization` scope, these claims are included in the identity token (and available from the userinfo endpoint).
+
+### Required = true
+
+Setting `Required = true` means this scope is not shown as an optional checkbox on the consent screen. It's always included when the client requests it. This is appropriate for claims that the application needs to function correctly.
+
+### Client Configuration
+
+Clients that need organization claims must include `"organization"` in their `AllowedScopes`:
 
 ```csharp
 new Client
 {
-    ClientId = "admin-portal",
+    ClientId = "admin-app",
     AllowedScopes =
     {
         IdentityServerConstants.StandardScopes.OpenId,
@@ -66,3 +66,7 @@ new Client
     }
 }
 ```
+
+### IProfileService
+
+For the claims to appear in tokens, your `IProfileService` implementation (or ASP.NET Identity integration) must provide the `org_id`, `org_name`, and `org_role` claims for the authenticated user.

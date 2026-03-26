@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme", "pass": true, "rationale": "Code configures ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto"},
-    {"assertion": "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()", "pass": true, "rationale": "UseForwardedHeaders() is called before UseIdentityServer() with explicit comment about ordering"},
-    {"assertion": "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes", "pass": true, "rationale": "Response includes Option 2 with ASPNETCORE_FORWARDEDHEADERS_ENABLED=true for cloud/Kubernetes environments"},
-    {"assertion": "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery", "pass": true, "rationale": "Response explains the proxy strips original scheme/host headers and IdentityServer generates HTTP URLs in discovery"}
+    {
+      "assertion": "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme",
+      "pass": true,
+      "rationale": "ForwardedHeaders.XForwardedProto is configured in the options"
+    },
+    {
+      "assertion": "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()",
+      "pass": true,
+      "rationale": "UseForwardedHeaders() is first in the pipeline, before UseIdentityServer()"
+    },
+    {
+      "assertion": "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes",
+      "pass": true,
+      "rationale": "Option 2 section describes ASPNETCORE_FORWARDEDHEADERS_ENABLED=true for cloud/Kubernetes"
+    },
+    {
+      "assertion": "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery",
+      "pass": true,
+      "rationale": "Explains the proxy strips original HTTPS scheme and host, and IdentityServer sees the internal HTTP request"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

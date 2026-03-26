@@ -2,10 +2,26 @@
   "eval_id": 7,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Identifies Data Protection key ring as the root cause — each instance generates its own keys", "pass": true, "rationale": "Clearly identifies Data Protection keys as the root cause: 'each instance generates its own set of encryption keys'"},
-    {"assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)", "pass": true, "rationale": "Shows PersistKeysToDbContext, PersistKeysToAzureBlobStorage, and PersistKeysToStackExchangeRedis"},
-    {"assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions", "pass": false, "rationale": "Recommends distributed session storage generically (Redis, AddStackExchangeRedisCache, AddSession) but does NOT mention AddEntityFrameworkServerSideSessions which is the Duende BFF-specific API"},
-    {"assertion": "Shows code for AddDataProtection() with a persistent key store", "pass": true, "rationale": "Shows builder.Services.AddDataProtection().PersistKeysToDbContext<ApplicationDbContext>() with full code"}
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "Identifies Data Protection and per-instance key ring as the issue"
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Shows PersistKeysToFileSystem and PersistKeysToDbContext"
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": false,
+      "rationale": "Mentions distributed session store generically but does NOT specifically recommend AddEntityFrameworkServerSideSessions \u2014 the Duende BFF-specific approach"
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "Shows AddDataProtection().PersistKeysToDbContext and PersistKeysToFileSystem"
+    }
   ],
   "pass_count": 3,
   "total_count": 4,

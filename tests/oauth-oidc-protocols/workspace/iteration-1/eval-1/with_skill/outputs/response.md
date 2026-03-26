@@ -1,62 +1,59 @@
-# Client Credentials Token Request with IdentityModel
+# Client Credentials Token Request Using Discovery
 
-Here's how to fetch a token using IdentityModel by first resolving endpoints from the discovery document, then making the client credentials request:
+Here's how to fetch a token using the discovery document with IdentityModel:
 
 ```csharp
 using IdentityModel.Client;
 
-var builder = WebApplication.CreateBuilder(args);
+var httpClient = new HttpClient();
 
-builder.Services.AddAuthorization();
+// Step 1: Fetch the discovery document to resolve endpoints
+var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
 
-var app = builder.Build();
-
-app.MapGet("/call-api", async () =>
+if (disco.IsError)
 {
-    // Step 1: Fetch the discovery document from the authority
-    using var httpClient = new HttpClient();
-    var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
+    Console.WriteLine($"Discovery error: {disco.Error}");
+    return;
+}
 
-    if (disco.IsError)
+// Step 2: Request a client credentials token using the discovered token endpoint
+var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
+    new ClientCredentialsTokenRequest
     {
-        // Handle unreachable or invalid discovery document
-        return Results.Problem($"Discovery document error: {disco.Error}");
-    }
+        Address = disco.TokenEndpoint,  // Use discovered endpoint, not hardcoded URL
+        ClientId = "backend-service",
+        ClientSecret = "service-secret",
+        Scope = "catalog.read"
+    });
 
-    // Step 2: Use the discovered token endpoint to request a client credentials token
-    var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
-        new ClientCredentialsTokenRequest
-        {
-            Address = disco.TokenEndpoint, // resolved from discovery, not hardcoded
-            ClientId = "backend-service",
-            ClientSecret = "service-secret",
-            Scope = "catalog.read"
-        });
+if (tokenResponse.IsError)
+{
+    Console.WriteLine($"Token error: {tokenResponse.Error}");
+    return;
+}
 
-    if (tokenResponse.IsError)
-    {
-        return Results.Problem($"Token request error: {tokenResponse.Error}");
-    }
+// Step 3: Use the access token to call the API
+var accessToken = tokenResponse.AccessToken;
+Console.WriteLine($"Access token: {accessToken}");
 
-    // Step 3: Use the access token to call the API
-    var apiClient = new HttpClient();
-    apiClient.SetBearerToken(tokenResponse.AccessToken!);
-
-    var response = await apiClient.GetAsync("https://api.example.com/catalog/items");
-    var content = await response.Content.ReadAsStringAsync();
-
-    return Results.Ok(content);
-});
-
-app.Run();
+// Set the token on an HttpClient to call the API
+var apiClient = new HttpClient();
+apiClient.SetBearerToken(accessToken);
+var response = await apiClient.GetAsync("https://api.example.com/catalog");
 ```
+
+## How It Works
+
+1. **`GetDiscoveryDocumentAsync`** fetches the OpenID Connect discovery document from `https://identity.example.com/.well-known/openid-configuration`. This JSON document advertises all endpoint URLs, supported grant types, and signing key information.
+
+2. **Error checking** (`disco.IsError`) is essential — the authority might be unreachable, return invalid JSON, or have an untrusted HTTPS certificate.
+
+3. **`RequestClientCredentialsTokenAsync`** sends a `POST` to the token endpoint with `grant_type=client_credentials`, the client credentials, and the requested scope.
+
+4. **`disco.TokenEndpoint`** is used as the `Address` instead of hardcoding `https://identity.example.com/connect/token`. This is a best practice — if the IdentityServer URL or path changes, or if it's behind a reverse proxy, the discovery document will always provide the correct endpoint.
 
 ## Key Points
 
-1. **Discovery Document** — Always resolve endpoints from `/.well-known/openid-configuration` via `GetDiscoveryDocumentAsync()` rather than hardcoding the token endpoint URL. This ensures your application adapts to URL changes and load balancer configurations.
-
-2. **Error Handling** — Always check `disco.IsError` before using the discovery response. The document may be unreachable or return invalid JSON.
-
-3. **Client Credentials Flow** — `RequestClientCredentialsTokenAsync` sends a `grant_type=client_credentials` POST to the token endpoint with the specified `ClientId`, `ClientSecret`, and `Scope`.
-
-4. **Token Endpoint from Discovery** — The `Address` property is set to `disco.TokenEndpoint`, which is the URL resolved from the discovery document — never a hardcoded value.
+- **Never hardcode the token endpoint URL.** Always resolve it from the discovery document.
+- **Always check `IsError`** on both the discovery response and the token response.
+- The client credentials flow produces an access token with no user identity — it contains only client claims and the requested scope.

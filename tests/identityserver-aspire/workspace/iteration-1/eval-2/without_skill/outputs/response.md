@@ -1,6 +1,6 @@
-# Passing Configuration to Services in Aspire
+# Passing Configuration via Environment Variables in Aspire
 
-You can use `WithEnvironment` to pass configuration values to your services in an Aspire AppHost.
+You can use `WithEnvironment` to pass configuration values to your services. Here's how:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
@@ -10,30 +10,32 @@ var identityDb = sqlServer.AddDatabase("identitydb");
 
 var identityServer = builder.AddProject<Projects.IdentityServer>("identity-server")
     .WithReference(identityDb)
-    .WaitFor(sqlServer);
+    .WithEnvironment("IdentityServer__IssuerUri", "https://localhost:5001");
 
 // Web App
 var webApp = builder.AddProject<Projects.WebApp>("web-app")
     .WithReference(identityServer)
-    .WaitFor(identityServer)
-    .WithEnvironment("Authentication__Authority", identityServer.GetEndpoint("https"))
+    .WithEnvironment("Authentication__Authority", "https://localhost:5001")
     .WithEnvironment("Authentication__ClientId", "web-app")
-    .WithEnvironment("Authentication__Scopes__0", "openid")
-    .WithEnvironment("Authentication__Scopes__1", "profile");
+    .WithEnvironment("Authentication__Scopes", "openid profile weather.read");
 
 // API
 var api = builder.AddProject<Projects.WeatherApi>("weather-api")
     .WithReference(identityServer)
-    .WaitFor(identityServer)
-    .WithEnvironment("Authentication__Authority", identityServer.GetEndpoint("https"));
+    .WithEnvironment("Authentication__Authority", "https://localhost:5001");
 
 builder.Build().Run();
 ```
 
-The double-underscore (`__`) maps to nested configuration paths. In the web app, you'd read these as `Authentication:Authority`, `Authentication:ClientId`, etc.
+The double-underscore convention (`__`) maps to the colon (`:`) separator in .NET configuration. So `Authentication__Authority` becomes `Authentication:Authority` in `IConfiguration`.
 
-You can also set the IssuerUri for IdentityServer if needed:
+In the web app, read these values:
 
 ```csharp
-.WithEnvironment("IdentityServer__IssuerUri", identityServer.GetEndpoint("https"));
+services.AddAuthentication()
+    .AddOpenIdConnect(options =>
+    {
+        options.Authority = builder.Configuration["Authentication:Authority"];
+        options.ClientId = builder.Configuration["Authentication:ClientId"];
+    });
 ```

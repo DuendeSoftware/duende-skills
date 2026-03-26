@@ -1,1 +1,29 @@
-{"eval_id":1,"variant":"without_skill","assertions":[{"assertion":"Output contains configuration of ForwardedHeaders with either ForwardedHeaders.XForwardedProto or the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable approach","pass":true,"rationale":"Shows ForwardedHeadersOptions with XForwardedProto and mentions ASPNETCORE_FORWARDEDHEADERS_ENABLED"},{"assertion":"Output mentions that the ForwardedHeaders middleware must run before IdentityServer middleware in the pipeline","pass":true,"rationale":"States 'UseForwardedHeaders() must be called before UseIdentityServer()' and shows correct ordering"},{"assertion":"Output includes adding proxy IP addresses to KnownProxies or KnownNetworks for production, or explains the default localhost-only trust","pass":true,"rationale":"Shows KnownProxies.Add() and explains 'By default, only loopback addresses are trusted'"},{"assertion":"If explicit configuration is shown, ForwardedHeaders option includes XForwardedProto (to fix the http vs https issue)","pass":true,"rationale":"Explicit configuration includes ForwardedHeaders.XForwardedProto"}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains configuration of ForwardedHeaders with either ForwardedHeaders.XForwardedProto or the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable approach",
+      "pass": true,
+      "rationale": "Shows ForwardedHeaders.XForwardedProto configuration"
+    },
+    {
+      "assertion": "Output mentions that the ForwardedHeaders middleware must run before IdentityServer middleware in the pipeline",
+      "pass": false,
+      "rationale": "Code shows the correct order but no explicit explanation of why order matters"
+    },
+    {
+      "assertion": "Output includes adding proxy IP addresses to KnownProxies or KnownNetworks for production, or explains the default localhost-only trust",
+      "pass": false,
+      "rationale": "No mention of KnownProxies, KnownNetworks, or the default localhost-only trust"
+    },
+    {
+      "assertion": "If explicit configuration is shown, ForwardedHeaders option includes XForwardedProto (to fix the http vs https issue)",
+      "pass": true,
+      "rationale": "ForwardedHeaders.XForwardedProto is included"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

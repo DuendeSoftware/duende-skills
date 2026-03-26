@@ -1,1 +1,29 @@
-{"eval_id":3,"variant":"with_skill","assertions":[{"assertion":"Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager","pass":true,"rationale":"Code uses IClientCredentialsTokenManager in the v4 service."},{"assertion":"Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string","pass":true,"rationale":"Uses ClientCredentialsClientName.Parse(\"api-client\") explicitly."},{"assertion":"Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value","pass":true,"rationale":"Checks tokenResult.Succeeded before calling .GetToken()."},{"assertion":"Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically","pass":true,"rationale":"Explicitly comments out AddDistributedMemoryCache with explanation that v4 uses HybridCache automatically."},{"assertion":"Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()","pass":true,"rationale":"Uses ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse() in the client configuration."}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 3,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager",
+      "passed": true
+    },
+    {
+      "assertion": "Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string",
+      "passed": true
+    },
+    {
+      "assertion": "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value",
+      "passed": true
+    },
+    {
+      "assertion": "Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically",
+      "passed": true
+    },
+    {
+      "assertion": "Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()",
+      "passed": true
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

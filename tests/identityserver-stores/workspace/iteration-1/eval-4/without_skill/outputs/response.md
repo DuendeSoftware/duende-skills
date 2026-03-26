@@ -1,9 +1,10 @@
-# Server-Side Sessions with EF Core
+# Server-Side Sessions with Cleanup
 
 ```csharp
 var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
 
 builder.Services.AddIdentityServer()
+    .AddServerSideSessions()
     .AddOperationalStore(options =>
     {
         options.ConfigureDbContext = b =>
@@ -12,8 +13,7 @@ builder.Services.AddIdentityServer()
         options.EnableTokenCleanup = true;
         options.RemoveConsumedTokens = true;
         options.ConsumedTokenCleanupDelay = 300;
-    })
-    .AddServerSideSessions();
+    });
 ```
 
-This enables server-side sessions and configures token cleanup with consumed token removal after 300 seconds.
+Server-side sessions require the operational store to persist session data.

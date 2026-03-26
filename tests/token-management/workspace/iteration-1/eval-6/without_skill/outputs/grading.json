@@ -1,1 +1,29 @@
-{"eval_id":6,"variant":"without_skill","assertions":[{"assertion":"Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier","pass":true,"rationale":"AddStackExchangeRedisCache is called with Configuration from builder.Configuration.GetConnectionString(\"Redis\")."},{"assertion":"Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options","pass":true,"rationale":"options.CacheLifetimeBuffer = 120 is set."},{"assertion":"Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption","pass":false,"rationale":"Implements an IDistributedCache wrapper for encryption instead of the v4-correct IHybridCacheSerializer<ClientCredentialsToken>."},{"assertion":"Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()","pass":false,"rationale":"Does not call AddHybridCache().AddSerializer<>(); uses an IDistributedCache wrapper pattern instead."},{"assertion":"Output calls AddDataProtection() to enable the data protection provider","pass":true,"rationale":"builder.Services.AddDataProtection() is called."}],"pass_count":3,"total_count":5,"score":0.6}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 6,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier",
+      "passed": true
+    },
+    {
+      "assertion": "Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options",
+      "passed": true
+    },
+    {
+      "assertion": "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+      "passed": false
+    },
+    {
+      "assertion": "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()",
+      "passed": false
+    },
+    {
+      "assertion": "Output calls AddDataProtection() to enable the data protection provider",
+      "passed": false
+    }
+  ],
+  "passed": 2,
+  "total": 5
+}

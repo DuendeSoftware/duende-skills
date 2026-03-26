@@ -76,6 +76,7 @@
       "id": 6,
       "prompt": "I'm implementing a token exchange extension grant (urn:ietf:params:oauth:grant-type:token-exchange) in Duende IdentityServer. Show me how to build the IExtensionGrantValidator and emit custom claims like the original client ID into the resulting token.",
       "expected_output": "An IExtensionGrantValidator implementation that validates the subject_token, extracts the subject, and returns a GrantValidationResult with custom claims. Registered via AddExtensionGrantValidator<T>().",
+      "sub_documents": ["extension-grant-claims.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj"
@@ -106,6 +107,7 @@
       "id": 8,
       "prompt": "I need to set up an external Azure AD login on my IdentityServer and map the incoming AAD claims (like 'oid' and 'groups') to my internal claim types. Show me both the OIDC handler configuration with ClaimActions and the login callback claim mapping.",
       "expected_output": "An OIDC handler configuration for Azure AD with MapInboundClaims = false, ClaimActions.Clear() followed by explicit MapJsonKey calls, and a callback method that maps AAD-specific claims (oid, groups) to internal claim types.",
+      "sub_documents": ["external-provider-claims.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj"
@@ -116,6 +118,18 @@
         "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'",
         "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
         "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "How does claims filtering work in Duende IdentityServer? I added a claim in IProfileService but it doesn't appear in access tokens unless I declare it somewhere. Explain the relationship between UserClaims, ApiScope, ApiResource, and AddRequestedClaims.",
+      "expected_output": "An explanation that claims are filtered by requested claim types — IProfileService receives a RequestedClaimTypes list, and AddRequestedClaims only emits claims that match. The claim type must be declared in UserClaims of an ApiScope or ApiResource. AlwaysIncludeUserClaimsInIdToken bypasses this for identity tokens.",
+      "files": [],
+      "assertions": [
+        "Explains that IProfileService.GetProfileDataAsync receives ProfileDataRequestContext with RequestedClaimTypes",
+        "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes",
+        "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types",
+        "Does NOT require sub-documents — this is answered entirely from the core SKILL.md"
       ]
     }
   ]

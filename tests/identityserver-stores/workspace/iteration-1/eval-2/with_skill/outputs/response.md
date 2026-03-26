@@ -1,4 +1,4 @@
-# Custom MongoDB IClientStore with Caching
+# Custom MongoDB Client Store with Caching
 
 ## MongoClientStore Implementation
 
@@ -7,20 +7,20 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using MongoDB.Driver;
 
-public sealed class MongoClientStore : IClientStore
+public class MongoClientStore : IClientStore
 {
-    private readonly IMongoDatabase _database;
+    private readonly IMongoCollection<ClientDocument> _clients;
 
     public MongoClientStore(IMongoDatabase database)
     {
-        _database = database;
+        _clients = database.GetCollection<ClientDocument>("clients");
     }
 
+    // v7 — no CancellationToken parameter
     public async Task<Client?> FindClientByIdAsync(string clientId)
     {
-        var collection = _database.GetCollection<ClientDocument>("clients");
-        var doc = await collection.Find(c => c.ClientId == clientId).FirstOrDefaultAsync();
-        return doc?.ToIdentityServerClient();
+        var doc = await _clients.Find(c => c.ClientId == clientId).FirstOrDefaultAsync();
+        return doc?.ToClient();
     }
 }
 
@@ -28,19 +28,20 @@ public class ClientDocument
 {
     public string ClientId { get; set; } = default!;
     public string ClientName { get; set; } = default!;
-    public IList<string> AllowedGrantTypes { get; set; } = new List<string>();
-    public IList<string> AllowedScopes { get; set; } = new List<string>();
-    public IList<string> RedirectUris { get; set; } = new List<string>();
-    public IList<string> ClientSecrets { get; set; } = new List<string>();
+    public List<string> AllowedGrantTypes { get; set; } = [];
+    public List<string> AllowedScopes { get; set; } = [];
+    public List<string> RedirectUris { get; set; } = [];
+    public List<SecretDocument> ClientSecrets { get; set; } = [];
+    // ... other properties
 
-    public Client ToIdentityServerClient() => new Client
+    public Client ToClient() => new Client
     {
         ClientId = ClientId,
         ClientName = ClientName,
         AllowedGrantTypes = AllowedGrantTypes,
         AllowedScopes = AllowedScopes,
         RedirectUris = RedirectUris,
-        ClientSecrets = ClientSecrets.Select(s => new Secret(s.Sha256())).ToList()
+        ClientSecrets = ClientSecrets.Select(s => new Secret(s.Value)).ToList()
     };
 }
 ```
@@ -57,9 +58,10 @@ builder.Services.AddIdentityServer(options =>
     .AddClientStoreCache<MongoClientStore>();
 ```
 
-**Key points:**
-- `MongoClientStore` implements `IClientStore` with a constructor accepting `IMongoDatabase`.
-- `FindClientByIdAsync` does NOT include a `CancellationToken` parameter (v7 target).
-- Registered via `AddClientStore<MongoClientStore>()`.
-- `AddInMemoryCaching()` registers `ICache<T>` and `AddClientStoreCache<MongoClientStore>()` wraps the store.
-- `ClientStoreExpiration` is set to 5 minutes.
+## Key Points
+
+- **`AddClientStore<MongoClientStore>()`** — Registers the custom store
+- **`AddInMemoryCaching()`** — Registers the `ICache<T>` infrastructure needed for store caching
+- **`AddClientStoreCache<MongoClientStore>()`** — Wraps the store with a caching decorator
+- **`ClientStoreExpiration = TimeSpan.FromMinutes(5)`** — Cache entries expire after 5 minutes
+- **No CancellationToken** — v7 store interfaces don't include CancellationToken parameters

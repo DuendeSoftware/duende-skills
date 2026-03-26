@@ -1,56 +1,38 @@
-# Calling a Remote Service with User Tokens in a BFF Endpoint
+# Making Authenticated HTTP Calls from BFF Endpoints
 
-Here are two approaches to call a remote API with the logged-in user's access token from a local BFF endpoint.
-
-## Pattern 1: Named HttpClient with Automatic Token Management
-
-You can use `AddUserAccessTokenHttpClient` from Duende's AccessTokenManagement to register a named HTTP client that automatically attaches and refreshes the user's access token:
+## Named HttpClient
 
 ```csharp
-// Service registration
-builder.Services.AddUserAccessTokenHttpClient("remoteService", configureClient: client =>
+builder.Services.AddHttpClient("remoteApi", client =>
 {
-    client.BaseAddress = new Uri("https://remote-service.example.com/");
+    client.BaseAddress = new Uri("https://remote-service.internal/");
 });
+
+app.MapGet("/api/reports", async (HttpContext ctx, IHttpClientFactory factory) =>
+{
+    var token = await ctx.GetTokenAsync("access_token");
+    var client = factory.CreateClient("remoteApi");
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", token);
+
+    var response = await client.GetAsync("reports");
+    return Results.Text(await response.Content.ReadAsStringAsync());
+}).RequireAuthorization();
 ```
 
-```csharp
-// Endpoint
-app.MapGet("/api/data", async (IHttpClientFactory factory) =>
-{
-    var client = factory.CreateClient("remoteService"); // Token attached automatically
-    var response = await client.GetAsync("data");
-    var content = await response.Content.ReadAsStringAsync();
-    return Results.Text(content);
-})
-.RequireAuthorization();
-```
-
-## Pattern 2: Manual Token Retrieval with GetUserAccessTokenAsync
-
-For more control, retrieve the token manually:
+## Manual Approach
 
 ```csharp
-app.MapGet("/api/data-manual", async (HttpContext ctx, IHttpClientFactory factory) =>
+app.MapGet("/api/dashboard", async (HttpContext ctx, IHttpClientFactory factory) =>
 {
-    var token = await ctx.GetUserAccessTokenAsync();
-
+    var token = await ctx.GetTokenAsync("access_token");
     var client = factory.CreateClient();
-    client.SetBearerToken(token);
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", token);
 
-    var response = await client.GetAsync("https://remote-service.example.com/data");
-    var content = await response.Content.ReadAsStringAsync();
-    return Results.Text(content);
-})
-.RequireAuthorization();
+    var response = await client.GetAsync("https://remote-service.internal/dashboard");
+    return Results.Text(await response.Content.ReadAsStringAsync());
+}).RequireAuthorization();
 ```
 
-## Token Refresh
-
-Both approaches benefit from Duende.AccessTokenManagement, which automatically handles token refresh when the access token is expired. You don't need to implement refresh logic yourself.
-
-## Notes
-
-- Make sure `SaveTokens = true` is set in your OIDC configuration so tokens are stored in the session.
-- Both endpoints use `.RequireAuthorization()` to ensure only authenticated users can access them.
-- The `AddUserAccessTokenHttpClient` approach is preferred as it's less error-prone — you can't forget to attach the token.
+Use `GetTokenAsync("access_token")` to retrieve the access token from the authentication session and attach it to outgoing requests.

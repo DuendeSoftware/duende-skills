@@ -1,32 +1,24 @@
-# Persisted Grants Decryption Failure After Upgrade
+# Persisted Grants Decryption Issue After .NET Upgrade
 
-## Likely Cause: Data Protection Keys
+## The Problem
 
-The most likely cause is an **ASP.NET Core Data Protection** issue. IdentityServer encrypts persisted grant data using the Data Protection system. If the Data Protection keys or configuration changed during your upgrade, previously encrypted data cannot be decrypted.
+This is a **Data Protection** issue. ASP.NET Core Data Protection is used to encrypt sensitive data in persisted grants. When you upgrade .NET versions, the Data Protection configuration may change, causing previously encrypted data to become unreadable.
 
-## Common Reasons
+## Why It Happens
 
-1. **Data Protection keys were lost**: If you were storing Data Protection keys in the default location (file system or in-memory), upgrading the application may have changed the storage path or the keys may not have been carried over to the new deployment.
+The Data Protection system uses an application discriminator to isolate keys between different applications. By default, this is based on the content root path of the application. When the .NET version changes, the way this path is determined can change slightly, causing the system to treat the new version as a different application.
 
-2. **Application isolation changed**: Data Protection uses an application discriminator to isolate keys between applications. If the hosting environment changed (different path, different app pool, etc.), the framework may treat it as a different application.
+## Fix
 
-## How to Fix
+Set an explicit application name for Data Protection:
 
-1. **Set an explicit application name** to ensure key isolation remains consistent:
-   ```csharp
-   builder.Services.AddDataProtection()
-       .SetApplicationName("MyIdentityServer")
-       .PersistKeysToFileSystem(new DirectoryInfo(@"C:\keys"));
-   ```
+```csharp
+builder.Services.AddDataProtection()
+    .SetApplicationName("MyIdentityServer");
+```
 
-2. **Ensure old keys are still available**: Copy or point to the Data Protection key ring from your old deployment. The keys are typically stored as XML files.
+This ensures consistent key isolation across .NET version upgrades.
 
-3. **Use a persistent key store**: For production, store Data Protection keys in a database or Azure Blob Storage so they survive deployments:
-   ```csharp
-   builder.Services.AddDataProtection()
-       .PersistKeysToDbContext<MyDbContext>();
-   ```
+## Also Check
 
-4. **Verify the key ring**: Check that the key XML files or database entries from the old deployment still exist and are accessible to the new application.
-
-If the old keys are truly lost, the encrypted persisted grants unfortunately cannot be recovered. Users will need to re-authenticate.
+Make sure the old Data Protection keys are still accessible. If they've been deleted or rotated away, the old encrypted data cannot be recovered, and affected users will need to re-authenticate.

@@ -1,83 +1,54 @@
-# Manual Token Management in BFF Local API Endpoints
+# Manual HTTP Calls with Token Management
 
-Here are two patterns for calling a remote service from a local BFF endpoint with automatic token refresh, without using `MapRemoteBffApiEndpoint`.
+Two patterns for making authenticated HTTP calls from a local BFF endpoint to a remote service.
 
-## Pattern 1: Named HttpClient with Automatic Token Attachment (Preferred)
-
-Register a named HTTP client with `AddUserAccessTokenHttpClient`. This automatically attaches the user's access token to every outgoing request and handles refresh transparently via `Duende.AccessTokenManagement`.
+## Pattern 1: Named HttpClient with Automatic Token Attachment
 
 ```csharp
-// Service registration
+// Registration
 builder.Services.AddBff()
-    .ConfigureOpenIdConnect(options =>
-    {
-        options.Authority = "https://idp.example.com";
-        options.ClientId = "bff-client";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("offline_access");
-    });
+    .ConfigureOpenIdConnect(/* ... */);
 
-// Named HttpClient with automatic user access token management
-builder.Services.AddUserAccessTokenHttpClient("remoteService", configureClient: client =>
+builder.Services.AddUserAccessTokenHttpClient("remoteApiClient", configureClient: client =>
 {
-    client.BaseAddress = new Uri("https://remote-service.example.com/");
+    client.BaseAddress = new Uri("https://remote-service.internal/");
 });
-```
 
-```csharp
-// Endpoint using the named HttpClient
-app.MapGet("/api/data", async (IHttpClientFactory factory) =>
+// Endpoint
+app.MapGet("/api/reports", async (IHttpClientFactory factory) =>
 {
-    var client = factory.CreateClient("remoteService"); // Token attached automatically
-    var response = await client.GetAsync("data");
-    var content = await response.Content.ReadAsStringAsync();
-    return Results.Text(content);
+    var client = factory.CreateClient("remoteApiClient");
+    // Token is automatically attached and refreshed by AccessTokenManagement
+    var response = await client.GetAsync("reports");
+    var data = await response.Content.ReadAsStringAsync();
+    return Results.Text(data, "application/json");
 })
 .RequireAuthorization()
 .AsBffApiEndpoint();
 ```
 
-## Pattern 2: Manual Token Retrieval with GetUserAccessTokenAsync
-
-For more control, retrieve the token manually using `GetUserAccessTokenAsync` and attach it with `SetBearerToken`. Token refresh is still handled automatically by AccessTokenManagement — if the current token is expired, the refresh token is used to obtain a new one before returning.
+## Pattern 2: Manual GetUserAccessTokenAsync
 
 ```csharp
-app.MapGet("/api/data-manual", async (HttpContext ctx, IHttpClientFactory factory) =>
+app.MapGet("/api/dashboard", async (HttpContext ctx, IHttpClientFactory factory) =>
 {
-    // AccessTokenManagement handles refresh automatically if the token is expired
+    // Get the user's access token — automatically refreshed if expired
     var token = await ctx.GetUserAccessTokenAsync();
 
     var client = factory.CreateClient();
-    client.SetBearerToken(token);
+    client.SetBearerToken(token.AccessToken!);
 
-    var response = await client.GetAsync("https://remote-service.example.com/data");
-    var content = await response.Content.ReadAsStringAsync();
-    return Results.Text(content);
+    var response = await client.GetAsync("https://remote-service.internal/dashboard");
+    var data = await response.Content.ReadAsStringAsync();
+    return Results.Text(data, "application/json");
 })
 .RequireAuthorization()
 .AsBffApiEndpoint();
-```
-
-## Important: Never Expose Tokens to the Browser
-
-Both patterns keep the access token server-side. **Never** return the raw token to JavaScript — this defeats the entire purpose of the BFF pattern:
-
-```csharp
-// ❌ DO NOT DO THIS — exposes token to the browser
-app.MapGet("/api/token", async (HttpContext ctx) =>
-{
-    var token = await ctx.GetUserAccessTokenAsync();
-    return Results.Json(new { accessToken = token }); // ❌ Token leaked to frontend
-});
 ```
 
 ## Key Points
 
-- **Token refresh is automatic**: `Duende.AccessTokenManagement` transparently refreshes expired tokens using the refresh token stored in the server-side session. You don't need to implement any refresh logic.
-- **Both patterns require `.AsBffApiEndpoint()`** to enforce CSRF protection via the `X-CSRF: 1` header.
-- **Pattern 1 is preferred** when you just need to forward requests — less boilerplate and no risk of forgetting to attach the token.
-- **Pattern 2 is useful** when you need to inspect the token, call multiple services with different tokens, or apply custom logic before making the request.
+- **`AddUserAccessTokenHttpClient`** creates a named `HttpClient` that automatically attaches the user's access token via a delegating handler. Token refresh is handled transparently by `Duende.AccessTokenManagement`.
+- **`GetUserAccessTokenAsync`** retrieves the current user's access token manually. If the token is expired and a refresh token is available, it's refreshed automatically.
+- **Both endpoints use `.AsBffApiEndpoint()`** for CSRF protection — this is required for any BFF endpoint called from the SPA.
+- **Never return the raw token to the browser** — that defeats the entire BFF pattern. The token stays server-side.

@@ -2,10 +2,26 @@
   "eval_id": 11,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration", "pass": true, "rationale": "Shows .AddBffBlazorClient() chained on the AddBff().ConfigureOpenIdConnect() builder"},
-    {"assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))", "pass": true, "rationale": "Shows builder.Services.AddBffBlazorClient(options => { ... options.Polling = new BffBlazorClientPollingOptions { Interval = TimeSpan.FromSeconds(30) } })"},
-    {"assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'", "pass": true, "rationale": "Shows builder.Services.AddLocalApiHttpClient<WeatherClient>()"},
-    {"assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'", "pass": true, "rationale": "Shows builder.Services.AddBff().ConfigureOpenIdConnect(options => { ... })"}
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": true,
+      "rationale": ".AddBffBlazorClient() is chained on the server-side BFF builder"
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": true,
+      "rationale": "AddBffBlazorClient with Polling.Interval = TimeSpan.FromSeconds(30) on the client"
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": true,
+      "rationale": "builder.Services.AddLocalApiHttpClient<WeatherClient>() is present"
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": true,
+      "rationale": "AddBff().ConfigureOpenIdConnect() is present on the server"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

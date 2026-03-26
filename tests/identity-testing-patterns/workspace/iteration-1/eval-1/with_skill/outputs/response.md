@@ -1,11 +1,8 @@
-# Integration Testing a Protected API with TestAuthHandler
+# TestAuthHandler for Protected API Integration Tests
 
-Here's how to create a `TestAuthHandler` that lets you control the `ClaimsPrincipal` per-test, along with a `WebApplicationFactory` setup and example tests.
-
-## 1. ITestClaimsProvider Interface and Implementation
+## 1. ITestClaimsProvider Interface
 
 ```csharp
-// Swap this per-test to change the authenticated user
 public interface ITestClaimsProvider
 {
     IEnumerable<Claim>? GetClaims();
@@ -21,14 +18,14 @@ public sealed class TestClaimsProvider : ITestClaimsProvider
 }
 ```
 
-## 2. TestAuthHandler Implementation
+## 2. TestAuthHandler
 
 ```csharp
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
 
 public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -61,14 +58,12 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
 }
 ```
 
-## 3. WebApplicationFactory with Test Auth Scheme
+## 3. WebApplicationFactory
 
 ```csharp
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication;
 
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
@@ -78,8 +73,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
+            // Register the test claims provider as a singleton
             services.AddSingleton<ITestClaimsProvider>(ClaimsProvider);
 
+            // Replace the authentication scheme with our test handler
             services.AddAuthentication(TestAuthHandler.SchemeName)
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                     TestAuthHandler.SchemeName, _ => { });
@@ -88,19 +85,19 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 }
 ```
 
-## 4. Example Tests
+## 4. Tests
 
 ```csharp
 using System.Net;
 using System.Security.Claims;
 using Xunit;
 
-public class ProductsApiTests : IClassFixture<ApiFactory>
+public class ProtectedApiTests : IClassFixture<ApiFactory>
 {
     private readonly ApiFactory _factory;
     private readonly HttpClient _client;
 
-    public ProductsApiTests(ApiFactory factory)
+    public ProtectedApiTests(ApiFactory factory)
     {
         _factory = factory;
         _client = factory.CreateClient();
@@ -109,11 +106,12 @@ public class ProductsApiTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task GetProducts_Authenticated_ShouldReturn200()
     {
-        _factory.ClaimsProvider.SetClaims(
-        [
+        _factory.ClaimsProvider.SetClaims(new[]
+        {
             new Claim("sub", "user-001"),
-            new Claim("scope", "api1")
-        ]);
+            new Claim("scope", "api1"),
+            new Claim("role", "viewer")
+        });
 
         var response = await _client.GetAsync("/api/products");
 
@@ -123,7 +121,7 @@ public class ProductsApiTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task GetProducts_Unauthenticated_ShouldReturn401()
     {
-        // ClearClaims makes the handler return AuthenticateResult.NoResult()
+        // Clear claims = no authenticated identity = AuthenticateResult.NoResult()
         _factory.ClaimsProvider.ClearClaims();
 
         var response = await _client.GetAsync("/api/products");
@@ -133,8 +131,8 @@ public class ProductsApiTests : IClassFixture<ApiFactory>
 }
 ```
 
-**Key points:**
-- The `TestAuthHandler` extends `AuthenticationHandler<AuthenticationSchemeOptions>` and injects an `ITestClaimsProvider` to control the identity per-test.
-- When `ClearClaims()` is called, the handler returns `AuthenticateResult.NoResult()`, which results in a 401 Unauthorized response.
-- Authorization policies remain fully active — we only replace the authentication source, not the authorization pipeline. The `AdminOnly` and `ApiScope` policies still enforce their claim requirements normally.
-- The `WebApplicationFactory` registers the test scheme via `AddAuthentication` and `AddScheme`.
+## Key Points
+
+- **TestAuthHandler returns `AuthenticateResult.NoResult()`** when claims are null — this means no authentication ticket is created, and the authorization middleware returns 401 for `[Authorize]` endpoints.
+- **Authorization policies remain active** — we only replace the authentication source, not the authorization logic. Policies like `AdminOnly` and `ApiScope` still enforce their claim requirements.
+- **ClearClaims() simulates unauthenticated requests** — no need to remove the auth handler or modify middleware.

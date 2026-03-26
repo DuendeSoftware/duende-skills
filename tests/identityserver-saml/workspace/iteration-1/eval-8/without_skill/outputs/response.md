@@ -1,14 +1,12 @@
 # Detecting SAML Requests in the Login Page
 
-To detect if an incoming request is a SAML AuthnRequest versus a standard OIDC request, you can check the return URL parameters.
+To determine whether an incoming request to your login page is a SAML AuthnRequest, you can inspect the authentication context. Here's an approach:
 
-## Approach
-
-You can use the `IIdentityServerInteractionService` to get the authorization context and check if it's a SAML request:
+## Checking the Request Type
 
 ```csharp
-using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Mvc;
+using Duende.IdentityServer.Services;
 
 public class AccountController : Controller
 {
@@ -26,25 +24,40 @@ public class AccountController : Controller
 
         if (context != null)
         {
-            // This is an authentication request
-            // Check parameters to determine if it's SAML
-            var isSaml = returnUrl?.Contains("/saml/") == true;
-
-            if (isSaml)
-            {
-                // Handle SAML-specific login logic
-                ViewData["IsSaml"] = true;
-            }
+            // We have an authentication context
+            // Check the protocol type or parameters to determine if it's SAML
+            ViewBag.ClientName = context.Client?.ClientName;
+            ViewBag.ReturnUrl = returnUrl;
         }
 
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        return View();
     }
 }
 ```
 
-## Key Points
+## Determining SAML vs OIDC
 
-- Use the interaction service to get context about the authentication request
-- Check the return URL to determine if it's a SAML flow
-- You can customize the login UI based on the request type
-- Both OIDC and SAML flows share the same login page in IdentityServer
+The `IIdentityServerInteractionService` provides the authorization context for OIDC requests. For SAML, you might need to:
+
+1. Parse the return URL to check for SAML-specific parameters
+2. Check if the request path includes SAML endpoints (like `/saml/signin`)
+3. Look at the request's query string or form data for `SAMLRequest` parameters
+
+```csharp
+public bool IsSamlRequest(string returnUrl)
+{
+    return returnUrl?.Contains("/saml/", StringComparison.OrdinalIgnoreCase) == true;
+}
+```
+
+## Accessing SP Details
+
+Once you've determined it's a SAML request, you can look up the service provider details from your store:
+
+```csharp
+// Look up SP by entity ID from the request
+var entityId = ExtractEntityIdFromRequest(returnUrl);
+var sp = await _serviceProviderStore.FindByEntityIdAsync(entityId);
+```
+
+This approach works but requires manual parsing. Check Duende's documentation for any built-in SAML interaction service that might simplify this.

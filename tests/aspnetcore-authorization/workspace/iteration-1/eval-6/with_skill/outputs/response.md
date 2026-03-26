@@ -1,6 +1,6 @@
 # Combining Client Scope and User Role in a Single Policy
 
-When protecting an API endpoint with IdentityServer, you should check **both** the client's scope (what the application is allowed to do) and the user's claims (what the user is allowed to do). This is because scopes and roles represent different authorization dimensions.
+When protecting API endpoints, it's critical to check **both** the client's scope (what the client application is allowed to do) and the user's claims (what the user is allowed to do). The DELETE endpoint for products is a destructive operation that should require both levels of permission.
 
 ## Updated Program.cs
 
@@ -18,11 +18,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    // Combined policy: requires BOTH client scope AND user role
-    options.AddPolicy("catalog-admin-delete", policy =>
+    // Policy combining client scope AND user role
+    options.AddPolicy("catalog.delete", policy =>
     {
-        policy.RequireClaim("scope", "catalog.write"); // Client-level permission
-        policy.RequireRole("admin");                    // User-level permission
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("scope", "catalog.write");  // Client-level permission
+        policy.RequireRole("admin");                      // User-level permission
     });
 });
 
@@ -42,7 +43,7 @@ app.MapPost("/products", (object product) => Results.Created("/products/3", prod
 
 // DELETE requires both catalog.write scope AND admin role
 app.MapDelete("/products/{id}", (int id) => Results.NoContent())
-    .RequireAuthorization("catalog-admin-delete");
+    .RequireAuthorization("catalog.delete");
 
 // Admin endpoints
 app.MapGet("/admin/users", () => Results.Ok(new[] { "alice", "bob" }));
@@ -61,23 +62,25 @@ app.Run();
 
 ## Why Check Both Scope and Role?
 
-**Scopes represent client permissions** — they describe what the *client application* is permitted to do. A scope like `catalog.write` means "this application has been granted write access to the catalog API." Scopes are consented to during the OAuth flow and embedded in the access token.
+In an OAuth 2.0 system, there are two distinct layers of authorization:
 
-**Roles (and other user claims) represent user permissions** — they describe what the *user* is permitted to do. The `admin` role means "this user has administrative privileges."
+1. **Client scope (`scope` claim)** — Represents what the **client application** is permitted to do. Scopes are granted when the access token is issued and define the boundaries of what the client can request on behalf of a user. For example, a mobile app might be granted `catalog.read` and `catalog.write` scopes, while a reporting tool might only get `catalog.read`.
+
+2. **User role/claims (`role` claim)** — Represents what the **user** is permitted to do. Even if a client has the `catalog.write` scope, the user operating that client might not have the `admin` role needed to delete products.
 
 ### Why both matter:
 
-1. **A malicious or misconfigured client** could request broad scopes. If you only check the scope, any user accessing through that client would have delete access — even non-admins.
+- **A malicious client could request broad scopes**, but the user may not have permission to perform the operation. Checking the user's role ensures that only authorized users can perform destructive actions.
 
-2. **A privileged user using a restricted client** should be limited by that client's permissions. If you only check the `admin` role, a read-only client application could be used to delete products, even though the client was only granted read scopes.
+- **A privileged user operating through a restricted client** should be limited by that client's scopes. An admin user using a read-only reporting tool shouldn't be able to delete products through it, even though their role would allow it.
 
-3. **Defense in depth**: Checking both ensures that:
-   - The client application was explicitly granted the `catalog.write` scope
-   - The user has the `admin` role
-   - Both conditions must be true simultaneously for the delete to proceed
+- **Defense in depth** — By requiring both checks, you create a layered security model. The client must be authorized to perform the action, AND the user must have the right claims. This aligns with the OAuth 2.0 Security Best Current Practice.
 
-This is a key principle in OAuth 2.0 API authorization: **scopes constrain the client, claims constrain the user, and both must be satisfied.**
+### The policy in detail:
 
-## Policy Composition
+```csharp
+policy.RequireClaim("scope", "catalog.write");  // Client has write permission
+policy.RequireRole("admin");                      // User has admin role
+```
 
-In the policy builder, `RequireClaim(...)` and `RequireRole(...)` are added as separate *requirements*. Multiple requirements in a single policy use **AND** logic — all requirements must pass for the policy to succeed. This is exactly what we want: the client must have the scope AND the user must have the role.
+Multiple requirements in a single policy use **AND logic** — all requirements must be satisfied for the policy to pass. This is exactly what we want: the token must have the scope AND the user must have the role.

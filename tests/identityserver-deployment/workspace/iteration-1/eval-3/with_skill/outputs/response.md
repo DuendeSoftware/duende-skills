@@ -1,10 +1,10 @@
-# Implementing Health Checks for IdentityServer Discovery and JWKS Endpoints
+# Implementing Health Checks for IdentityServer
 
-## Overview
+Here's how to add health checks that verify the discovery endpoint and JWKS endpoint are functioning correctly.
 
-Rather than making external HTTP calls to the discovery and JWKS endpoints, we can invoke the internal IdentityServer endpoint handlers directly. This approach is more reliable (no network dependency), faster, and tests the actual processing pipeline including access to configuration and signing key stores.
+## Health Check Implementations
 
-## Step 1: Discovery Endpoint Health Check
+### Discovery Endpoint Health Check
 
 ```csharp
 using Duende.IdentityServer;
@@ -42,37 +42,25 @@ public class DiscoveryHealthCheck : IHealthCheck
                 if (handler != null)
                 {
                     var result = await handler.ProcessAsync(
-                        _httpContextAccessor.HttpContext!);
+                        _httpContextAccessor.HttpContext);
 
                     if (result is DiscoveryDocumentResult)
                     {
-                        return HealthCheckResult.Healthy(
-                            "Discovery endpoint is responding correctly.");
+                        return HealthCheckResult.Healthy();
                     }
                 }
             }
         }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Unhealthy(
-                "Discovery endpoint check failed.", ex);
-        }
+        catch { }
 
-        return new HealthCheckResult(
-            context.Registration.FailureStatus,
-            "Discovery endpoint handler not found or returned unexpected result.");
+        return new HealthCheckResult(context.Registration.FailureStatus);
     }
 }
 ```
 
-## Step 2: JWKS Endpoint Health Check
+### JWKS Endpoint Health Check
 
 ```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Endpoints.Results;
-using Duende.IdentityServer.Hosting;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
 public class DiscoveryKeysHealthCheck : IHealthCheck
 {
     private readonly IEnumerable<Hosting.Endpoint> _endpoints;
@@ -103,37 +91,25 @@ public class DiscoveryKeysHealthCheck : IHealthCheck
                 if (handler != null)
                 {
                     var result = await handler.ProcessAsync(
-                        _httpContextAccessor.HttpContext!);
+                        _httpContextAccessor.HttpContext);
 
                     if (result is JsonWebKeysResult)
                     {
-                        return HealthCheckResult.Healthy(
-                            "JWKS endpoint is responding correctly.");
+                        return HealthCheckResult.Healthy();
                     }
                 }
             }
         }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Unhealthy(
-                "JWKS endpoint check failed.", ex);
-        }
+        catch { }
 
-        return new HealthCheckResult(
-            context.Registration.FailureStatus,
-            "JWKS endpoint handler not found or returned unexpected result.");
+        return new HealthCheckResult(context.Registration.FailureStatus);
     }
 }
 ```
 
-## Step 3: Register Health Checks and Map Endpoint
-
-Update your `Program.cs`:
+## Registration in Program.cs
 
 ```csharp
-using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
@@ -145,14 +121,14 @@ builder.Services.AddIdentityServer()
 
 // Register health checks
 builder.Services.AddHealthChecks()
-    .AddCheck<DiscoveryHealthCheck>("discovery_endpoint")
-    .AddCheck<DiscoveryKeysHealthCheck>("jwks_endpoint");
+    .AddCheck<DiscoveryHealthCheck>("discovery")
+    .AddCheck<DiscoveryKeysHealthCheck>("jwks");
 
 var app = builder.Build();
 
 app.UseIdentityServer();
 
-// Map health check endpoint
+// Map the health endpoint
 app.MapHealthChecks("/health");
 
 app.MapGet("/", () => "IdentityServer is running");
@@ -162,13 +138,14 @@ app.Run();
 
 ## How It Works
 
-The pattern uses IdentityServer's internal `IEnumerable<Hosting.Endpoint>` collection, which contains all registered endpoint handlers. By looking up endpoints by their well-known names (`IdentityServerConstants.EndpointNames.Discovery` and `.Jwks`), we can:
+Both health checks use the same pattern:
 
-1. Find the endpoint definition
-2. Resolve the handler from the DI container
-3. Invoke `ProcessAsync()` to execute the endpoint logic
-4. Check the result type to confirm it completed successfully
+1. **Inject `IEnumerable<Hosting.Endpoint>`** — IdentityServer registers its internal endpoints in DI
+2. **Inject `IHttpContextAccessor`** — needed to get the current HTTP context for handler invocation
+3. **Find the endpoint by name** — using `IdentityServerConstants.EndpointNames.Discovery` and `.Jwks`
+4. **Resolve and invoke the handler** — calls `ProcessAsync` to actually exercise the endpoint logic
+5. **Check the result type** — `DiscoveryDocumentResult` for discovery, `JsonWebKeysResult` for JWKS
 
-This verifies the entire pipeline: configuration stores, signing key stores, and the endpoint processing logic — without making an external HTTP request.
+This approach tests the actual IdentityServer processing pipeline, including configuration store connectivity and signing key availability, rather than just checking if the HTTP endpoint responds.
 
-**Note**: This pattern requires IdentityServer v6.3+ which added endpoint name constants.
+**Note**: This endpoint name lookup requires IdentityServer v6.3+.

@@ -1,31 +1,83 @@
 {
-  "metadata": {"skill_name": "identityserver-sessions-providers", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "identityserver-sessions-providers",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 37, "passed": 37, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 37, "passed": 23, "failed": 14, "pass_rate": 62.2},
-    "delta": {"assertions_improved": 14, "delta_pass_rate": 37.8}
+    "with_skill": {
+      "total_assertions": 37,
+      "passed": 37,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 37,
+      "passed": 23,
+      "failed": 14,
+      "pass_rate": 62.2
+    },
+    "delta": {
+      "assertions_improved": 14,
+      "delta_pass_rate": 37.8
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
       "without_skill_failures": [
+        "Code uses RemoveSessionsAsync with RevokeConsents = false to preserve consent grants",
         "Response mentions preferring GetSessionsAsync over QuerySessionsAsync for simple session listing"
       ]
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
       "without_skill_failures": [
         "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true"
@@ -33,19 +85,40 @@
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25},
-      "delta": 0.75,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
       "without_skill_failures": [
-        "Program.cs or a seed file creates an OidcProvider with Scheme set to 'demoidsrv' and Authority set to 'https://demo.duendesoftware.com'",
         "Program.cs calls AddConfigurationStoreCache() for caching dynamic provider lookups",
         "Response mentions or acknowledges that dynamic identity providers require the Enterprise Edition"
       ]
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
       "delta": 0.6,
       "without_skill_failures": [
         "GoogleIdentityProvider uses the indexer pattern (this[\"ClientId\"]) for property storage",
@@ -55,8 +128,19 @@
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
       "without_skill_failures": [
         "Response mentions that CIBA requires the Enterprise Edition"
@@ -64,8 +148,19 @@
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
       "without_skill_failures": [
         "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)"
@@ -73,8 +168,19 @@
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
       "delta": 0.8,
       "without_skill_failures": [
         "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",

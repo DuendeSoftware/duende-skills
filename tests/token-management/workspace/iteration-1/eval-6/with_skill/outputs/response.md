@@ -1,64 +1,43 @@
-# Token Caching with Redis, HybridCache, and Encryption
-
-In Duende.AccessTokenManagement v4, client credentials tokens are cached using `HybridCache` — a two-tier cache with an in-memory L1 and an optional distributed L2. Here's how to configure Redis as the L2 backend, set a custom cache lifetime buffer, and encrypt cached tokens with Data Protection.
-
-## Package References
-
-```xml
-<PackageReference Include="Duende.AccessTokenManagement" Version="4.0.0" />
-<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
-<PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.0" />
-```
-
-## Program.cs
+# Token Caching with Redis and Data Protection Encryption
 
 ```csharp
-using System.Buffers;
-using System.Text.Json;
-using Duende.AccessTokenManagement;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Caching.Hybrid;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// ── 1. Redis as the distributed L2 cache tier ──
-// HybridCache picks this up automatically as its remote backing store
+// Register Redis as the distributed L2 cache tier
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
-// ── 2. Data Protection for encrypting cached tokens ──
+// Register Data Protection for token encryption
 builder.Services.AddDataProtection();
 
-// ── 3. Client credentials token management with custom cache buffer ──
+// Register the encrypted serializer
+builder.Services.AddHybridCache()
+    .AddSerializer<ClientCredentialsToken, EncryptedHybridCacheSerializer>();
+
+// Configure token management with cache lifetime buffer
 builder.Services.AddClientCredentialsTokenManagement(options =>
 {
-    // Refresh tokens 120 seconds before they expire to avoid serving near-expired tokens
-    options.CacheLifetimeBuffer = 120;
+    options.CacheLifetimeBuffer = 120; // Refresh tokens 120 seconds before expiry
 })
-.AddClient("api.client", client =>
+.AddClient(ClientCredentialsClientName.Parse("api-client"), client =>
 {
     client.TokenEndpoint = new Uri("https://sts.example.com/connect/token");
     client.ClientId = ClientId.Parse("my-service");
     client.ClientSecret = ClientSecret.Parse("my-secret");
     client.Scope = Scope.Parse("api1");
 });
+```
 
-// ── 4. Register HybridCache with an encrypted serializer for ClientCredentialsToken ──
-builder.Services.AddHybridCache()
-    .AddSerializer<ClientCredentialsToken, EncryptedHybridCacheSerializer>();
+## Encrypted Cache Serializer
 
-// ── 5. Register HTTP client ──
-builder.Services.AddClientCredentialsHttpClient(
-    "api",
-    ClientCredentialsClientName.Parse("api.client"),
-    client => { client.BaseAddress = new Uri("https://api.example.com/"); });
+```csharp
+using System.Buffers;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.AspNetCore.DataProtection;
 
-var app = builder.Build();
-app.Run();
-
-// ── Encrypted serializer implementation ──
 public sealed class EncryptedHybridCacheSerializer : IHybridCacheSerializer<ClientCredentialsToken>
 {
     private readonly IDataProtector _protector;
@@ -84,10 +63,10 @@ public sealed class EncryptedHybridCacheSerializer : IHybridCacheSerializer<Clie
 
 ## How It Works
 
-1. **Redis as L2**: `AddStackExchangeRedisCache` registers an `IDistributedCache` backed by Redis. `HybridCache` in v4 automatically picks this up as the remote L2 tier — no explicit registration of `HybridCache` wiring to Redis is needed. The L1 is in-memory by default.
+1. **`AddStackExchangeRedisCache`** registers Redis as the distributed cache backend. HybridCache automatically picks it up as the L2 tier.
 
-2. **CacheLifetimeBuffer = 120**: Tokens are evicted from cache 120 seconds before their actual expiry. This prevents the library from serving a token that could expire in transit between retrieval and use at the API.
+2. **`CacheLifetimeBuffer = 120`** means the library will request a new token 120 seconds before the cached token expires, ensuring the API never receives a near-expired token.
 
-3. **Encrypted serializer**: Since the Redis instance is shared with other applications, implementing `IHybridCacheSerializer<ClientCredentialsToken>` using `IDataProtector` ensures tokens are encrypted at rest. The `AddHybridCache().AddSerializer<>()` call replaces the default serializer for the `ClientCredentialsToken` type only.
+3. **`EncryptedHybridCacheSerializer`** implements `IHybridCacheSerializer<ClientCredentialsToken>` and uses ASP.NET Core Data Protection to encrypt/decrypt tokens before they enter/leave the cache. This prevents other apps sharing the same Redis instance from reading your tokens.
 
-4. **Data Protection**: `AddDataProtection()` enables the `IDataProtectionProvider` used by the encrypted serializer. In production, configure a persistent key ring (e.g., Azure Blob Storage + Azure Key Vault) so keys survive app restarts.
+4. **`AddHybridCache().AddSerializer<>()`** registers the custom serializer so HybridCache uses it for all `ClientCredentialsToken` entries.

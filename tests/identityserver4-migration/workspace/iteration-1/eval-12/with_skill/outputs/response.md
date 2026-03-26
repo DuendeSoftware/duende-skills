@@ -1,11 +1,10 @@
 # Migrating the IdentityServer4 Quickstart UI to Duende IdentityServer
 
-Your MVC-based UI (AccountController, ConsentController, Razor views) needs several updates. Here's a comprehensive approach:
+## Namespace Updates in Razor Views
 
-## 1. Update Namespace Directives
+Update all `@using` directives in your `.cshtml` files:
 
-Update `@using IdentityServer4` directives in `_ViewImports.cshtml` and any individual `.cshtml` files to `@using Duende.IdentityServer`:
-
+### _ViewImports.cshtml
 ```cshtml
 @* Old *@
 @using IdentityServer4
@@ -14,52 +13,91 @@ Update `@using IdentityServer4` directives in `_ViewImports.cshtml` and any indi
 @using Duende.IdentityServer
 ```
 
-Check all Razor view files — not just `_ViewImports.cshtml` — for any direct `IdentityServer4` namespace references.
+Search all `.cshtml` files for `@using IdentityServer4` and replace with `@using Duende.IdentityServer`. This includes:
+- `_ViewImports.cshtml` (affects all views)
+- Individual view files that have their own `@using` directives
+- Layout files
 
-## 2. Understand the UI Layout Differences
+## Duende Templates Use Razor Pages, Not MVC Controllers
 
-Duende IdentityServer templates now use **Razor Pages** (`Pages/`) instead of MVC controllers (`Controllers/` + `Views/`). The UI architecture has changed significantly since the IdentityServer4 Quickstart UI era. However, your **existing MVC-based UI will still compile and work after the namespace updates** — it just won't include newer UI flows like:
+The Duende IdentityServer UI templates have **diverged significantly** from the IdentityServer4 Quickstart UI:
 
-- **Device flow** authorization page
-- **CIBA** (Client-Initiated Backchannel Authentication)
-- **Dynamic identity provider** management
-- **Server-side session** management
+| IdentityServer4 Quickstart UI | Duende IdentityServer Templates |
+|-------------------------------|--------------------------------|
+| MVC Controllers (`AccountController`, `ConsentController`) | Razor Pages (`Pages/Account/Login.cshtml`, `Pages/Consent/Index.cshtml`) |
+| Views under `Views/Account/`, `Views/Consent/` | Pages under `Pages/` |
+| Controllers + ViewModels | PageModels with OnGet/OnPost |
 
-## 3. Fix API Changes in Controller Code
+## Recommended Approach: Scaffold Fresh Templates
 
-Several API surfaces changed between IdentityServer4 v3/v4 and Duende. Update your controller code:
-
-```csharp
-// Old (IdentityServer4)
-var clientId = request.ClientId;
-var scopes = request.ScopesRequested;
-
-// New (Duende)
-var clientId = request.Client.ClientId;      // Client is now an object
-var scopes = request.ValidatedResources.RawScopeValues;
-```
-
-```csharp
-// Old
-var consent = new ConsentResponse { ScopesConsented = scopes };
-
-// New
-var consent = new ConsentResponse { ScopesValuesConsented = scopes };  // renamed
-```
-
-## 4. Choose a Migration Approach
-
-### Recommended: Start Fresh with Duende Templates
-
-Scaffold the current Duende UI pages and port your customizations:
+The cleanest approach is to scaffold the current Duende UI templates and port your customizations:
 
 ```bash
 dotnet new install Duende.Templates
 dotnet new duende-is-ui
 ```
 
-This gives you the latest Razor Pages-based UI. Diff the output against your existing controllers/views to identify where your customizations fit.
+This creates the full set of Duende UI pages in your project. Diff the output against your existing UI to identify where your customizations should go.
 
-### Alternative: Incremental Update
+## Existing MVC UI Will Still Work (With Limitations)
 
-If your UI has heavy customizations, update namespaces in all `.cshtml` files, fix the v4 API changes in controllers, and defer the full layout refresh. This is a minimum-viable approach that gets you compiling but leaves you on the older MVC pattern.
+Your existing MVC-based UI (`AccountController`, `ConsentController`, etc.) **will still compile and work** after updating namespaces. However, it will miss newer UI flows that Duende templates include:
+
+- **Device flow authorization page** — for input-constrained devices
+- **CIBA (Client-Initiated Backchannel Authentication) page** — for decoupled auth flows
+- **Dynamic identity provider management pages** — for runtime provider configuration
+- **Server-side session management pages** — for viewing/revoking active sessions
+
+## Fix v4 API Changes in Controllers
+
+If you keep your MVC controllers (or if you're also migrating from v3 to v4), fix these API changes:
+
+### AuthorizationRequest property access
+```csharp
+// Old (v3)
+var clientId = request.ClientId;
+
+// New (v4+)
+var clientId = request.Client.ClientId;
+```
+
+### Consent scopes
+```csharp
+// Old (v3)
+var grantedConsent = new ConsentResponse
+{
+    ScopesConsented = consentedScopes
+};
+
+// New (v4+)
+var grantedConsent = new ConsentResponse
+{
+    ScopesValuesConsented = consentedScopes  // renamed property
+};
+```
+
+### Grant management
+```csharp
+// Old (v3)
+await _interaction.GetAllUserConsentsAsync();
+
+// New (v4+)
+await _interaction.GetAllUserGrantsAsync();
+```
+
+### Validated resources
+```csharp
+// Old (v3)
+var scopes = request.ScopesRequested;
+
+// New (v4+)
+var scopes = request.ValidatedResources.RawScopeValues;
+```
+
+## Summary
+
+| Approach | Effort | Coverage |
+|----------|--------|----------|
+| **Fresh start** (`dotnet new duende-is-ui`) + port customizations | Medium | Full — includes all new UI flows |
+| **Incremental diff** — compare existing UI with Duende templates | Medium-High | Full if thorough |
+| **Minimum viable** — update namespaces only | Low | Partial — compiles but misses new flows |

@@ -1,6 +1,6 @@
-# Configuring Inactivity Timeout
+# Configuring Inactivity Timeout with Server-Side Sessions
 
-Here's how to configure IdentityServer with an 8-hour absolute session lifetime, coordinated client lifetimes, and back-channel logout on expiration.
+Here's the complete configuration for an 8-hour absolute session with coordinated client lifetimes and back-channel logout on expiration.
 
 ## Updated Program.cs
 
@@ -19,15 +19,14 @@ var connectionString = builder.Configuration.GetConnectionString("IdentityServer
 
 builder.Services.AddIdentityServer(options =>
 {
-    // 8-hour absolute session lifetime, no sliding expiration
+    // 8-hour absolute session, no sliding
     options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
     options.Authentication.CookieSlidingExpiration = false;
 
-    // Coordinate client token lifetimes with the user session globally
+    // Coordinate client token lifetimes with user session globally
     options.Authentication.CoordinateClientLifetimesWithUserSession = true;
 
     // Trigger back-channel logout when expired sessions are cleaned up
-    // (this is true by default, shown here for explicitness)
     options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
 })
     .AddInMemoryIdentityResources(new List<IdentityResource>
@@ -44,30 +43,28 @@ builder.Services.AddIdentityServer(options =>
     })
     .AddInMemoryClients(new List<Client>
     {
-        // Interactive web application — with back-channel logout and short access token lifetime
         new Client
         {
             ClientId = "web.app",
             ClientName = "Main Web Application",
             AllowedGrantTypes = GrantTypes.Code,
             RequirePkce = true,
-
             ClientSecrets = { new Secret("WebAppSecret".Sha256()) },
-
             RedirectUris = { "https://app.example.com/signin-oidc" },
             PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
-            BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
-
             AllowedScopes = { "openid", "profile", "email", "catalog.read", "catalog.write" },
-
             AllowOfflineAccess = true,
-            AccessTokenLifetime = 300, // 5 minutes — shorter than session, so refresh usage signals activity
+
+            // 5-minute access token — short lifetime forces frequent refresh,
+            // which signals user activity to the server-side session
+            AccessTokenLifetime = 300,
             RefreshTokenUsage = TokenUsage.OneTimeOnly,
+
+            // Back-channel logout URI for session expiration notifications
+            BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
 
             AllowedCorsOrigins = { "https://app.example.com" }
         },
-
-        // BFF-secured SPA
         new Client
         {
             ClientId = "spa.bff",
@@ -83,8 +80,6 @@ builder.Services.AddIdentityServer(options =>
             RefreshTokenUsage = TokenUsage.OneTimeOnly,
             AllowedCorsOrigins = { "https://spa.example.com" }
         },
-
-        // Machine-to-machine client
         new Client
         {
             ClientId = "background.worker",
@@ -94,8 +89,6 @@ builder.Services.AddIdentityServer(options =>
             AllowedScopes = { "orders.manage" },
             AccessTokenLifetime = 3600
         },
-
-        // CIBA client (not yet configured)
         new Client
         {
             ClientId = "kiosk.app",
@@ -105,10 +98,14 @@ builder.Services.AddIdentityServer(options =>
             AllowedScopes = { "openid", "profile", "catalog.read" }
         }
     })
-    // Enable server-side sessions — required for inactivity timeout
-    .AddServerSideSessions();
+    .AddServerSideSessions()
+    .AddOperationalStore(options =>
+    {
+        options.ConfigureDbContext = b =>
+            b.UseSqlServer(connectionString);
+    });
 
-// Static external providers
+// External providers...
 builder.Services.AddAuthentication()
     .AddGoogle("Google", options =>
     {
@@ -133,24 +130,21 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
-
 app.MapRazorPages();
 
 app.Run();
 ```
 
-## How It Works
+## How Inactivity Timeout Works
 
-1. **`CookieLifetime = TimeSpan.FromHours(8)`** — Sets the absolute session lifetime to 8 hours. After 8 hours, the session expires regardless of activity.
+1. **Access token lifetime (5 min)** is much shorter than the session lifetime (8 hours)
+2. The client's refresh token requests act as "heartbeats" — each refresh extends the server-side session
+3. If no refresh happens within the session window, the session expires
+4. On expiration, back-channel logout notifications are sent to clients with a `BackChannelLogoutUri`
+5. `CoordinateClientLifetimesWithUserSession` ensures client token lifetimes cannot exceed the user session
 
-2. **`CookieSlidingExpiration = false`** — Disables sliding expiration. The session cannot be extended by activity; it has a hard 8-hour limit.
+## Important
 
-3. **`CoordinateClientLifetimesWithUserSession = true`** — Globally enables coordination between client token lifetimes and the server-side session. When a client uses refresh tokens, introspection, or userinfo, these protocol calls extend the server-side session (for inactivity tracking). When the session expires, client tokens are revoked.
-
-4. **`ExpiredSessionsTriggerBackchannelLogout = true`** — When the session cleanup job finds expired sessions, it sends back-channel logout notifications to clients that have a `BackChannelLogoutUri`. This is the default, shown explicitly here.
-
-5. **`BackChannelLogoutUri` on web.app** — The web.app client now has a back-channel logout URI so it receives notifications when the session expires.
-
-6. **`AccessTokenLifetime = 300` on web.app** — 5-minute access token lifetime. This is critical: the access token must be shorter than the session lifetime so that the client is forced to use refresh tokens regularly, which signals activity to IdentityServer and keeps the session alive.
-
-**Important**: `AddServerSideSessions()` must be called to enable server-side sessions. Without it, there's no server-side session record to track expiration and activity.
+- `CookieSlidingExpiration = false` ensures an absolute 8-hour limit
+- The `web.app` client now has `AccessTokenLifetime = 300` (5 minutes) to drive frequent refreshes
+- `BackChannelLogoutUri` on `web.app` ensures it gets notified when the session expires

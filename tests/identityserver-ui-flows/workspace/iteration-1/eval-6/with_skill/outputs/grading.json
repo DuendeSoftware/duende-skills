@@ -5,22 +5,22 @@
     {
       "assertion": "The login page checks context.IdP from GetAuthorizationContextAsync and bypasses the login UI when an IdP hint is present",
       "pass": true,
-      "rationale": "OnGet checks context.IdP and if set, calls ChallengeExternalProvider bypassing the login UI."
+      "rationale": "Code checks context.IdP and calls ChallengeExternalProvider to skip the UI when a hint is present."
     },
     {
       "assertion": "The login page performs email-domain-based routing, sending @contoso.com users to the AAD provider",
       "pass": true,
-      "rationale": "OnPost checks Email.EndsWith(\"@contoso.com\") and calls ChallengeExternalProvider(\"AAD\", ReturnUrl)."
+      "rationale": "OnPostEmailDiscovery checks Email.EndsWith('@contoso.com') and routes to AAD."
     },
     {
       "assertion": "The spa.app client is configured with IdentityProviderRestrictions that includes 'Google' and excludes 'AAD'",
       "pass": true,
-      "rationale": "spa.app has IdentityProviderRestrictions = { \"Google\", \"local\" } \u2014 includes Google, excludes AAD."
+      "rationale": "spa.app has IdentityProviderRestrictions = { 'Google', 'local' } \u2014 AAD is excluded."
     },
     {
       "assertion": "The login page issues a Challenge to the appropriate external provider scheme when HRD determines the provider",
       "pass": true,
-      "rationale": "ChallengeExternalProvider calls Challenge(props, provider) with the determined provider scheme."
+      "rationale": "ChallengeExternalProvider method calls Challenge(props, scheme)."
     }
   ],
   "pass_count": 4,

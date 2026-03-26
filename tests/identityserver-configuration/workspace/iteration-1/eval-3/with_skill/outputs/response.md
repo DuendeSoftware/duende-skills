@@ -1,10 +1,8 @@
-To achieve audience isolation between your `catalog-api` and `orders-api` microservices, you need to use both **API Scopes** (for permissions) and **API Resources** (for audience boundaries). The `ApiResource` controls the `aud` claim in access tokens, ensuring a token issued for one API cannot be used at another.
+# Audience Isolation with API Resources and Scopes
 
-Here's the full configuration:
+To ensure tokens issued for `catalog-api` can't be used at `orders-api`, you need **API Resources** in addition to API Scopes. The API Resource controls the `aud` (audience) claim in access tokens.
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
     options.Events.RaiseErrorEvents = true;
@@ -12,12 +10,12 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
 })
-    .AddInMemoryApiScopes(new List<ApiScope>
+    .AddInMemoryApiScopes(new ApiScope[]
     {
-        new ApiScope("read", "Read Access"),
-        new ApiScope("write", "Write Access")
+        new ApiScope("read", "Read data"),
+        new ApiScope("write", "Write data")
     })
-    .AddInMemoryApiResources(new List<ApiResource>
+    .AddInMemoryApiResources(new ApiResource[]
     {
         new ApiResource("catalog-api", "Product Catalog API")
         {
@@ -28,31 +26,50 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
             Scopes = { "read" }
         }
     })
-    .AddInMemoryClients(Array.Empty<Client>());
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
+    .AddInMemoryClients(Config.Clients);
 ```
 
-### How It Works
+## How Audience Isolation Works
 
-1. **`ApiScope`** defines the permissions (`read` and `write`). These are the values clients request via the `scope` parameter.
+The `aud` claim is derived from the API Resource name. When a client requests scopes, IdentityServer determines which API Resources contain those scopes and adds their names as audience values.
 
-2. **`ApiResource`** defines the logical API boundaries:
-   - `catalog-api` owns both `read` and `write` scopes
-   - `orders-api` owns only the `read` scope
+### Example Token for catalog-api
 
-3. **Audience isolation** — When a client requests a token targeting `catalog-api`, IdentityServer includes `"aud": "catalog-api"` in the access token. The `orders-api` validates that the `aud` claim matches its own name and rejects tokens issued for `catalog-api`, even if they contain the `read` scope.
+When a client requests `read` and `write` scopes targeting the catalog-api:
 
-4. Clients specify which resource they want via the `resource` parameter (RFC 8707) in the token request, and IdentityServer issues a token scoped to that audience.
+```json
+{
+  "aud": ["catalog-api", "orders-api"],
+  "scope": "read write"
+}
+```
 
-### Key Distinction
+Note: Because `read` is shared between both resources, requesting `read` results in both audiences. The `write` scope is only in `catalog-api`.
 
-- **`ApiScope` alone** — Sufficient for simple single-API setups. No audience claim isolation.
-- **`ApiResource` + `ApiScope`** — Required when multiple APIs share scope names and you need token isolation between them. The `ApiResource` name becomes the `aud` claim.
+### Achieving Strict Isolation
+
+For strict token isolation, use resource-specific scope names:
+
+```csharp
+.AddInMemoryApiScopes(new ApiScope[]
+{
+    new ApiScope("catalog.read", "Read catalog data"),
+    new ApiScope("catalog.write", "Write catalog data"),
+    new ApiScope("orders.read", "Read order data")
+})
+.AddInMemoryApiResources(new ApiResource[]
+{
+    new ApiResource("catalog-api", "Product Catalog API")
+    {
+        Scopes = { "catalog.read", "catalog.write" }
+    },
+    new ApiResource("orders-api", "Order Management API")
+    {
+        Scopes = { "orders.read" }
+    }
+})
+```
+
+Now a token with `catalog.read` will only have `aud: "catalog-api"`, and the orders-api will reject it because the audience doesn't match.
+
+For even stricter isolation, use the `resource` parameter (RFC 8707) to explicitly target a specific API Resource in the token request.

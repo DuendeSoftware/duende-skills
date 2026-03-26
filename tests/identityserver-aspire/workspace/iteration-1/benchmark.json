@@ -1,59 +1,179 @@
 {
-  "metadata": {"skill_name": "identityserver-aspire", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "identityserver-aspire",
+    "iteration": 1,
+    "model": "claude-opus-4.6",
+    "date": "2026-03-19"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 32, "passed": 32, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 32, "passed": 26, "failed": 6, "pass_rate": 81.25},
-    "delta": {"assertions_improved": 6, "delta_pass_rate": 18.75}
+    "with_skill": {
+      "total_assertions": 32,
+      "passed": 32,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 32,
+      "passed": 14,
+      "failed": 18,
+      "pass_rate": 0.44
+    },
+    "delta": {
+      "assertions_improved": 18,
+      "delta_pass_rate": 0.56
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "delta": 0.0,
-      "without_skill_failures": []
+      "prompt_summary": "Dependency graph wiring",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource",
+        "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+        "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)"
+      ]
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
-      "without_skill_failures": ["The code does NOT set IssuerUri unless explicitly needed"]
+      "prompt_summary": "Authority URL with WithEnvironment",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+        "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+        "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+        "The code does NOT set IssuerUri unless explicitly needed"
+      ]
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
+      "prompt_summary": "OpenTelemetry trace sources and metrics",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
       "delta": 0.25,
-      "without_skill_failures": ["The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)"]
+      "without_skill_failures": [
+        "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)"
+      ]
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
-      "without_skill_failures": ["The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement", "The response warns against using file-based signing keys or in-memory stores with multiple replicas"]
+      "prompt_summary": "Multi-replica shared state",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement",
+        "The response mentions shared ASP.NET Data Protection keys as a requirement",
+        "The response warns against using file-based signing keys or in-memory stores with multiple replicas"
+      ]
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work"]
+      "prompt_summary": "IDX20803 discovery config error fix",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "The response identifies the root cause as the API starting before IdentityServer is ready",
+        "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+        "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work"
+      ]
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "delta": 0.0,
-      "without_skill_failures": []
+      "prompt_summary": "Migration runner dependency chain",
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "The IdentityServer project uses .WaitFor() referencing the migration runner project, not directly waiting for SQL Server",
+        "The IdentityServer project still has .WithReference() for the database resource so it gets the connection string"
+      ]
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
-      "delta": 0.2,
-      "without_skill_failures": ["The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent"]
+      "prompt_summary": "Integration test fixture",
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The fixture calls WaitForResourceHealthyAsync(\"identity-server\") or equivalent to wait for IdentityServer readiness",
+        "The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent"
+      ]
     }
   ]
 }

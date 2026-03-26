@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Sets RequireDPoP = true on the client configuration", "pass": true, "rationale": "Code explicitly sets RequireDPoP = true on the dpop_client."},
-    {"assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client", "pass": true, "rationale": "Code sets DPoPClockSkew = TimeSpan.FromMinutes(2) on the client."},
-    {"assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value", "pass": true, "rationale": "Response explains the cnf claim with jkt thumbprint and shows the JSON example."},
-    {"assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3", "pass": true, "rationale": "Response states 'DPoP requires Duende IdentityServer Enterprise Edition, version >= 6.3'."},
-    {"assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication", "pass": true, "rationale": "Client uses GrantTypes.ClientCredentials with Secret('secret'.Sha256()) and the response explicitly explains DPoP is separate from client authentication."}
+    {
+      "assertion": "Sets RequireDPoP = true on the client configuration",
+      "pass": true,
+      "rationale": "RequireDPoP = true is set on dpop_client."
+    },
+    {
+      "assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client",
+      "pass": true,
+      "rationale": "DPoPClockSkew = TimeSpan.FromMinutes(2) is set."
+    },
+    {
+      "assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value",
+      "pass": true,
+      "rationale": "Explains cnf claim with jkt thumbprint, shows JSON example."
+    },
+    {
+      "assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3",
+      "pass": true,
+      "rationale": "Explicitly states 'DPoP requires Enterprise Edition of Duende IdentityServer (version >= 6.3)'."
+    },
+    {
+      "assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication",
+      "pass": true,
+      "rationale": "Client uses GrantTypes.ClientCredentials with shared secret. Explicitly states DPoP is separate from client authentication."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

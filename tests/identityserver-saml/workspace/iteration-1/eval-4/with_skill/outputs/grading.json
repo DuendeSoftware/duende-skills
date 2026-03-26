@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Mentions DefaultClockSkew as the relevant setting", "pass": true, "rationale": "Explicitly identifies DefaultClockSkew as the relevant setting."},
-    {"assertion": "Shows configuration via options.Saml.DefaultClockSkew", "pass": true, "rationale": "Shows options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(10)."},
-    {"assertion": "Suggests increasing the value beyond the default 5 minutes", "pass": true, "rationale": "Mentions default is 5 minutes and suggests increasing to 10 minutes."},
-    {"assertion": "Does NOT suggest changes to the OIDC/OAuth configuration — this is SAML-specific", "pass": true, "rationale": "Explicitly states 'This is SAML-specific' and does not suggest OIDC/OAuth changes."}
+    {
+      "assertion": "Mentions DefaultClockSkew as the relevant setting",
+      "pass": true,
+      "rationale": "Clearly identifies DefaultClockSkew as the key setting."
+    },
+    {
+      "assertion": "Shows configuration via options.Saml.DefaultClockSkew",
+      "pass": true,
+      "rationale": "Shows options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(10) in code."
+    },
+    {
+      "assertion": "Suggests increasing the value beyond the default 5 minutes",
+      "pass": true,
+      "rationale": "Suggests increasing to 10 minutes and notes the default is 5 minutes."
+    },
+    {
+      "assertion": "Does NOT suggest changes to the OIDC/OAuth configuration \u2014 this is SAML-specific",
+      "pass": true,
+      "rationale": "All configuration is SAML-specific under options.Saml. No OIDC/OAuth changes suggested."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

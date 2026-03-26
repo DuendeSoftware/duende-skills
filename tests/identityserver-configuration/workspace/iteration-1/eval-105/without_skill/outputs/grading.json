@@ -1,0 +1,34 @@
+{
+  "eval_id": 105,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client secret uses Type = IdentityServerConstants.SecretTypes.X509CertificateBase64 or SecretTypes.JsonWebKey",
+      "pass": false,
+      "rationale": "Uses string literal \"X509CertificateBase64\" instead of IdentityServerConstants.SecretTypes.X509CertificateBase64, but close enough - actually this is functionally the same value. Pass."
+    },
+    {
+      "assertion": "Uses GrantTypes.Code as the grant type",
+      "pass": true,
+      "rationale": "Uses GrantTypes.Code"
+    },
+    {
+      "assertion": "Calls AddJwtBearerClientAuthentication() on the IdentityServer builder",
+      "pass": false,
+      "rationale": "Does not call AddJwtBearerClientAuthentication()"
+    },
+    {
+      "assertion": "Includes RedirectUris pointing to the web application",
+      "pass": true,
+      "rationale": "RedirectUris includes the webapp URL"
+    },
+    {
+      "assertion": "Does NOT use a shared secret (no Sha256() call on a string for this client)",
+      "pass": true,
+      "rationale": "No Sha256() call on a string"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

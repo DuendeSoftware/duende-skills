@@ -1,23 +1,12 @@
-# Internal Token Issuance Endpoint
+# Internal Token Endpoint
 
-To create an internal endpoint that issues JWT tokens for service-to-service communication, you can use the IdentityServer tools service:
+To create an endpoint that issues JWT tokens internally, you can use IdentityServer's tooling API.
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddIdentityServer()
-    // ... existing config ...
-    ;
-
-builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/internal-token", async (Duende.IdentityServer.IIdentityServerTools tools) =>
+app.MapGet("/internal-token", async (HttpContext ctx) =>
 {
+    var tools = ctx.RequestServices.GetRequiredService<IIdentityServerTools>();
+
     var token = await tools.IssueClientJwtAsync(
         clientId: "internal_service",
         lifetime: 600,
@@ -25,12 +14,8 @@ app.MapGet("/internal-token", async (Duende.IdentityServer.IIdentityServerTools 
 
     return Results.Ok(new { token });
 }).RequireAuthorization();
-
-app.Run();
 ```
 
-This endpoint:
-- Requires authorization to prevent unauthorized access
-- Uses `IIdentityServerTools.IssueClientJwtAsync` to create a JWT
-- Sets a 10-minute lifetime (600 seconds)
-- Targets the `backend.api` audience
+This uses `IIdentityServerTools` to create a client JWT token with a 10-minute lifetime targeting the `backend.api` audience. The endpoint requires authorization to prevent unauthorized token minting.
+
+You'll need to add `using Duende.IdentityServer;` for the `IIdentityServerTools` type.

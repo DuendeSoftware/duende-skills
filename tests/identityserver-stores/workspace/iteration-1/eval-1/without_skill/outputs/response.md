@@ -1,4 +1,4 @@
-# Setting Up EF Core Stores for IdentityServer
+# EF Core Stores Setup
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -27,4 +27,4 @@ app.UseIdentityServer();
 app.Run();
 ```
 
-This registers both the configuration and operational stores with SQL Server and enables token cleanup every 30 minutes.
+Run EF migrations to create the database tables for both contexts.

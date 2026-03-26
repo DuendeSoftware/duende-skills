@@ -1,52 +1,61 @@
-# External Authentication Handler Compatibility After Migration
+# External Authentication Provider Compatibility After Migration
 
-Your external authentication providers (Google OAuth, WS-Federation, Sustainsys.Saml2) will continue to work conceptually, but **their NuGet packages must be updated** to versions compatible with the new .NET version. IdentityServer4 ran on .NET Core 3.1 or .NET 5 — Duende IdentityServer v7 requires .NET 8 or .NET 10. Authentication handlers compiled against older ASP.NET Core versions may fail to load at runtime on the new framework.
+## Third-Party Authentication Handlers Need Updates
 
-## Handler-by-Handler Assessment
+When migrating from IdentityServer4 (on .NET Core 3.1 / .NET 5) to Duende IdentityServer (on .NET 8+), all third-party authentication handlers must be updated to versions compatible with the new ASP.NET Core version. The handlers themselves are ASP.NET Core authentication middleware — they have no dependency on IdentityServer4 or Duende, but they do depend on specific ASP.NET Core versions.
 
-### Google OAuth (`Microsoft.AspNetCore.Authentication.Google`)
+## Your Specific Handlers
 
-This is a Microsoft-maintained package that ships with the ASP.NET Core shared framework. When you update your target framework to `net8.0` or `net10.0`, the matching version is included automatically. No separate NuGet package update is needed — it comes with the framework.
+### 1. Google OAuth (`Microsoft.AspNetCore.Authentication.Google`)
 
-### WS-Federation (`Microsoft.AspNetCore.Authentication.WsFederation`)
+This is a first-party Microsoft package. Update it to match your target framework:
 
-This handler **needs a NuGet package update** to match your target .NET version:
+```xml
+<!-- For net8.0 -->
+<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.0" />
+```
+
+On .NET 8+, the social auth packages are included in the ASP.NET Core shared framework, so you may not even need an explicit package reference — just verify the `AddGoogle()` extension method is available.
+
+### 2. WS-Federation (`Microsoft.AspNetCore.Authentication.WsFederation`)
+
+This is also a Microsoft package, but it's **not** included in the shared framework — you need an explicit package reference:
 
 ```xml
 <!-- For net8.0 -->
 <PackageReference Include="Microsoft.AspNetCore.Authentication.WsFederation" Version="8.0.0" />
-
-<!-- For net10.0 -->
-<PackageReference Include="Microsoft.AspNetCore.Authentication.WsFederation" Version="10.0.0" />
 ```
 
-The WS-Federation handler is not part of the shared framework — it ships as a standalone NuGet package and must be explicitly updated.
+**Important:** The WS-Federation package must match the target framework version. A .NET Core 3.1 version will not load on .NET 8.
 
-### SAML2P (`Sustainsys.Saml2`)
+### 3. SAML2P (Sustainsys.Saml2)
 
-Sustainsys.Saml2 needs a compatible version for .NET 8+. The package has undergone significant API changes across major versions:
-
-- **Sustainsys.Saml2 v2.x** — supports .NET Core 3.1 / .NET 5 (your current version likely)
-- **Sustainsys.Saml2 v3.x** — rebuilt for modern .NET (.NET 8+)
+Sustainsys.Saml2 is a third-party package. You need a version compatible with .NET 8+:
 
 ```xml
-<!-- Update to a version compatible with your target framework -->
-<PackageReference Include="Sustainsys.Saml2.AspNetCore2" Version="3.0.0" />
+<!-- Check NuGet for the latest compatible version -->
+<PackageReference Include="Sustainsys.Saml2.AspNetCore2" Version="2.9.x" />
 ```
 
-Check the [Sustainsys.Saml2 releases](https://github.com/Sustainsys/Saml2/releases) for the latest compatible version. Be aware of breaking API changes in the configuration — the options setup may need adjustment.
+**Important notes:**
+- Sustainsys.Saml2 has had breaking API changes between major versions
+- The package name may have changed (e.g., `Sustainsys.Saml2.AspNetCore2` vs older naming)
+- Review the Sustainsys changelog for .NET 8 compatibility and any required code changes
+- If Sustainsys doesn't support .NET 8, consider alternatives like `ITfoxtec.Identity.Saml2` or the Duende SAML component
 
-## Post-Migration Verification
+## Testing After Migration
 
-**Test all external login flows end-to-end after migration.** Specifically:
+**Test all external login flows end-to-end after migration.** Missing or incompatible handlers will cause runtime errors (not compile-time errors) when users attempt to authenticate via those schemes.
 
-1. **Google login** — initiate login via Google, verify callback, check claims
-2. **WS-Federation login** — initiate login via your Azure AD WS-Fed provider, verify the SAML token processing
-3. **SAML2P login** — initiate login via the SAML2P provider, verify assertion processing and attribute mapping
-4. **Error handling** — test with invalid/expired tokens to verify error flows still work correctly
+For each provider:
+1. Click the external login button
+2. Verify the redirect to the external provider works
+3. Complete authentication at the provider
+4. Verify the callback to IdentityServer succeeds
+5. Verify claims mapping and user provisioning still work correctly
 
-Missing or incompatible handlers will cause runtime errors when users attempt to authenticate via those schemes. The errors may not appear until a user actually clicks "Sign in with [provider]", so automated testing of all external login paths is essential.
+## Common Issues
 
-## Detection with the Migration Analysis Tool
-
-If you run the Migration Analysis Tool (Step 0 of the migration) against your current IdentityServer4 instance, it will list all registered authentication schemes and flag non-Microsoft, non-IdentityServer4 handlers that may need attention. This gives you a complete inventory before you start.
+- **Handler fails to load at runtime** — The handler assembly was compiled against an older ASP.NET Core version. Update the NuGet package.
+- **Claims not mapped correctly** — Some providers changed their claim types between versions. Check `ClaimActions` configuration.
+- **Redirect URI mismatch** — If your IdentityServer URL changed, update the redirect URIs registered at each external provider.

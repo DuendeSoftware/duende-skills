@@ -1,1 +1,34 @@
-{"eval_id":6,"variant":"with_skill","assertions":[{"assertion":"Implements the IClientConfigurationStore interface","pass":true,"rationale":"MongoClientConfigurationStore implements IClientConfigurationStore"},{"assertion":"Includes an AddAsync method for persisting new clients","pass":true,"rationale":"AddAsync method is implemented with InsertOneAsync"},{"assertion":"Includes a FindByClientIdAsync method that returns Client or null","pass":true,"rationale":"FindByClientIdAsync returns Client? using FirstOrDefaultAsync"},{"assertion":"Includes UpdateAsync and DeleteAsync methods for client lifecycle management","pass":true,"rationale":"Both UpdateAsync (ReplaceOneAsync) and DeleteAsync (DeleteOneAsync) are implemented"},{"assertion":"Mentions that client secrets should be stored securely (hashed, not plaintext)","pass":true,"rationale":"Explicitly states 'Hash secrets before storing — never store plaintext secrets' and code shows Sha256 hashing"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements the IClientConfigurationStore interface",
+      "pass": true,
+      "rationale": "MongoClientConfigurationStore implements IClientConfigurationStore"
+    },
+    {
+      "assertion": "Includes an AddAsync method for persisting new clients",
+      "pass": true,
+      "rationale": "AddAsync method present"
+    },
+    {
+      "assertion": "Includes a FindByClientIdAsync method that returns Client or null",
+      "pass": true,
+      "rationale": "FindByClientIdAsync returns Client? (nullable)"
+    },
+    {
+      "assertion": "Includes UpdateAsync and DeleteAsync methods for client lifecycle management",
+      "pass": true,
+      "rationale": "Both methods present"
+    },
+    {
+      "assertion": "Mentions that client secrets should be stored securely (hashed, not plaintext)",
+      "pass": true,
+      "rationale": "Explicit security note about hashed secrets"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

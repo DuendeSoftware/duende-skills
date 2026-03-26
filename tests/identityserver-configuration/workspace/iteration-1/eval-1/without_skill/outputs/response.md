@@ -1,15 +1,11 @@
-Here's how to set up a basic Duende IdentityServer host with in-memory stores:
+# Setting Up IdentityServer with In-Memory Stores
+
+Here's how to set up a basic IdentityServer host:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddIdentityServer(options =>
-{
-    options.Events.RaiseErrorEvents = true;
-    options.Events.RaiseInformationEvents = true;
-    options.Events.RaiseFailureEvents = true;
-    options.Events.RaiseSuccessEvents = true;
-})
+builder.Services.AddIdentityServer()
     .AddInMemoryIdentityResources(new List<IdentityResource>
     {
         new IdentityResources.OpenId(),
@@ -19,22 +15,19 @@ builder.Services.AddIdentityServer(options =>
     {
         new ApiScope("weatherapi", "Weather API")
     })
-    .AddInMemoryClients(new List<Client>());
+    .AddDeveloperSigningCredential();
 
 var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseIdentityServer();
-
-app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-This sets up:
-- IdentityServer with all event types enabled for logging/diagnostics
-- The standard `openid` and `profile` identity resources
-- A single API scope called `weatherapi`
-- An empty client list (you'll add clients later)
-- The authentication and authorization middleware in the pipeline
+This sets up IdentityServer with:
+- OpenID and Profile identity resources
+- A `weatherapi` API scope
+- Developer signing credential (for development only)
+
+The identity resources define what user claims are available, while the API scope defines what APIs clients can access.

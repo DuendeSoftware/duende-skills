@@ -1,1 +1,34 @@
-{"eval_id":3,"variant":"without_skill","assertions":[{"assertion":"Creates a class that extends DynamicClientRegistrationValidator","pass":true,"rationale":"StrictDcrValidator extends DynamicClientRegistrationValidator"},{"assertion":"Overrides ValidateGrantTypesAsync to reject grant types other than authorization_code","pass":true,"rationale":"ValidateGrantTypesAsync rejects non-authorization_code grant types with context.SetError()"},{"assertion":"Overrides ValidateRedirectUrisAsync to enforce HTTPS on all redirect URIs","pass":true,"rationale":"ValidateRedirectUrisAsync checks StartsWith('https://') and calls SetError for non-HTTPS"},{"assertion":"Sets RequirePkce = true in SetClientDefaultsAsync or equivalent override","pass":true,"rationale":"SetClientDefaultsAsync sets context.Client.RequirePkce = true"},{"assertion":"Registers the validator using AddDynamicClientRegistrationValidator<T>() on the configuration builder","pass":true,"rationale":"Shows AddIdentityServerConfiguration().AddDynamicClientRegistrationValidator<StrictDcrValidator>()"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a class that extends DynamicClientRegistrationValidator",
+      "pass": true,
+      "rationale": "Extends DynamicClientRegistrationValidator"
+    },
+    {
+      "assertion": "Overrides ValidateGrantTypesAsync to reject grant types other than authorization_code",
+      "pass": true,
+      "rationale": "Correct implementation"
+    },
+    {
+      "assertion": "Overrides ValidateRedirectUrisAsync to enforce HTTPS on all redirect URIs",
+      "pass": true,
+      "rationale": "Correct implementation"
+    },
+    {
+      "assertion": "Sets RequirePkce = true in SetClientDefaultsAsync or equivalent override",
+      "pass": true,
+      "rationale": "RequirePkce = true in SetClientDefaultsAsync"
+    },
+    {
+      "assertion": "Registers the validator using AddDynamicClientRegistrationValidator<T>() on the configuration builder",
+      "pass": true,
+      "rationale": "Registered correctly"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

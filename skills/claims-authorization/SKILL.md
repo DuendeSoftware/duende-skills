@@ -27,6 +27,15 @@ invocable: false
 
 ---
 
+## Sub-Documents
+
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/extension-grant-claims.md](docs/extension-grant-claims.md) | `IExtensionGrantValidator` implementation for custom grant types with claim propagation | Extension grants, token exchange, custom grant type, IExtensionGrantValidator, GrantValidationResult |
+| [docs/external-provider-claims.md](docs/external-provider-claims.md) | External provider login callback with claim mapping, Google/AAD normalization, and ClaimActions | External provider, Google, Azure AD, OIDC callback, claim mapping, ExternalCookieAuthenticationScheme |
+
+---
+
 ## Claims Pipeline Overview
 
 Claims travel through several distinct stages between the user's identity and an API's authorization check. Understanding where each transformation occurs prevents duplicate work and subtle bugs.
@@ -427,218 +436,17 @@ builder.Services.AddTransient<IClaimsTransformation, TenantClaimsTransformation>
 
 ## Extension Grant Validators
 
-`IExtensionGrantValidator` handles custom OAuth grant types at the token endpoint. Implement one when you need a non-standard flow (e.g. token exchange, assertion grants, device pairing).
+`IExtensionGrantValidator` handles custom OAuth grant types at the token endpoint (e.g. token exchange, assertion grants). Implement `ValidateAsync` to validate the incoming token/assertion, then call `new GrantValidationResult(subject, grantType, customClaims)`. `IProfileService` is called subsequently and can augment claims further. Register with `AddExtensionGrantValidator<T>()`.
 
-### Emitting Claims from an Extension Grant
-
-```csharp
-public sealed class TokenExchangeGrantValidator : IExtensionGrantValidator
-{
-    private readonly IUserRepository _users;
-    private readonly ITokenValidator _tokenValidator;
-
-    public string GrantType => "urn:ietf:params:oauth:grant-type:token-exchange";
-
-    public TokenExchangeGrantValidator(
-        IUserRepository users,
-        ITokenValidator tokenValidator)
-    {
-        _users = users;
-        _tokenValidator = tokenValidator;
-    }
-
-    public async Task ValidateAsync(ExtensionGrantValidationContext context)
-    {
-        var subjectToken = context.Request.Raw.Get("subject_token");
-        if (string.IsNullOrWhiteSpace(subjectToken))
-        {
-            context.Result = new GrantValidationResult(
-                TokenRequestErrors.InvalidRequest,
-                "subject_token is required");
-            return;
-        }
-
-        // Validate the incoming token
-        var validationResult = await _tokenValidator.ValidateAccessTokenAsync(subjectToken);
-        if (validationResult.IsError)
-        {
-            context.Result = new GrantValidationResult(
-                TokenRequestErrors.InvalidGrant,
-                "subject_token validation failed");
-            return;
-        }
-
-        var subjectId = validationResult.Claims
-            .FirstOrDefault(c => c.Type == JwtClaimTypes.Subject)?.Value;
-
-        if (subjectId is null)
-        {
-            context.Result = new GrantValidationResult(
-                TokenRequestErrors.InvalidGrant, "no subject claim");
-            return;
-        }
-
-        var user = await _users.FindBySubjectIdAsync(subjectId);
-        if (user is null || !user.IsEnabled)
-        {
-            context.Result = new GrantValidationResult(
-                TokenRequestErrors.InvalidGrant, "user not found or inactive");
-            return;
-        }
-
-        // Build the validated identity with custom claims
-        // IProfileService.GetProfileDataAsync will be called subsequently
-        // and can augment these claims further.
-        var customClaims = new[]
-        {
-            new Claim("exchange_source", "token-exchange"),
-            new Claim("original_client", validationResult.Client?.ClientId ?? "unknown"),
-        };
-
-        context.Result = new GrantValidationResult(
-            subject: subjectId,
-            authenticationMethod: GrantType,
-            claims: customClaims);
-    }
-}
-```
-
-```csharp
-// Program.cs
-builder.Services.AddIdentityServer()
-    .AddExtensionGrantValidator<TokenExchangeGrantValidator>();
-```
-
-> Claims passed to `GrantValidationResult` become the subject principal. `IProfileService` is then called and can add further claims based on the requested scopes. The `customClaims` here augment the subject's base identity — they are available in `context.Subject.Claims` during the profile service call.
+> See [docs/extension-grant-claims.md](docs/extension-grant-claims.md) for a full token exchange validator implementation with error handling and custom claim propagation.
 
 ---
 
 ## Claims from External Providers
 
-When a user authenticates through an external provider, IdentityServer receives claims from that provider in a temporary external cookie. The login callback is where you normalize them into your internal claim model.
+When a user authenticates through an external provider, IdentityServer receives claims in a temporary external cookie. In the login callback: read via `HttpContext.AuthenticateAsync(ExternalCookieAuthenticationScheme)`, extract the provider user ID, find or provision the local user, build an `IdentityServerUser` with `AdditionalClaims = MapProviderClaims(...)`, then call `SignInAsync` + `SignOutAsync` for the external cookie. For OIDC handlers, use `ClaimActions.Clear()` followed by explicit `MapJsonKey` calls to whitelist only the claims you need.
 
-### Callback Pattern
-
-```csharp
-// ExternalController.cs (login callback)
-public async Task<IActionResult> Callback()
-{
-    // Read the external cookie written by the OIDC/OAuth handler
-    var result = await HttpContext.AuthenticateAsync(
-        IdentityServerConstants.ExternalCookieAuthenticationScheme);
-
-    if (result?.Succeeded != true)
-    {
-        throw new InvalidOperationException("External authentication error");
-    }
-
-    var externalUser = result.Principal
-        ?? throw new InvalidOperationException("No external principal");
-
-    // Extract the provider's user identifier
-    // Different providers use different claim types for their user id
-    var userIdClaim = externalUser.FindFirst(JwtClaimTypes.Subject)
-        ?? externalUser.FindFirst(ClaimTypes.NameIdentifier)
-        ?? throw new InvalidOperationException("Unknown userid");
-
-    var provider = result.Properties.Items["scheme"]
-        ?? throw new InvalidOperationException("No scheme in external result");
-
-    var providerUserId = userIdClaim.Value;
-
-    // Find or provision the local user
-    var user = await _userService.FindByExternalProviderAsync(provider, providerUserId)
-        ?? await _userService.ProvisionUserAsync(provider, providerUserId, externalUser.Claims);
-
-    // Sign in with the internal subject id — IProfileService handles claim loading
-    var identityServerUser = new IdentityServerUser(user.SubjectId)
-    {
-        DisplayName = user.DisplayName,
-        IdentityProvider = provider,
-        AdditionalClaims = MapProviderClaims(externalUser.Claims, provider)
-    };
-
-    await HttpContext.SignInAsync(identityServerUser, result.Properties);
-    await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
-
-    var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
-    return Redirect(returnUrl);
-}
-
-private static ICollection<Claim> MapProviderClaims(
-    IEnumerable<Claim> externalClaims,
-    string provider)
-{
-    return provider switch
-    {
-        "google" => MapGoogleClaims(externalClaims),
-        "aad"    => MapAzureAdClaims(externalClaims),
-        _        => []
-    };
-}
-
-private static ICollection<Claim> MapGoogleClaims(IEnumerable<Claim> claims)
-{
-    var mapped = new List<Claim>();
-    var hd = claims.FirstOrDefault(c => c.Type == "hd")?.Value;
-    if (hd is not null)
-    {
-        mapped.Add(new Claim("google_hd", hd));  // hosted domain
-    }
-    return mapped;
-}
-
-private static ICollection<Claim> MapAzureAdClaims(IEnumerable<Claim> claims)
-{
-    var mapped = new List<Claim>();
-
-    // AAD "oid" → internal "aad_oid" for correlation
-    var oid = claims.FirstOrDefault(c => c.Type == "oid")?.Value;
-    if (oid is not null)
-    {
-        mapped.Add(new Claim("aad_oid", oid));
-    }
-
-    // Map AAD groups to local roles
-    foreach (var group in claims.Where(c => c.Type == "groups"))
-    {
-        if (AadGroupRoleMap.TryGetValue(group.Value, out var role))
-        {
-            mapped.Add(new Claim(JwtClaimTypes.Role, role));
-        }
-    }
-
-    return mapped;
-}
-```
-
-### Using Claim Actions (Remote Authentication Handlers)
-
-For OIDC handlers where you configure the handler declaratively, use `ClaimActions` to whitelist and remap incoming claims:
-
-```csharp
-// ✅ Whitelist and rename specific claims from Azure AD
-builder.Services.AddAuthentication()
-    .AddOpenIdConnect("aad", "Azure AD", options =>
-    {
-        options.Authority = "https://login.microsoftonline.com/{tenantId}/v2.0";
-        options.ClientId = "...";
-        options.MapInboundClaims = false;
-        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
-        // Remove all default claim mappings
-        options.ClaimActions.Clear();
-
-        // Explicitly map only what you need
-        options.ClaimActions.MapJsonKey(JwtClaimTypes.Subject, "oid");
-        options.ClaimActions.MapJsonKey(JwtClaimTypes.Email, "email");
-        options.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "name");
-        options.ClaimActions.MapJsonKey("department", "department");
-
-        // Map AAD groups to role claims
-        options.ClaimActions.MapJsonKey(JwtClaimTypes.Role, "roles");
-    });
-```
+> See [docs/external-provider-claims.md](docs/external-provider-claims.md) for the full callback controller implementation with Google/AAD claim mapping and `ClaimActions` examples.
 
 ---
 

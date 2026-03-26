@@ -1,17 +1,12 @@
-# Enabling Server-Side Sessions with EF Core
+# Enabling Server-Side Sessions with Entity Framework Core
 
-To enable server-side sessions with Entity Framework Core and SQL Server, you need to:
+To enable server-side sessions with a production-ready EF Core store, you need to call `AddServerSideSessions()` and configure `AddOperationalStore` with your SQL Server connection string. You'll also set the display name claim type.
 
-1. Call `AddServerSideSessions()` on the IdentityServer builder
-2. Configure the operational store with your existing SQL Server connection string
-3. Set the display name claim type for session indexing
-
-Here's the updated `Program.cs`:
+## Updated Program.cs
 
 ```csharp
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,9 +16,7 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration));
 
 var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
-var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 
-// IdentityServer registration with server-side sessions backed by EF Core
 builder.Services.AddIdentityServer(options =>
 {
     // Store the user's 'name' claim as the display name in the session index
@@ -91,14 +84,14 @@ builder.Services.AddIdentityServer(options =>
             AllowedScopes = { "openid", "profile", "catalog.read" }
         }
     })
-    // Enable server-side sessions — replaces the default in-memory cookie-only approach
+    // Enable server-side sessions (replaces cookie-only sessions)
     .AddServerSideSessions()
-    // Use EF Core operational store backed by SQL Server for durable session storage
+    // Configure EF Core operational store for durable session persistence
     .AddOperationalStore(options =>
     {
         options.ConfigureDbContext = b =>
             b.UseSqlServer(connectionString,
-                sql => sql.MigrationsAssembly(migrationsAssembly));
+                sql => sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name));
     });
 
 // Static external providers
@@ -134,10 +127,17 @@ app.Run();
 
 ## Key Changes
 
-1. **`AddServerSideSessions()`** — Enables server-side session storage, moving authentication state from the cookie to the server. The cookie now only carries a session reference.
+1. **`AddServerSideSessions()`** — Enables server-side session storage. Without this, all session state lives in the cookie.
 
-2. **`AddOperationalStore()`** with `UseSqlServer` — Configures the EF Core operational store using the `IdentityServer` connection string already in `appsettings.json`. This replaces the default in-memory store with a durable SQL Server-backed store. You'll need to generate and apply EF Core migrations for the operational store schema.
+2. **`AddOperationalStore(...)`** — Configures Entity Framework Core with SQL Server as the backing store. The operational store includes the `ServerSideSession` table. This replaces the default in-memory store.
 
-3. **`ServerSideSessions.UserDisplayNameClaimType = "name"`** — Extracts the user's `name` claim and stores it as the display name in the session index, making it queryable via `ISessionManagementService`. Note that this is null by default due to PII concerns.
+3. **`options.ServerSideSessions.UserDisplayNameClaimType = "name"`** — Stores the user's `name` claim as a queryable display name in the session index. By default this is null (unset) for PII reasons.
 
-**Important**: The default in-memory session store is not suitable for production — sessions would be lost on application restart. The EF Core store ensures sessions survive restarts and can be shared across load-balanced instances (provided Data Protection keys are also shared).
+## Next Steps
+
+- Run EF Core migrations to create the session tables:
+  ```bash
+  dotnet ef migrations add ServerSideSessions -c PersistedGrantDbContext
+  dotnet ef database update -c PersistedGrantDbContext
+  ```
+- Configure Data Protection key persistence if running behind a load balancer

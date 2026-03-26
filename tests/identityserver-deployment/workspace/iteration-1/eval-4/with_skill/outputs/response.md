@@ -1,26 +1,28 @@
 # Adding OpenTelemetry to IdentityServer for Production Monitoring
 
-## Step 1: Add Required NuGet Packages
+## NuGet Packages Required
 
 ```bash
 dotnet add package OpenTelemetry
 dotnet add package OpenTelemetry.Extensions.Hosting
 dotnet add package OpenTelemetry.Instrumentation.AspNetCore
 dotnet add package OpenTelemetry.Exporter.Prometheus.AspNetCore
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
 ```
 
-## Step 2: Configure OpenTelemetry in Program.cs
+## Program.cs Configuration
 
 ```csharp
 using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add OpenTelemetry logging correlation
-builder.Logging.AddOpenTelemetry();
+builder.Services.AddIdentityServer()
+    .AddInMemoryIdentityResources(Config.IdentityResources)
+    .AddInMemoryApiScopes(Config.ApiScopes)
+    .AddInMemoryClients(Config.Clients);
 
 // Configure OpenTelemetry
 var openTelemetry = builder.Services.AddOpenTelemetry();
@@ -28,33 +30,28 @@ var openTelemetry = builder.Services.AddOpenTelemetry();
 openTelemetry.ConfigureResource(r => r
     .AddService(builder.Environment.ApplicationName));
 
-// Metrics: Add the Duende IdentityServer meter + Prometheus exporter
+// Metrics with Prometheus exporter
 openTelemetry.WithMetrics(m => m
-    .AddMeter("Duende.IdentityServer")   // This is Telemetry.ServiceName
+    .AddMeter("Duende.IdentityServer")     // The IdentityServer meter (Telemetry.ServiceName)
     .AddAspNetCoreInstrumentation()
     .AddPrometheusExporter());
 
-// Tracing: Only Basic source for production (not verbose sources)
+// Tracing — ONLY Basic source for production
 openTelemetry.WithTracing(t => t
     .AddSource(IdentityServerConstants.Tracing.Basic)
-    // DO NOT add these in production — they generate excessive trace data:
-    // .AddSource(IdentityServerConstants.Tracing.Cache)
-    // .AddSource(IdentityServerConstants.Tracing.Services)
+    // Do NOT add these in production — too verbose:
     // .AddSource(IdentityServerConstants.Tracing.Stores)
     // .AddSource(IdentityServerConstants.Tracing.Validation)
+    // .AddSource(IdentityServerConstants.Tracing.Cache)
+    // .AddSource(IdentityServerConstants.Tracing.Services)
     .AddAspNetCoreInstrumentation()
-    .AddOtlpExporter());  // Send traces to your OTLP-compatible backend
-
-builder.Services.AddIdentityServer()
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
+    .AddOtlpExporter());    // Export traces to your collector
 
 var app = builder.Build();
 
 app.UseIdentityServer();
 
-// Map Prometheus scraping endpoint
+// Expose Prometheus scraping endpoint
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.MapGet("/", () => "IdentityServer is running");
@@ -62,55 +59,31 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## Key Configuration Details
+## Key Configuration Decisions
 
-### Metrics
+### Meter Name
 
-The IdentityServer meter name is `"Duende.IdentityServer"` (also available as `Telemetry.ServiceName`). This meter exposes counters for:
+The IdentityServer meter is registered as `"Duende.IdentityServer"` (also available as `Telemetry.ServiceName`). This meter emits metrics like:
 
-| Metric | Description |
-|--------|-------------|
-| `tokenservice.operation` | Aggregated success/failure/error counts |
-| `active_requests` | Current requests being processed |
-| `tokenservice.token_issued` | Token issuance attempts |
-| `tokenservice.client.secret_validation` | Client authentication results |
-| `tokenservice.introspection` | Token introspection counts |
-| `tokenservice.revocation` | Token revocation counts |
+- `tokenservice.operation` — aggregated success/failure counts
+- `active_requests` — current requests being processed
+- `tokenservice.token_issued` — token issuance counts
+- `tokenservice.client.secret_validation` — client auth success/failure
 
-The `AddPrometheusExporter()` makes these metrics available in Prometheus exposition format, and `UseOpenTelemetryPrometheusScrapingEndpoint()` maps the `/metrics` endpoint for Prometheus to scrape.
+### Prometheus Exporter
 
-### Tracing Sources
+`AddPrometheusExporter()` registers the Prometheus metrics exporter, and `UseOpenTelemetryPrometheusScrapingEndpoint()` maps the `/metrics` endpoint that Prometheus scrapes.
 
-IdentityServer provides five tracing sources with different verbosity levels:
+### Tracing Sources for Production
 
-| Source | What It Traces | Production? |
-|--------|---------------|-------------|
+IdentityServer provides 5 tracing sources:
+
+| Source | Content | Production? |
+|--------|---------|-------------|
 | `IdentityServerConstants.Tracing.Basic` | High-level request processing | **Yes** |
-| `IdentityServerConstants.Tracing.Cache` | Cache operations | No |
-| `IdentityServerConstants.Tracing.Services` | Service-layer operations | No |
-| `IdentityServerConstants.Tracing.Stores` | Store/database operations | No |
-| `IdentityServerConstants.Tracing.Validation` | Detailed validation | No |
+| `IdentityServerConstants.Tracing.Stores` | Database/store operations | No — too verbose |
+| `IdentityServerConstants.Tracing.Validation` | Detailed validation | No — too verbose |
+| `IdentityServerConstants.Tracing.Cache` | Cache operations | No — too verbose |
+| `IdentityServerConstants.Tracing.Services` | Service-layer operations | No — too verbose |
 
-For production, **only subscribe to `Basic`**. The other sources generate excessive trace data that can overwhelm your tracing backend and increase costs. Add them temporarily when troubleshooting specific issues.
-
-### Prometheus Scrape Configuration
-
-Add this to your `prometheus.yml`:
-
-```yaml
-scrape_configs:
-  - job_name: 'identityserver'
-    scrape_interval: 15s
-    static_configs:
-      - targets: ['identityserver:8080']
-```
-
-## Verification
-
-After deploying, verify metrics are available:
-
-```bash
-curl http://localhost:8080/metrics
-```
-
-You should see Prometheus-formatted metrics including the `Duende.IdentityServer` counters.
+For production, use **only `Basic`**. The other sources generate excessive trace data and are intended for development and troubleshooting. You can enable additional sources temporarily when diagnosing issues.

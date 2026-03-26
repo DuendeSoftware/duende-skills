@@ -1,6 +1,6 @@
 # Custom Dynamic Provider Type for Google Authentication
 
-Here's how to create a custom dynamic provider type for Google authentication in Duende IdentityServer.
+To add Google as a dynamic provider type in Duende IdentityServer, you need three components: a custom `IdentityProvider` class, handler registration, and an options mapper.
 
 ## Step 1: GoogleIdentityProvider Class
 
@@ -27,7 +27,7 @@ public class GoogleIdentityProvider : IdentityProvider
 }
 ```
 
-The `GoogleIdentityProvider` class extends `IdentityProvider` with a `"google"` provider type constant. Properties use the **indexer pattern** (`this["ClientId"]`) to store values in the underlying `Properties` dictionary, which is serialized to the database by the configuration store.
+The `this["key"]` indexer pattern stores properties in the base class's `Properties` dictionary, which is automatically serialized to the database.
 
 ## Step 2: Register the Handler Mapping in Program.cs
 
@@ -40,17 +40,16 @@ builder.Services.AddIdentityServer(options =>
         .AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>(
             GoogleIdentityProvider.ProviderType);
 })
-    // ... other configuration
+    .AddInMemoryIdentityResources(Config.IdentityResources)
+    .AddInMemoryApiScopes(Config.ApiScopes)
+    .AddInMemoryClients(Config.Clients)
     .AddConfigurationStore(options =>
     {
         options.ConfigureDbContext = b =>
-            b.UseSqlServer(connectionString,
-                sql => sql.MigrationsAssembly(migrationsAssembly));
+            b.UseSqlServer(connectionString);
     })
     .AddConfigurationStoreCache();
 ```
-
-This tells IdentityServer that when it encounters an identity provider record with type `"google"`, it should use `GoogleHandler` as the authentication handler, `GoogleOptions` as the options type, and `GoogleIdentityProvider` as the model type.
 
 ## Step 3: ConfigureAuthenticationOptions Implementation
 
@@ -80,7 +79,7 @@ public class GoogleDynamicConfigureOptions
 }
 ```
 
-Register it in `Program.cs`:
+Register it:
 
 ```csharp
 builder.Services.ConfigureOptions<GoogleDynamicConfigureOptions>();
@@ -88,25 +87,20 @@ builder.Services.ConfigureOptions<GoogleDynamicConfigureOptions>();
 
 ## Step 4: Seed a Google Provider
 
-To use the existing Google config from `appsettings.json`:
-
 ```csharp
-// SeedData.cs or in Program.cs
-var googleProvider = new GoogleIdentityProvider
+context.IdentityProviders.Add(new GoogleIdentityProvider
 {
-    Scheme = "Google",
-    DisplayName = "Google (dynamic)",
-    Enabled = true,
+    Scheme = "google-dynamic",
+    DisplayName = "Google (Dynamic)",
     ClientId = builder.Configuration["ExternalProviders:Google:ClientId"],
-    ClientSecret = builder.Configuration["ExternalProviders:Google:ClientSecret"]
-};
-
-context.IdentityProviders.Add(googleProvider.ToEntity());
-await context.SaveChangesAsync();
+    ClientSecret = builder.Configuration["ExternalProviders:Google:ClientSecret"],
+    Enabled = true
+}.ToEntity());
 ```
 
-## How It All Fits Together
+## Key Points
 
-1. **`GoogleIdentityProvider`** stores the Google-specific configuration (ClientId, ClientSecret) using the indexer pattern, which serializes to the `Properties` JSON column in the configuration store.
-2. **`AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>`** registers the mapping so IdentityServer knows how to instantiate the authentication handler for this provider type.
-3. **`GoogleDynamicConfigureOptions`** derives from `ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider>` and maps the stored properties to `GoogleOptions`. It also sets `SignInScheme` to ensure the external login cookie is used, and `CallbackPath` to follow the dynamic provider convention.
+- The indexer pattern (`this["ClientId"]`) stores values in the `Properties` dictionary for automatic serialization
+- `AddProviderType<THandler, TOptions, TIdentityProvider>()` maps the handler to the provider type
+- `ConfigureAuthenticationOptions<TOptions, TIdentityProvider>` bridges provider data to auth options
+- `SignInScheme` and `CallbackPath` must be set correctly for the dynamic provider flow

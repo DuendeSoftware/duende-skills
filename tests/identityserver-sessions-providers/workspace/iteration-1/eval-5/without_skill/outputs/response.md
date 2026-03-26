@@ -1,30 +1,24 @@
-# Custom Dynamic Provider Type for Google Authentication
+# Custom Dynamic Google Provider
 
-Here's how to create a custom dynamic provider type for Google in Duende IdentityServer.
+To create a custom Google dynamic provider, you need to register a handler and map configuration.
 
-## GoogleIdentityProvider Model
+## GoogleIdentityProvider Class
 
 ```csharp
-using Duende.IdentityServer.Models;
-
 public class GoogleIdentityProvider : IdentityProvider
 {
     public const string ProviderType = "google";
 
     public GoogleIdentityProvider() : base(ProviderType) { }
 
-    public string? ClientId { get; set; }
-    public string? ClientSecret { get; set; }
+    public string ClientId { get; set; }
+    public string ClientSecret { get; set; }
 }
 ```
 
-## Register the Handler Mapping
-
-In `Program.cs`:
+## Registration
 
 ```csharp
-using Microsoft.AspNetCore.Authentication.Google;
-
 builder.Services.AddIdentityServer(options =>
 {
     options.DynamicProviders
@@ -33,50 +27,33 @@ builder.Services.AddIdentityServer(options =>
 });
 ```
 
-## Options Mapping
+## Options Mapper
 
 ```csharp
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.Extensions.Options;
-
-public class GoogleDynamicConfigureOptions : IConfigureNamedOptions<GoogleOptions>
+public class GoogleOptionsMapper : IConfigureNamedOptions<GoogleOptions>
 {
-    public void Configure(string? name, GoogleOptions options)
+    private readonly IIdentityProviderStore _store;
+
+    public GoogleOptionsMapper(IIdentityProviderStore store)
     {
-        // This would need to look up the provider configuration
-        // and map it to GoogleOptions
+        _store = store;
+    }
+
+    public void Configure(string name, GoogleOptions options)
+    {
+        var provider = _store.GetBySchemeAsync(name).GetAwaiter().GetResult();
+        if (provider is GoogleIdentityProvider google)
+        {
+            options.ClientId = google.ClientId;
+            options.ClientSecret = google.ClientSecret;
+        }
     }
 
     public void Configure(GoogleOptions options) { }
 }
 ```
 
-Register it:
-
+Register:
 ```csharp
-builder.Services.ConfigureOptions<GoogleDynamicConfigureOptions>();
+builder.Services.ConfigureOptions<GoogleOptionsMapper>();
 ```
-
-## Seeding a Provider
-
-```csharp
-using var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-
-if (!context.IdentityProviders.Any())
-{
-    var provider = new GoogleIdentityProvider
-    {
-        Scheme = "Google",
-        DisplayName = "Google",
-        Enabled = true,
-        ClientId = builder.Configuration["ExternalProviders:Google:ClientId"],
-        ClientSecret = builder.Configuration["ExternalProviders:Google:ClientSecret"]
-    };
-
-    context.IdentityProviders.Add(provider.ToEntity());
-    context.SaveChanges();
-}
-```
-
-This maps the Google handler to the dynamic provider system, allowing Google providers to be managed in the database rather than hardcoded in startup.

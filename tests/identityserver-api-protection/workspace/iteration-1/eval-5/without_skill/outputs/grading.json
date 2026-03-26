@@ -2,10 +2,26 @@
   "eval_id": 5,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Calls ConfigureDPoPTokensForScheme on IServiceCollection (builder.Services), NOT inside the AddJwtBearer options lambda", "pass": false, "rationale": "Response does not use ConfigureDPoPTokensForScheme at all. Instead, it attempts manual DPoP handling via JwtBearerEvents.OnMessageReceived."},
-    {"assertion": "Registers a distributed cache implementation (e.g., AddDistributedMemoryCache or Redis) for DPoP replay detection", "pass": false, "rationale": "No distributed cache registration is present in the code"},
-    {"assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler", "pass": false, "rationale": "Response does not set TokenValidationParameters.ValidTypes"},
-    {"assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package", "pass": false, "rationale": "Response does not mention the Duende.AspNetCore.Authentication.JwtBearer package"}
+    {
+      "assertion": "Calls ConfigureDPoPTokensForScheme on IServiceCollection (builder.Services), NOT inside the AddJwtBearer options lambda",
+      "pass": false,
+      "rationale": "Response attempts manual DPoP validation in JwtBearerEvents instead of using ConfigureDPoPTokensForScheme"
+    },
+    {
+      "assertion": "Registers a distributed cache implementation (e.g., AddDistributedMemoryCache or Redis) for DPoP replay detection",
+      "pass": false,
+      "rationale": "Response does not register any distributed cache"
+    },
+    {
+      "assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+      "pass": false,
+      "rationale": "Response does not set ValidTypes"
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package",
+      "pass": false,
+      "rationale": "Response does not mention the Duende.AspNetCore.Authentication.JwtBearer package"
+    }
   ],
   "pass_count": 0,
   "total_count": 4,

@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'", "pass": true, "rationale": "Code defines policies using RequireClaim(\"scope\", \"api1.read\") and RequireClaim(\"scope\", \"api1.write\")"},
-    {"assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization", "pass": true, "rationale": "GET /data uses .RequireAuthorization(\"read\") and POST /data uses .RequireAuthorization(\"write\")"},
-    {"assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims", "pass": true, "rationale": "ScopeClaimsTransformation implements IClaimsTransformation, splits space-delimited scope claims with scopeClaim.Value.Split(' ') and adds individual claims"},
-    {"assertion": "Registers the IClaimsTransformation implementation in the DI container", "pass": true, "rationale": "Code shows builder.Services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>()"}
+    {
+      "assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'",
+      "pass": true,
+      "rationale": "Response defines policies using RequireClaim('scope', 'api1.read') and RequireClaim('scope', 'api1.write')"
+    },
+    {
+      "assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization",
+      "pass": true,
+      "rationale": "GET uses RequireAuthorization('read') and POST uses RequireAuthorization('write')"
+    },
+    {
+      "assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims",
+      "pass": true,
+      "rationale": "Response implements ScopeClaimsTransformation that splits space-delimited scopes"
+    },
+    {
+      "assertion": "Registers the IClaimsTransformation implementation in the DI container",
+      "pass": true,
+      "rationale": "Response registers AddTransient<IClaimsTransformation, ScopeClaimsTransformation>()"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

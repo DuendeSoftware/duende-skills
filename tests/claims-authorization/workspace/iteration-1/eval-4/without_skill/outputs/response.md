@@ -1,6 +1,6 @@
-# Adding Application Roles After JWT Validation
+# Adding Application Roles to ClaimsPrincipal After JWT Validation
 
-You can use ASP.NET Core's `IClaimsTransformation` to enrich the `ClaimsPrincipal` after the JWT has been validated. This lets you add application-specific roles from your local database without putting them in the token.
+You can use `IClaimsTransformation` to enrich the principal with additional claims from your local database.
 
 ## Implementation
 
@@ -8,13 +8,13 @@ You can use ASP.NET Core's `IClaimsTransformation` to enrich the `ClaimsPrincipa
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 
-public class ApplicationRolesTransformation : IClaimsTransformation
+public class RoleClaimsTransformation : IClaimsTransformation
 {
-    private readonly IAppRoleRepository _roleRepo;
+    private readonly IRoleService _roleService;
 
-    public ApplicationRolesTransformation(IAppRoleRepository roleRepo)
+    public RoleClaimsTransformation(IRoleService roleService)
     {
-        _roleRepo = roleRepo;
+        _roleService = roleService;
     }
 
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -22,15 +22,12 @@ public class ApplicationRolesTransformation : IClaimsTransformation
         var userId = principal.FindFirst("sub")?.Value;
         if (userId == null) return principal;
 
-        var roles = await _roleRepo.GetRolesAsync(userId);
+        var roles = await _roleService.GetRolesAsync(userId);
 
-        var claimsIdentity = principal.Identity as ClaimsIdentity;
-        if (claimsIdentity != null)
+        var claimsIdentity = (ClaimsIdentity)principal.Identity!;
+        foreach (var role in roles)
         {
-            foreach (var role in roles)
-            {
-                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role));
-            }
+            claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, role));
         }
 
         return principal;
@@ -41,11 +38,7 @@ public class ApplicationRolesTransformation : IClaimsTransformation
 ## Registration
 
 ```csharp
-builder.Services.AddTransient<IClaimsTransformation, ApplicationRolesTransformation>();
+builder.Services.AddTransient<IClaimsTransformation, RoleClaimsTransformation>();
 ```
 
-## Notes
-
-- `TransformAsync` is called on every authenticated request, so consider caching the role data
-- The roles will be available for `[Authorize(Roles = "Admin")]` and policy-based authorization
-- This approach keeps the token lean while still providing rich authorization data
+This will add the roles from your database to the user's claims after the JWT is validated. The roles will then be available for authorization policies.

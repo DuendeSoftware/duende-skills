@@ -1,36 +1,30 @@
-# Setting Up Signing Keys and Data Protection
+# Replacing Developer Signing Credential
 
-## Replace Developer Signing Credential
+## Remove AddDeveloperSigningCredential
 
-The developer signing credential should not be used in production. Here's how to set up proper key management:
+The developer signing credential is for development only. For production, use proper key management.
+
+## Configure Key Management
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure Data Protection
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
-    .SetApplicationName("identity-server");
-
-// IdentityServer configuration
-var idsvrBuilder = builder.Services.AddIdentityServer(options =>
+builder.Services.AddIdentityServer(options =>
 {
     options.KeyManagement.RotationInterval = TimeSpan.FromDays(90);
     options.KeyManagement.PropagationTime = TimeSpan.FromDays(14);
     options.KeyManagement.RetentionDuration = TimeSpan.FromDays(14);
 });
-
-// Add identity resources, scopes, clients...
-idsvrBuilder.AddInMemoryIdentityResources(/* ... */);
-idsvrBuilder.AddInMemoryApiScopes(/* ... */);
-idsvrBuilder.AddInMemoryClients(/* ... */);
 ```
 
-## Key Points
+For ES256 as primary with RS256 fallback, you would need to configure the signing algorithms. However, the exact API for this depends on the version of IdentityServer you're using.
 
-- Remove `AddDeveloperSigningCredential()` for production
-- IdentityServer's automatic key management handles rotation
-- Data Protection is configured with persistent file storage for load-balanced deployments
-- Keys rotate every 90 days with 14-day propagation time
+## Data Protection
 
-Note: You should also consider using RS256 or ES256 algorithms for signing. Configure the algorithms based on your client compatibility needs.
+For load-balanced deployment, configure shared Data Protection:
+
+```csharp
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
+    .SetApplicationName("identity-server");
+```
+
+Make sure the `/var/identity/dp-keys` directory is accessible by all instances and has appropriate permissions.

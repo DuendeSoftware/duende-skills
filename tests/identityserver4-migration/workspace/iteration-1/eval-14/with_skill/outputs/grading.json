@@ -1,29 +1,25 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 14,
-  "variant": "with_skill",
+  "mode": "with_skill",
   "assertions": [
     {
       "assertion": "Response warns that the issuer URI (iss claim) must remain the same after migration",
-      "pass": true,
-      "rationale": "States 'if the issuer URI changes, all existing tokens become invalid and client trust relationships break' and 'The iss claim in every token and the issuer field in the discovery document must remain exactly the same after migration.'"
+      "passed": true
     },
     {
       "assertion": "Response explains that changing the issuer breaks existing tokens and/or client trust relationships",
-      "pass": true,
-      "rationale": "Dedicated 'Why This Matters' section explains: existing access tokens fail validation, refresh tokens fail, client configurations reject the identity provider, and federation trust breaks."
+      "passed": true
     },
     {
       "assertion": "Response recommends setting options.IssuerUri explicitly in the Duende IdentityServer configuration",
-      "pass": true,
-      "rationale": "Shows code: 'builder.Services.AddIdentityServer(options => { options.IssuerUri = \"https://identity.example.com\"; });' and states 'explicitly set options.IssuerUri to match the value from the discovery document.'"
+      "passed": true
     },
     {
       "assertion": "Response suggests checking the current /.well-known/openid-configuration discovery document to find the existing issuer value",
-      "pass": true,
-      "rationale": "Step 1 says 'check the discovery document of your running IdentityServer4 instance: GET https://your-identity-server/.well-known/openid-configuration' and 'Note the issuer value in the JSON response.'"
+      "passed": true
     }
   ],
-  "pass_count": 4,
-  "total_count": 4,
-  "score": 1.0
+  "passed": 4,
+  "total": 4
 }

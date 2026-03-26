@@ -1,101 +1,78 @@
-# Fixing Transport Security Behind AWS ALB
+# Transport Security Fix — Reverse Proxy + HSTS + HTTPS Redirection
 
-The core issue is that your AWS ALB terminates TLS, so IdentityServer receives HTTP requests and publishes an `http://` issuer in the discovery document. You need `ForwardedHeaders` middleware to restore the original scheme, plus HTTPS redirection and strong HSTS.
+## Problem
 
-## Updated Program.cs
+Behind an AWS ALB that terminates TLS, IdentityServer sees HTTP requests and publishes an `http://` issuer URI in the discovery document. Downstream APIs reject all tokens because the issuer doesn't match. Additionally, there's no HSTS or HTTPS enforcement.
+
+## Solution
+
+### 1. Configure ForwardedHeaders (restricted to known proxy)
 
 ```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.HttpOverrides;
-using Serilog;
 using System.Net;
+using Microsoft.AspNetCore.HttpOverrides;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Console()
-    .ReadFrom.Configuration(ctx.Configuration));
-
-// Configure ForwardedHeaders — required behind ALB/reverse proxy
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
         ForwardedHeaders.XForwardedFor |
         ForwardedHeaders.XForwardedProto;
 
-    // Restrict to known proxy IP — never accept forwarded headers from any source
+    // Restrict to known proxy IP — never accept from any source
     options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
     options.ForwardLimit = 1;
 });
+```
 
-// Strong HSTS configuration
+### 2. Configure HSTS with strong settings
+
+```csharp
 builder.Services.AddHsts(options =>
 {
     options.MaxAge = TimeSpan.FromDays(365);
     options.IncludeSubDomains = true;
     options.Preload = true;
 });
+```
 
-// Force HTTPS redirect with 308 Permanent Redirect
+### 3. Configure HTTPS Redirection with 308 Permanent Redirect
+
+```csharp
 builder.Services.AddHttpsRedirection(options =>
 {
     options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
     options.HttpsPort = 443;
 });
+```
 
-// IdentityServer registration
-builder.Services.AddIdentityServer()
-    .AddDeveloperSigningCredential()
-    .AddInMemoryIdentityResources(new List<IdentityResource>
-    {
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile(),
-        new IdentityResources.Email()
-    })
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("catalog.read", "Read access to the catalog"),
-        new ApiScope("catalog.write", "Write access to the catalog"),
-        new ApiScope("orders.manage", "Manage orders"),
-        new ApiScope("internal-api", "Internal API access")
-    })
-    .AddInMemoryClients(new List<Client>
-    {
-        // ... clients omitted for brevity
-    });
+### 4. Middleware Pipeline Ordering
 
-builder.Services.AddRazorPages();
+The ordering is critical. `UseForwardedHeaders()` must be the very first middleware so all subsequent middleware (including IdentityServer) sees the correct scheme:
 
+```csharp
 var app = builder.Build();
 
-// 1. ForwardedHeaders MUST be the very first middleware
+// 1. ForwardedHeaders FIRST — restores original scheme/IP from proxy headers
 app.UseForwardedHeaders();
 
-// 2. HTTPS redirection — permanent redirect (308) for any HTTP request
+// 2. HTTPS redirection — redirects any HTTP request with 308
 app.UseHttpsRedirection();
 
-// 3. HSTS — tell browsers to always use HTTPS
+// 3. HSTS — tells browsers to always use HTTPS
 app.UseHsts();
 
 app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
-
 app.MapRazorPages();
-
 app.Run();
 ```
 
-## What Changed
+## Why This Fixes the Discovery Document Issue
 
-1. **ForwardedHeaders middleware** — Configured with `XForwardedFor | XForwardedProto`, restricted to `KnownProxies` with only `10.0.0.1` (the ALB IP). This ensures IdentityServer sees the original `https://` scheme.
+Without `ForwardedHeaders`, IdentityServer sees the request scheme as `http://` (because ALB terminated TLS). The discovery document at `/.well-known/openid-configuration` publishes the issuer as `http://identity.example.com`. When APIs validate tokens, the `iss` claim doesn't match the expected `https://` issuer, causing `IDX20803` errors.
 
-2. **HSTS** — Configured with `MaxAge = 365 days`, `IncludeSubDomains = true`, and `Preload = true` for browser preload list eligibility.
+By configuring `ForwardedHeaders` with `XForwardedProto`, ASP.NET Core restores the original HTTPS scheme from the `X-Forwarded-Proto` header set by the ALB. IdentityServer then correctly publishes `https://identity.example.com` as the issuer.
 
-3. **HTTPS Redirection** — Uses `StatusCodes.Status308PermanentRedirect` (308) to permanently redirect any HTTP request.
-
-4. **Middleware ordering** — `UseForwardedHeaders()` → `UseHttpsRedirection()` → `UseHsts()` → `UseIdentityServer()`. ForwardedHeaders must be first so subsequent middleware sees the correct scheme.
-
-Without `ForwardedHeaders`, IdentityServer publishes an `http://` issuer URI in the discovery document, causing `IDX20803` token validation failures in every downstream API.
+Restricting `KnownProxies` to `10.0.0.1` prevents an attacker from spoofing the `X-Forwarded-Proto` header from an arbitrary IP.

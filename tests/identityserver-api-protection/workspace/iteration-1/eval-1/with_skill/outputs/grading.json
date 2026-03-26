@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Calls AddJwtBearer with Authority set to 'https://identity.example.com'", "pass": true, "rationale": "Code shows AddJwtBearer with options.Authority = \"https://identity.example.com\""},
-    {"assertion": "Sets Audience to 'api1'", "pass": true, "rationale": "Code shows options.Audience = \"api1\""},
-    {"assertion": "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks", "pass": true, "rationale": "Code shows options.TokenValidationParameters.ValidTypes = [\"at+jwt\"] with explanation about JWT confusion attacks"},
-    {"assertion": "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline", "pass": true, "rationale": "Code shows app.UseAuthentication() before app.UseAuthorization() with explanation of correct ordering"},
-    {"assertion": "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package", "pass": true, "rationale": "Includes dotnet add package command and csproj PackageReference for Microsoft.AspNetCore.Authentication.JwtBearer"}
+    {
+      "assertion": "Calls AddJwtBearer with Authority set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "Response includes AddJwtBearer with options.Authority = \"https://identity.example.com\""
+    },
+    {
+      "assertion": "Sets Audience to 'api1'",
+      "pass": true,
+      "rationale": "Response includes options.Audience = \"api1\""
+    },
+    {
+      "assertion": "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks",
+      "pass": true,
+      "rationale": "Response sets ValidTypes = [\"at+jwt\"] and explains JWT confusion attack prevention"
+    },
+    {
+      "assertion": "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "Response shows UseAuthentication() before UseAuthorization() and explicitly notes the ordering requirement"
+    },
+    {
+      "assertion": "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "Response includes dotnet add package command and updated csproj with the package"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

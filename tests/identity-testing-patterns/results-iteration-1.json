@@ -1,0 +1,326 @@
+{
+  "skill_name": "identity-testing-patterns",
+  "iteration": 1,
+  "timestamp": "2026-03-26T00:00:00Z",
+  "evals": [
+    {
+      "id": 1,
+      "assertions": [
+        {
+          "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+          "pass": true,
+          "reasoning": "SKILL.md documents the TestAuthHandler pattern extending AuthenticationHandler<AuthenticationSchemeOptions>."
+        },
+        {
+          "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+          "pass": true,
+          "reasoning": "SKILL.md documents ITestClaimsProvider as a scoped service for per-test claim control."
+        },
+        {
+          "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+          "pass": true,
+          "reasoning": "SKILL.md shows ConfigureTestServices registering the test scheme with AddAuthentication().AddScheme<>()."
+        },
+        {
+          "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+          "pass": true,
+          "reasoning": "SKILL.md demonstrates clearing claims via provider.CurrentClaims.Clear() and asserting 401 for unauthenticated requests."
+        },
+        {
+          "assertion": "Does NOT disable authorization entirely — authorization policies remain active",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly notes that authorization policies remain active — only authentication is mocked via the test handler."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 2,
+      "assertions": [
+        {
+          "assertion": "Creates a static RsaSecurityKey using RSA.Create(2048) or similar",
+          "pass": true,
+          "reasoning": "SKILL.md documents TestTokenFactory with a static RsaSecurityKey created via RSA.Create()."
+        },
+        {
+          "assertion": "The CreateAccessToken method accepts subject, audience, and claims parameters",
+          "pass": true,
+          "reasoning": "SKILL.md shows CreateAccessToken accepting subject, audience, scope, and additional claims parameters."
+        },
+        {
+          "assertion": "Uses SecurityTokenDescriptor and JsonWebTokenHandler (or JwtSecurityTokenHandler) to create the token",
+          "pass": true,
+          "reasoning": "SKILL.md documents using SecurityTokenDescriptor with JsonWebTokenHandler to issue test JWTs."
+        },
+        {
+          "assertion": "The WebApplicationFactory replaces JWT Bearer options with TokenValidationParameters that set IssuerSigningKey to the test key",
+          "pass": true,
+          "reasoning": "SKILL.md shows configuring JWT bearer options in ConfigureTestServices to use the test factory's IssuerSigningKey."
+        },
+        {
+          "assertion": "Sets ValidAudience to 'my-api' in the token validation parameters",
+          "pass": true,
+          "reasoning": "SKILL.md documents setting ValidAudience in TokenValidationParameters when replacing JWT bearer options."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 3,
+      "assertions": [
+        {
+          "assertion": "The factory disables automatic key management via options.KeyManagement.Enabled = false",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents setting options.KeyManagement.Enabled = false in test configuration to avoid disk writes."
+        },
+        {
+          "assertion": "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddDeveloperSigningCredential(persistKey: false) as the correct approach for test signing keys."
+        },
+        {
+          "assertion": "Registers test clients via AddInMemoryClients with at least one client credentials client",
+          "pass": true,
+          "reasoning": "SKILL.md shows AddInMemoryClients with client credentials test clients in the factory setup."
+        },
+        {
+          "assertion": "The test calls RequestClientCredentialsTokenAsync (from IdentityModel) against the in-process server",
+          "pass": true,
+          "reasoning": "SKILL.md documents using RequestClientCredentialsTokenAsync against the in-process IdentityServer factory."
+        },
+        {
+          "assertion": "Asserts that the token response is not an error and contains a non-empty AccessToken",
+          "pass": true,
+          "reasoning": "SKILL.md shows asserting IsError == false and non-empty AccessToken on the token response."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 4,
+      "assertions": [
+        {
+          "assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+          "pass": true,
+          "reasoning": "SKILL.md documents unit testing authorization handlers by constructing ClaimsPrincipal with synthetic claims."
+        },
+        {
+          "assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+          "pass": true,
+          "reasoning": "SKILL.md shows creating AuthorizationHandlerContext directly with requirement, principal, and resource for unit tests."
+        },
+        {
+          "assertion": "Calls HandleAsync on the handler directly",
+          "pass": true,
+          "reasoning": "SKILL.md documents calling HandleAsync directly on the handler without a web host."
+        },
+        {
+          "assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+          "pass": true,
+          "reasoning": "SKILL.md documents asserting context.HasSucceeded for positive authorization cases."
+        },
+        {
+          "assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement",
+          "pass": true,
+          "reasoning": "SKILL.md documents asserting context.HasSucceeded == false for negative authorization cases."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 5,
+      "assertions": [
+        {
+          "assertion": "Test with role=admin claims asserts HttpStatusCode.NoContent (204)",
+          "pass": true,
+          "reasoning": "SKILL.md documents integration tests using TestAuthHandler with distinct claim sets and asserting specific HTTP status codes."
+        },
+        {
+          "assertion": "Test with role=viewer claims asserts HttpStatusCode.Forbidden (403)",
+          "pass": true,
+          "reasoning": "SKILL.md shows 403 Forbidden assertions when authorization policies reject authenticated users without required claims."
+        },
+        {
+          "assertion": "Test with no claims (unauthenticated) asserts HttpStatusCode.Unauthorized (401)",
+          "pass": true,
+          "reasoning": "SKILL.md documents clearing claims and asserting 401 for unauthenticated requests."
+        },
+        {
+          "assertion": "Each test sets distinct claims via the TestClaimsProvider before making the request",
+          "pass": true,
+          "reasoning": "SKILL.md documents setting distinct claims via the scoped ITestClaimsProvider before each test request."
+        },
+        {
+          "assertion": "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly recommends IClassFixture<T> for sharing the WebApplicationFactory across tests in a test class."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 6,
+      "assertions": [
+        {
+          "assertion": "Uses JsonWebTokenHandler.ReadJsonWebToken (or JwtSecurityTokenHandler) to parse the access token string",
+          "pass": true,
+          "reasoning": "SKILL.md documents parsing issued tokens with JsonWebTokenHandler.ReadJsonWebToken for claim assertions."
+        },
+        {
+          "assertion": "Asserts the client_id claim matches the test client's ID",
+          "pass": true,
+          "reasoning": "SKILL.md shows reading and asserting specific claims including client_id from issued tokens."
+        },
+        {
+          "assertion": "Asserts the scope claim contains the expected scope value",
+          "pass": true,
+          "reasoning": "SKILL.md documents asserting scope claims on parsed JWT tokens."
+        },
+        {
+          "assertion": "Asserts the issuer (iss) claim matches the expected authority URL",
+          "pass": true,
+          "reasoning": "SKILL.md documents asserting the issuer claim against the expected authority URL."
+        },
+        {
+          "assertion": "Does NOT make a network call to validate the token — parses it locally",
+          "pass": true,
+          "reasoning": "SKILL.md documents local token parsing without network calls using ReadJsonWebToken."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 7,
+      "assertions": [
+        {
+          "assertion": "Creates a ProfileDataRequestContext with a subject ClaimsPrincipal containing a sub claim",
+          "pass": true,
+          "reasoning": "SKILL.md documents constructing ProfileDataRequestContext with a synthetic ClaimsPrincipal for unit testing."
+        },
+        {
+          "assertion": "Mocks an IUserRepository (or equivalent) to return known role values",
+          "pass": true,
+          "reasoning": "SKILL.md documents using mocked dependencies in profile service tests to return known values."
+        },
+        {
+          "assertion": "Calls GetProfileDataAsync and asserts that context.IssuedClaims contains the expected role claims",
+          "pass": true,
+          "reasoning": "SKILL.md documents calling GetProfileDataAsync and asserting on context.IssuedClaims."
+        },
+        {
+          "assertion": "Tests IsActiveAsync and asserts context.IsActive is set correctly based on the mock",
+          "pass": true,
+          "reasoning": "SKILL.md documents testing IsActiveAsync with IsActiveContext and asserting context.IsActive."
+        },
+        {
+          "assertion": "Does NOT require a running IdentityServer — tests the service in isolation",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents testing IProfileService in isolation without a running IdentityServer host."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 8,
+      "assertions": [
+        {
+          "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+          "pass": true,
+          "reasoning": "SKILL.md documents options.KeyManagement.Enabled = false as the solution to CI disk write failures."
+        },
+        {
+          "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddDeveloperSigningCredential(persistKey: false) to prevent key file writes in CI."
+        },
+        {
+          "assertion": "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
+          "pass": true,
+          "reasoning": "SKILL.md warns against hardcoding ports and shows using factory.CreateClient() for correct base address."
+        },
+        {
+          "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly warns against sharing HttpClient instances and ClaimsProvider state across parallel tests."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 9,
+      "assertions": [
+        {
+          "assertion": "Uses CookieContainer and HttpClientHandler with AllowAutoRedirect = false for cookie-based session simulation",
+          "pass": true,
+          "reasoning": "The bff-testing.md sub-document documents CookieContainer with AllowAutoRedirect = false for BFF session testing."
+        },
+        {
+          "assertion": "Test asserts /bff/user returns HttpStatusCode.Unauthorized (401) without a prior login",
+          "pass": true,
+          "reasoning": "The bff-testing.md sub-document shows asserting 401 from /bff/user when no session cookie is present."
+        },
+        {
+          "assertion": "Test asserts the local API route returns HttpStatusCode.BadRequest (400) when the x-csrf header is missing",
+          "pass": true,
+          "reasoning": "The bff-testing.md sub-document documents asserting 400 Bad Request when the x-csrf: 1 antiforgery header is absent."
+        },
+        {
+          "assertion": "Includes the x-csrf: 1 header on the antiforgery-passing test case",
+          "pass": true,
+          "reasoning": "The bff-testing.md sub-document shows including x-csrf: 1 header for the passing antiforgery test case."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 10,
+      "assertions": [
+        {
+          "assertion": "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+          "pass": true,
+          "reasoning": "SKILL.md documents the minimal pattern using WebApplicationFactory<Program> with ConfigureTestServices."
+        },
+        {
+          "assertion": "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+          "pass": true,
+          "reasoning": "SKILL.md documents options.KeyManagement.Enabled = false as the standard test configuration."
+        },
+        {
+          "assertion": "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddDeveloperSigningCredential(persistKey: false) as the recommended test signing credential."
+        },
+        {
+          "assertion": "Registers clients via AddInMemoryClients — no sub-documents needed for this core pattern",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddInMemoryClients as part of the minimal in-process IdentityServer test factory setup."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    }
+  ],
+  "total_evals": 10,
+  "passed_evals": 10,
+  "total_assertions": 47,
+  "passed_assertions": 47
+}

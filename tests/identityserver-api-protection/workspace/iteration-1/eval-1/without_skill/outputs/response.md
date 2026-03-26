@@ -1,8 +1,8 @@
-# Protecting a Minimal API with JWT Bearer Authentication
+# Setting Up JWT Bearer Authentication for Your API
 
-Here's how to set up JWT bearer authentication for your ASP.NET Core minimal API.
+To protect your minimal API with JWT bearer authentication, follow these steps:
 
-## Step 1: Add the NuGet Package
+## Step 1: Install the NuGet Package
 
 ```bash
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
@@ -13,12 +13,10 @@ dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 Update your `Program.cs`:
 
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Add JWT Bearer authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -36,13 +34,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Protected endpoints
 app.MapGet("/data", () => Results.Ok(new { message = "Protected data" }))
     .RequireAuthorization();
-
 app.MapPost("/data", (DataModel model) => Results.Created($"/data/{model.Id}", model))
     .RequireAuthorization();
-
 app.MapDelete("/data/{id}", (int id) => Results.NoContent())
     .RequireAuthorization();
 
@@ -53,8 +48,8 @@ public record DataModel(int Id, string Name, string Description);
 
 ## How It Works
 
-- **`Authority`** tells the JWT bearer handler where to find the OpenID Connect discovery document and signing keys for token validation.
-- **`Audience`** validates the `aud` claim in the token matches your API.
-- `UseAuthentication()` and `UseAuthorization()` middleware handle the authentication and authorization pipeline.
+- **Authority**: Points to your IdentityServer instance. The middleware will automatically download the discovery document and signing keys.
+- **Audience**: Must match the API resource name configured in IdentityServer.
+- **UseAuthentication/UseAuthorization**: These middleware components must be added in the correct order — authentication first, then authorization.
 
-This setup will validate JWTs issued by your IdentityServer and ensure only authenticated requests reach your API endpoints.
+The JWT bearer handler will validate incoming access tokens by checking the signature against IdentityServer's public keys, verifying the issuer and audience claims, and checking token expiration.

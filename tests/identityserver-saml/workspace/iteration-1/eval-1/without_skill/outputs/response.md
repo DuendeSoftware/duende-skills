@@ -1,14 +1,18 @@
 # Adding SAML 2.0 Support to IdentityServer
 
-To add SAML 2.0 Identity Provider support to your Duende IdentityServer, you'll need to install the SAML package and configure a service provider.
+To add SAML support to your IdentityServer setup, you'll need to install the SAML component package and configure a service provider.
 
 ## Step 1: Install the SAML NuGet Package
+
+First, add the SAML package to your project:
 
 ```bash
 dotnet add package Duende.IdentityServer.Saml2p
 ```
 
-## Step 2: Update Program.cs
+## Step 2: Configure SAML in Program.cs
+
+Update your `Program.cs` to add SAML support:
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -23,23 +27,7 @@ builder.Services.AddIdentityServer(options =>
     .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
     .AddTestUsers(TestUsers.Users)
-    .AddSamlPlugin()
-    .AddInMemoryServiceProviders(new List<ServiceProvider>
-    {
-        new ServiceProvider
-        {
-            EntityId = "https://crm.contoso.com",
-            AssertionConsumerServices = new[]
-            {
-                new AssertionConsumerService
-                {
-                    Location = "https://crm.contoso.com/saml/acs",
-                    Binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                }
-            },
-            SigningCertificates = new List<X509Certificate2>()
-        }
-    });
+    .AddSaml2p();
 
 builder.Services.AddRazorPages();
 
@@ -48,20 +36,30 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();
-app.UseSamlPlugin();
 app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
 ```
 
-## Key Points
+## Step 3: Register the Service Provider
 
-- You need the `Duende.IdentityServer.Saml2p` NuGet package for SAML support
-- Call `.AddSamlPlugin()` on the IdentityServer builder
-- Register your service providers with their entity ID and assertion consumer service URLs
-- Add `app.UseSamlPlugin()` middleware
-- The `EntityId` identifies the service provider (`https://crm.contoso.com`)
-- The assertion consumer service URL is where SAML responses will be posted
+You'll need to configure the Contoso CRM as a SAML service provider. The exact registration depends on the SAML library you use, but typically you'd define the SP configuration like this:
 
-This will expose a SAML metadata endpoint and handle SAML authentication requests from the CRM system.
+```csharp
+var serviceProviders = new List<ServiceProvider>
+{
+    new ServiceProvider
+    {
+        EntityId = "https://crm.contoso.com",
+        AssertionConsumerServiceUrl = "https://crm.contoso.com/saml/acs",
+        SignOnBinding = Saml2BindingType.HttpPost
+    }
+};
+```
+
+Register these in your DI configuration and ensure IdentityServer knows about them.
+
+## SAML Metadata
+
+Your IdentityServer should expose a SAML metadata endpoint (typically at `/saml2/metadata`) that the CRM system can use to configure trust.

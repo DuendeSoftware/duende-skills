@@ -5,27 +5,27 @@
     {
       "assertion": "Code defines a GoogleIdentityProvider class that extends IdentityProvider with a 'google' provider type constant",
       "pass": true,
-      "rationale": "Code defines `public class GoogleIdentityProvider : IdentityProvider` with `public const string ProviderType = \"google\";` and constructor `base(ProviderType)`."
+      "rationale": "GoogleIdentityProvider extends IdentityProvider with const ProviderType = 'google'."
     },
     {
       "assertion": "GoogleIdentityProvider uses the indexer pattern (this[\"ClientId\"]) for property storage",
       "pass": true,
-      "rationale": "Code shows `get => this[\"ClientId\"]; set => this[\"ClientId\"] = value;` for both ClientId and ClientSecret properties."
+      "rationale": "Uses this[\"ClientId\"] and this[\"ClientSecret\"] indexer pattern."
     },
     {
       "assertion": "Program.cs calls AddProviderType with GoogleHandler, GoogleOptions, and GoogleIdentityProvider type parameters",
       "pass": true,
-      "rationale": "Code shows `options.DynamicProviders.AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>(GoogleIdentityProvider.ProviderType);`."
+      "rationale": "AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>() is called."
     },
     {
       "assertion": "Code includes a ConfigureAuthenticationOptions-derived class that maps GoogleIdentityProvider properties to GoogleOptions",
       "pass": true,
-      "rationale": "Code defines `GoogleDynamicConfigureOptions : ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider>` with a Configure method that maps ClientId and ClientSecret."
+      "rationale": "GoogleDynamicConfigureOptions extends ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider>."
     },
     {
       "assertion": "The configure class sets SignInScheme and CallbackPath on the GoogleOptions",
       "pass": true,
-      "rationale": "Code shows `googleOptions.SignInScheme = context.DynamicProviderOptions.SignInScheme;` and `googleOptions.CallbackPath = context.PathPrefix + \"/signin\";`."
+      "rationale": "Sets googleOptions.SignInScheme and googleOptions.CallbackPath in the Configure method."
     }
   ],
   "pass_count": 5,

@@ -5,22 +5,22 @@
     {
       "assertion": "Program.cs configures opt.UserInteraction.ErrorUrl to a specific error page path",
       "pass": true,
-      "rationale": "Program.cs sets options.UserInteraction.ErrorUrl = \"/Error\"."
+      "rationale": "Code sets opt.UserInteraction.ErrorUrl = '/Error'."
     },
     {
       "assertion": "An error page calls GetErrorContextAsync(errorId) to retrieve error details from IIdentityServerInteractionService",
       "pass": true,
-      "rationale": "ErrorModel.OnGet calls _interaction.GetErrorContextAsync(errorId)."
+      "rationale": "ErrorModel calls _interaction.GetErrorContextAsync(errorId)."
     },
     {
       "assertion": "The error page displays the Error code and RequestId to the user but does not render ErrorDescription directly in the view",
       "pass": true,
-      "rationale": "View renders ErrorCode and RequestId only; ErrorDescription is explicitly not rendered with a comment explaining why."
+      "rationale": "View shows ErrorCode and RequestId. ErrorDescription is explicitly not rendered and there's a comment explaining why."
     },
     {
       "assertion": "The error page logs the full error details including ErrorDescription using ILogger at Debug level",
       "pass": true,
-      "rationale": "_logger.LogDebug logs Error, ErrorDescription, RequestId, and ClientId."
+      "rationale": "Code calls _logger.LogDebug with Error, ErrorDescription, RequestId, and ClientId."
     }
   ],
   "pass_count": 4,

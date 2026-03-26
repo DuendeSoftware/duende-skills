@@ -1,0 +1,25 @@
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 12,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+      "passed": true
+    },
+    {
+      "assertion": "Output calls .AddClient() with at least TokenEndpoint, ClientId, and Scope configured",
+      "passed": true
+    },
+    {
+      "assertion": "Output registers an HTTP client with AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler",
+      "passed": true
+    },
+    {
+      "assertion": "Output does NOT require any sub-documents to answer correctly (core SKILL.md is sufficient)",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

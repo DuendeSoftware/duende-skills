@@ -1,14 +1,17 @@
-# Fixing IdentityServer Behind an Nginx Reverse Proxy
+# Fixing Discovery Document and Cookie Issues Behind Nginx
 
 ## The Problem
 
-When IdentityServer is behind a reverse proxy (like nginx), the proxy terminates HTTPS and forwards requests as plain HTTP internally. The proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in the discovery document (`/.well-known/openid-configuration`) instead of HTTPS. Cookies also lose their `Secure` attribute because IdentityServer sees the request as HTTP.
+When IdentityServer runs behind Nginx that terminates TLS, the proxy strips the original HTTPS scheme and host. ASP.NET Core sees the internal HTTP request, causing:
 
-## Solution: Forwarded Headers Middleware
+1. **Discovery document shows `http://` URLs** — IdentityServer generates URLs based on the incoming request scheme, which is `http` after the proxy
+2. **Cookies missing `Secure` attribute** — Without HTTPS, cookies don't get the `Secure` flag, which breaks `SameSite=None` behavior
 
-You need to configure ASP.NET Core to trust and process the forwarded headers from nginx.
+The root cause is that the **reverse proxy strips the original scheme and host headers**, and IdentityServer doesn't know the request originally came via HTTPS.
 
-### Option 1: Explicit Configuration (Recommended for Production)
+## Solution
+
+### Option 1: Explicit Configuration
 
 ```csharp
 using Microsoft.AspNetCore.HttpOverrides;
@@ -19,19 +22,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure forwarded headers
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedHost |
-                                ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto |
+                                ForwardedHeaders.XForwardedHost;
 
-    // If you know the proxy IP, add it:
-    // options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
+    // Add your Nginx proxy IP
+    options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
     options.ForwardLimit = 1;
 });
 
-builder.Services.AddIdentityServer();
+builder.Services.AddIdentityServer()
+    .AddInMemoryIdentityResources(Config.IdentityResources)
+    .AddInMemoryApiScopes(Config.ApiScopes)
+    .AddInMemoryClients(Config.Clients);
 
 var app = builder.Build();
 
-// UseForwardedHeaders MUST be early in the pipeline, before UseIdentityServer
+// IMPORTANT: UseForwardedHeaders MUST come early, before UseIdentityServer
 app.UseForwardedHeaders();
 
 app.UseStaticFiles();
@@ -39,37 +45,24 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 
-app.MapDefaultControllerRoute();
-
 app.Run();
 ```
 
 ### Option 2: Environment Variable (Simpler for Cloud/Kubernetes)
 
-Set the environment variable `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`. This is the simplest alternative for cloud or Kubernetes environments — ASP.NET Core will automatically configure forwarded headers middleware to trust all proxies:
+Set the `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` environment variable. This automatically configures the ForwardedHeaders middleware without any code changes.
 
-```bash
-ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
-```
+This is the simplest approach for cloud-hosted and Kubernetes environments where you don't need fine-grained proxy control.
 
-### Nginx Configuration
+## Key Points
 
-Make sure your nginx config forwards the proper headers:
+1. **`UseForwardedHeaders()` must come early** in the pipeline, before `UseIdentityServer()`. If it runs too late, IdentityServer will already have used the wrong scheme.
 
-```nginx
-location / {
-    proxy_pass http://identityserver:5000;
-    proxy_set_header X-Forwarded-Host $host;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-}
-```
+2. **`ForwardedHeaders.XForwardedProto`** restores the original HTTPS scheme, fixing the discovery document URLs and enabling the `Secure` cookie attribute.
 
-## Why This Happens
-
-The reverse proxy terminates TLS/HTTPS and forwards requests to IdentityServer over plain HTTP. Without forwarded headers:
-
-1. IdentityServer sees `http://` as the request scheme
-2. The discovery document uses `http://` for all endpoint URLs
-3. Authentication cookies are not marked as `Secure` (because the request appears to be HTTP)
-4. Token issuers may not match what clients expect
+3. **Nginx config** must set the forwarded headers:
+   ```nginx
+   proxy_set_header X-Forwarded-Proto $scheme;
+   proxy_set_header X-Forwarded-Host $host;
+   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+   ```

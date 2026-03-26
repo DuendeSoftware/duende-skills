@@ -1,51 +1,36 @@
-# Migration Checklist: IdentityServer4 v4.x to Duende IdentityServer v7
+# Migration Checklist: IdentityServer4 to Duende IdentityServer
 
-Here's a step-by-step checklist for your migration:
+## Step 1: Update Target Framework
+Update from `netcoreapp3.1` to `net8.0` or later:
+```xml
+<TargetFramework>net8.0</TargetFramework>
+```
 
-## 1. Update Target Framework
+## Step 2: Replace NuGet Packages
+- `IdentityServer4` → `Duende.IdentityServer`
+- `IdentityServer4.EntityFramework` → `Duende.IdentityServer.EntityFramework`
+- `IdentityServer4.AspNetIdentity` → `Duende.IdentityServer.AspNetIdentity`
+- Update EF Core packages to 8.0
 
-- [ ] Update from `netcoreapp3.1` to `net8.0` or later
-- [ ] Update all related Microsoft packages to match the new framework version
+## Step 3: Update Namespaces
+Replace all `IdentityServer4` namespaces with `Duende.IdentityServer`.
 
-## 2. Replace NuGet Packages
+## Step 4: Update Hosting Model
+Convert `Startup.cs` to minimal hosting with `WebApplication.CreateBuilder`.
 
-- [ ] Replace `IdentityServer4` with `Duende.IdentityServer`
-- [ ] Replace `IdentityServer4.EntityFramework` with `Duende.IdentityServer.EntityFramework`
-- [ ] Replace `IdentityServer4.AspNetIdentity` with `Duende.IdentityServer.AspNetIdentity`
-- [ ] Update `Microsoft.EntityFrameworkCore.*` packages to the matching version
+## Step 5: Configure License Key
+Add your Duende license key via configuration:
+```csharp
+options.LicenseKey = builder.Configuration["IdentityServer:LicenseKey"];
+```
 
-## 3. Update Namespaces
+## Step 6: Database Migrations
+Create and apply EF Core migrations for both ConfigurationDbContext and PersistedGrantDbContext.
 
-- [ ] Search and replace all `using IdentityServer4` with `using Duende.IdentityServer` across your codebase
-- [ ] Update any fully-qualified type references
+## Step 7: Update UI
+Update your login/logout/consent pages for Duende.
 
-## 4. Update Code Patterns
-
-- [ ] Convert `Startup.cs`/`Program.cs` to minimal hosting pattern if desired
-- [ ] Remove `AddDeveloperSigningCredential()` and configure proper signing keys
-- [ ] Update any breaking API calls
-
-## 5. Database Migrations
-
-- [ ] Create new EF Core migrations for `ConfigurationDbContext` and `PersistedGrantDbContext`
-- [ ] Review the generated migrations for data safety
-- [ ] Apply migrations to your database
-- [ ] Back up your database before applying
-
-## 6. ASP.NET Identity Integration
-
-- [ ] Verify your ASP.NET Identity configuration works with the updated packages
-- [ ] Test user registration, login, and password management
-
-## 7. Reverse Proxy Configuration
-
-- [ ] Ensure forwarded headers are properly configured
-- [ ] Verify HTTPS termination settings
-
-## 8. Testing and Verification
-
-- [ ] Test all OAuth/OIDC flows end-to-end
-- [ ] Verify token issuance works correctly
-- [ ] Check that existing clients can still authenticate
-- [ ] Test all external authentication providers
-- [ ] Review application logs for any warnings or errors
+## Step 8: Test
+- Verify discovery document
+- Test token issuance
+- Test all client flows

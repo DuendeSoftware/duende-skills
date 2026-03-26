@@ -1,14 +1,29 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 1,
-  "variant": "without_skill",
+  "mode": "without_skill",
   "assertions": [
-    {"assertion": "Code calls GetDiscoveryDocumentAsync to resolve endpoints from the authority rather than hardcoding the token endpoint URL", "pass": true, "rationale": "Code calls httpClient.GetDiscoveryDocumentAsync(\"https://identity.example.com\")."},
-    {"assertion": "Code checks disco.IsError before using the discovery response to handle unreachable or invalid discovery documents", "pass": true, "rationale": "Code checks if (disco.IsError) and returns a problem result."},
-    {"assertion": "Code uses RequestClientCredentialsTokenAsync (or equivalent POST to the token endpoint) with grant_type=client_credentials", "pass": true, "rationale": "Code calls httpClient.RequestClientCredentialsTokenAsync with a ClientCredentialsTokenRequest."},
-    {"assertion": "Code sets the Scope to 'catalog.read' and provides ClientId and ClientSecret in the token request", "pass": true, "rationale": "ClientId, ClientSecret, and Scope are all correctly set in the request."},
-    {"assertion": "Code uses disco.TokenEndpoint as the Address for the token request rather than a hardcoded URL", "pass": true, "rationale": "Address = disco.TokenEndpoint is used in the token request."}
+    {
+      "assertion": "Code calls GetDiscoveryDocumentAsync to resolve endpoints from the authority rather than hardcoding the token endpoint URL",
+      "passed": true
+    },
+    {
+      "assertion": "Code checks disco.IsError before using the discovery response to handle unreachable or invalid discovery documents",
+      "passed": true
+    },
+    {
+      "assertion": "Code uses RequestClientCredentialsTokenAsync (or equivalent POST to the token endpoint) with grant_type=client_credentials",
+      "passed": true
+    },
+    {
+      "assertion": "Code sets the Scope to 'catalog.read' and provides ClientId and ClientSecret in the token request",
+      "passed": true
+    },
+    {
+      "assertion": "Code uses disco.TokenEndpoint as the Address for the token request rather than a hardcoded URL",
+      "passed": true
+    }
   ],
-  "pass_count": 5,
-  "total_count": 5,
-  "score": 1.0
+  "passed": 5,
+  "total": 5
 }

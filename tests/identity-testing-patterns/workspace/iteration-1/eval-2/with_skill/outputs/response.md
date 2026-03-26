@@ -1,4 +1,4 @@
-# Self-Signed JWT Token Factory for API Testing
+# TestTokenFactory for Self-Signed JWT Tokens
 
 ## 1. TestTokenFactory
 
@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 
 public static class TestTokenFactory
 {
-    // Static key shared between the token factory and the test auth configuration
     private static readonly RsaSecurityKey TestSigningKey = CreateRsaKey();
 
     public static SecurityKey SigningKey => TestSigningKey;
@@ -52,14 +51,13 @@ public static class TestTokenFactory
 }
 ```
 
-## 2. WebApplicationFactory Trusting the Test Key
+## 2. WebApplicationFactory — Trust the Test Key
 
 ```csharp
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -69,13 +67,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
-            // Remove production JWT Bearer configuration
+            // Remove the production JWT Bearer configuration
             var jwtDescriptor = services.FirstOrDefault(
                 d => d.ServiceType == typeof(IConfigureOptions<JwtBearerOptions>));
             if (jwtDescriptor is not null)
                 services.Remove(jwtDescriptor);
 
-            // Replace with test-friendly JWT Bearer that trusts our static key
+            // Replace with test-friendly JWT Bearer trusting our static key
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
@@ -100,15 +98,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 ## 3. Example Tests
 
 ```csharp
-using System.Net;
-using System.Security.Claims;
-using Xunit;
-
-public class ApiTokenTests : IClassFixture<ApiFactory>
+public class ProductsApiTests : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client;
 
-    public ApiTokenTests(ApiFactory factory)
+    public ProductsApiTests(ApiFactory factory)
     {
         _client = factory.CreateClient();
     }
@@ -119,7 +113,7 @@ public class ApiTokenTests : IClassFixture<ApiFactory>
         var token = TestTokenFactory.CreateAccessToken(
             subject: "user-123",
             audience: "my-api",
-            claims: [new Claim("scope", "api1")]);
+            claims: new[] { new Claim("scope", "api1") });
 
         _client.SetBearerToken(token);
 
@@ -128,8 +122,15 @@ public class ApiTokenTests : IClassFixture<ApiFactory>
     }
 
     [Fact]
-    public async Task GetProducts_WithoutToken_ShouldReturn401()
+    public async Task GetProducts_WithWrongAudience_ShouldReturn401()
     {
+        var token = TestTokenFactory.CreateAccessToken(
+            subject: "user-123",
+            audience: "wrong-api",
+            claims: new[] { new Claim("scope", "api1") });
+
+        _client.SetBearerToken(token);
+
         var response = await _client.GetAsync("/api/products");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

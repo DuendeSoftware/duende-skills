@@ -1,51 +1,27 @@
 # Configuring Pushed Authorization Requests (PAR)
 
-PAR moves authorization parameters from the front channel (browser redirect URL) to the back channel (direct HTTP POST to the PAR endpoint). This prevents parameter leakage and tampering in the browser URL bar.
-
-**Important:** PAR requires **Duende IdentityServer Business or Enterprise Edition**, version **>= 7.0**.
+PAR moves authorization parameters from the front channel (browser redirect URLs) to the back channel (direct HTTP POST to a dedicated endpoint), preventing parameter leakage and tampering.
 
 ## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer(options =>
 {
-    // Require PAR globally — all clients must use the PAR endpoint
+    // Require PAR globally
     options.PushedAuthorization.Required = true;
 
-    // Lifetime of pushed authorization requests: 5 minutes (in seconds, as int)
+    // PAR request lifetime: 5 minutes (in seconds, as int)
     options.PushedAuthorization.Lifetime = 300;
 })
     .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.Run();
-
-public static class Config
-{
-    public static IEnumerable<IdentityResource> IdentityResources =>
-    [
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile()
-    ];
-
-    public static IEnumerable<ApiScope> ApiScopes =>
-    [
-        new ApiScope("api1", "My API")
-    ];
-
-    public static IEnumerable<Client> Clients =>
-    [
+    .AddInMemoryClients(new List<Client>
+    {
+        // Existing clients...
         new Client
         {
             ClientId = "machine_client",
@@ -55,57 +31,59 @@ public static class Config
         },
         new Client
         {
+            ClientId = "web_app",
+            AllowedGrantTypes = GrantTypes.Code,
+            RequirePkce = true,
+            ClientSecrets = { new Secret("web_secret".Sha256()) },
+            RedirectUris = { "https://webapp.example.com/callback" },
+            AllowedScopes = { "openid", "profile", "api1" },
+            AllowOfflineAccess = true
+        },
+        // Banking app with PAR override
+        new Client
+        {
             ClientId = "banking_app",
             AllowedGrantTypes = GrantTypes.Code,
             RequirePkce = true,
             ClientSecrets = { new Secret("banking_secret".Sha256()) },
             RedirectUris = { "https://banking.example.com/callback" },
             AllowedScopes = { "openid", "profile", "api1" },
-            AllowOfflineAccess = true,
 
-            // Require PAR for this specific client (redundant here since global is true,
-            // but explicit for clarity and protects against global setting change)
+            // PAR required for this client (also enforced globally, but explicit)
             RequirePushedAuthorization = true,
 
-            // Override global lifetime to 15 minutes (in seconds) for this client
-            // Banking users may need more time for MFA and consent
+            // Override global lifetime to 15 minutes for this client
             PushedAuthorizationLifetime = 900
         }
-    ];
-}
+    });
+
+var app = builder.Build();
+
+app.UseIdentityServer();
+app.UseAuthorization();
+
+app.Run();
 ```
 
-## How PAR Works
+## Configuration Explained
 
-1. **Client POSTs to PAR endpoint**: Instead of putting all authorization parameters in the browser redirect URL, the client sends them directly to `POST /connect/par` (back channel).
-2. **Server returns a `request_uri`**: IdentityServer stores the parameters and returns a short-lived `request_uri` identifier.
-3. **Client redirects with `request_uri`**: The browser redirect to `/connect/authorize` only includes `client_id` and `request_uri` — no sensitive parameters in the URL.
-4. **Server resolves parameters**: IdentityServer looks up the stored parameters using the `request_uri` and processes the authorization request normally.
+### Global Settings
+- **`PushedAuthorization.Required = true`** — All clients must use PAR. Any authorize request without a `request_uri` from the PAR endpoint is rejected.
+- **`PushedAuthorization.Lifetime = 300`** — PAR requests expire after 5 minutes (300 seconds). This is an `int`, not a `TimeSpan`. The default is 600 (10 minutes).
 
-## Key Configuration Details
+### Per-Client Override
+- **`RequirePushedAuthorization = true`** — Redundant here since PAR is required globally, but explicit for clarity. Useful when the global setting is `false` and you want specific clients to require PAR.
+- **`PushedAuthorizationLifetime = 900`** — Overrides the global 5-minute lifetime to 15 minutes for this client. This gives users more time to complete the authentication flow (MFA, consent, etc.).
 
-- `PushedAuthorization.Lifetime` is an **`int` in seconds**, not a `TimeSpan`. This is different from many other ASP.NET Core lifetime configurations.
-- `PushedAuthorization.Required = true` enforces PAR globally. Without it, PAR is optional (clients can choose to use it if the endpoint is available).
-- Per-client `RequirePushedAuthorization` can require PAR for specific clients even when the global setting is `false`.
-- Per-client `PushedAuthorizationLifetime` overrides the global lifetime for that client. This is useful when some clients need more time (e.g., banking apps with complex MFA flows).
-
-## .NET 9+ Client Configuration
+### Edition Requirements
+PAR requires **Business or Enterprise Edition** of Duende IdentityServer (version >= 7.0). In the Starter edition, PAR requests are not processed. You can disable the endpoint in discovery:
 
 ```csharp
-// Client-side Program.cs
-builder.Services.AddAuthentication(...)
-    .AddCookie()
-    .AddOpenIdConnect("oidc", oidcOptions =>
-    {
-        // .NET 9+ supports PAR natively
-        // UseIfAvailable is the default; use Require to enforce
-        oidcOptions.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Require;
-    });
+options.Endpoints.EnablePushedAuthorizationEndpoint = false;
 ```
 
-## Why PAR Matters
-
-- **Security**: Authorization parameters (scopes, claims, login hints containing PII) are never exposed in browser URLs.
-- **Integrity**: Parameters cannot be tampered with by an attacker modifying the redirect URL.
-- **Compliance**: PAR is required by the FAPI 2.0 Security Profile for open banking and similar high-value scenarios.
-- **Practicality**: Avoids URL length limits when authorization requests carry large parameter sets.
+### How PAR Works
+1. Client POSTs authorization parameters to `/connect/par`
+2. IdentityServer validates and stores the parameters, returns a `request_uri`
+3. Client redirects the user to `/connect/authorize?client_id=banking_app&request_uri=urn:ietf:params:oauth:request_uri:...`
+4. IdentityServer looks up the stored parameters and proceeds with normal authorization

@@ -1,1 +1,34 @@
-{"eval_id":7,"variant":"without_skill","assertions":[{"assertion":"Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'","pass":true,"rationale":"Code shows AddIdentityServerConfiguration(options => { options.IdentityServerBaseUrl = 'https://identity.example.com'; })"},{"assertion":"Sets up JWT bearer authentication pointing to the main IdentityServer as Authority","pass":true,"rationale":"AddJwtBearer('Bearer', options => { options.Authority = 'https://identity.example.com'; })"},{"assertion":"Calls MapDynamicClientRegistration() with RequireAuthorization()","pass":true,"rationale":"Code shows MapDynamicClientRegistration().RequireAuthorization('DcrPolicy')"},{"assertion":"Does NOT call AddIdentityServer() — this is a separate host, not an IdentityServer instance","pass":true,"rationale":"No AddIdentityServer() call in the code; mentions it does NOT run full IdentityServer middleware"},{"assertion":"Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from","pass":true,"rationale":"States 'The DCR host needs access to the same client database that your main IdentityServer uses'"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "IdentityServerBaseUrl set correctly"
+    },
+    {
+      "assertion": "Sets up JWT bearer authentication pointing to the main IdentityServer as Authority",
+      "pass": true,
+      "rationale": "Authority set to the main IdentityServer"
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()",
+      "pass": true,
+      "rationale": "RequireAuthorization() applied"
+    },
+    {
+      "assertion": "Does NOT call AddIdentityServer() - this is a separate host, not an IdentityServer instance",
+      "pass": true,
+      "rationale": "No AddIdentityServer() call present"
+    },
+    {
+      "assertion": "Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from",
+      "pass": true,
+      "rationale": "Mentions same client store requirement, though briefly"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

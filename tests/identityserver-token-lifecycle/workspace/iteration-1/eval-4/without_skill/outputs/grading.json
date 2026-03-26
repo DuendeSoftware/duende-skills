@@ -2,12 +2,28 @@
   "eval_id": 4,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "A class extending DefaultProfileService or implementing IProfileService is defined", "pass": true, "rationale": "CustomProfileService implements IProfileService (not DefaultProfileService, but the assertion allows either)."},
-    {"assertion": "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims", "pass": false, "rationale": "The code uses context.IssuedClaims.AddRange(claims) which adds all claims directly, not context.AddRequestedClaims()."},
-    {"assertion": "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present", "pass": false, "rationale": "The code checks for the 'act' claim string but does not check for the token exchange authentication method. It just always checks for 'act' claim without verifying the authentication method is token exchange."},
-    {"assertion": "The profile service is registered via AddProfileService<T>() on the IdentityServer builder", "pass": true, "rationale": "Code calls idsvrBuilder.AddProfileService<CustomProfileService>()."}
+    {
+      "assertion": "A class extending DefaultProfileService or implementing IProfileService is defined",
+      "pass": true,
+      "rationale": "DatabaseProfileService implements IProfileService."
+    },
+    {
+      "assertion": "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims",
+      "pass": true,
+      "rationale": "Uses context.AddRequestedClaims(claims)."
+    },
+    {
+      "assertion": "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present",
+      "pass": false,
+      "rationale": "No token exchange handling. The act claim forwarding is missing entirely."
+    },
+    {
+      "assertion": "The profile service is registered via AddProfileService<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddProfileService<DatabaseProfileService>() is called."
+    }
   ],
-  "pass_count": 2,
+  "pass_count": 3,
   "total_count": 4,
-  "score": 0.5
+  "score": 0.75
 }

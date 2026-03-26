@@ -2,26 +2,32 @@
 
 ## NuGet Package
 
-To add SAML support to Duende IdentityServer, you'll need to install the SAML plugin package:
+To add SAML support to Duende IdentityServer, you'll likely need an additional package. Duende has historically offered SAML as a separate component:
 
 ```bash
 dotnet add package Duende.IdentityServer.Saml2p
 ```
 
-This is a separate package from the core IdentityServer package.
+Check the Duende documentation for the exact package name as it may have changed across versions.
 
 ## License Requirements
 
-SAML support in Duende IdentityServer typically requires a higher-tier license. You'll need at least the **Business Edition** to use SAML features. Check the Duende pricing page for the latest edition requirements.
+SAML support in Duende IdentityServer requires a commercial license. Duende offers different editions:
+
+- **Community** — Free for small companies
+- **Business** — Standard commercial features
+- **Enterprise** — Full feature set including advanced protocols
+
+SAML is typically included in the Business or Enterprise editions. Check Duende's pricing page for the specific edition you need.
 
 ## Setup
 
-Once installed:
+Once you have the package installed and the proper license:
 
 ```csharp
 builder.Services.AddIdentityServer()
-    .AddSamlPlugin()
-    .AddInMemoryServiceProviders(serviceProviders);
+    .AddSaml2p()  // or AddSaml() depending on version
+    .AddInMemorySamlServiceProviders(serviceProviders);
 ```
 
-The SAML plugin integrates with your existing IdentityServer setup and shares the same user authentication pipeline.
+Refer to the Duende documentation for version-specific setup instructions.

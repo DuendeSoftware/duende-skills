@@ -2,10 +2,26 @@
   "eval_id": 2,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'", "pass": true, "rationale": "Code contains options.KeyManagement.Enabled = false in the AddIdentityServer options lambda"},
-    {"assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2", "pass": true, "rationale": "Code uses X509CertificateLoader.LoadPkcs12(certBytes, certPassword) after reading from /certs/signing.pfx"},
-    {"assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')", "pass": true, "rationale": "Code calls idsvrBuilder.AddSigningCredential(certificate, SecurityAlgorithms.RsaSha256)"},
-    {"assertion": "Program.cs does not remove the existing client and scope configuration", "pass": true, "rationale": "The existing web-app client, machine-client, api1 scope, and identity resources are all preserved"}
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "Sets options.KeyManagement.Enabled = false in the AddIdentityServer lambda."
+    },
+    {
+      "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+      "pass": true,
+      "rationale": "Uses X509CertificateLoader.LoadPkcs12 to load from /certs/signing.pfx."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+      "pass": true,
+      "rationale": "Calls idsvrBuilder.AddSigningCredential(signingCertificate, SecurityAlgorithms.RsaSha256)."
+    },
+    {
+      "assertion": "Program.cs does not remove the existing client and scope configuration",
+      "pass": true,
+      "rationale": "All existing clients and scopes are preserved in the configuration."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

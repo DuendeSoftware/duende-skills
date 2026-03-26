@@ -1,11 +1,10 @@
-# mTLS Token Binding Without Certificate-Based Client Authentication
+# mTLS Token Binding Without Certificate Authentication
 
-You can bind access tokens to a client certificate (via the `cnf` claim) without using the certificate for client authentication. The client authenticates with a shared secret as usual, but the TLS client certificate presented during the token request is used to embed the `x5t#S256` (SHA-256 certificate thumbprint) in the access token's `cnf` claim.
+You can use mTLS to bind tokens to a client certificate (`cnf` claim with `x5t#S256`) without using the certificate for client authentication. This means the client authenticates normally (e.g., shared secret) but the access token is cryptographically bound to the TLS client certificate.
 
-## Server Configuration
+## Configuration
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,91 +13,60 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
     // Enable mTLS
     options.MutualTls.Enabled = true;
-    options.MutualTls.DomainName = "mtls";
 
-    // Emit the cnf claim for ALL clients that present a TLS client certificate,
-    // regardless of whether the certificate is used for client authentication
+    // Emit cnf claim even when the certificate isn't used for client authentication
     options.MutualTls.AlwaysEmitConfirmationClaim = true;
-})
+});
+
+idsvrBuilder
     .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.Run();
-
-public static class Config
-{
-    public static IEnumerable<IdentityResource> IdentityResources =>
-    [
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile()
-    ];
-
-    public static IEnumerable<ApiScope> ApiScopes =>
-    [
-        new ApiScope("api1", "My API")
-    ];
-
-    public static IEnumerable<Client> Clients =>
-    [
+    .AddInMemoryClients(new List<Client>
+    {
         new Client
         {
             ClientId = "hybrid_app",
             AllowedGrantTypes = GrantTypes.Code,
             RequirePkce = true,
+
+            // Standard shared secret authentication
+            ClientSecrets = { new Secret("hybrid_secret".Sha256()) },
+
             RedirectUris = { "https://hybrid.example.com/callback" },
             AllowedScopes = { "openid", "profile", "api1" },
-
-            // Standard shared secret authentication — NOT certificate-based
-            ClientSecrets = { new Secret("hybrid_secret".Sha256()) }
+            AllowOfflineAccess = true
         }
-    ];
-}
+    });
+
+var app = builder.Build();
+app.UseIdentityServer();
+app.UseAuthorization();
+app.Run();
 ```
 
 ## How It Works
 
-1. The client establishes a TLS connection to the mTLS token endpoint (`https://mtls.identity.example.com/connect/token`) and presents a client certificate during the TLS handshake.
-2. The client authenticates using its shared secret (via POST body or Authorization header) — the certificate is **not** used for authentication.
-3. Because `AlwaysEmitConfirmationClaim = true`, IdentityServer reads the SHA-256 thumbprint of the TLS client certificate and embeds it in the access token:
+1. **Client authentication**: `hybrid_app` authenticates with its shared secret at the token endpoint (standard `client_secret_post` or `client_secret_basic`)
 
-```json
-{
-  "iss": "https://identity.example.com",
-  "client_id": "hybrid_app",
-  "cnf": {
-    "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
-  }
-}
-```
+2. **TLS client certificate**: The client must present a TLS client certificate when calling the token endpoint, even though the certificate is not used for authentication
 
-4. When calling the API, the client must use the **same certificate** to establish the TLS connection. The API validates that the `x5t#S256` value in the `cnf` claim matches the SHA-256 thumbprint of the TLS client certificate on the current connection.
+3. **Token binding**: IdentityServer takes the SHA-256 thumbprint of the TLS client certificate and embeds it in the access token via the `cnf` claim:
+   ```json
+   {
+     "cnf": {
+       "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+     }
+   }
+   ```
 
-## Important: Client Must Present a Certificate
+4. **API validation**: The API validates that the `x5t#S256` value in the `cnf` claim matches the thumbprint of the TLS client certificate presented by the caller
 
-Even though the certificate is not used for client authentication, the client **must** present a TLS client certificate when calling the token endpoint. This is how IdentityServer obtains the thumbprint to embed in the `cnf` claim. Without a certificate on the TLS channel, there is nothing to bind to.
+## Key Setting: `AlwaysEmitConfirmationClaim`
 
-The client can generate a self-signed certificate for this purpose — it doesn't need to be trusted by the server or registered as a client secret.
+Without `AlwaysEmitConfirmationClaim = true`, the `cnf` claim is only embedded when the certificate is used for **client authentication** (via `X509CertificateThumbprint` or `X509CertificateName` secrets). With it set to `true`, the `cnf` claim is embedded whenever a TLS client certificate is present, regardless of the authentication method.
 
-## API-Side Validation
+## Why Use This Pattern?
 
-The API needs custom middleware to validate the `cnf` claim:
-
-```csharp
-app.UseAuthentication();
-app.UseConfirmationValidation(); // custom middleware to validate cnf against TLS cert
-app.UseAuthorization();
-```
-
-The middleware extracts the `x5t#S256` from the `cnf` claim in the access token, computes the SHA-256 thumbprint of the TLS client certificate, and rejects the request if they don't match.
-
-## Key Points
-
-- `AlwaysEmitConfirmationClaim = true` is the critical setting. Without it, the `cnf` claim is only emitted when the certificate is used for client authentication.
-- This pattern works with any client authentication method: shared secrets, private_key_jwt, etc.
-- The client certificate can be self-signed and ephemeral — it only needs to be consistent between the token request and API calls.
+- You want proof-of-possession token security without the complexity of certificate-based client authentication
+- The client can use any authentication method (shared secret, private_key_jwt) while still getting sender-constrained tokens
+- Works well with public clients that can create self-signed certificates dynamically

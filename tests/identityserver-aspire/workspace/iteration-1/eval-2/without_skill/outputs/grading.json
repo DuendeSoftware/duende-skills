@@ -1,1 +1,34 @@
-{"eval_id": 2, "variant": "without_skill", "assertions": [{"assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))"}, {"assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__ClientId\", \"web-app\")"}, {"assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention", "pass": true, "rationale": "Code shows Scopes__0 and Scopes__1"}, {"assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))"}, {"assertion": "The code does NOT set IssuerUri unless explicitly needed", "pass": false, "rationale": "Response suggests setting IssuerUri with a code example, which the skill warns against doing unless the internal and external URLs differ"}], "pass_count": 4, "total_count": 5, "score": 0.8}
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+      "pass": false,
+      "rationale": "Uses a hardcoded URL string 'https://localhost:5001' instead of identityServer.GetEndpoint(\"https\")"
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "Code shows `.WithEnvironment(\"Authentication__ClientId\", \"web-app\")`"
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+      "pass": false,
+      "rationale": "Uses a single string \"Authentication__Scopes\" with space-delimited values instead of the __0, __1, __2 array indexing convention"
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": false,
+      "rationale": "Uses hardcoded 'https://localhost:5001' instead of GetEndpoint"
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": false,
+      "rationale": "Code explicitly sets IssuerUri via WithEnvironment which is not needed and the prompt didn't ask for it"
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

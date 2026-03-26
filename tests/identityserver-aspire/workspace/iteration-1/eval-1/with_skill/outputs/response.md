@@ -1,6 +1,6 @@
-# Aspire AppHost: Full Dependency Graph
+# Wiring the Full Dependency Graph in Aspire AppHost
 
-Here's the complete `Program.cs` for your Aspire AppHost with the full dependency graph wired up:
+Here's the complete `Program.cs` for your Aspire AppHost that establishes the correct startup ordering:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
@@ -9,17 +9,17 @@ var builder = DistributedApplication.CreateBuilder(args);
 var sqlServer = builder.AddSqlServer("sql");
 var identityDb = sqlServer.AddDatabase("identitydb");
 
-// IdentityServer — depends on the database
+// IdentityServer waits for SQL Server to be ready
 var identityServer = builder.AddProject<Projects.IdentityServer>("identity-server")
     .WithReference(identityDb)
     .WaitFor(sqlServer);
 
-// Weather API — depends on IdentityServer for JWT validation
+// Weather API waits for IdentityServer (needs JWKS for token validation)
 var api = builder.AddProject<Projects.WeatherApi>("weather-api")
     .WithReference(identityServer)
     .WaitFor(identityServer);
 
-// Web App — depends on IdentityServer for OIDC and the API
+// Web App waits for IdentityServer (needs discovery doc for OIDC)
 var webApp = builder.AddProject<Projects.WebApp>("web-app")
     .WithReference(identityServer)
     .WaitFor(identityServer)
@@ -28,26 +28,36 @@ var webApp = builder.AddProject<Projects.WebApp>("web-app")
 builder.Build().Run();
 ```
 
-## Dependency Flow
+## Why This Ordering Matters
+
+The dependency graph flows like this:
 
 ```
 sqlServer -> identity-server -> weather-api
                              -> web-app -> weather-api
 ```
 
-## What Each Call Does
+Each call serves a specific purpose:
 
 | Call | Effect |
 |------|--------|
-| `builder.AddSqlServer("sql")` | Creates a SQL Server container resource |
-| `sqlServer.AddDatabase("identitydb")` | Creates a logical database resource on the SQL Server |
-| `.WithReference(identityDb)` | Makes the connection string available to IdentityServer via `ConnectionStrings__identitydb` |
-| `.WaitFor(sqlServer)` | Ensures SQL Server is accepting connections before IdentityServer starts |
-| `.WithReference(identityServer)` | Makes the IdentityServer endpoint URL available to the dependent service via service discovery |
-| `.WaitFor(identityServer)` | Holds the dependent service from starting until IdentityServer's health check returns healthy |
+| `.WithReference(identityDb)` | Makes the `ConnectionStrings__identitydb` available to IdentityServer |
+| `.WaitFor(sqlServer)` | Holds IdentityServer from starting until SQL Server accepts connections |
+| `.WithReference(identityServer)` | Makes IdentityServer's endpoint URL available via service discovery |
+| `.WaitFor(identityServer)` | Holds the dependent service until IdentityServer's health check returns healthy |
 
-Both `WithReference` and `WaitFor` are needed for each dependency:
-- `WithReference` alone provides the URL but doesn't prevent premature startup
-- `WaitFor` alone delays startup but doesn't expose the endpoint URL
+Both `WithReference` and `WaitFor` are needed on the API and web app. `WithReference` alone provides the URL but doesn't prevent premature startup. `WaitFor` alone delays startup but doesn't expose the endpoint URL.
 
-Without `WaitFor(identityServer)` on the API and web app, they may start before IdentityServer is ready, causing `InvalidOperationException: IDX20803: Unable to obtain configuration from '.well-known/openid-configuration'` errors.
+Without `WaitFor(identityServer)`, the API and web app may start before IdentityServer is ready, causing `IDX20803: Unable to obtain configuration from '.well-known/openid-configuration'` errors.
+
+## Health Check Requirement
+
+For `WaitFor(identityServer)` to work, IdentityServer must expose a health check endpoint. At minimum:
+
+```csharp
+// In IdentityServer's Program.cs
+builder.Services.AddHealthChecks();
+app.MapHealthChecks("/health");
+```
+
+Aspire polls this endpoint to determine when IdentityServer is ready to accept traffic.
