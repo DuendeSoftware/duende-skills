@@ -1,46 +1,36 @@
-# Parsing Access Tokens in the Client — What's Wrong
+# Getting User Info Without Parsing Access Tokens
 
-## The Problem
+## The Issue
 
-Your application broke because you were parsing the access token as a JWT to extract user claims. When the server switched to reference tokens (opaque strings), the JWT parsing fails because reference tokens aren't JWTs — they're just random identifiers.
+You shouldn't parse access tokens in your client application. Access tokens are meant for APIs, not clients. When the format changed from JWT to reference token, your code broke because reference tokens aren't parseable JWTs.
 
-## The Root Issue
+## Correct Approaches
 
-Access tokens are intended for the API (resource server), not for the client application. The format and contents of access tokens can change at any time — the server may switch between JWT and reference tokens, change claim names, or restructure the token entirely.
-
-## The Correct Approach
-
-### 1. Use the ID Token for User Claims
-
-OpenID Connect issues an ID token specifically for the client application to identify the user. In ASP.NET Core, the OIDC middleware automatically processes the ID token and populates the `ClaimsPrincipal`:
+### Use the ID Token
+The ID token contains user identity claims like name and email:
 
 ```csharp
-// Read user claims from the authentication result (populated from ID token)
 var name = User.FindFirst("name")?.Value;
 var email = User.FindFirst("email")?.Value;
 ```
 
-### 2. Call the UserInfo Endpoint
+Make sure you request the appropriate scopes (`profile`, `email`).
 
-If you need additional user information that isn't in the ID token, you can call the userinfo endpoint:
-
-```csharp
-// Configure the OIDC handler to fetch additional claims from userinfo
-options.GetClaimsFromUserInfoEndpoint = true;
-```
-
-Or call it manually:
+### Use the UserInfo Endpoint
+You can also call the UserInfo endpoint to get user claims:
 
 ```csharp
-var userInfoResponse = await httpClient.GetUserInfoAsync(new UserInfoRequest
+var userInfo = await httpClient.GetUserInfoAsync(new UserInfoRequest
 {
     Address = disco.UserInfoEndpoint,
-    Token = accessToken  // pass the access token (don't parse it)
+    Token = accessToken
 });
 ```
 
-### Key Takeaway
+## Token Roles
 
-- The **ID token** is for the client — it tells you who the user is
-- The **access token** is for the API — it authorizes what the user can access
-- Access tokens should be treated as opaque strings by clients — never parsed or decoded
+- **ID Token**: For the client — proves who the user is
+- **Access Token**: For the API — authorizes access
+- **Refresh Token**: For the client — gets new access tokens
+
+Access tokens should be treated as opaque by clients.

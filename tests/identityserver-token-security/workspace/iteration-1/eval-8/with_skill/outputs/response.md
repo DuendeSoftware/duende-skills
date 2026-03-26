@@ -1,106 +1,79 @@
 # Client-Side DPoP with Duende.AccessTokenManagement
 
-Duende.AccessTokenManagement handles DPoP proof token creation and management automatically. For client credentials flow, you configure the DPoP JWK on the client registration and the library handles proof generation on every token request and API call.
-
-## Install the Package
-
-```bash
-dotnet add package Duende.AccessTokenManagement
-```
+Duende.AccessTokenManagement handles DPoP proof token generation automatically. You configure it with a DPoP JWK and it manages proof creation for every token request.
 
 ## Configuration
 
 ```csharp
-// Program.cs
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text.Json;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Generate a DPoP JWK (see below for key generation)
+// Generate a DPoP proof key (RSA with PS256)
 var rsaKey = new RsaSecurityKey(RSA.Create(2048));
 var jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
 jsonWebKey.Alg = "PS256";
-string dpopJwk = JsonSerializer.Serialize(jsonWebKey);
+var dpopKey = JsonSerializer.Serialize(jsonWebKey);
 
+// Configure client credentials token management with DPoP
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("demo_dpop_client", client =>
+    .AddClient("dpop_client", client =>
     {
         client.TokenEndpoint = "https://identity.example.com/connect/token";
         client.ClientId = "dpop_client";
         client.ClientSecret = "secret";
-        client.DPoPJsonWebKey = dpopJwk;
+        client.DPoPJsonWebKey = dpopKey;
     });
 
-// Register named HttpClient that automatically attaches DPoP tokens
-builder.Services.AddClientCredentialsHttpClient("api_client", "demo_dpop_client", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com");
-});
+// Register named HttpClient that uses the DPoP-bound token
+builder.Services.AddClientCredentialsHttpClient("dpop_api_client",
+    configureClient: httpClient =>
+    {
+        httpClient.BaseAddress = new Uri("https://api.example.com");
+    })
+    .SetTokenName("dpop_client");
 
 var app = builder.Build();
-
-app.MapGet("/call-api", async (IHttpClientFactory factory) =>
-{
-    var client = factory.CreateClient("api_client");
-    var response = await client.GetStringAsync("/protected");
-    return response;
-});
-
 app.Run();
 ```
 
-## Generating a DPoP JWK
+## DPoP JWK Generation
 
 ```csharp
-// Generate an RSA key pair for DPoP
+// Generate an RSA key pair
 var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+
+// Convert to JWK format
 var jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
-jsonWebKey.Alg = "PS256"; // Use PS256 for FAPI 2.0 compliance
-string jwk = JsonSerializer.Serialize(jsonWebKey);
 
-// Store this JWK securely — it contains both public and private key material
-Console.WriteLine(jwk);
-```
+// Set the algorithm — PS256 is recommended for FAPI 2.0
+jsonWebKey.Alg = "PS256";
 
-You can also use ECDSA keys:
-
-```csharp
-var ecKey = new ECDsaSecurityKey(ECDsa.Create(ECCurve.NamedCurves.nistP256));
-var jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(ecKey);
-jsonWebKey.Alg = "ES256";
+// Serialize to JSON string
 string jwk = JsonSerializer.Serialize(jsonWebKey);
 ```
 
-## Critical Security Warning
+This generates a full RSA key pair (public + private) as a JWK. The `DPoPJsonWebKey` property expects this serialized JWK string containing **both** public and private key components.
 
-The `DPoPJsonWebKey` is a **critical secret** that requires careful management:
+## Critical Security Warnings
 
-- **If lost**: Tokens bound to this key become unusable — the client cannot produce valid DPoP proofs for existing tokens, and those tokens will be rejected by APIs.
-- **If leaked**: The security benefits of DPoP are completely nullified — an attacker with the key can produce valid proofs for any stolen tokens, defeating proof-of-possession.
+**The `DPoPJsonWebKey` is a critical secret:**
 
-Store the JWK in a secure location (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault, etc.). Do not hardcode it in source code or configuration files. In production, persist the key across application restarts so existing tokens remain valid.
+- **Losing it**: If you lose the DPoP key, any tokens bound to it become unusable. The client cannot create valid DPoP proofs without the private key, so APIs will reject the tokens.
+- **Leaking it**: If the key is compromised, an attacker can generate valid DPoP proofs for any token bound to that key, completely nullifying the security benefits of DPoP.
+
+### Key Management Best Practices
+- Persist the key securely (e.g., Azure Key Vault, HashiCorp Vault, DPAPI)
+- Rotate keys periodically
+- Do not log or include the JWK in diagnostics
+- Generate per-instance keys in production (avoid sharing across servers unless necessary)
 
 ## How It Works
 
-1. `AddClientCredentialsTokenManagement` registers the token management infrastructure.
-2. `AddClient` configures a named client with the token endpoint, credentials, and DPoP key.
-3. When a token is requested, the library automatically creates a DPoP proof JWT signed with the private key and sends it in the `DPoP` header.
-4. The library caches the access token and handles refresh when it expires.
-5. When using the named `HttpClient` via `AddClientCredentialsHttpClient`, the library attaches the `DPoP` authorization header with the access token and includes a fresh DPoP proof on every API call.
-
-## Authorization Code Flow
-
-For interactive flows, configure DPoP on the OpenID Connect token management:
-
-```csharp
-builder.Services.AddAuthentication(...)
-    .AddCookie("cookie", ...)
-    .AddOpenIdConnect("oidc", ...);
-
-builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
-{
-    options.DPoPJsonWebKey = dpopJwk;
-});
-```
+1. `AddClientCredentialsTokenManagement` manages token acquisition and caching
+2. When a token is needed, the library requests one from the token endpoint with a DPoP proof JWT in the `DPoP` header
+3. The proof is signed with the private key from `DPoPJsonWebKey`
+4. IdentityServer validates the proof and returns a DPoP-bound access token
+5. On subsequent API calls, the library automatically generates fresh DPoP proofs for each request

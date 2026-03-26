@@ -1,28 +1,21 @@
-# Client Assertions with JWT
+# Client Assertions (private_key_jwt) with Duende.AccessTokenManagement
 
-Client assertions let you authenticate your client using signed JWTs instead of shared secrets. This is more secure for production scenarios.
+Client assertions allow you to authenticate to the token endpoint using a signed JWT instead of a shared secret. This is the `private_key_jwt` client authentication method from the OpenID Connect specification.
 
 ## Implementation
 
-```csharp
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
+You need to implement `IClientAssertionService`:
 
+```csharp
 public class JwtClientAssertionService : IClientAssertionService
 {
     private readonly SigningCredentials _signingCredentials;
     private readonly string _clientId;
-    private readonly string _tokenEndpoint;
 
-    public JwtClientAssertionService(
-        SigningCredentials signingCredentials,
-        string clientId,
-        string tokenEndpoint)
+    public JwtClientAssertionService(SigningCredentials signingCredentials, string clientId)
     {
         _signingCredentials = signingCredentials;
         _clientId = clientId;
-        _tokenEndpoint = tokenEndpoint;
     }
 
     public Task<ClientAssertion?> GetClientAssertionAsync(
@@ -31,23 +24,22 @@ public class JwtClientAssertionService : IClientAssertionService
     {
         var now = DateTime.UtcNow;
 
-        var claims = new[]
+        var token = new SecurityTokenDescriptor
         {
-            new Claim(JwtRegisteredClaimNames.Sub, _clientId),
-            new Claim(JwtRegisteredClaimNames.Iss, _clientId),
-            new Claim(JwtRegisteredClaimNames.Aud, _tokenEndpoint),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            Issuer = _clientId,
+            Audience = "https://identity.example.com/connect/token",
+            Expires = now.AddMinutes(5),
+            IssuedAt = now,
+            SigningCredentials = _signingCredentials,
+            Claims = new Dictionary<string, object>
+            {
+                ["sub"] = _clientId,
+                ["jti"] = Guid.NewGuid().ToString()
+            }
         };
 
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: now.AddMinutes(5),
-            signingCredentials: _signingCredentials
-        );
-
-        var handler = new JwtSecurityTokenHandler();
-        var jwt = handler.WriteToken(token);
+        var handler = new JsonWebTokenHandler();
+        var jwt = handler.CreateToken(token);
 
         return Task.FromResult<ClientAssertion?>(new ClientAssertion
         {
@@ -61,29 +53,17 @@ public class JwtClientAssertionService : IClientAssertionService
 ## Registration
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-var rsaKey = RSA.Create();
-rsaKey.ImportFromPem(builder.Configuration["ClientAssertion:PrivateKeyPem"]);
-var signingCredentials = new SigningCredentials(
-    new RsaSecurityKey(rsaKey), SecurityAlgorithms.RsaSsaPssSha256);
+var jwkJson = builder.Configuration["ClientAssertion:JsonWebKey"];
+var jwk = new JsonWebKey(jwkJson);
+var signingCredentials = new SigningCredentials(jwk, SecurityAlgorithms.RsaSha256);
 
 builder.Services.AddSingleton<IClientAssertionService>(
-    new JwtClientAssertionService(
-        signingCredentials,
-        clientId: "webapp",
-        tokenEndpoint: "https://sts.example.com/connect/token"));
-
-builder.Services.AddAccessTokenManagement();
-
-var app = builder.Build();
-app.Run();
+    new JwtClientAssertionService(signingCredentials, "my-client-id"));
 ```
 
-## Explanation
+## Notes
 
-- The service creates a signed JWT with the client ID as both issuer and subject
-- The audience is set to the token endpoint URL
-- The JWT is signed with an RSA key loaded from configuration
-- The assertion type is set to `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` per RFC 7523
-- Register as a singleton since it only needs the signing credentials
+- The JWT audience should be set to the token endpoint URL
+- The assertion type is `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
+- Keep JWT expiration short (5 minutes is recommended)
+- Load keys from secure storage, not hardcoded

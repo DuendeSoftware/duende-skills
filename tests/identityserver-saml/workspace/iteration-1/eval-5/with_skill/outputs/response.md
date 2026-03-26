@@ -1,42 +1,44 @@
-# Encrypted Assertions and IdP-Initiated SSO
+# Configuring Encrypted Assertions and IdP-Initiated SSO
 
-Here's how to configure a SAML service provider in Duende IdentityServer with encrypted assertions and IdP-initiated SSO support.
+Here's how to configure a SAML service provider with encrypted assertions and IdP-initiated SSO support.
 
-## SamlServiceProvider Configuration
+## Service Provider Configuration
 
 ```csharp
 using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer.Models.Saml;
+using Duende.IdentityServer.Models;
 
-var encryptedSp = new SamlServiceProvider
-{
-    EntityId = "https://sp.example.com",
-    DisplayName = "SP with Encrypted Assertions",
+public static IEnumerable<SamlServiceProvider> SamlServiceProviders =>
+[
+    new SamlServiceProvider
+    {
+        EntityId = "https://sp.example.com",
+        DisplayName = "Example SP with Encryption",
 
-    AssertionConsumerServiceUrls =
-    [
-        new Uri("https://sp.example.com/saml/acs")
-    ],
+        AssertionConsumerServiceUrls =
+        [
+            new Uri("https://sp.example.com/saml/acs")
+        ],
 
-    // Enable assertion encryption
-    EncryptAssertions = true,
+        // Enable assertion encryption
+        EncryptAssertions = true,
+        EncryptionCertificates =
+        [
+            new X509Certificate2("certs/sp-encryption.cer")
+        ],
 
-    // Load the SP's encryption certificate
-    EncryptionCertificates =
-    [
-        new X509Certificate2("certs/sp-encryption.cer")
-    ],
+        // Enable IdP-initiated SSO
+        AllowIdpInitiated = true,
 
-    // Enable IdP-initiated SSO for this SP
-    AllowIdpInitiated = true,
-
-    SigningBehavior = SamlSigningBehavior.SignAssertion
-};
+        // Other settings
+        SigningBehavior = SamlSigningBehavior.SignAssertion
+    }
+];
 ```
 
 ## Enable the IdP-Initiated SSO Endpoint
 
-The IdP-initiated SSO endpoint is **disabled by default**. You must explicitly enable it via `IdentityServerOptions.Endpoints`:
+The IdP-initiated SSO endpoint is **disabled by default**. You must explicitly enable it in `IdentityServerOptions.Endpoints`:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
@@ -45,67 +47,26 @@ builder.Services.AddIdentityServer(options =>
     options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true;
 })
     .AddSaml()
-    .AddInMemorySamlServiceProviders(new[]
-    {
-        encryptedSp
-    });
+    .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-## Full Program.cs
+Once enabled, the endpoint is available at `/saml/idp-initiated`. To start an IdP-initiated flow for the SP, navigate to:
 
-```csharp
-using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Models.Saml;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddIdentityServer(options =>
-{
-    options.EmitStaticAudienceClaim = true;
-
-    // Enable IdP-initiated SSO endpoint (default: false)
-    options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true;
-})
-    .AddInMemoryClients(Config.Clients)
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddTestUsers(TestUsers.Users)
-    .AddSaml()
-    .AddInMemorySamlServiceProviders(new[]
-    {
-        new SamlServiceProvider
-        {
-            EntityId = "https://sp.example.com",
-            DisplayName = "Encrypted SP",
-            AssertionConsumerServiceUrls =
-            [
-                new Uri("https://sp.example.com/saml/acs")
-            ],
-            EncryptAssertions = true,
-            EncryptionCertificates =
-            [
-                new X509Certificate2("certs/sp-encryption.cer")
-            ],
-            AllowIdpInitiated = true
-        }
-    });
-
-builder.Services.AddRazorPages();
-var app = builder.Build();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-app.MapRazorPages();
-app.Run();
+```
+https://your-idp.example.com/saml/idp-initiated?entityId=https://sp.example.com
 ```
 
-## Key Points
+## How Encryption Works
 
-- **`EncryptAssertions = true`** enables encryption of the SAML assertion for this SP
-- **`EncryptionCertificates`** must be populated when `EncryptAssertions = true` — otherwise assertion generation will fail
-- **`AllowIdpInitiated = true`** enables IdP-initiated SSO for this specific SP (it's `false` by default)
-- The global endpoint **`options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true`** must also be set to make the `/saml/idp-initiated` endpoint available
-- IdP-initiated SSO is less secure than SP-initiated; only enable when required
+When `EncryptAssertions = true`:
+1. IdentityServer encrypts the SAML assertion using the SP's encryption certificate
+2. The SP decrypts the assertion using its private key
+3. Only the SP with the matching private key can read the assertion contents
+
+**Important:** Never set `EncryptAssertions = true` without providing `EncryptionCertificates`. Assertion generation will fail if no encryption certificate is available.
+
+## Security Considerations
+
+- **Assertion encryption** protects assertion contents in transit, complementing TLS
+- **IdP-initiated SSO** is less secure than SP-initiated flows because there's no AuthnRequest to validate. Only enable it for SPs that explicitly require it
+- The SP's encryption certificate should be the **public key only** (`.cer` file) — you don't need their private key

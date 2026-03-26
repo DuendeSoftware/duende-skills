@@ -1,0 +1,29 @@
+{
+  "eval_id": 108,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Shows setting options.EmitStaticAudienceClaim = true in the IdentityServer options",
+      "pass": false,
+      "rationale": "Does not mention EmitStaticAudienceClaim at all"
+    },
+    {
+      "assertion": "Explains that this emits a static audience claim of '{issuer}/resources'",
+      "pass": false,
+      "rationale": "Does not explain EmitStaticAudienceClaim"
+    },
+    {
+      "assertion": "Mentions the alternative of defining an ApiResource as a more targeted approach",
+      "pass": true,
+      "rationale": "Shows ApiResource as the primary approach (which is technically the alternative to EmitStaticAudienceClaim)"
+    },
+    {
+      "assertion": "Does NOT suggest using the Implicit grant type or any deprecated patterns",
+      "pass": true,
+      "rationale": "No deprecated patterns suggested"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,68 +1,58 @@
-# Fixing State Parameter Length and ReturnUrl Issues
+# Fixing State and ReturnUrl Issues
 
 ## The Problem
 
-When using an external OIDC provider, two issues can occur:
-1. The state parameter in the URL can become too long
-2. The returnUrl can be lost during the external authentication round-trip
+The OIDC state parameter is too long because it's encoded in the URL. Also, the returnUrl is being lost during the external auth round-trip.
 
-## Fix: Store ReturnUrl in AuthenticationProperties
+## Fix 1: State Storage
 
-### External Login Trigger
+You can store the state server-side. In ASP.NET Core, you can configure a distributed cache and use a custom state data format:
 
 ```csharp
-public class ExternalLoginModel : PageModel
-{
-    public IActionResult OnGet(string returnUrl)
-    {
-        var props = new AuthenticationProperties
-        {
-            RedirectUri = "/ExternalLoginCallback",
-            Items =
-            {
-                { "returnUrl", returnUrl }
-            }
-        };
+builder.Services.AddDistributedMemoryCache();
 
-        return Challenge(props, "corporate-idp");
-    }
+// Configure the OIDC handler
+builder.Services.AddAuthentication()
+    .AddOpenIdConnect("corporate-idp", options =>
+    {
+        options.Authority = "https://corporate-idp.example.com";
+        options.ClientId = "your-client-id";
+        options.StateDataFormat = new PropertiesDataFormat(
+            new DistributedCacheStateDataFormatter(/* ... */));
+    });
+```
+
+## Fix 2: Preserve ReturnUrl
+
+Store it in AuthenticationProperties before the Challenge:
+
+```csharp
+public IActionResult OnGetLogin(string returnUrl)
+{
+    var props = new AuthenticationProperties
+    {
+        RedirectUri = "/callback",
+        Items = { { "returnUrl", returnUrl } }
+    };
+    return Challenge(props, "corporate-idp");
 }
 ```
 
-### External Login Callback
+Then retrieve it in the callback:
 
 ```csharp
-public class ExternalLoginCallbackModel : PageModel
+public async Task<IActionResult> OnGetCallback()
 {
-    public async Task<IActionResult> OnGet()
-    {
-        var result = await HttpContext.AuthenticateAsync("Cookies");
+    var result = await HttpContext.AuthenticateAsync("Cookies");
+    var returnUrl = result.Properties.Items["returnUrl"] ?? "/";
 
-        if (result?.Succeeded != true)
-            throw new Exception("External auth failed");
+    // ... sign in user ...
 
-        var returnUrl = result.Properties?.Items["returnUrl"] ?? "~/";
-
-        // Create local session
-        var claims = new List<System.Security.Claims.Claim>
-        {
-            new("sub", result.Principal.FindFirst("sub")?.Value ?? "unknown"),
-            new("name", result.Principal.Identity?.Name ?? "User")
-        };
-        var identity = new System.Security.Claims.ClaimsIdentity(claims, "external");
-        await HttpContext.SignInAsync(new System.Security.Claims.ClaimsPrincipal(identity));
-
+    if (Url.IsLocalUrl(returnUrl))
         return Redirect(returnUrl);
-    }
+
+    return Redirect("/");
 }
 ```
 
-## For the URL Length Issue
-
-Consider reducing the number of scopes requested, or using a distributed cache to store the state server-side. Some OIDC libraries support custom state data formatters that can compress or store state externally.
-
-### Notes
-
-- Always store `returnUrl` in `AuthenticationProperties.Items` before the Challenge.
-- Retrieve it from `result.Properties.Items` in the callback.
-- Consider using a distributed cache for state storage if URL length is a persistent issue.
+This ensures the returnUrl survives the round-trip and is validated before redirecting.

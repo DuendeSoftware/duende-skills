@@ -1,1 +1,25 @@
-{"eval_id":4,"variant":"with_skill","assertions":[{"assertion":"Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup","pass":true,"rationale":"Loads from builder.Configuration[\"DPoP:JsonWebKey\"] with explicit warning against RSA.Create()."},{"assertion":"Output sets the DPoPJsonWebKey property on the client credentials client configuration","pass":true,"rationale":"client.DPoPJsonWebKey = dpopJwk is set on the client."},{"assertion":"Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart","pass":true,"rationale":"Explicit warning comment about not using RSA.Create(2048) ephemerally."},{"assertion":"Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured","pass":true,"rationale":"AddClientCredentialsTokenManagement().AddClient() used with DPoPJsonWebKey."}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 4,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup",
+      "passed": true
+    },
+    {
+      "assertion": "Output sets the DPoPJsonWebKey property on the client credentials client configuration",
+      "passed": true
+    },
+    {
+      "assertion": "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart",
+      "passed": true
+    },
+    {
+      "assertion": "Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

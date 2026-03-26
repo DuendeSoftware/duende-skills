@@ -1,6 +1,4 @@
-# Complete IdentityServer Setup
-
-Here's a complete IdentityServer setup with identity resources, API scope, and an interactive client:
+# IdentityServer with Interactive Client
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -8,22 +6,22 @@ using Duende.IdentityServer.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer()
-    .AddInMemoryIdentityResources(new List<IdentityResource>
+    .AddInMemoryIdentityResources(new IdentityResource[]
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile()
     })
-    .AddInMemoryApiScopes(new List<ApiScope>
+    .AddInMemoryApiScopes(new[]
     {
         new ApiScope("weatherapi", "Weather API")
     })
-    .AddInMemoryClients(new List<Client>
+    .AddInMemoryClients(new[]
     {
         new Client
         {
             ClientId = "webapp",
-            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.Code,
+            ClientSecrets = { new Secret("secret".Sha256()) },
             RedirectUris = { "https://webapp.example.com/signin-oidc" },
             PostLogoutRedirectUris = { "https://webapp.example.com/signout-callback-oidc" },
             AllowedScopes = { "openid", "profile", "weatherapi" }
@@ -32,14 +30,11 @@ builder.Services.AddIdentityServer()
 
 var app = builder.Build();
 
-app.UseRouting();
+app.UseAuthentication();
 app.UseIdentityServer();
 app.UseAuthorization();
 
 app.Run();
 ```
 
-This sets up:
-- OpenID Connect identity resources for user authentication
-- A `weatherapi` API scope
-- An interactive web client using authorization code flow with the specified redirect URIs
+This sets up IdentityServer with identity resources, an API scope, and an interactive client using authorization code flow.

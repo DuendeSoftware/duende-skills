@@ -1,69 +1,95 @@
-# Admin Session Management with ISessionManagementService
+# Using ISessionManagementService for Session Management
 
-Here's how to build an admin endpoint that queries and terminates user sessions using `ISessionManagementService`.
+`ISessionManagementService` provides APIs for querying and terminating user sessions programmatically.
 
-## Injection and Setup
-
-First, inject `ISessionManagementService` into your admin endpoint or controller:
+## Admin Endpoint Implementation
 
 ```csharp
 using Duende.IdentityServer.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-app.MapGet("/admin/sessions", async (ISessionManagementService sessionManagement) =>
+[ApiController]
+[Route("api/admin/sessions")]
+[Authorize(Policy = "AdminOnly")]
+public class SessionAdminController : ControllerBase
 {
-    // 1. Query the first page of 10 sessions
-    var firstPage = await sessionManagement.QuerySessionsAsync(new SessionQuery
-    {
-        CountRequested = 10
-    });
+    private readonly ISessionManagementService _sessionManagement;
 
-    // 2. Get the next page using the ResultsToken from the first query
-    var nextPage = await sessionManagement.QuerySessionsAsync(new SessionQuery
+    public SessionAdminController(ISessionManagementService sessionManagement)
     {
-        ResultsToken = firstPage.ResultsToken,
-        CountRequested = 10
-    });
+        _sessionManagement = sessionManagement;
+    }
 
-    return Results.Ok(new
+    // (1) Query the first page of 10 sessions
+    [HttpGet]
+    public async Task<IActionResult> GetSessions()
     {
-        FirstPage = firstPage.Sessions,
-        NextPage = nextPage.Sessions,
-        HasMore = nextPage.HasNextResults
-    });
-});
+        var result = await _sessionManagement.QuerySessionsAsync(new SessionQuery
+        {
+            CountRequested = 10
+        });
+
+        return Ok(new
+        {
+            Sessions = result.Sessions,
+            HasMore = result.HasNextResults,
+            ResultsToken = result.ResultsToken,
+            TotalCount = result.TotalCount
+        });
+    }
+
+    // (2) Get the next page using ResultsToken
+    [HttpGet("next")]
+    public async Task<IActionResult> GetNextPage([FromQuery] string resultsToken)
+    {
+        var result = await _sessionManagement.QuerySessionsAsync(new SessionQuery
+        {
+            ResultsToken = resultsToken,
+            CountRequested = 10
+        });
+
+        return Ok(new
+        {
+            Sessions = result.Sessions,
+            HasMore = result.HasNextResults,
+            ResultsToken = result.ResultsToken,
+            TotalCount = result.TotalCount
+        });
+    }
+
+    // (3) Revoke all sessions for a user — back-channel logout yes, consents no
+    [HttpDelete("{subjectId}")]
+    public async Task<IActionResult> RevokeUserSessions(string subjectId)
+    {
+        await _sessionManagement.RemoveSessionsAsync(new RemoveSessionsContext
+        {
+            SubjectId = subjectId,
+            RemoveServerSideSession = true,
+            RevokeTokens = true,
+            SendBackchannelLogoutNotification = true,
+            RevokeConsents = false
+        });
+
+        return NoContent();
+    }
+}
 ```
 
-## Terminating All Sessions for a User
+## Performance Note
+
+For simple session listing (e.g., showing a user their active sessions), prefer `GetSessionsAsync` over `QuerySessionsAsync`. `GetSessionsAsync` is faster because it looks up sessions by subject ID directly. `QuerySessionsAsync` performs a more expensive search and should be reserved for administrative use cases that need filtering by display name or other criteria.
 
 ```csharp
-app.MapDelete("/admin/sessions/{subjectId}", async (
-    string subjectId,
-    ISessionManagementService sessionManagement) =>
-{
-    // 3. Revoke all sessions for the user
-    await sessionManagement.RemoveSessionsAsync(new RemoveSessionsContext
-    {
-        SubjectId = subjectId,
-        RemoveServerSideSession = true,           // Delete the session record
-        RevokeTokens = true,                      // Revoke refresh tokens and reference tokens
-        SendBackchannelLogoutNotification = true,  // Notify clients via back-channel logout
-        RevokeConsents = false                     // Preserve user consent grants
-    });
-
-    return Results.NoContent();
-});
+// Prefer this for simple listing by user
+var sessions = await _sessionManagement.GetSessionsAsync(
+    new GetSessionsFilter { SubjectId = "12345" });
 ```
 
 ## Key Points
 
-- **Paging**: `QuerySessionsAsync` returns a `ResultsToken` that you pass to the next call to fetch subsequent pages. You can also set `RequestPriorResults = true` to navigate backwards.
-
-- **`RemoveSessionsAsync` flags**: Each flag controls what gets cleaned up:
-  - `RemoveServerSideSession` (default: `true`) — deletes the session record from the store
-  - `RevokeTokens` (default: `true`) — revokes refresh tokens and reference access tokens
-  - `RevokeConsents` (default: `true`) — removes persisted consent grants (set to `false` to preserve them)
-  - `SendBackchannelLogoutNotification` (default: `true`) — sends back-channel logout notifications to clients with a `BackChannelLogoutUri`
-
-- **Performance tip**: Prefer `GetSessionsAsync` over `QuerySessionsAsync` for simple session listing. `QuerySessionsAsync` performs a full-text search and may be slower. Use it only when you need advanced filtering by display name or other criteria.
-
-- **Selective revocation**: You can also filter by `SessionId` (target a specific session) or `ClientIds` (target specific clients within a session).
+- `QuerySessionsAsync` returns a `QueryResult<UserSession>` with paging support via `ResultsToken`
+- Pass `ResultsToken` from a previous result to fetch the next page
+- `RemoveSessionsAsync` accepts a `RemoveSessionsContext` with fine-grained control
+- `SendBackchannelLogoutNotification` defaults to `true` — set explicitly for clarity
+- `RevokeConsents = false` preserves consent grants when terminating sessions

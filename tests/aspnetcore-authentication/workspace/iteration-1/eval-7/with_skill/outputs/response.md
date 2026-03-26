@@ -1,55 +1,45 @@
-# Authentication Cookie Too Large — Solutions
+# Cookie Size Too Large
 
-## The Problem
+When `SaveTokens = true` and many claims come from the userinfo endpoint, the authentication cookie can exceed the 4KB browser limit. Here are the solutions:
 
-Your authentication cookie exceeds the 4KB browser limit because of two factors:
+## Understanding the Problem
 
-1. **`SaveTokens = true`** stores the access token, refresh token, and ID token directly in the cookie. Access tokens can be large (especially JWTs with many claims), and refresh tokens add even more bulk.
-2. **Claims from the userinfo endpoint** add additional data to the cookie's authentication ticket.
+`SaveTokens = true` stores the access token, refresh token, and ID token directly in the authentication cookie. Combined with claims from the userinfo endpoint, this can easily exceed the 4KB cookie size limit, causing silent authentication failures.
 
-Combined, these easily push the cookie past the 4KB limit, causing browsers to silently truncate or reject it.
+## Solution 1: Use ITicketStore (Server-Side Session)
 
-## Solutions
-
-### Solution 1: Server-Side Ticket Store (ITicketStore)
-
-Move the full authentication ticket out of the cookie and into a server-side store. The cookie then only holds a small session key/identifier.
+Move the authentication ticket out of the cookie entirely. The cookie only holds a session key, while the full ticket (including tokens and claims) is stored server-side.
 
 ```csharp
-// Implement ITicketStore backed by IDistributedCache (e.g., Redis)
+// Implement ITicketStore backed by IDistributedCache
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379";
 });
-builder.Services.AddSingleton<ITicketStore, RedisTicketStore>(); // Your custom implementation
+builder.Services.AddSingleton<ITicketStore, RedisTicketStore>();
 
 .AddCookie("Cookies", options =>
 {
-    // Wire the ITicketStore so the cookie only holds a session key, not the full ticket
-    options.SessionStore = app.Services.GetRequiredService<ITicketStore>();
+    options.SessionStore = serviceProvider.GetRequiredService<ITicketStore>();
 });
 ```
 
-`ITicketStore` (from `Microsoft.AspNetCore.Authentication.Cookies`) requires you to implement `StoreAsync`, `RenewAsync`, `RetrieveAsync`, and `RemoveAsync`. You can back it with `IDistributedCache`, a database, or any persistent store.
+## Solution 2: Filter Unnecessary Claims
 
-### Solution 2: Filter Unnecessary Claims
-
-Remove claims you don't need from the cookie using `ClaimActions.DeleteClaims`:
+Remove claims that aren't needed in the cookie using `ClaimActions.DeleteClaims`:
 
 ```csharp
 .AddOpenIdConnect("oidc", options =>
 {
-    // Remove claims that aren't needed in the cookie
+    // Remove claims that are not needed by the app
     options.ClaimActions.DeleteClaims("sid", "idp", "auth_time", "amr");
 });
 ```
 
-Claims like `sid` (session ID), `idp` (identity provider), `auth_time`, and `amr` (authentication method) are often unnecessary in the client application and can safely be removed.
+## Solution 3: Duende IdentityServer Server-Side Sessions
 
-### Solution 3: Use Duende IdentityServer Server-Side Sessions
+If you're using Duende IdentityServer, enable server-side sessions which keep session data server-side and reduce cookie payload.
 
-If you're using Duende IdentityServer, server-side sessions move session management to the server, dramatically reducing cookie size.
+## Root Cause
 
-## Recommendation
-
-For most applications, **Solution 1 (ITicketStore)** is the most effective because it caps the cookie size at a small session key regardless of how many tokens or claims exist. Combine it with **Solution 2** to keep the server-side ticket lean as well.
+`SaveTokens = true` stores access, refresh, and ID tokens in the cookie — each of which can be several hundred bytes to multiple kilobytes. This is the primary contributor to cookie bloat.

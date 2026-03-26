@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+      "pass": true,
+      "rationale": "WebApplicationFactory<Program> with ConfigureTestServices"
+    },
+    {
+      "assertion": "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+      "pass": false,
+      "rationale": "Does not set KeyManagement.Enabled = false \u2014 AddIdentityServer() called without options"
+    },
+    {
+      "assertion": "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+      "pass": false,
+      "rationale": "AddDeveloperSigningCredential() called without persistKey: false \u2014 will write tempkey.jwk to disk"
+    },
+    {
+      "assertion": "Registers clients via AddInMemoryClients \u2014 no sub-documents needed for this core pattern",
+      "pass": true,
+      "rationale": "AddInMemoryClients is used"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

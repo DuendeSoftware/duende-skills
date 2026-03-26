@@ -2,11 +2,31 @@
   "eval_id": 8,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment", "pass": true, "rationale": "Shows builder.Services.AddUserAccessTokenHttpClient(\"remoteService\", configureClient: client => { client.BaseAddress = ... })"},
-    {"assertion": "Shows GetUserAccessTokenAsync for the manual pattern", "pass": true, "rationale": "Shows var token = await ctx.GetUserAccessTokenAsync() in the manual pattern endpoint"},
-    {"assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection", "pass": true, "rationale": "Both endpoints chain .AsBffApiEndpoint() — the named client endpoint and the manual endpoint"},
-    {"assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)", "pass": true, "rationale": "Explicitly shows the anti-pattern with a ❌ warning and explains it defeats the BFF purpose. No endpoint returns the token."},
-    {"assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement", "pass": true, "rationale": "States 'Token refresh is automatic: Duende.AccessTokenManagement transparently refreshes expired tokens using the refresh token'"}
+    {
+      "assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+      "pass": true,
+      "rationale": "AddUserAccessTokenHttpClient(\"remoteApiClient\", ...) is shown"
+    },
+    {
+      "assertion": "Shows GetUserAccessTokenAsync for the manual pattern",
+      "pass": true,
+      "rationale": "ctx.GetUserAccessTokenAsync() is used in Pattern 2"
+    },
+    {
+      "assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+      "pass": true,
+      "rationale": "Both endpoints have .AsBffApiEndpoint()"
+    },
+    {
+      "assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)",
+      "pass": true,
+      "rationale": "Returns the remote service response, not the token. Explicitly warns against returning tokens."
+    },
+    {
+      "assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement",
+      "pass": true,
+      "rationale": "Explains token refresh is handled transparently by Duende.AccessTokenManagement"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

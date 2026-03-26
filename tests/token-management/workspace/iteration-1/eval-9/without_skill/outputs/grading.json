@@ -1,1 +1,25 @@
-{"eval_id":9,"variant":"without_skill","assertions":[{"assertion":"Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request","pass":true,"rationale":"Explains that HttpContext is only available during the initial HTTP request and becomes null after the SignalR circuit is established."},{"assertion":"Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation","pass":false,"rationale":"Does not use AddBlazorServerAccessTokenManagement<T>(). Instead uses a custom scoped TokenProvider service with manual HttpContextAccessor-based token capture — not the Duende library's built-in Blazor Server support."},{"assertion":"The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods","pass":false,"rationale":"Does not implement IUserTokenStore at all. Uses a simple TokenProvider POCO with AccessToken/RefreshToken properties, not the library's IUserTokenStore interface."},{"assertion":"Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store","pass":false,"rationale":"Captures tokens in App.razor/OnInitializedAsync via HttpContextAccessor.HttpContext.GetTokenAsync(), not in the OnTokenValidated OIDC event."}],"pass_count":1,"total_count":4,"score":0.25}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 9,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+      "passed": true
+    },
+    {
+      "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+      "passed": false
+    },
+    {
+      "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+      "passed": true
+    },
+    {
+      "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store",
+      "passed": true
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

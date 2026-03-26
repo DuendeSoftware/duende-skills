@@ -1,25 +1,21 @@
 # Phase 1: Migrating from Static to Automatic Key Management
 
-Here's the updated `Program.cs` for Phase 1 of the migration — enabling automatic key management while keeping your existing static key as the active signing credential:
+In Phase 1, you enable automatic key management while keeping the existing static key as the active signing credential. This allows automatic keys to be announced in discovery while the static key continues signing.
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// Phase 1: Migration from static to automatic key management
-// - Automatic key management is enabled (creates and announces new keys)
-// - Static key from vault remains the active signing credential
-// - Once all clients/APIs have cached the new automatic keys,
-//   proceed to Phase 2 (remove AddSigningCredential, use AddValidationKey)
-// ============================================================
-
+// Phase 1: Enable automatic key management, keep static key for signing
+// The static signing credential takes precedence over automatic keys.
+// Automatic key management begins creating and announcing keys in discovery.
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
-    // Enable automatic key management (this is the default, but explicit for clarity)
+    // Automatic key management is enabled (this is the default, shown for clarity)
     options.KeyManagement.Enabled = true;
 })
     .AddInMemoryClients(new List<Client>
@@ -50,12 +46,10 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
         new IdentityResources.Profile()
     });
 
-// Keep the static key as the active signing credential.
-// AddSigningCredential takes precedence over automatic keys.
-// Automatic key management will create and announce its keys in discovery,
-// but the static key continues to be used for signing.
-var signingKey = GetSigningKeyFromVault();
-idsvrBuilder.AddSigningCredential(signingKey, SecurityAlgorithms.RsaSha256);
+// Phase 1: Static key remains as the SIGNING credential
+// It takes precedence over automatic keys for signing
+var staticKey = GetSigningKeyFromVault();
+idsvrBuilder.AddSigningCredential(staticKey, SecurityAlgorithms.RsaSha256);
 
 var app = builder.Build();
 
@@ -66,21 +60,10 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## How Phase 1 Works
+## Migration Phases Overview
 
-1. **`KeyManagement.Enabled = true`** enables automatic key management. IdentityServer starts creating and rotating keys automatically.
+- **Phase 1 (current)**: Automatic key management enabled + static key as `AddSigningCredential`. Static key signs tokens. Automatic keys are announced in discovery.
+- **Phase 2 (next)**: Remove `AddSigningCredential`, change to `AddValidationKey` for the static key. Automatic keys now sign tokens.
+- **Phase 3 (final)**: Remove the static key entirely. Fully automatic key management.
 
-2. **`AddSigningCredential`** registers the static key from Azure Key Vault as the active signing credential. When both static signing credentials and automatic keys exist, the static credential takes precedence for signing.
-
-3. The automatic keys are announced in the discovery document (JWKS endpoint), so clients and APIs begin caching them alongside the static key.
-
-## Next Steps
-
-After all clients and APIs have refreshed their key caches (wait at least as long as the longest cache duration — default is 24 hours), proceed to **Phase 2**:
-
-- Remove `AddSigningCredential` 
-- Add `AddValidationKey` for the old static key
-- Automatic keys now handle signing
-- The static key remains in discovery for validation of existing tokens
-
-Phase 3 (after tokens signed with the static key expire): Remove `AddValidationKey` entirely.
+Wait until all APIs and clients have refreshed their caches before moving to Phase 2.

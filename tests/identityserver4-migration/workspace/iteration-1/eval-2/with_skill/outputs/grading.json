@@ -1,34 +1,29 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 2,
-  "variant": "with_skill",
+  "mode": "with_skill",
   "assertions": [
     {
       "assertion": "Output uses WebApplication.CreateBuilder (minimal hosting) instead of the Startup class pattern",
-      "pass": true,
-      "rationale": "Uses WebApplication.CreateBuilder(args) with top-level statements."
+      "passed": true
     },
     {
       "assertion": "Output calls builder.Services.AddIdentityServer() with Duende namespace instead of IdentityServer4",
-      "pass": true,
-      "rationale": "Uses Duende.IdentityServer namespace with builder.Services.AddIdentityServer()."
+      "passed": true
     },
     {
       "assertion": "Output calls AddConfigurationStore and AddOperationalStore with UseSqlServer and MigrationsAssembly configuration",
-      "pass": true,
-      "rationale": "Both stores configured with UseSqlServer and MigrationsAssembly."
+      "passed": true
     },
     {
       "assertion": "Output includes UseIdentityServer() in the middleware pipeline after UseRouting() and before UseAuthorization()",
-      "pass": true,
-      "rationale": "Pipeline order is UseRouting, UseIdentityServer, UseAuthorization."
+      "passed": true
     },
     {
       "assertion": "Output removes AddDeveloperSigningCredential() or replaces it with Duende key management",
-      "pass": true,
-      "rationale": "AddDeveloperSigningCredential is removed with a comment about automatic key management."
+      "passed": true
     }
   ],
-  "pass_count": 5,
-  "total_count": 5,
-  "score": 1.0
+  "passed": 5,
+  "total": 5
 }

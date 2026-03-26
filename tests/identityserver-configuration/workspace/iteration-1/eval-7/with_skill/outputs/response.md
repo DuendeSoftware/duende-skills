@@ -1,75 +1,55 @@
-Here's the configuration for deploying IdentityServer behind Nginx with the specified settings:
+# Production IdentityServer Configuration Behind Nginx
+
+Here's the complete configuration with IssuerUri, authentication cookies, PAR, and caching:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
 var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 {
-    // Set the issuer to the external URL behind the reverse proxy
+    // External URL behind reverse proxy
     options.IssuerUri = "https://id.mycompany.com";
+
+    // Authentication cookie settings
+    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
+    options.Authentication.CookieSlidingExpiration = false;
+
+    // Require Pushed Authorization Requests for all clients
+    options.PushedAuthorization.Required = true;
+
+    // Store caching
+    options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(10);
+    options.Caching.ResourceStoreExpiration = TimeSpan.FromMinutes(10);
 
     // Events for monitoring
     options.Events.RaiseErrorEvents = true;
     options.Events.RaiseInformationEvents = true;
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
-
-    // Authentication cookie: 8 hours, no sliding expiration
-    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
-    options.Authentication.CookieSlidingExpiration = false;
-
-    // Require Pushed Authorization Requests (PAR) for all clients
-    options.PushedAuthorization.Required = true;
-
-    // Cache client and resource store lookups for 10 minutes
-    options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(10);
-    options.Caching.ResourceStoreExpiration = TimeSpan.FromMinutes(10);
 });
 
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapGet("/", () => "IdentityServer is running");
-
-app.Run();
+// Enable caching for stores
+idsvrBuilder.AddInMemoryCaching();
 ```
 
-### Explanation of Each Setting
+## Configuration Details
 
-1. **`IssuerUri = "https://id.mycompany.com"`** — When IdentityServer is behind a reverse proxy, the internal hostname/port doesn't match the external URL. Without this setting, tokens would contain an `iss` claim with the internal address, and clients would reject them. Setting `IssuerUri` ensures all tokens and discovery responses use the correct external URL.
+### IssuerUri
 
-2. **`CookieLifetime = TimeSpan.FromHours(8)` and `CookieSlidingExpiration = false`** — The authentication cookie expires after exactly 8 hours regardless of user activity. With `CookieSlidingExpiration = false`, the cookie won't be renewed on each request — once 8 hours pass from login, the user must re-authenticate. This is a common enterprise requirement.
+`options.IssuerUri = "https://id.mycompany.com"` sets the issuer claim (`iss`) in all tokens. Behind a reverse proxy, IdentityServer's internal URL differs from the external URL clients see. Without this, the `iss` claim would contain the internal hostname, causing token validation failures.
 
-3. **`PushedAuthorization.Required = true`** — Requires all clients to use Pushed Authorization Requests (PAR, RFC 9126). With PAR, clients send authorization parameters directly to the PAR endpoint first and receive a `request_uri` reference. The browser redirect to the authorize endpoint only contains this reference, not the actual parameters. This prevents:
-   - Authorization parameter tampering in the browser
-   - Large authorization requests exceeding URL length limits
-   - Exposure of sensitive parameters in browser history/logs
+### Authentication Cookie
 
-4. **`Caching.ClientStoreExpiration` and `Caching.ResourceStoreExpiration`** — Caches client and resource lookups for 10 minutes. This reduces database round-trips when using EF Core or custom stores. The in-memory cache is invalidated after the expiration period.
+- `CookieLifetime = TimeSpan.FromHours(8)` — The user's session lasts 8 hours.
+- `CookieSlidingExpiration = false` — The cookie expires at a fixed time, not extended by activity. This is more predictable for security policies.
 
-### Nginx Configuration Note
+### Pushed Authorization Requests (PAR)
 
-Make sure your Nginx configuration forwards the correct headers so ASP.NET Core can determine the original scheme and host:
+`PushedAuthorization.Required = true` forces all clients to use PAR. Instead of sending authorization parameters in the URL query string, clients first POST them to the PAR endpoint and receive a request URI. This prevents:
+- Authorization parameter tampering
+- URL length limitations
+- Sensitive parameter leakage in browser history or logs
 
-```nginx
-location / {
-    proxy_pass http://localhost:5000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
+### Caching
 
-And configure the forwarded headers middleware in your app:
-
-```csharp
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-});
-
-// Before UseIdentityServer()
-app.UseForwardedHeaders();
-```
+`ClientStoreExpiration` and `ResourceStoreExpiration` at 10 minutes reduce database queries for client and resource lookups. Requires calling `AddInMemoryCaching()` on the builder (or a custom `ICache<T>` implementation).

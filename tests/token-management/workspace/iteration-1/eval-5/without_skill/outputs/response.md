@@ -1,78 +1,23 @@
-# Calling Two APIs: User Token + Client Credentials
-
-You can use `IHttpClientFactory` with Duende.AccessTokenManagement to register two separate HTTP clients — one for the user's token and one for client credentials.
-
-## Program.cs
+# Two HTTP Clients with Different Token Sources
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication(options =>
+// User token client for invoices
+builder.Services.AddUserAccessTokenHttpClient(
+    "invoices",
+    configureClient: client =>
     {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie")
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("offline_access");
-        options.SaveTokens = true;
+        client.BaseAddress = new Uri("https://api.example.com/invoices/");
     });
 
-// Register user token management
-builder.Services.AddAccessTokenManagement();
-
-// HTTP client for invoice API - uses the user's token
-builder.Services.AddHttpClient("invoices", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com/invoices/");
-}).AddUserAccessTokenHandler();
-
-// HTTP client for master data API - uses client credentials
-builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("masterdata-client", client =>
+// Client credentials client for master data
+builder.Services.AddClientAccessTokenHttpClient(
+    "masterdata",
+    configureClient: client =>
     {
-        client.TokenEndpoint = "https://sts.example.com/connect/token";
-        client.ClientId = "webapp";
-        client.ClientSecret = "secret";
-        client.Scope = "masterdata";
+        client.BaseAddress = new Uri("https://api.example.com/masterdata/");
     });
 
-builder.Services.AddHttpClient("masterdata", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com/masterdata/");
-}).AddClientCredentialsTokenHandler("masterdata-client");
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/invoices", async (IHttpClientFactory factory) =>
-{
-    var client = factory.CreateClient("invoices");
-    var response = await client.GetAsync("list");
-    return Results.Ok(await response.Content.ReadAsStringAsync());
-}).RequireAuthorization();
-
-app.MapGet("/masterdata", async (IHttpClientFactory factory) =>
-{
-    var client = factory.CreateClient("masterdata");
-    var response = await client.GetAsync("countries");
-    return Results.Ok(await response.Content.ReadAsStringAsync());
-});
-
-app.Run();
+builder.Services.AddOpenIdConnectAccessTokenManagement();
 ```
 
-## Explanation
-
-- The `"invoices"` client uses `AddUserAccessTokenHandler()` to automatically attach the logged-in user's access token.
-- The `"masterdata"` client uses `AddClientCredentialsTokenHandler()` to attach a machine-to-machine token.
-- Both clients have distinct names and base addresses so you can call `factory.CreateClient("invoices")` or `factory.CreateClient("masterdata")` without manual token management.
+The first client attaches the user's access token, while the second uses client credentials for machine-to-machine access.

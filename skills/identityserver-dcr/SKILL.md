@@ -318,8 +318,7 @@ app.Run();
 
 ## Related Skills
 
-- `identityserver-configuration` — IdentityServer host configuration including client definitions
-- `identityserver-clients-resources` — Client types, grant types, and secret management
+- `identityserver-configuration` — IdentityServer host configuration, client types, grant types, secret management, and resource configuration
 - `identityserver-saml` — SAML 2.0 Identity Provider (the other advanced IdentityServer feature)
 - `identityserver-stores` — Persistent store patterns (useful for custom `IClientConfigurationStore`)
 - `aspnetcore-authorization` — Authorization policies for securing the DCR endpoint

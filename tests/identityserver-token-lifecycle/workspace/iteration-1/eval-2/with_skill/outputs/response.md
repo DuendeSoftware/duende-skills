@@ -1,6 +1,8 @@
-# Configuring Reference Access Tokens for the web_app Client
+# Configuring Reference Access Tokens with Introspection
 
-To use reference access tokens instead of JWTs and enable immediate revocation, you need to update the `web_app` client and the `ApiResource`. Here's the modified `Program.cs`:
+Reference access tokens are **pointers** to token data stored server-side, rather than self-contained JWTs. This enables immediate revocation — you simply delete the stored data and the token becomes invalid.
+
+## Updated Program.cs
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -26,25 +28,7 @@ builder.Services.AddIdentityServer()
             // 15-minute access token lifetime
             AccessTokenLifetime = 900
         },
-        new Client
-        {
-            ClientId = "m2m_client",
-            ClientName = "Machine to Machine Client",
-            AllowedGrantTypes = GrantTypes.ClientCredentials,
-            ClientSecrets = { new Secret("m2m_secret".Sha256()) },
-            AllowedScopes = { "api1" }
-        },
-        new Client
-        {
-            ClientId = "mobile_app",
-            ClientName = "Mobile Application",
-            AllowedGrantTypes = GrantTypes.Code,
-            RequireClientSecret = false,
-            RedirectUris = { "myapp://callback" },
-            PostLogoutRedirectUris = { "myapp://signout" },
-            AllowedScopes = { "openid", "profile", "api1" },
-            RequirePkce = true
-        }
+        // ... other clients ...
     })
     .AddInMemoryApiScopes(new List<ApiScope>
     {
@@ -57,7 +41,7 @@ builder.Services.AddIdentityServer()
             Scopes = { "api1" },
 
             // Secret required for introspection endpoint validation
-            ApiSecrets = { new Secret("api1_introspection_secret".Sha256()) }
+            ApiSecrets = { new Secret("api1_secret".Sha256()) }
         }
     })
     .AddInMemoryIdentityResources(new List<IdentityResource>
@@ -84,38 +68,26 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## Key Changes
+## Key Configuration Details
 
-### 1. Reference Token Type
-```csharp
-AccessTokenType = AccessTokenType.Reference
-```
+### Client: Reference Tokens
+- **`AccessTokenType = AccessTokenType.Reference`** — Tokens are stored server-side; only an opaque handle is returned to the client
+- **`AccessTokenLifetime = 900`** — 15 minutes (15 × 60 = 900 seconds)
 
-Reference tokens are **pointers** to token data stored in the IdentityServer persisted grant store. Unlike JWTs which are self-contained, reference tokens are opaque handles. This means:
+### API Resource: Introspection Secret
+- **`ApiSecrets = { new Secret("api1_secret".Sha256()) }`** — The API must authenticate itself to the introspection endpoint. Without this secret, introspection calls return `401 Unauthorized`.
 
-- **Immediate revocation**: You can revoke a reference token at any time by deleting it from the store. With JWTs, you must wait for the `exp` to pass.
-- **Smaller token size**: Reference tokens are just opaque handles rather than full JWTs with claims.
-- **Trade-off**: The API must call the introspection endpoint on every request to validate the token, which adds latency and a dependency on IdentityServer availability.
+### How Reference Token Validation Works
 
-### 2. Access Token Lifetime
-```csharp
-AccessTokenLifetime = 900 // 15 minutes in seconds
-```
+1. Client receives an opaque token handle (not a JWT)
+2. Client sends the handle to the API in the `Authorization: Bearer` header
+3. API calls IdentityServer's introspection endpoint (`/connect/introspect`) with the token handle
+4. IdentityServer looks up the stored token data and returns the claims
+5. API uses the claims for authorization decisions
 
-Even though reference tokens can be revoked, keeping lifetimes short is still a best practice. 15 minutes (900 seconds) means the API only caches introspection results for a short period.
+### API-Side Configuration (Consuming API)
 
-### 3. API Resource Secret for Introspection
-```csharp
-ApiSecrets = { new Secret("api1_introspection_secret".Sha256()) }
-```
-
-The `ApiResource` must have an `ApiSecrets` collection with at least one secret. The API uses this secret to authenticate when calling the introspection endpoint (`/connect/introspect`). Without a configured `ApiSecret`, the introspection endpoint will return `401 Unauthorized`.
-
-The secret uses `Sha256()` hashing, consistent with how client secrets are hashed in Duende IdentityServer.
-
-### API-Side Configuration
-
-On the API side, you would configure introspection-based token validation:
+The API needs to be configured to use introspection:
 
 ```csharp
 builder.Services.AddAuthentication("Bearer")
@@ -123,6 +95,11 @@ builder.Services.AddAuthentication("Bearer")
     {
         options.Authority = "https://localhost:5001";
         options.ClientId = "api1_resource";
-        options.ClientSecret = "api1_introspection_secret";
+        options.ClientSecret = "api1_secret";
     });
 ```
+
+### Why Reference Tokens?
+- **Immediate revocation**: Delete the persisted grant and the token is instantly invalid
+- **Smaller token size**: Only a handle is transmitted, reducing bandwidth
+- **Trade-off**: Each API call requires an introspection call to IdentityServer, adding latency and requiring IdentityServer availability

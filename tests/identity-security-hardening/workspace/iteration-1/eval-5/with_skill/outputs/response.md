@@ -1,47 +1,39 @@
 # Replacing Developer Signing Credential with Automatic Key Management
 
-## Remove Developer Signing Credential
+## Problem
 
-`AddDeveloperSigningCredential()` generates a persistent key file suitable only for development. Replace it with production automatic key management.
+`AddDeveloperSigningCredential()` generates an ephemeral RSA key stored in a local file (`tempkey.jwk`). This is unsuitable for production:
+- The key is not rotated
+- It's not protected at rest
+- It's lost on container restart
+- It can't be shared across multiple instances
 
-## Updated Program.cs
+## Solution: Automatic Key Management with ES256 + RS256
+
+### Remove Developer Signing Credential
+
+Delete the `.AddDeveloperSigningCredential()` call and configure automatic key management:
 
 ```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Console()
-    .ReadFrom.Configuration(ctx.Configuration));
-
-// Configure Data Protection for load-balanced deployment
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
-    .SetApplicationName("identity-server");
-
-// IdentityServer with automatic key management
 builder.Services.AddIdentityServer(options =>
 {
     // Key rotation every 90 days
     options.KeyManagement.RotationInterval = TimeSpan.FromDays(90);
 
-    // Announce 14 days before activation so JWKS caches refresh
+    // Announce new key 14 days before activation for JWKS cache refresh
     options.KeyManagement.PropagationTime = TimeSpan.FromDays(14);
 
-    // Keep retired keys for 14 days to validate recently-issued tokens
+    // Keep retired keys 14 days for in-flight token validation
     options.KeyManagement.RetentionDuration = TimeSpan.FromDays(14);
 
-    // Delete keys when retention ends
+    // Delete keys when retention period ends
     options.KeyManagement.DeleteRetiredKeys = true;
 
-    // Encrypt keys at rest via ASP.NET Core Data Protection
+    // Encrypt signing keys at rest via ASP.NET Data Protection
     options.KeyManagement.DataProtectKeys = true;
 
-    // ES256 first (primary), RS256 as fallback for legacy clients
+    // ES256 as primary (smaller tokens, faster signing)
+    // RS256 as fallback for legacy client compatibility
     options.KeyManagement.SigningAlgorithms = new[]
     {
         new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256),
@@ -51,47 +43,58 @@ builder.Services.AddIdentityServer(options =>
         }
     };
 })
-// NO .AddDeveloperSigningCredential() — automatic key management handles this
-.AddInMemoryIdentityResources(new List<IdentityResource>
-{
-    new IdentityResources.OpenId(),
-    new IdentityResources.Profile(),
-    new IdentityResources.Email()
-})
-.AddInMemoryApiScopes(new List<ApiScope>
-{
-    new ApiScope("catalog.read"),
-    new ApiScope("catalog.write"),
-    new ApiScope("orders.manage"),
-    new ApiScope("internal-api")
-})
-.AddInMemoryClients(new List<Client>
-{
-    // ... clients ...
-});
-
-builder.Services.AddRazorPages();
-
-var app = builder.Build();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-app.Run();
+.AddInMemoryIdentityResources(/* ... */)
+.AddInMemoryApiScopes(/* ... */)
+.AddInMemoryClients(/* ... */);
+// NO .AddDeveloperSigningCredential()
 ```
 
-## Summary
+### Configure Data Protection for Load-Balanced Deployment
 
-| Setting | Before | After |
-|---------|--------|-------|
-| Signing | `AddDeveloperSigningCredential()` | Automatic key management |
-| Algorithms | RS256 only (implicit) | ES256 primary, RS256 fallback |
-| Rotation | None | 90 days |
-| Propagation | N/A | 14 days |
-| Retention | N/A | 14 days |
-| Data Protection | Not configured | `PersistKeysToFileSystem("/var/identity/dp-keys")` + `SetApplicationName` |
-| Key encryption | None | `DataProtectKeys = true` |
+Automatic key management encrypts signing keys using ASP.NET Core Data Protection. For multiple instances, Data Protection keys must be persisted to a shared location:
+
+```csharp
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
+    .SetApplicationName("identity-server");
+```
+
+### Complete Updated Program.cs Snippet
+
+```csharp
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.IdentityModel.Tokens;
+
+// Data Protection — shared key storage for load-balanced deployment
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
+    .SetApplicationName("identity-server");
+
+// IdentityServer with automatic key management
+builder.Services.AddIdentityServer(options =>
+{
+    options.KeyManagement.RotationInterval = TimeSpan.FromDays(90);
+    options.KeyManagement.PropagationTime = TimeSpan.FromDays(14);
+    options.KeyManagement.RetentionDuration = TimeSpan.FromDays(14);
+    options.KeyManagement.DeleteRetiredKeys = true;
+    options.KeyManagement.DataProtectKeys = true;
+
+    options.KeyManagement.SigningAlgorithms = new[]
+    {
+        new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256),
+        new SigningAlgorithmOptions(SecurityAlgorithms.RsaSha256)
+        {
+            UseX509Certificate = true
+        }
+    };
+})
+// ... resource and client registrations
+// NO .AddDeveloperSigningCredential()
+```
+
+## Why ES256 First?
+
+- **Smaller tokens**: ECDSA signatures are ~64 bytes vs ~256 bytes for RSA
+- **Faster signing**: ES256 is computationally cheaper than RS256
+- **Modern standard**: FAPI 2.0 and newer profiles prefer EC algorithms
+- **RS256 fallback**: Legacy clients that don't support ES256 will still work with the RS256 key

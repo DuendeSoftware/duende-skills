@@ -1,43 +1,30 @@
-# Protecting Local API Endpoints in IdentityServer
+# Protecting Local APIs in the IdentityServer Host
 
-If you're hosting an API inside the same application as IdentityServer, you can validate tokens locally without making network calls.
+When your API is in the same application as IdentityServer, you can use local API authentication to avoid network overhead.
 
 ## Setup
 
-You can use the local API authentication feature that comes with Duende IdentityServer:
-
 ```csharp
-// Program.cs
-var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddIdentityServer()
     .AddInMemoryClients(Config.Clients)
     .AddInMemoryApiScopes(Config.ApiScopes);
 
-// Enable local API authentication
+// Add local API authentication
 builder.Services.AddLocalApiAuthentication();
 
 var app = builder.Build();
 
 app.UseIdentityServer();
-app.UseAuthentication();
 app.UseAuthorization();
 
-// Protect endpoints
-app.MapGet("/api/data", () => Results.Ok(new { message = "Protected" }))
-    .RequireAuthorization("IdentityServerApiPolicy");
+app.MapGet("/local-api/data", () => Results.Ok(new { message = "Local data" }))
+    .RequireAuthorization("LocalApi");
 
 app.Run();
 ```
 
-## How It Works
+## Configuration
 
-The `AddLocalApiAuthentication()` method registers an authentication handler that validates tokens locally using IdentityServer's built-in token validation. This avoids the network round-trip that JWT bearer or introspection would require.
+The local API authentication sets up a scheme that validates access tokens internally. You need to make sure clients requesting access to the local API have the appropriate scope configured.
 
-You can apply authorization to your endpoints using the policy or scheme that gets registered. The typical approach is to use the policy name that comes built-in.
-
-## Considerations
-
-- This approach is useful for admin endpoints or management APIs that live in the same process as IdentityServer
-- Tokens are validated using the internal token validation, so performance is better than making HTTP calls
-- Make sure clients requesting tokens for this API have the appropriate scopes configured
+This approach saves the network round-trip of token validation since the API is co-located with the identity provider.

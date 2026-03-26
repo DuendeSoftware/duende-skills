@@ -1,26 +1,35 @@
-# Local and Remote API Endpoints
-
-## Local API Endpoint
+# Adding Local and Remote API Endpoints
 
 ```csharp
-app.MapGet("/api/orders", (HttpContext ctx) =>
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddBff();
+builder.Services.AddAuthentication(/* ... */);
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseBff();
+app.UseAuthorization();
+
+// Local API endpoint
+app.MapGet("/api/orders", () =>
 {
-    var orders = new[] { new { Id = 1, Name = "Order 1" } };
-    return Results.Ok(orders);
-})
-.RequireAuthorization()
-.AsBffApiEndpoint();
-```
+    return Results.Ok(new[]
+    {
+        new { Id = 1, Product = "Widget", Quantity = 5 },
+    });
+}).RequireAuthorization();
 
-## Remote API Proxy
-
-For the remote proxy, you can use BFF's remote API support:
-
-```csharp
+// Remote proxy to catalog service
 app.MapRemoteBffApiEndpoint("/api/catalog", new Uri("https://catalog-service.internal/api"))
     .RequireAccessToken(TokenType.User);
+
+app.MapBffManagementEndpoints();
+
+app.Run();
 ```
 
-This will proxy requests from `/api/catalog` to the remote catalog service, automatically attaching the user's access token.
-
-The local endpoint uses `.AsBffApiEndpoint()` for anti-forgery protection and `.RequireAuthorization()` to ensure the user is logged in.
+The local endpoint requires authorization, and the remote endpoint proxies to the catalog service with the user's access token.

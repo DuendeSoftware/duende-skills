@@ -1,6 +1,6 @@
-# Migrating to Minimal Hosting with Duende IdentityServer
+# Migrating Startup.cs to Minimal Hosting with Duende IdentityServer
 
-Here's the updated `Program.cs`:
+Here's your project converted to the minimal hosting model with Duende IdentityServer:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = @"server=(localdb)\mssqllocaldb;database=is_migration_sample;trusted_connection=yes";
 
 builder.Services.AddIdentityServer()
-    .AddDeveloperSigningCredential()
     .AddConfigurationStore(options =>
     {
         options.ConfigureDbContext = b => b.UseSqlServer(connectionString,
@@ -22,6 +21,8 @@ builder.Services.AddIdentityServer()
             sql => sql.MigrationsAssembly(typeof(Program).Assembly.FullName));
     });
 
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 app.UseRouting();
@@ -32,9 +33,10 @@ app.MapDefaultControllerRoute();
 app.Run();
 ```
 
-### Changes Made
+## Changes Made
 
-- Converted from `Startup.cs` class to top-level statements with `WebApplication.CreateBuilder`
-- Used `builder.Services` instead of `ConfigureServices` method
-- Removed `UseEndpoints` wrapper, using `MapDefaultControllerRoute()` directly
-- Updated middleware pipeline order
+- Converted from `Startup.cs` class pattern to minimal hosting with `WebApplication.CreateBuilder`
+- Replaced `IdentityServer4` with `Duende.IdentityServer` (the Duende namespace)
+- Removed `AddDeveloperSigningCredential()` — use proper key management in production
+- Used `MapDefaultControllerRoute()` directly instead of wrapping in `UseEndpoints`
+- Kept the same SQL Server connection string and migration assembly configuration

@@ -1,6 +1,6 @@
-# Aspire AppHost Setup
+# Aspire AppHost Dependency Graph
 
-Here's how to set up the dependency graph in your Aspire AppHost:
+Here's how to set up the dependency graph in your `Program.cs`:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
@@ -9,23 +9,22 @@ var builder = DistributedApplication.CreateBuilder(args);
 var sqlServer = builder.AddSqlServer("sql");
 var identityDb = sqlServer.AddDatabase("identitydb");
 
-// Add IdentityServer project
+// Add IdentityServer - depends on database
 var identityServer = builder.AddProject<Projects.IdentityServer>("identity-server")
-    .WithReference(identityDb)
-    .WaitFor(sqlServer);
+    .WithReference(identityDb);
 
 // Add Weather API
 var api = builder.AddProject<Projects.WeatherApi>("weather-api")
-    .WithReference(identityServer)
-    .WaitFor(identityServer);
+    .WithReference(identityServer);
 
 // Add Web App
 var webApp = builder.AddProject<Projects.WebApp>("web-app")
     .WithReference(identityServer)
-    .WaitFor(identityServer)
     .WithReference(api);
 
 builder.Build().Run();
 ```
 
-This sets up the dependency chain: SQL Server starts first, then IdentityServer, then the API and web app. Using `WaitFor` ensures each service is healthy before dependents start. `WithReference` makes the connection strings and service URLs available to each project.
+This sets up service discovery so each project can find the others. The `WithReference` calls ensure that connection strings and service URLs are passed between projects.
+
+The IdentityServer project gets the database connection string via `WithReference(identityDb)`, and both the API and web app get the IdentityServer URL via `WithReference(identityServer)`.

@@ -5,27 +5,27 @@
     {
       "assertion": "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
       "pass": true,
-      "rationale": "Code shows `builder.Services.AddIdentityServer().AddServerSideSessions<RedisSessionStore>();` as the one-step approach."
+      "rationale": "Shows AddServerSideSessions<RedisSessionStore>() as Pattern 1."
     },
     {
       "assertion": "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
       "pass": true,
-      "rationale": "Code shows `builder.Services.AddIdentityServer().AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>();` as the two-step approach."
+      "rationale": "Shows AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>() as Pattern 2."
     },
     {
       "assertion": "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
       "pass": true,
-      "rationale": "Response states: 'The session stores the serialized ASP.NET Core AuthenticationTicket... The data is protected using ASP.NET Core's Data Protection API — your Redis store receives encrypted bytes, not plaintext.'"
+      "rationale": "Explains 'serialized ASP.NET Core AuthenticationTicket' protected by 'Data Protection API'."
     },
     {
       "assertion": "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
       "pass": true,
-      "rationale": "Response includes a table listing SubjectId (sub claim value), SessionId (sid claim value), and DisplayName (configurable claim type) as the three queryable indices."
+      "rationale": "Lists all three indices in a table: SubjectId (sub), SessionId (sid), DisplayName."
     },
     {
       "assertion": "Response notes that UserDisplayNameClaimType is null by default due to PII concerns",
       "pass": true,
-      "rationale": "Response states: 'The UserDisplayNameClaimType is unset (null) by default because display names often contain PII (names, emails). You must explicitly opt in.'"
+      "rationale": "States 'UserDisplayNameClaimType is null by default due to PII concerns'."
     }
   ],
   "pass_count": 5,

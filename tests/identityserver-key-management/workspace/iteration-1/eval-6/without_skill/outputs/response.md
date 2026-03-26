@@ -1,15 +1,17 @@
-# Manual Key Rotation - Phase 2
+# Key Rotation Phase 2: Signing with New Key
 
-Here's the updated `Program.cs` for Phase 2 where we switch to the new signing key:
+Now that the new key has been announced, switch signing to it while keeping the old key for validation:
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var idsvrBuilder = builder.Services.AddIdentityServer()
+var idsvrBuilder = builder.Services.AddIdentityServer(options =>
+{
+    options.KeyManagement.Enabled = false;
+})
     .AddInMemoryClients(new List<Client>
     {
         new Client
@@ -38,23 +40,18 @@ var idsvrBuilder = builder.Services.AddIdentityServer()
         new IdentityResources.Profile()
     });
 
-// Sign with the new key
+// Sign with new key
 var newKey = LoadNewKey();
 idsvrBuilder.AddSigningCredential(newKey, SecurityAlgorithms.RsaSha256);
 
-// Keep the old key for validating existing tokens
+// Keep old key for validation
 var oldKey = LoadOldKey();
 idsvrBuilder.AddValidationKey(oldKey, SecurityAlgorithms.RsaSha256);
 
 var app = builder.Build();
-
 app.UseIdentityServer();
-
 app.MapGet("/", () => "IdentityServer is running");
-
 app.Run();
 ```
 
-This registers the new key from `LoadNewKey()` as the active signing credential using RS256, and keeps the old key from `LoadOldKey()` as a validation key so that tokens signed with the previous key can still be verified by clients and APIs.
-
-Once all tokens signed with the old key have expired, you can remove the `AddValidationKey` call entirely.
+The new key handles all new token signing. The old key stays in JWKS so existing tokens can still be validated until they expire.

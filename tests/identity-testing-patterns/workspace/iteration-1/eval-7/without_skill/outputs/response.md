@@ -1,12 +1,8 @@
-# Testing a Custom IProfileService
+# Testing IProfileService
 
-## Unit Tests
+You can unit test your profile service by mocking the user repository and constructing the appropriate context objects.
 
 ```csharp
-using Moq;
-using System.Security.Claims;
-using Xunit;
-
 public class ProfileServiceTests
 {
     private readonly Mock<IUserRepository> _mockRepo;
@@ -21,18 +17,17 @@ public class ProfileServiceTests
     [Fact]
     public async Task GetProfileData_AddsRoleClaims()
     {
+        var subject = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("sub", "user-1")
+        }));
+
         _mockRepo.Setup(r => r.GetRolesAsync("user-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { "admin", "editor" });
 
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-            new[] { new Claim("sub", "user-1") }));
-
-        // Create a context - note the ProfileDataRequestContext constructor
-        // requires subject, client, caller, and requested claim types
-        var context = new Duende.IdentityServer.Models.ProfileDataRequestContext(
-            subject, 
-            new Duende.IdentityServer.Models.Client { ClientId = "test" }, 
-            "test",
+        // ProfileDataRequestContext constructor may vary by version
+        var context = new ProfileDataRequestContext(
+            subject, new Client { ClientId = "test" }, "ClaimsProviderAccessToken",
             new[] { "role" });
 
         await _service.GetProfileDataAsync(context);
@@ -42,37 +37,17 @@ public class ProfileServiceTests
     }
 
     [Fact]
-    public async Task IsActive_ActiveUser_ReturnsTrue()
+    public async Task IsActive_ReturnsCorrectValue()
     {
-        _mockRepo.Setup(r => r.IsActiveAsync("user-1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+        var subject = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("sub", "user-inactive")
+        }));
 
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-            new[] { new Claim("sub", "user-1") }));
-
-        var context = new Duende.IdentityServer.Models.IsActiveContext(
-            subject, 
-            new Duende.IdentityServer.Models.Client { ClientId = "test" },
-            "test");
-
-        await _service.IsActiveAsync(context);
-
-        Assert.True(context.IsActive);
-    }
-
-    [Fact]
-    public async Task IsActive_InactiveUser_ReturnsFalse()
-    {
-        _mockRepo.Setup(r => r.IsActiveAsync("user-2", It.IsAny<CancellationToken>()))
+        _mockRepo.Setup(r => r.IsActiveAsync("user-inactive", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-            new[] { new Claim("sub", "user-2") }));
-
-        var context = new Duende.IdentityServer.Models.IsActiveContext(
-            subject, 
-            new Duende.IdentityServer.Models.Client { ClientId = "test" },
-            "test");
+        var context = new IsActiveContext(subject, new Client { ClientId = "test" }, "test");
 
         await _service.IsActiveAsync(context);
 
@@ -81,4 +56,4 @@ public class ProfileServiceTests
 }
 ```
 
-This tests the profile service in isolation by mocking the user repository and checking the context properties after calling the service methods.
+This tests the service in isolation without needing a running IdentityServer instance.

@@ -1,9 +1,10 @@
-# Configuring Automatic Key Management
+# Configuring Automatic Key Management with Custom Rotation Settings
 
-Here's the updated `Program.cs` with custom key management settings for 30-day rotation, 5-day propagation, 7-day retention, and no deletion of retired keys:
+Here's how to configure automatic key management on your IdentityServer with 30-day rotation, 5-day announcement, 7-day retention, and no deletion of retired keys.
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,10 +17,10 @@ builder.Services.AddIdentityServer(options =>
     // Announce new key 5 days before it becomes active
     options.KeyManagement.PropagationTime = TimeSpan.FromDays(5);
 
-    // Keep retired keys in discovery for 7 days for validation
+    // Keep retired keys in discovery for 7 days
     options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
 
-    // Don't delete retired keys after the retention period
+    // Don't delete retired keys after retention period
     options.KeyManagement.DeleteRetiredKeys = false;
 })
     .AddInMemoryClients(new List<Client>
@@ -59,18 +60,25 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## Key Lifecycle
+## Key Lifecycle with These Settings
 
-With these settings, keys move through the following phases:
+With the configuration above, keys will follow this lifecycle:
 
 ```
-Announced --> Signing --> Retired --> (kept indefinitely)
-  5 days      25 days     7 days
+Announced --> Signing --> Retired (kept indefinitely)
+   |             |            |
+   5 days        25 days      7 days in discovery, then removed from discovery but NOT deleted
 ```
 
-- **Announced (5 days):** The new key is published in the discovery document's JWKS endpoint so clients and APIs can cache it before it starts signing.
-- **Signing (25 days):** The key is the active signing credential (RotationInterval minus PropagationTime = 30 - 5 = 25 days of active signing).
-- **Retired (7 days):** The key remains in the discovery document for token validation but is no longer used for signing.
-- **After retention:** Because `DeleteRetiredKeys = false`, the key material is preserved in the store but removed from the discovery document.
+- **New key announced**: Published in the JWKS discovery document 5 days before it starts signing
+- **Active signing**: The key signs tokens for 25 days (RotationInterval minus PropagationTime = 30 - 5 = 25 days)
+- **Retired**: The key remains in discovery for 7 days after rotation for validation of tokens still in use
+- **After retention**: The key is removed from discovery but NOT deleted from storage (`DeleteRetiredKeys = false`)
 
-Setting `DeleteRetiredKeys = false` is useful for audit/compliance scenarios where you need to retain all historical key material.
+Setting `DeleteRetiredKeys = false` ensures you retain a historical record of all signing keys. This is useful for audit scenarios or if you need to validate very old tokens.
+
+## Important Notes
+
+- Automatic key management is **enabled by default** — no need to set `Enabled = true` explicitly
+- Ensure `PropagationTime` is long enough for all clients and APIs to refresh their cached JWKS keys
+- The default key storage is file-based at `{ContentRootPath}/keys` — for production multi-instance deployments, use EF Core operational store or a shared file system

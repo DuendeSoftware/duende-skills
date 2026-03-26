@@ -1,22 +1,19 @@
 # Redirect Loop After Login
 
-## Diagnosis
+The most common cause of a redirect loop after OIDC login is related to cookie settings. Since you're using `SameSiteMode.Strict`, the issue is that the cookie isn't being set after the callback from IdentityServer.
 
-The redirect loop is likely caused by the cookie not being set properly after the OIDC callback. Since you're using `SameSiteMode.Strict`, the cookie won't be attached when the browser follows the redirect from IdentityServer back to your application.
-
-When the browser is redirected from IdentityServer (a different domain) back to your app, the `SameSite=Strict` setting prevents the cookie from being sent on that cross-site navigation. This means the authentication cookie is never established, so your app keeps redirecting to IdentityServer in a loop.
+`SameSite=Strict` means the cookie is only sent for same-site requests. The OIDC callback is a redirect from your IdentityServer (a different domain), so the browser treats it as a cross-site request and doesn't send the cookie.
 
 ## Fix
 
-Change the SameSite mode to `Lax`:
+Change to `SameSiteMode.Lax`:
 
 ```csharp
 .AddCookie("Cookies", options =>
 {
     options.Cookie.SameSite = SameSiteMode.Lax;
-})
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 ```
 
-`SameSiteMode.Lax` allows the cookie to be sent on top-level navigations from other sites, which is what happens during the OIDC callback redirect. It still provides protection against CSRF attacks for non-GET requests.
-
-You should also make sure your cookie is only sent over HTTPS in production for security reasons.
+`Lax` allows cookies on top-level navigations (like the redirect back from your IdP) while still preventing CSRF on POST requests.

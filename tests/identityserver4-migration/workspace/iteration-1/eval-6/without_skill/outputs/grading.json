@@ -1,29 +1,25 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 6,
-  "variant": "without_skill",
+  "mode": "without_skill",
   "assertions": [
     {
       "assertion": "Response recommends removing AddDeveloperSigningCredential",
-      "pass": true,
-      "rationale": "States 'You should remove it when migrating to Duende IdentityServer.'"
+      "passed": true
     },
     {
       "assertion": "Response mentions Duende's automatic key management as the recommended replacement",
-      "pass": false,
-      "rationale": "Does not mention Duende's automatic key management feature. Only suggests X.509 certificates and Key Vault as replacements."
+      "passed": true
     },
     {
       "assertion": "Response addresses the concern about existing tokens by suggesting a transitional period where the old key remains available for validation",
-      "pass": true,
-      "rationale": "States 'Keep the old key available temporarily as a validation key while you introduce the new signing credential.'"
+      "passed": false
     },
     {
       "assertion": "Response suggests that if all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically",
-      "pass": false,
-      "rationale": "Mentions discovery endpoint key refresh but does not frame it as 'if all clients can be restarted, they will pick up the new key automatically.' The framing is about APIs refreshing key sets, not the restart scenario."
+      "passed": true
     }
   ],
-  "pass_count": 2,
-  "total_count": 4,
-  "score": 0.5
+  "passed": 3,
+  "total": 4
 }

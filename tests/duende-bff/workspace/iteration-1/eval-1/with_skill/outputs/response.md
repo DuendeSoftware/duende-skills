@@ -1,4 +1,6 @@
-# Full BFF v4 Program.cs Setup
+# Duende BFF v4 Setup for React SPA
+
+Here's the complete `Program.cs` using BFF v4's streamlined registration API.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,7 @@ builder.Services.AddBff()
         options.Scope.Clear();
         options.Scope.Add("openid");
         options.Scope.Add("profile");
-        options.Scope.Add("offline_access"); // Required for refresh tokens
+        options.Scope.Add("offline_access");
     })
     .ConfigureCookies(options =>
     {
@@ -32,19 +34,22 @@ var app = builder.Build();
 
 app.UseRouting();
 app.UseAuthentication();
-app.UseBff();          // Adds CSRF anti-forgery enforcement middleware
+app.UseBff();
 app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World");
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
 ```
 
 ## Key Points
 
-- **`AddBff()`** registers all BFF services and auto-registers management endpoints (`/bff/login`, `/bff/logout`, `/bff/user`, `/bff/backchannel-logout`).
-- **`ConfigureOpenIdConnect`** sets up the OIDC handler with recommended defaults — do NOT manually call `AddAuthentication().AddCookie().AddOpenIdConnect()` when using v4.
-- **`ConfigureCookies`** configures the authentication cookie. Use `SameSite.Lax` when the IDP is on a different domain.
-- **`offline_access`** scope is required for refresh tokens — without it, BFF cannot renew expired access tokens.
-- **Middleware order matters**: `UseRouting()` -> `UseAuthentication()` -> `UseBff()` -> `UseAuthorization()`. Incorrect order silently breaks anti-forgery enforcement.
-- **`SaveTokens = true`** is required so tokens are stored in the session and `GetUserAccessTokenAsync()` works.
+- **`AddBff()`** registers BFF services and automatically configures OpenID Connect and cookie authentication with recommended defaults. In v4, this replaces the manual `AddAuthentication().AddCookie().AddOpenIdConnect()` pattern.
+- **`ConfigureOpenIdConnect`** configures the OIDC handler with your IDP settings. `SaveTokens = true` is required for token management to work.
+- **`offline_access`** scope is critical — without a refresh token, the BFF cannot automatically renew expired access tokens.
+- **`ConfigureCookies`** sets the cookie options. `SameSite = Lax` is used here since the IDP is on a different domain.
+- **Middleware order**: `UseRouting` → `UseAuthentication` → `UseBff` → `UseAuthorization`. `UseBff()` must be between authentication and authorization for CSRF enforcement to work.
+- In v4, management endpoints (`/bff/login`, `/bff/logout`, `/bff/user`) are registered automatically — no `MapBffManagementEndpoints()` call needed.

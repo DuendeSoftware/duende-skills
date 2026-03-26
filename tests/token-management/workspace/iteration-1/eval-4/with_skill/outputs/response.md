@@ -1,38 +1,74 @@
-# DPoP with Client Credentials — Loading Key from Configuration
+# DPoP with Client Credentials Token Management
+
+## Loading the DPoP Key from Configuration
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// Load the DPoP JWK from configuration (not generated ephemerally)
+// Load the DPoP JWK from configuration (e.g., Key Vault, user secrets, env var)
 var dpopJwk = builder.Configuration["DPoP:JsonWebKey"];
 
-// WARNING: Do NOT generate a new RSA key at startup like this:
-//   var rsaKey = new RsaSecurityKey(RSA.Create(2048)); // ephemeral — lost on restart
-// All previously issued DPoP-bound tokens become unusable if the key changes.
-// Always load from stable, secure storage (Key Vault, configuration secrets).
-
+// Register client credentials with the DPoP key
 builder.Services.AddClientCredentialsTokenManagement()
-    .AddClient("catalog.client", client =>
+    .AddClient(ClientCredentialsClientName.Parse("my-client"), client =>
     {
         client.TokenEndpoint = new Uri("https://sts.example.com/connect/token");
-        client.ClientId = ClientId.Parse("catalog-worker");
-        client.ClientSecret = ClientSecret.Parse("worker-secret");
-        client.Scope = Scope.Parse("catalog:read");
-        client.DPoPJsonWebKey = dpopJwk; // Set the DPoP key from configuration
+        client.ClientId = ClientId.Parse("my-client-id");
+        client.ClientSecret = ClientSecret.Parse("my-client-secret");
+        client.Scope = Scope.Parse("api1");
+        client.DPoPJsonWebKey = dpopJwk;  // DPoP key from configuration
     });
 
 builder.Services.AddClientCredentialsHttpClient(
-    "catalog-api",
-    ClientCredentialsClientName.Parse("catalog.client"),
-    client => { client.BaseAddress = new Uri("https://api.example.com/catalog/"); });
-
-var app = builder.Build();
-app.Run();
+    "api",
+    ClientCredentialsClientName.Parse("my-client"),
+    client => client.BaseAddress = new Uri("https://api.example.com/"));
 ```
 
-## Key Points
+## Important: Do NOT Generate Ephemeral Keys
 
-- The DPoP JWK is loaded from `configuration["DPoP:JsonWebKey"]` — stored securely in Key Vault or user secrets, not generated at runtime.
-- `DPoPJsonWebKey` is set on the client credentials client options.
-- Generating ephemeral keys with `RSA.Create()` on every process restart would invalidate all previously issued DPoP-bound tokens, causing 401 errors until new tokens are obtained.
-- For dynamic key resolution (e.g., from Azure Key Vault at runtime), implement `IDPoPKeyStore`.
+```csharp
+// ❌ WRONG: New key generated on every restart
+// All previously issued DPoP-bound tokens become unusable, causing 401 errors
+var rsaKey = new RsaSecurityKey(RSA.Create(2048)); // ephemeral — lost on restart
+
+// ✅ CORRECT: Load from stable, secure storage
+var jwkJson = builder.Configuration["DPoP:JsonWebKey"]; // from Key Vault / secrets
+```
+
+When DPoP is configured, the library automatically:
+- Sends a DPoP proof JWT with every token endpoint request
+- Sends a DPoP proof JWT with every outgoing API request
+- Handles DPoP nonce challenges from the server
+
+## Generating a JWK (One-Time Setup)
+
+Generate the JWK once and store it securely:
+
+```csharp
+using System.Security.Cryptography;
+using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
+
+var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
+jwkKey.Alg = "PS256";
+var jwk = JsonSerializer.Serialize(jwkKey);
+// Store this JWK in Key Vault or configuration secrets
+```
+
+## Advanced: Custom Key Store
+
+For dynamic key resolution (e.g., per-client keys from Azure Key Vault), implement `IDPoPKeyStore`:
+
+```csharp
+public sealed class KeyVaultDPoPKeyStore : IDPoPKeyStore
+{
+    public async Task<string?> GetKeyAsync(string clientName, CancellationToken ct)
+    {
+        return await keyVault.GetSecretAsync($"dpop-key-{clientName}", ct);
+    }
+}
+
+builder.Services.AddSingleton<IDPoPKeyStore, KeyVaultDPoPKeyStore>();
+```

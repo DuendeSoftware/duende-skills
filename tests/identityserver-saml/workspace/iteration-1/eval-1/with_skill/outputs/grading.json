@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "The code calls .AddSaml() on the IdentityServer builder chain", "pass": true, "rationale": "The code clearly shows .AddSaml() called on the IdentityServer builder chain."},
-    {"assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer", "pass": true, "rationale": "Explicitly states no separate NuGet package is needed and that SAML is built into Duende.IdentityServer."},
-    {"assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'", "pass": true, "rationale": "A SamlServiceProvider is created with EntityId = \"https://crm.contoso.com\"."},
-    {"assertion": "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'", "pass": true, "rationale": "AssertionConsumerServiceUrls contains new Uri(\"https://crm.contoso.com/saml/acs\")."},
-    {"assertion": "The code mentions or uses AddInMemorySamlServiceProviders to register the SP", "pass": true, "rationale": "The code uses .AddInMemorySamlServiceProviders(Config.SamlServiceProviders)."}
+    {
+      "assertion": "The code calls .AddSaml() on the IdentityServer builder chain",
+      "pass": true,
+      "rationale": "Code clearly shows .AddSaml() chained on the IdentityServer builder."
+    },
+    {
+      "assertion": "No separate NuGet package is added \u2014 SAML is built into Duende.IdentityServer",
+      "pass": true,
+      "rationale": "Explicitly states no additional NuGet package is needed and existing Duende.IdentityServer 8.0.0 includes SAML."
+    },
+    {
+      "assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+      "pass": true,
+      "rationale": "SamlServiceProvider has EntityId = \"https://crm.contoso.com\"."
+    },
+    {
+      "assertion": "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'",
+      "pass": true,
+      "rationale": "AssertionConsumerServiceUrls includes new Uri(\"https://crm.contoso.com/saml/acs\")."
+    },
+    {
+      "assertion": "The code mentions or uses AddInMemorySamlServiceProviders to register the SP",
+      "pass": true,
+      "rationale": "Uses .AddInMemorySamlServiceProviders(Config.SamlServiceProviders) in the builder chain."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

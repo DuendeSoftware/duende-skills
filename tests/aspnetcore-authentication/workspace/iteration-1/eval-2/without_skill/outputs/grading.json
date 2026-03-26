@@ -2,13 +2,33 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs configures AddJwtBearer with Authority set to the IdentityServer URL", "pass": true, "rationale": "The response includes 'options.Authority = \"https://identity.example.com\";' inside AddJwtBearer."},
-    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": false, "rationale": "The without_skill response does not include MapInboundClaims = false. This is a specific best practice that a generic assistant would likely miss."},
-    {"assertion": "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'", "pass": false, "rationale": "The response has TokenValidationParameters but only sets ValidateAudience and ValidAudience, missing NameClaimType and RoleClaimType."},
-    {"assertion": "Program.cs sets Audience or ValidAudience to 'catalog-api'", "pass": true, "rationale": "The response sets both options.Audience = \"catalog-api\" and ValidAudience = \"catalog-api\"."},
-    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization()", "pass": true, "rationale": "The response shows app.UseAuthentication() before app.UseAuthorization() in correct order."}
+    {
+      "assertion": "Program.cs configures AddJwtBearer with Authority set to the IdentityServer URL",
+      "pass": true,
+      "rationale": "Authority is set to 'https://identity.example.com'."
+    },
+    {
+      "assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler",
+      "pass": false,
+      "rationale": "MapInboundClaims = false is not included. This is a common omission."
+    },
+    {
+      "assertion": "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'",
+      "pass": true,
+      "rationale": "NameClaimType = 'name' and RoleClaimType = 'role' are set."
+    },
+    {
+      "assertion": "Program.cs sets Audience or ValidAudience to 'catalog-api'",
+      "pass": true,
+      "rationale": "options.Audience = 'catalog-api' is set."
+    },
+    {
+      "assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization()",
+      "pass": true,
+      "rationale": "Correct middleware ordering is shown."
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 4,
   "total_count": 5,
-  "score": 0.6
+  "score": 0.8
 }

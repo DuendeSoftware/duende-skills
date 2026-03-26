@@ -2,10 +2,26 @@
   "eval_id": 3,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Implements ISamlClaimsMapper interface", "pass": true, "rationale": "LegacySamlClaimsMapper implements ISamlClaimsMapper with the correct MapClaimsAsync method signature."},
-    {"assertion": "The mapper returns SamlAttribute objects with custom Name values", "pass": true, "rationale": "Returns SamlAttribute objects with names like 'urn:custom:email', 'urn:custom:name', etc."},
-    {"assertion": "Warns that ISamlClaimsMapper completely replaces default claim mapping — DefaultClaimMappings are not applied", "pass": true, "rationale": "Explicitly warns with bold text: 'completely replaces the default claim mapping. The default mappings configured in IdentityServerOptions.Saml.DefaultClaimMappings are not applied'."},
-    {"assertion": "Registers the custom mapper with dependency injection (e.g., AddTransient)", "pass": true, "rationale": "Shows builder.Services.AddTransient<ISamlClaimsMapper, LegacySamlClaimsMapper>()."}
+    {
+      "assertion": "Implements ISamlClaimsMapper interface",
+      "pass": true,
+      "rationale": "Class explicitly implements ISamlClaimsMapper with MapClaimsAsync method."
+    },
+    {
+      "assertion": "The mapper returns SamlAttribute objects with custom Name values",
+      "pass": true,
+      "rationale": "Returns SamlAttribute objects with custom Names like 'urn:custom:email'."
+    },
+    {
+      "assertion": "Warns that ISamlClaimsMapper completely replaces default claim mapping \u2014 DefaultClaimMappings are not applied",
+      "pass": true,
+      "rationale": "Prominently warns: 'Implementing ISamlClaimsMapper completely replaces the default claim mapping. The default mappings configured in IdentityServerOptions.Saml.DefaultClaimMappings are not applied.'"
+    },
+    {
+      "assertion": "Registers the custom mapper with dependency injection (e.g., AddTransient)",
+      "pass": true,
+      "rationale": "Shows builder.Services.AddTransient<ISamlClaimsMapper, CustomSamlClaimsMapper>();"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

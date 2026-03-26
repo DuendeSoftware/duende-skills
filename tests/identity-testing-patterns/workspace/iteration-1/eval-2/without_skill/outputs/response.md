@@ -1,71 +1,56 @@
-# Creating Test JWT Tokens for API Integration Tests
+# Creating Self-Signed JWTs for Testing
 
-## 1. TestTokenFactory
+## Token Factory
 
 ```csharp
-using System.Security.Claims;
 using System.Security.Cryptography;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 public static class TestTokenFactory
 {
-    private static readonly RSA Rsa = RSA.Create(2048);
-    private static readonly RsaSecurityKey SigningKey = new RsaSecurityKey(Rsa);
+    private static readonly RSA _rsa = RSA.Create(2048);
+    private static readonly RsaSecurityKey _key = new(_rsa) { KeyId = "test-key" };
 
-    public static SecurityKey Key => SigningKey;
+    public static SecurityKey SigningKey => _key;
 
-    public static string CreateAccessToken(string subject, string audience, IEnumerable<Claim>? additionalClaims = null)
+    public static string CreateAccessToken(string subject, string audience, IEnumerable<Claim> claims)
     {
-        var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, subject),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        if (additionalClaims != null)
-            claims.AddRange(additionalClaims);
-
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(30),
-            Issuer = "https://test-issuer",
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, subject)
+            }.Concat(claims)),
             Audience = audience,
-            SigningCredentials = new SigningCredentials(SigningKey, SecurityAlgorithms.RsaSha256)
+            Issuer = "https://test-issuer",
+            Expires = DateTime.UtcNow.AddMinutes(5),
+            SigningCredentials = new SigningCredentials(_key, SecurityAlgorithms.RsaSha256)
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.CreateToken(tokenDescriptor);
+        return handler.WriteToken(token);
     }
 }
 ```
 
-## 2. WebApplicationFactory Configuration
+## Configure API to Trust Test Key
 
 ```csharp
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-
-public class TestWebApplicationFactory : WebApplicationFactory<Program>
+public class TestApiFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureTestServices(services =>
         {
-            services.PostConfigure<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions>("Bearer", options =>
+            services.PostConfigure<JwtBearerOptions>("Bearer", options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = TestTokenFactory.Key,
-                    ValidateIssuer = true,
+                    IssuerSigningKey = TestTokenFactory.SigningKey,
                     ValidIssuer = "https://test-issuer",
-                    ValidateAudience = true,
                     ValidAudience = "my-api",
                     ValidateLifetime = true
                 };
@@ -75,30 +60,19 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 }
 ```
 
-## 3. Tests
+## Test Example
 
 ```csharp
-using System.Net;
-using System.Net.Http.Headers;
-using Xunit;
-
-public class ApiTests : IClassFixture<TestWebApplicationFactory>
+[Fact]
+public async Task GetProducts_WithToken_Returns200()
 {
-    private readonly HttpClient _client;
+    var token = TestTokenFactory.CreateAccessToken("user-1", "my-api",
+        new[] { new Claim("scope", "api1") });
 
-    public ApiTests(TestWebApplicationFactory factory)
-    {
-        _client = factory.CreateClient();
-    }
+    _client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", token);
 
-    [Fact]
-    public async Task GetProducts_WithToken_Returns200()
-    {
-        var token = TestTokenFactory.CreateAccessToken("user1", "my-api");
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        var response = await _client.GetAsync("/api/products");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
+    var response = await _client.GetAsync("/api/products");
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 }
 ```

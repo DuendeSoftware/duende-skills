@@ -130,6 +130,34 @@
         "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
         "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "I'm testing a Duende BFF application. How do I test that the /bff/user endpoint returns 401 when there's no session, and that local API routes return 400 when the antiforgery header is missing?",
+      "expected_output": "BFF test factory with cookie-based session simulation using CookieContainer + HttpClientHandler with AllowAutoRedirect = false. Tests verify /bff/user returns 401 without a session and local API routes return 400 without the x-csrf: 1 header.",
+      "sub_documents": ["bff-testing.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Uses CookieContainer and HttpClientHandler with AllowAutoRedirect = false for cookie-based session simulation",
+        "Test asserts /bff/user returns HttpStatusCode.Unauthorized (401) without a prior login",
+        "Test asserts the local API route returns HttpStatusCode.BadRequest (400) when the x-csrf header is missing",
+        "Includes the x-csrf: 1 header on the antiforgery-passing test case"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "What is the minimal pattern for hosting an in-process IdentityServer for integration testing?",
+      "expected_output": "WebApplicationFactory<Program> that calls ConfigureTestServices, disables KeyManagement.Enabled, uses AddDeveloperSigningCredential(persistKey: false), and registers in-memory clients/scopes.",
+      "files": [],
+      "assertions": [
+        "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+        "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+        "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+        "Registers clients via AddInMemoryClients — no sub-documents needed for this core pattern"
+      ]
     }
   ]
 }

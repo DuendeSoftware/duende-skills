@@ -2,11 +2,31 @@
   "eval_id": 4,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'", "pass": true, "rationale": "CSP header includes \"frame-ancestors 'none'\""},
-    {"assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths", "pass": true, "rationale": "X-Frame-Options: DENY is set, though on all paths rather than just IdentityServer UI paths"},
-    {"assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20", "pass": true, "rationale": "AddRateLimiter with token-limit policy, PermitLimit = 20"},
-    {"assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10", "pass": true, "rationale": "authorize-limit policy with PermitLimit = 10"},
-    {"assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline", "pass": true, "rationale": "app.UseRateLimiter() is present"}
+    {
+      "assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+      "pass": true,
+      "rationale": "CSP includes frame-ancestors 'none'"
+    },
+    {
+      "assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+      "pass": true,
+      "rationale": "X-Frame-Options: DENY is set \u2014 though applied globally rather than just UI paths, still meets the assertion"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+      "pass": true,
+      "rationale": "token-limit policy with PermitLimit = 20 is configured via AddRateLimiter"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+      "pass": true,
+      "rationale": "authorize-limit policy with PermitLimit = 10"
+    },
+    {
+      "assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline",
+      "pass": true,
+      "rationale": "app.UseRateLimiter() is called"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

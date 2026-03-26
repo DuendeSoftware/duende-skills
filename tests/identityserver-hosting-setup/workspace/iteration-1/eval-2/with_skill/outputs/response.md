@@ -1,54 +1,51 @@
 # Fixing the IdentityServer Middleware Pipeline
 
-Your current pipeline has two issues:
+## What's Wrong
 
-## Problem 1: `UseRouting()` Must Come Before `UseIdentityServer()`
+Your current pipeline order has multiple problems:
 
-Your current order has `UseIdentityServer()` before `UseRouting()`. This is incorrect. `UseRouting()` must come first because IdentityServer needs the routing system to be initialized to match its endpoints.
+```csharp
+// ❌ CURRENT (WRONG)
+app.UseIdentityServer();    // 1 — too early, before routing
+app.UseRouting();           // 2 — must be before IdentityServer
+app.UseAuthentication();    // 3 — redundant
+app.UseAuthorization();     // 4 — correct position
+```
 
-## Problem 2: `UseAuthentication()` Is Redundant
+### Issues:
 
-`UseIdentityServer()` already calls `UseAuthentication()` internally. Having both is unnecessary (though not harmful). You should remove the explicit `UseAuthentication()` call.
+1. **`UseRouting()` must come before `UseIdentityServer()`** — IdentityServer relies on routing to match its endpoints (discovery, token, authorize, etc.). Without routing first, IdentityServer's endpoints won't be reachable.
 
-## Problem 3: Don't Omit `UseAuthorization()`
+2. **`UseAuthentication()` is redundant** — `UseIdentityServer()` already calls `UseAuthentication()` internally. Having both won't cause an error, but it's unnecessary and confusing.
 
-`UseAuthorization()` must not be omitted as it is required by the Duende UI template for authorization on login, consent, and other UI pages.
+3. **`UseIdentityServer()` is too early** — It should come after routing but before authorization.
 
 ## Correct Pipeline Order
 
 ```csharp
 var app = builder.Build();
 
-app.UseStaticFiles();       // 1. Static files first
-app.UseRouting();           // 2. Routing before IdentityServer
-app.UseIdentityServer();    // 3. IdentityServer (includes UseAuthentication internally)
-app.UseAuthorization();     // 4. Authorization after IdentityServer - must not be omitted
-
-app.MapDefaultControllerRoute();
+app.UseStaticFiles();       // 1 — static files first
+app.UseRouting();           // 2 — routing before IdentityServer
+app.UseIdentityServer();   // 3 — includes UseAuthentication() internally
+app.UseAuthorization();    // 4 — required, must not be omitted
+app.MapDefaultControllerRoute();  // 5 — UI framework endpoints
 ```
 
-### Why This Order Matters
+### Pipeline Rules
 
 | Order | Middleware | Notes |
 |-------|-----------|-------|
 | 1 | `UseStaticFiles()` | Before IdentityServer |
-| 2 | `UseRouting()` | Before IdentityServer |
+| 2 | `UseRouting()` | **Before** IdentityServer |
 | 3 | `UseIdentityServer()` | Includes `UseAuthentication()` internally |
-| 4 | `UseAuthorization()` | Required after IdentityServer, must not be omitted |
+| 4 | `UseAuthorization()` | **After** IdentityServer — must not be omitted |
 | 5 | `MapDefaultControllerRoute()` | UI framework endpoints |
 
-### What You Had vs. What's Correct
+### Why `UseAuthorization()` Must Not Be Omitted
 
-```csharp
-// ❌ Your current (wrong) order:
-app.UseIdentityServer();    // Too early - routing not set up yet
-app.UseRouting();           // Should be before IdentityServer
-app.UseAuthentication();    // Redundant - UseIdentityServer includes this
-app.UseAuthorization();
+Even though it might seem optional, `UseAuthorization()` is **required** by the Duende UI template. The login, logout, consent, and error pages use authorization attributes, and omitting this middleware will cause authorization failures in those UI pages.
 
-// ✅ Correct order:
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();    // Already calls UseAuthentication()
-app.UseAuthorization();     // Required for Duende UI template
-```
+### Why `UseAuthentication()` Is Redundant
+
+`UseIdentityServer()` internally calls `UseAuthentication()` as part of its middleware setup. Adding a separate `UseAuthentication()` call is unnecessary. While it won't break anything, it should be removed to avoid confusion.

@@ -1,144 +1,88 @@
-# Fixing OIDC State Storage and ReturnUrl Preservation
+# Fixing State Storage and ReturnUrl Preservation
 
-## Problem 1: URL Length Issues — State Parameter Too Long
+## Problem 1: State Parameter Too Long
 
-The OIDC state parameter contains the full authentication properties serialized into the URL. When the state is large, this can exceed URL length limits (>2000 characters). The fix is to use `AddOidcStateDataFormatterCache` which stores the state server-side using `IDistributedCache`.
+The OIDC state parameter is stored in the URL by default. For providers that add a lot of data to the state, this can exceed URL length limits. The fix is to use IdentityServer's `AddOidcStateDataFormatterCache` which stores state server-side using `IDistributedCache`.
 
-## Problem 2: ReturnUrl Lost During External Round-Trip
+## Problem 2: ReturnUrl Lost During Round-Trip
 
-The `returnUrl` must be stored in `AuthenticationProperties.Items` before issuing the Challenge, and retrieved from `result.Properties.Items` after the callback.
+The `returnUrl` must be explicitly stored in `AuthenticationProperties.Items` before the Challenge and retrieved from `result.Properties.Items` in the callback.
 
-## Program.cs — Fix State Storage
+## Fix in Program.cs
 
 ```csharp
-using Duende.IdentityServer;
+// Store OIDC state server-side for the corporate-idp scheme
+builder.Services.AddOidcStateDataFormatterCache("corporate-idp");
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorPages();
-
-builder.Services.AddIdentityServer()
-    // ... existing configuration ...
-    ;
-
-// Register external OIDC provider
 builder.Services.AddAuthentication()
     .AddOpenIdConnect("corporate-idp", options =>
     {
         options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         options.Authority = "https://corporate-idp.example.com";
         options.ClientId = "your-client-id";
+        options.ClientSecret = "your-client-secret";
         options.ResponseType = "code";
     });
-
-// Fix: Store OIDC state server-side using IDistributedCache instead of the URL
-builder.Services.AddOidcStateDataFormatterCache("corporate-idp");
-
-var app = builder.Build();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-app.MapRazorPages();
-
-app.Run();
 ```
 
-## Pages/ExternalLogin.cshtml.cs — Store ReturnUrl Before Challenge
+## External Login Trigger (Storing returnUrl)
 
 ```csharp
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
-public class ExternalLoginModel : PageModel
+public IActionResult OnGetExternalLogin(string returnUrl)
 {
-    public IActionResult OnGet(string returnUrl)
+    var callbackUrl = Url.Page("/ExternalLoginCallback");
+
+    var props = new AuthenticationProperties
     {
-        var callbackUrl = Url.Page("/ExternalLoginCallback");
-
-        var props = new AuthenticationProperties
+        RedirectUri = callbackUrl,
+        Items =
         {
-            RedirectUri = callbackUrl,
-            Items =
-            {
-                { "scheme", "corporate-idp" },
-                { "returnUrl", returnUrl }  // Store returnUrl in Items before Challenge
-            }
-        };
-
-        return Challenge(props, "corporate-idp");
-    }
-}
-```
-
-## Pages/ExternalLoginCallback.cshtml.cs — Retrieve ReturnUrl After Callback
-
-```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
-public class ExternalLoginCallbackModel : PageModel
-{
-    private readonly IIdentityServerInteractionService _interaction;
-
-    public ExternalLoginCallbackModel(IIdentityServerInteractionService interaction)
-    {
-        _interaction = interaction;
-    }
-
-    public async Task<IActionResult> OnGet()
-    {
-        // Authenticate against the external cookie scheme
-        var result = await HttpContext.AuthenticateAsync(
-            IdentityServerConstants.ExternalCookieAuthenticationScheme);
-
-        if (result?.Succeeded != true)
-            throw new Exception("External authentication error");
-
-        // Retrieve returnUrl from result.Properties.Items
-        var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
-        var scheme = result.Properties.Items["scheme"];
-
-        var externalUser = result.Principal;
-        var userId = externalUser.FindFirst("sub")?.Value
-            ?? externalUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        // Find or provision local user
-        // ... user provisioning logic ...
-
-        // Establish IdentityServer session
-        var isUser = new IdentityServerUser(userId ?? Guid.NewGuid().ToString())
-        {
-            IdentityProvider = scheme
-        };
-        await HttpContext.SignInAsync(isUser);
-
-        // Clean up external cookie
-        await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
-
-        // Validate returnUrl before redirecting
-        if (_interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
-        {
-            return Redirect(returnUrl);
+            { "scheme", "corporate-idp" },
+            { "returnUrl", returnUrl }  // Store returnUrl in Items
         }
+    };
 
-        return Redirect("~/");
-    }
+    return Challenge(props, "corporate-idp");
 }
 ```
 
-### Key Points
+## Callback Handler (Retrieving returnUrl)
 
-1. **`AddOidcStateDataFormatterCache("corporate-idp")`** stores OIDC state server-side using `IDistributedCache`, preventing URL length issues.
-2. **ReturnUrl stored before Challenge**: `AuthenticationProperties.Items["returnUrl"]` is set before calling `Challenge`.
-3. **ReturnUrl retrieved after callback**: `result.Properties.Items["returnUrl"]` retrieves the preserved URL after authenticating the external cookie.
-4. **ReturnUrl validated**: `_interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl)` protects against open redirects.
+```csharp
+public async Task<IActionResult> OnGetCallback()
+{
+    // Read the external identity
+    var result = await HttpContext.AuthenticateAsync(
+        IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+    if (result?.Succeeded != true)
+        throw new Exception("External authentication failed");
+
+    // Retrieve returnUrl from Properties.Items
+    var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
+    var scheme = result.Properties.Items["scheme"];
+
+    // Provision user, establish session...
+    var isUser = new IdentityServerUser(user.SubjectId)
+    {
+        IdentityProvider = scheme
+    };
+    await HttpContext.SignInAsync(isUser);
+    await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+    // Validate returnUrl before redirecting
+    if (_interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
+    {
+        return Redirect(returnUrl);
+    }
+
+    return Redirect("~/");
+}
+```
+
+## Key Fixes
+
+1. **`AddOidcStateDataFormatterCache("corporate-idp")`**: Stores the OIDC state server-side using `IDistributedCache`, replacing the URL-based state with a short reference. This solves the URL length issue.
+2. **`AuthenticationProperties.Items["returnUrl"]`**: The returnUrl is stored in Items before the Challenge, so it survives the external authentication round-trip.
+3. **`result.Properties.Items["returnUrl"]`**: Retrieved in the callback after authenticating against the external cookie scheme.
+4. **returnUrl validation**: Checked with `IsValidReturnUrl` or `Url.IsLocalUrl` before redirecting.

@@ -2,11 +2,31 @@
   "eval_id": 4,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Implements IClaimsTransformation with a TransformAsync method", "pass": true, "rationale": "Implements IClaimsTransformation with TransformAsync method"},
-    {"assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place", "pass": true, "rationale": "Creates new ClaimsIdentity(), adds claims to it, then calls principal.AddIdentity(identity)"},
-    {"assertion": "Loads roles from a local repository or database based on the user's subject claim", "pass": true, "rationale": "Gets subjectId from principal.FindFirstValue(\"sub\"), then calls _roleRepository.GetRolesForUserAsync(subjectId)"},
-    {"assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)", "pass": true, "rationale": "Shows builder.Services.AddTransient<IClaimsTransformation, ApplicationRolesClaimsTransformation>()"},
-    {"assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims", "pass": true, "rationale": "Explicit warning: 'Do not use IClaimsTransformation on the IdentityServer host to modify token claims'"}
+    {
+      "assertion": "Implements IClaimsTransformation with a TransformAsync method",
+      "pass": true,
+      "rationale": "ApplicationRoleClaimsTransformation implements IClaimsTransformation with TransformAsync"
+    },
+    {
+      "assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() \u2014 does NOT mutate the existing identity in-place",
+      "pass": true,
+      "rationale": "Creates new ClaimsIdentity(), adds claims, then calls principal.AddIdentity(identity). Explicitly warns against mutating existing identity."
+    },
+    {
+      "assertion": "Loads roles from a local repository or database based on the user's subject claim",
+      "pass": true,
+      "rationale": "Gets subjectId from 'sub' claim, calls _roleRepository.GetRolesForUserAsync(subjectId)"
+    },
+    {
+      "assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)",
+      "pass": true,
+      "rationale": "Shows AddTransient<IClaimsTransformation, ApplicationRoleClaimsTransformation>()"
+    },
+    {
+      "assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims",
+      "pass": true,
+      "rationale": "Explicitly warns: 'Do NOT use IClaimsTransformation on the IdentityServer host to modify token claims. It runs during cookie authentication, not token issuance. Use IProfileService on the IdentityServer side instead.'"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

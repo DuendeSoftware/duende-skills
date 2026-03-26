@@ -1,8 +1,8 @@
 # Grouping Admin Endpoints with MapGroup and Shared Authorization
 
-Use `MapGroup` to organize related endpoints and apply authorization at the group level. This avoids repeating `.RequireAuthorization()` on each individual endpoint.
+To group the `/admin/users` endpoints under a `MapGroup` with shared authorization, you define a named policy requiring the `admin` role and apply it to the route group. All endpoints registered on the group inherit the authorization requirement.
 
-## Updated Program.cs
+Here is the updated `Program.cs`:
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,7 +18,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    // Centralized policy definition for admin access
+    // Centrally defined admin policy — requires the 'admin' role
     options.AddPolicy("admin", policy =>
         policy.RequireRole("admin"));
 });
@@ -36,21 +36,18 @@ app.MapGet("/products", () => Results.Ok(new[]
 }));
 
 app.MapPost("/products", (object product) => Results.Created("/products/3", product));
-
 app.MapDelete("/products/{id}", (int id) => Results.NoContent());
 
-// Admin endpoints — grouped with shared authorization policy
+// Admin endpoints — grouped with shared authorization
 var adminGroup = app.MapGroup("/admin")
     .RequireAuthorization("admin");
 
 adminGroup.MapGet("/users", () => Results.Ok(new[] { "alice", "bob" }));
-
 adminGroup.MapPost("/users", (object user) => Results.Created("/admin/users/3", user));
 
 // Documents endpoint
 app.MapGet("/documents/{id}", (int id) =>
     Results.Ok(new { Id = id, Title = "Quarterly Report", Department = "finance", OwnerId = "user-1" }));
-
 app.MapPut("/documents/{id}", (int id, object doc) => Results.NoContent());
 
 // Health check
@@ -61,14 +58,26 @@ app.Run();
 
 ## How It Works
 
-1. **`options.AddPolicy("admin", ...)`** defines the policy centrally using `RequireRole("admin")`. The policy checks that the authenticated user has the `admin` role claim.
-2. **`app.MapGroup("/admin")`** creates a route group with the `/admin` prefix. All endpoints registered on the group inherit the group's route prefix and metadata.
-3. **`.RequireAuthorization("admin")`** on the group applies the named policy to every endpoint within the group.
-4. **Individual endpoints use `adminGroup.MapGet`** instead of `app.MapGet` — this registers them on the group rather than directly on the application, so they inherit the group-level authorization.
+1. **Centralized Policy Definition** — `options.AddPolicy("admin", policy => policy.RequireRole("admin"))` defines a single policy that checks for the `admin` role claim. This keeps authorization logic in one place rather than scattering role strings across endpoints.
 
-## Benefits of This Pattern
+2. **`app.MapGroup("/admin")`** — Creates a route group with the `/admin` prefix. All endpoints registered on this group will have `/admin` prepended to their route templates.
 
-- **DRY**: Authorization is specified once at the group level, not repeated per endpoint.
-- **Consistency**: Adding a new admin endpoint to the group automatically gets the same authorization policy.
-- **Composability**: Groups can be nested, and each can add additional metadata like rate limiting, CORS, etc.
-- **Centralized policies**: The policy is defined in `AddAuthorization` so it can be referenced by name throughout the application. If requirements change (e.g., adding a required scope), only the policy definition needs to be updated.
+3. **`.RequireAuthorization("admin")`** — Applied to the group, this ensures that **every endpoint** within the group requires the `admin` policy. No need to add `.RequireAuthorization()` to each individual endpoint.
+
+4. **Endpoints on the group** — `adminGroup.MapGet("/users", ...)` and `adminGroup.MapPost("/users", ...)` are registered on `adminGroup` instead of `app`. Their effective routes are `/admin/users` (the group prefix + the endpoint template).
+
+## Benefits of MapGroup
+
+- **DRY authorization** — Apply authorization once at the group level instead of repeating it on each endpoint.
+- **Consistent routing** — All endpoints share the same prefix automatically.
+- **Composable** — Groups can be nested, and each level can add its own filters, metadata, or authorization.
+- **Easy to extend** — Adding new admin endpoints just requires registering them on `adminGroup`.
+
+## Policy-Based Over Role Strings
+
+Using `RequireRole("admin")` within a named policy is preferred over scattering `[Authorize(Roles = "admin")]` across controllers. If the role requirements change (e.g., you want to allow `it-ops` users too), you only change the policy definition in one place:
+
+```csharp
+options.AddPolicy("admin", policy =>
+    policy.RequireRole("admin", "it-ops"));
+```

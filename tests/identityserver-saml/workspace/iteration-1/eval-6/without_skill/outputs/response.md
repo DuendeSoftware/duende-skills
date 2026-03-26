@@ -1,40 +1,40 @@
-# SAML Signing Behaviors
+# SAML Signing Options in IdentityServer
 
-SAML supports different signing options for responses and assertions. Here's an overview:
+SAML responses can be signed in different ways depending on your security requirements and what the service provider expects.
 
 ## Signing Options
 
-1. **Sign the Assertion** — Only the SAML assertion within the response is signed. This is the most common approach.
-2. **Sign the Response** — The entire SAML response envelope is signed, but the assertion itself isn't.
-3. **Sign Both** — Both the assertion and the response are signed. This provides the highest level of security.
-4. **No Signing** — Neither is signed (not recommended for production).
+1. **Sign the Assertion** — Signs the SAML assertion within the response. This is the most common approach.
 
-## For Your Use Case
+2. **Sign the Response** — Signs the entire SAML response envelope.
 
-Since your SP requires both the assertion and full response to be signed, you should configure signing for both:
+3. **Sign Both** — Signs both the assertion and the response. This provides the highest level of security.
 
-```csharp
-var sp = new ServiceProvider
-{
-    EntityId = "https://sp.example.com",
-    SigningBehavior = SigningBehavior.SignAssertionAndResponse,
-    AssertionConsumerServiceUrl = "https://sp.example.com/saml/acs"
-};
-```
+4. **No Signing** — No signature is applied. This is not recommended for any environment.
 
 ## Configuration
 
+For your requirement of signing both the assertion and the response:
+
 ```csharp
-builder.Services.AddIdentityServer()
-    .AddSaml(options =>
-    {
-        options.DefaultSigningBehavior = SigningBehavior.SignAssertion; // default
-    });
+var sp = new SamlServiceProvider
+{
+    EntityId = "https://sp.example.com",
+    SigningBehavior = SamlSigningBehavior.SignBoth
+};
 ```
 
-## Key Considerations
+You can also set this as the default:
 
-- Signing the assertion is the default and most commonly used option
-- Signing both provides the most security but not all SPs support it
-- Never disable signing in production environments
-- Make sure your IdP's signing certificate is trusted by the SP
+```csharp
+builder.Services.AddIdentityServer(options =>
+{
+    options.Saml.DefaultSigningBehavior = SamlSigningBehavior.SignBoth;
+});
+```
+
+## Recommendations
+
+- Use assertion signing as the default for most integrations
+- Use SignBoth when the SP explicitly requires it
+- Never disable signing in a production environment

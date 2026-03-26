@@ -1,15 +1,44 @@
 {
-  "metadata": {"skill_name": "aspnetcore-authentication", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "aspnetcore-authentication",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 32, "passed": 32, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 32, "passed": 21, "failed": 11, "pass_rate": 65.6},
-    "delta": {"assertions_improved": 11, "delta_pass_rate": 34.4}
+    "with_skill": {
+      "total_assertions": 32,
+      "passed": 32,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 32,
+      "passed": 25,
+      "failed": 7,
+      "pass_rate": 78.1
+    },
+    "delta": {
+      "assertions_improved": 7,
+      "delta_pass_rate": 21.9
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
       "delta": 0.4,
       "without_skill_failures": [
         "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping",
@@ -18,18 +47,39 @@
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6},
-      "delta": 0.4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
       "without_skill_failures": [
-        "Program.cs sets MapInboundClaims = false on the JWT Bearer handler",
-        "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'"
+        "Program.cs sets MapInboundClaims = false on the JWT Bearer handler"
       ]
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
       "delta": 0.5,
       "without_skill_failures": [
         "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection",
@@ -38,40 +88,97 @@
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": [
-        "Response mentions setting Cookie.SecurePolicy to Always for HTTPS"
-      ]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0},
-      "delta": 0.0,
-      "without_skill_failures": []
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666
+      },
+      "delta": 0.33333333333333337,
+      "without_skill_failures": [
+        "Response mentions implementing ITicketStore (backed by IDistributedCache or similar) to move the authentication ticket server-side so the cookie only holds a session key"
+      ]
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "delta": 0.0,
-      "without_skill_failures": []
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Response explains this is a common pitfall where claims are silently renamed by the handler"
+      ]
     }
   ]
 }

@@ -1,48 +1,32 @@
-# Parsing JWT Token Claims After Issuance
+# Reading Token Claims After Issuance
 
 ```csharp
-using IdentityModel.Client;
-using System.IdentityModel.Tokens.Jwt;
-using Xunit;
-
-public class TokenClaimTests : IClassFixture<IdentityServerTestFactory>
+[Fact]
+public async Task Token_HasExpectedClaims()
 {
-    private readonly HttpClient _client;
+    var response = await _client.RequestClientCredentialsTokenAsync(
+        new ClientCredentialsTokenRequest
+        {
+            Address = "https://localhost/connect/token",
+            ClientId = "test.service",
+            ClientSecret = "test-secret",
+            Scope = "api1"
+        });
 
-    public TokenClaimTests(IdentityServerTestFactory factory)
-    {
-        _client = factory.CreateClient();
-    }
+    Assert.False(response.IsError);
 
-    [Fact]
-    public async Task Token_ContainsExpectedClaims()
-    {
-        var tokenResponse = await _client.RequestClientCredentialsTokenAsync(
-            new ClientCredentialsTokenRequest
-            {
-                Address = "https://localhost/connect/token",
-                ClientId = "test-client",
-                ClientSecret = "secret",
-                Scope = "api1"
-            });
+    var handler = new JwtSecurityTokenHandler();
+    var token = handler.ReadJwtToken(response.AccessToken);
 
-        Assert.False(tokenResponse.IsError);
+    // Check claims
+    var clientId = token.Claims.First(c => c.Type == "client_id").Value;
+    Assert.Equal("test.service", clientId);
 
-        var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(tokenResponse.AccessToken);
+    var scope = token.Claims.First(c => c.Type == "scope").Value;
+    Assert.Equal("api1", scope);
 
-        // Check client_id
-        var clientId = token.Claims.FirstOrDefault(c => c.Type == "client_id")?.Value;
-        Assert.Equal("test-client", clientId);
-
-        // Check scope
-        var scope = token.Claims.FirstOrDefault(c => c.Type == "scope")?.Value;
-        Assert.Equal("api1", scope);
-
-        // Check issuer
-        Assert.NotNull(token.Issuer);
-    }
+    Assert.Equal("https://localhost", token.Issuer);
 }
 ```
 
-This parses the JWT token locally and checks the claims without making additional network calls.
+This parses the JWT locally without calling any validation endpoint.

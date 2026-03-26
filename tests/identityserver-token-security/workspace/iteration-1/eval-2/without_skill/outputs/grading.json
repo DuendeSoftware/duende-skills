@@ -2,10 +2,26 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda", "pass": false, "rationale": "The code calls options.ConfigureDPoPTokensForScheme('token') INSIDE the AddJwtBearer lambda, not on builder.Services. This is the common mistake of a non-specialist who assumes DPoP configuration belongs with the JWT bearer options."},
-    {"assertion": "Registers a distributed cache (e.g., AddDistributedMemoryCache for dev, mentions Redis or similar for production)", "pass": true, "rationale": "Code calls builder.Services.AddDistributedMemoryCache() and mentions Redis for production."},
-    {"assertion": "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'", "pass": true, "rationale": "Code configures AddJwtBearer with Authority and ValidTypes = new[] { 'at+jwt' }."},
-    {"assertion": "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package", "pass": true, "rationale": "Response includes the package name and dotnet add package command."}
+    {
+      "assertion": "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda",
+      "pass": true,
+      "rationale": "builder.Services.ConfigureDPoPTokensForScheme(\"token\") called on IServiceCollection."
+    },
+    {
+      "assertion": "Registers a distributed cache (e.g., AddDistributedMemoryCache for dev, mentions Redis or similar for production)",
+      "pass": true,
+      "rationale": "AddDistributedMemoryCache is registered. No production recommendation but cache is present."
+    },
+    {
+      "assertion": "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'",
+      "pass": true,
+      "rationale": "AddJwtBearer has Authority and ValidTypes with at+jwt."
+    },
+    {
+      "assertion": "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package",
+      "pass": false,
+      "rationale": "Does not mention the specific package name Duende.AspNetCore.Authentication.JwtBearer. Just says 'a package that provides DPoP support'."
+    }
   ],
   "pass_count": 3,
   "total_count": 4,

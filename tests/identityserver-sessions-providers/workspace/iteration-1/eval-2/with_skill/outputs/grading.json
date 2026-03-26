@@ -5,27 +5,27 @@
     {
       "assertion": "Code uses ISessionManagementService with QuerySessionsAsync and CountRequested = 10 for the first page",
       "pass": true,
-      "rationale": "Code shows `await sessionManagement.QuerySessionsAsync(new SessionQuery { CountRequested = 10 });`."
+      "rationale": "QuerySessionsAsync with CountRequested = 10 for first page."
     },
     {
       "assertion": "Code uses ResultsToken from the first query result to fetch the next page",
       "pass": true,
-      "rationale": "Code shows `ResultsToken = firstPage.ResultsToken` in the second QuerySessionsAsync call."
+      "rationale": "Next page uses ResultsToken from previous result."
     },
     {
       "assertion": "Code uses RemoveSessionsAsync with RevokeConsents = false to preserve consent grants",
       "pass": true,
-      "rationale": "Code shows `RevokeConsents = false` in the RemoveSessionsContext."
+      "rationale": "RemoveSessionsAsync has RevokeConsents = false."
     },
     {
       "assertion": "Code sets SendBackchannelLogoutNotification = true (explicitly or by relying on the default) in RemoveSessionsContext",
       "pass": true,
-      "rationale": "Code explicitly sets `SendBackchannelLogoutNotification = true` in RemoveSessionsContext."
+      "rationale": "Explicitly sets SendBackchannelLogoutNotification = true."
     },
     {
       "assertion": "Response mentions preferring GetSessionsAsync over QuerySessionsAsync for simple session listing",
       "pass": true,
-      "rationale": "Response states: 'Prefer `GetSessionsAsync` over `QuerySessionsAsync` for simple session listing. `QuerySessionsAsync` performs a full-text search and may be slower.'"
+      "rationale": "Dedicated section explains preferring GetSessionsAsync for simple listing."
     }
   ],
   "pass_count": 5,

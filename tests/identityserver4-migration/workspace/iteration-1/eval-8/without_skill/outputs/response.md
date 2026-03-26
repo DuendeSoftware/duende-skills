@@ -1,6 +1,4 @@
-# Migrating Config.cs from IdentityServer4 to Duende IdentityServer
-
-The main change required is updating the namespace. Here's the migrated file:
+# Migrated Config.cs for Duende IdentityServer
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -57,10 +55,4 @@ namespace IdentityServerMigrationSample
 }
 ```
 
-## Key Changes
-
-1. **Namespace**: Changed `using IdentityServer4.Models` to `using Duende.IdentityServer.Models`
-
-The model classes like `Client`, `ApiScope`, `ApiResource`, `IdentityResource`, `Secret`, and `GrantTypes` are essentially the same in Duende IdentityServer. Your existing client and resource definitions should work without modification beyond the namespace change.
-
-You may also want to consider using newer C# features if you're upgrading to a newer target framework (e.g., collection expressions, file-scoped namespaces), but these are optional cosmetic improvements.
+The main change is replacing `using IdentityServer4.Models` with `using Duende.IdentityServer.Models`. The model types (`Client`, `ApiScope`, `ApiResource`, `IdentityResource`, `Secret`, `GrantTypes`) have the same names and API in Duende IdentityServer.

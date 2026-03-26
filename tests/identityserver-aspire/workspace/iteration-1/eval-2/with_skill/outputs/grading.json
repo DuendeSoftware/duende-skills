@@ -1,1 +1,34 @@
-{"eval_id": 2, "variant": "with_skill", "assertions": [{"assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))"}, {"assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__ClientId\", \"web-app\")"}, {"assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention", "pass": true, "rationale": "Code shows Scopes__0, Scopes__1, Scopes__2 with openid, profile, weather.read"}, {"assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL", "pass": true, "rationale": "Code shows .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) on the API"}, {"assertion": "The code does NOT set IssuerUri unless explicitly needed", "pass": true, "rationale": "No IssuerUri is set in the code. Response explicitly warns not to set it unless needed."}], "pass_count": 5, "total_count": 5, "score": 1.0}
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+      "pass": true,
+      "rationale": "Code shows `.WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))`"
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "Code shows `.WithEnvironment(\"Authentication__ClientId\", \"web-app\")`"
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+      "pass": true,
+      "rationale": "Code shows Scopes__0, Scopes__1, Scopes__2 with openid, profile, weather.read"
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": true,
+      "rationale": "Code shows `.WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))` on the API"
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": true,
+      "rationale": "No IssuerUri is set, and the response explicitly warns against setting it unnecessarily"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

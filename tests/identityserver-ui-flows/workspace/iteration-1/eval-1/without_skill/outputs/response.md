@@ -2,22 +2,29 @@
 
 Here's how to build a login page using Razor Pages for your IdentityServer setup.
 
-## Pages/Login.cshtml.cs
+## Login.cshtml.cs
 
 ```csharp
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Test;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace IdentityServer.Pages;
 
 public class LoginModel : PageModel
 {
     private readonly IIdentityServerInteractionService _interaction;
+    private readonly TestUserStore _users;
 
-    public LoginModel(IIdentityServerInteractionService interaction)
+    public LoginModel(
+        IIdentityServerInteractionService interaction,
+        TestUserStore users)
     {
         _interaction = interaction;
+        _users = users;
     }
 
     [BindProperty]
@@ -35,7 +42,6 @@ public class LoginModel : PageModel
     {
         ReturnUrl = returnUrl;
 
-        // Get authorization context to display client info
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
         if (context != null)
         {
@@ -47,20 +53,18 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        // You'd validate credentials against your user store here
-        // For example with ASP.NET Identity:
-        // var result = await _signInManager.PasswordSignInAsync(Username, Password, false, false);
-
-        if (IsValidUser(Username, Password))
+        if (_users.ValidateCredentials(Username, Password))
         {
-            var claims = new List<System.Security.Claims.Claim>
+            var user = _users.FindByUsername(Username);
+
+            var claims = new List<Claim>
             {
-                new System.Security.Claims.Claim("sub", "user_id_here"),
-                new System.Security.Claims.Claim("name", Username)
+                new Claim("sub", user.SubjectId),
+                new Claim("name", user.Username)
             };
 
-            var identity = new System.Security.Claims.ClaimsIdentity(claims, "pwd");
-            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(claims, "pwd");
+            var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(principal);
 
@@ -75,48 +79,29 @@ public class LoginModel : PageModel
         ModelState.AddModelError("", "Invalid credentials");
         return Page();
     }
-
-    private bool IsValidUser(string username, string password)
-    {
-        // Implement your validation logic
-        return username == "alice" && password == "password";
-    }
 }
 ```
 
-## Pages/Login.cshtml
+## Login.cshtml
 
 ```html
 @page
-@model IdentityServer.Pages.LoginModel
+@model LoginModel
 
-<h1>Login</h1>
+<h2>Login</h2>
 
 @if (!string.IsNullOrEmpty(Model.ClientName))
 {
-    <p>Sign in to <strong>@Model.ClientName</strong></p>
+    <p>You are signing in to @Model.ClientName</p>
 }
 
 <form method="post">
+    <div asp-validation-summary="All"></div>
+    <input asp-for="Username" placeholder="Username" />
+    <input asp-for="Password" type="password" placeholder="Password" />
     <input type="hidden" asp-for="ReturnUrl" />
-    <div asp-validation-summary="ModelOnly"></div>
-    
-    <div>
-        <label asp-for="Username"></label>
-        <input asp-for="Username" />
-    </div>
-    
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-    </div>
-    
     <button type="submit">Sign In</button>
 </form>
 ```
 
-### Key points
-
-- The login page gets the authorization context from the return URL to display client information.
-- After validation, a `ClaimsPrincipal` is created and `HttpContext.SignInAsync` establishes the session.
-- Always validate the `returnUrl` with `Url.IsLocalUrl()` to prevent open redirect attacks.
+This creates a basic login page. The `IIdentityServerInteractionService` is used to get information about the authorization request. After validating credentials, we create a `ClaimsPrincipal` and sign in the user. We also validate the return URL to prevent open redirect attacks.

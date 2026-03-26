@@ -1,31 +1,52 @@
-# Pre-Migration Analysis with the Migration Analysis Tool
+# Pre-Migration Analysis: The Duende Migration Analysis Tool
 
-Yes — Duende provides a **Migration Analysis Tool** (`MigrationAnalysisController.cs`) that you can add to your existing IdentityServer4 project before making any code changes. It inspects your running IdentityServer4 instance and produces a report with specific migration recommendations.
+## Yes — Use the Migration Analysis Tool
 
-## How to Use It
+Before making any code changes, Duende provides a **Migration Analysis Tool** that you can run against your existing IdentityServer4 instance. It inspects your live configuration and produces a detailed report with specific migration recommendations.
 
-1. Download `MigrationAnalysisController.cs` from the [Duende documentation](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-upgrade-analysis/) and add it to your IS4 project
-2. Update the authorization check in the `Index()` method (the default checks for username `"scott"`)
-3. Build, run, and navigate to `/MigrationAnalysis` while authenticated
-4. Review the report
+## How It Works
 
-No additional NuGet packages are needed — it works with your existing IS4 dependencies.
+The tool is a single file — **`MigrationAnalysisController.cs`** — that you drop into your existing IdentityServer4 project. It does not require any additional NuGet packages.
 
-## What the Tool Inspects
+### Setup
 
-| Data Point | Why It Matters |
-|------------|---------------|
-| **.NET runtime version** | Flags if you need to upgrade to a current LTS (.NET 8 or .NET 10) |
-| **IdentityServer4 version** | Determines if you need the v3→v4 migration stage first |
-| **Client inventory (interactive vs. non-interactive)** | Counts authorization code clients vs. client credentials clients — **this determines which Duende license edition you need** |
-| **Issuer URI** | Reports the configured issuer that must be preserved after migration |
-| **Signing credential store type and key ID** | Identifies custom signing stores and current key ID for migration planning |
-| **Data protection application name** | Flags missing or path-based discriminators that will break after .NET upgrade. Checks whether an explicit `SetApplicationName` is configured or if the default content root path is being used |
-| **Data protection repository type** | Warns if keys are stored ephemerally (lost on restart). Flags `(not set)` if no persistent store is configured |
-| **Authentication schemes** | Lists all registered authentication handlers. **Flags non-Microsoft, non-IdentityServer4 handlers** (e.g., WS-Federation, SAML2P, custom social providers) that may need NuGet package updates for the new ASP.NET Core version |
+1. Download `MigrationAnalysisController.cs` from the [Duende documentation](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-upgrade-analysis/)
+2. Add it to your IdentityServer4 project
+3. **Update the authorization check** in the `Index()` method — the default placeholder checks for username `"scott"`, which you must replace with your own authorization logic
+4. Build and run your IdentityServer4 project
+5. Navigate to `/MigrationAnalysis` while authenticated
 
-The tool automatically loads clients from in-memory configuration or EF Core stores. If you use a custom client store, you'll need to modify the constructor to wire up your client retrieval.
+### What the Tool Inspects
 
-## Recommendation
+| Data Point | What It Tells You |
+|------------|------------------|
+| **.NET runtime version** | Whether you need to upgrade to a current LTS (.NET 8 or .NET 10) |
+| **IdentityServer4 version** | Whether you need Stage 1 (v3 → v4) before proceeding to Duende |
+| **Client inventory** | Counts **interactive clients** (authorization_code grant — web apps, SPAs, native apps) vs. **non-interactive clients** (client_credentials — machine-to-machine). This determines which Duende license edition you need. |
+| **Issuer URI** | Reports the configured `IssuerUri` — must be preserved in Duende to avoid breaking existing tokens and client trust relationships |
+| **Signing credential store type** | Identifies custom signing stores that may need compatibility updates |
+| **Signing credential key ID** | Records the current key ID for signing key migration planning |
+| **Data protection application name** | Flags missing or path-based discriminators that will break after .NET upgrade. If it shows `(not set)`, you need to configure `SetApplicationName()` |
+| **Data protection repository type** | Warns if keys are stored ephemerally (in-memory, lost on restart) instead of a persistent store. If `(not set)`, add `PersistKeysToDbContext` or similar |
+| **Authentication schemes** | Lists all registered authentication handlers — flags non-Microsoft, non-IdentityServer4 handlers (e.g., WS-Federation, SAML2P, social providers) that may need version updates for the new ASP.NET Core version |
 
-Run this tool as your first step before any migration work. The output gives you a concrete, data-driven migration plan.
+### Client Store Compatibility
+
+The tool automatically loads clients from:
+- In-memory configuration (`AddInMemoryClients`)
+- EF Core stores (`AddConfigurationStore`)
+
+If you use a **custom client store** (implementing `IClientStore`), you will need to modify the controller's constructor to wire up your client retrieval.
+
+## What You Get
+
+The report gives you actionable information for planning:
+- Whether you can go directly to Duende (v4.x) or need the v3 → v4 intermediate step
+- Which Duende license edition matches your client count
+- Whether your data protection configuration will survive the .NET upgrade
+- Which third-party authentication handlers need package updates
+- Your current signing key details for key migration planning
+
+## Additional Resources
+
+Duende also offers a [free IdentityServer4 upgrade assessment](https://duendesoftware.com) to walk through your upgrade path with their team.

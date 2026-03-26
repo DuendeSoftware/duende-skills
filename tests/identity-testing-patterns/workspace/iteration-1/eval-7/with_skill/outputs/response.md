@@ -1,13 +1,9 @@
 # Unit Testing a Custom IProfileService
 
-## Custom Profile Service (System Under Test)
+## The Profile Service Under Test
 
 ```csharp
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using System.Security.Claims;
-
-public class CustomProfileService : IProfileService
+public sealed class CustomProfileService : IProfileService
 {
     private readonly IUserRepository _userRepo;
 
@@ -15,49 +11,44 @@ public class CustomProfileService : IProfileService
 
     public async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
-        var subClaim = context.Subject.FindFirst("sub");
-        if (subClaim is null) return;
+        var sub = context.Subject.FindFirst(JwtClaimTypes.Subject)?.Value;
+        if (sub is null) return;
 
-        var roles = await _userRepo.GetRolesAsync(subClaim.Value, CancellationToken.None);
+        var roles = await _userRepo.GetRolesAsync(sub, CancellationToken.None);
         foreach (var role in roles)
         {
-            context.IssuedClaims.Add(new Claim("role", role));
+            context.IssuedClaims.Add(new Claim(JwtClaimTypes.Role, role));
         }
     }
 
     public async Task IsActiveAsync(IsActiveContext context)
     {
-        var subClaim = context.Subject.FindFirst("sub");
-        if (subClaim is null)
+        var sub = context.Subject.FindFirst(JwtClaimTypes.Subject)?.Value;
+        if (sub is null)
         {
             context.IsActive = false;
             return;
         }
 
-        context.IsActive = await _userRepo.IsActiveAsync(subClaim.Value, CancellationToken.None);
+        context.IsActive = await _userRepo.IsActiveAsync(sub, CancellationToken.None);
     }
-}
-
-public interface IUserRepository
-{
-    Task<IEnumerable<string>> GetRolesAsync(string subjectId, CancellationToken ct);
-    Task<bool> IsActiveAsync(string subjectId, CancellationToken ct);
 }
 ```
 
 ## Unit Tests
 
 ```csharp
+using System.Security.Claims;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Validation;
 using IdentityModel;
 using Moq;
-using System.Security.Claims;
 using Xunit;
 
 public class CustomProfileServiceTests
 {
-    private readonly CustomProfileService _sut;
     private readonly Mock<IUserRepository> _userRepo;
+    private readonly CustomProfileService _sut;
 
     public CustomProfileServiceTests()
     {
@@ -68,14 +59,14 @@ public class CustomProfileServiceTests
     [Fact]
     public async Task GetProfileData_ShouldIncludeRoleClaims()
     {
-        // Arrange
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-        [
+        // Arrange: subject with known sub claim
+        var subject = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
             new Claim(JwtClaimTypes.Subject, "user-123")
-        ]));
+        }));
 
         _userRepo
-            .Setup(r => r.GetRolesAsync("user-123", CancellationToken.None))
+            .Setup(r => r.GetRolesAsync("user-123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { "admin", "billing" });
 
         var context = new ProfileDataRequestContext(
@@ -89,24 +80,25 @@ public class CustomProfileServiceTests
 
         // Assert
         var roles = context.IssuedClaims
-            .Where(c => c.Type == "role")
+            .Where(c => c.Type == JwtClaimTypes.Role)
             .Select(c => c.Value)
             .ToList();
 
         Assert.Contains("admin", roles);
         Assert.Contains("billing", roles);
+        Assert.Equal(2, roles.Count);
     }
 
     [Fact]
-    public async Task IsActive_WithActiveUser_ShouldReturnTrue()
+    public async Task IsActive_ActiveUser_ShouldSetIsActiveTrue()
     {
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(JwtClaimTypes.Subject, "user-active")
-        ]));
+        var subject = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(JwtClaimTypes.Subject, "user-123")
+        }));
 
         _userRepo
-            .Setup(r => r.IsActiveAsync("user-active", CancellationToken.None))
+            .Setup(r => r.IsActiveAsync("user-123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var context = new IsActiveContext(
@@ -120,15 +112,15 @@ public class CustomProfileServiceTests
     }
 
     [Fact]
-    public async Task IsActive_WithDeactivatedUser_ShouldReturnFalse()
+    public async Task IsActive_DeactivatedUser_ShouldSetIsActiveFalse()
     {
-        var subject = new ClaimsPrincipal(new ClaimsIdentity(
-        [
+        var subject = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
             new Claim(JwtClaimTypes.Subject, "user-deactivated")
-        ]));
+        }));
 
         _userRepo
-            .Setup(r => r.IsActiveAsync("user-deactivated", CancellationToken.None))
+            .Setup(r => r.IsActiveAsync("user-deactivated", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         var context = new IsActiveContext(
@@ -143,9 +135,9 @@ public class CustomProfileServiceTests
 }
 ```
 
-**Key points:**
-- `ProfileDataRequestContext` is constructed with a subject `ClaimsPrincipal` containing a `sub` claim.
-- `IUserRepository` is mocked to return known role values.
-- `GetProfileDataAsync` is called and `context.IssuedClaims` is checked for the expected role claims.
-- `IsActiveAsync` is tested with both active and inactive user mocks.
-- No running IdentityServer is needed — the service is tested in isolation.
+## Key Points
+
+- **No running IdentityServer needed**: These tests instantiate the profile service directly and call its methods with constructed contexts.
+- **Mock only the external dependency** (`IUserRepository`), not the IdentityServer contexts.
+- **`ProfileDataRequestContext`** takes `subject`, `client`, `caller`, and `requestedClaimTypes`. After calling `GetProfileDataAsync`, inspect `context.IssuedClaims`.
+- **`IsActiveContext`** takes `subject`, `client`, and `caller`. After calling `IsActiveAsync`, inspect `context.IsActive`.

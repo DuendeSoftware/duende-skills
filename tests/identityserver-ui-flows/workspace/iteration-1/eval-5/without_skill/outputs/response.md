@@ -1,81 +1,58 @@
-# Error Page for IdentityServer
+# Error Page
 
-Here's an error page implementation.
-
-## Program.cs
+## Program.cs Configuration
 
 ```csharp
-builder.Services.AddIdentityServer(options =>
+builder.Services.AddIdentityServer(opt =>
 {
-    // Configure error handling
-    options.UserInteraction.ErrorUrl = "/Error";
+    opt.UserInteraction.ErrorUrl = "/Error";
 });
 ```
 
-## Pages/Error.cshtml.cs
+## Error Page
 
 ```csharp
-using Duende.IdentityServer.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
 public class ErrorModel : PageModel
 {
     private readonly IIdentityServerInteractionService _interaction;
+    private readonly ILogger<ErrorModel> _logger;
 
-    public ErrorModel(IIdentityServerInteractionService interaction)
+    public ErrorModel(IIdentityServerInteractionService interaction, ILogger<ErrorModel> logger)
     {
         _interaction = interaction;
+        _logger = logger;
     }
 
     public string Error { get; set; }
-    public string ErrorDescription { get; set; }
+    public string Description { get; set; }
     public string RequestId { get; set; }
 
     public async Task<IActionResult> OnGet(string errorId)
     {
         var context = await _interaction.GetErrorContextAsync(errorId);
-
         if (context != null)
         {
             Error = context.Error;
-            ErrorDescription = context.ErrorDescription;
+            Description = context.ErrorDescription;
             RequestId = context.RequestId;
-        }
 
+            _logger.LogError("Protocol error: {Error} - {Description}", Error, Description);
+        }
         return Page();
     }
 }
 ```
 
-## Pages/Error.cshtml
+## Razor View
 
 ```html
 @page
-@model IdentityServer.Pages.ErrorModel
+@model ErrorModel
 
 <h1>Error</h1>
-
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-    <p><strong>Error:</strong> @Model.Error</p>
-}
-
-@if (!string.IsNullOrEmpty(Model.ErrorDescription))
-{
-    <p><strong>Description:</strong> @Model.ErrorDescription</p>
-}
-
-@if (!string.IsNullOrEmpty(Model.RequestId))
-{
-    <p><strong>Request ID:</strong> @Model.RequestId</p>
-}
+<p><strong>Error:</strong> @Model.Error</p>
+<p><strong>Description:</strong> @Model.Description</p>
+<p><strong>Request ID:</strong> @Model.RequestId</p>
 ```
 
-### Notes
-
-- Use `IIdentityServerInteractionService.GetErrorContextAsync` to retrieve error details.
-- Display error information to help users understand what went wrong.
-- Include the request ID so support teams can track the issue.
+This shows the error details to the user so they can report issues.

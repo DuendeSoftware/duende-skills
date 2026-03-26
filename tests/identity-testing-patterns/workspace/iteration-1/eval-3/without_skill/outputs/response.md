@@ -1,14 +1,9 @@
-# In-Process IdentityServer Integration Testing
+# In-Process IdentityServer Testing
 
-## 1. WebApplicationFactory
+## Factory Setup
 
 ```csharp
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-
-public class IdentityServerTestFactory : WebApplicationFactory<Program>
+public class IdentityServerFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -17,17 +12,17 @@ public class IdentityServerTestFactory : WebApplicationFactory<Program>
             services.AddIdentityServer()
                 .AddInMemoryClients(new[]
                 {
-                    new Duende.IdentityServer.Models.Client
+                    new Client
                     {
-                        ClientId = "test-client",
-                        AllowedGrantTypes = Duende.IdentityServer.Models.GrantTypes.ClientCredentials,
-                        ClientSecrets = { new Duende.IdentityServer.Models.Secret("secret".Sha256()) },
+                        ClientId = "test.client",
+                        AllowedGrantTypes = GrantTypes.ClientCredentials,
+                        ClientSecrets = { new Secret("secret".Sha256()) },
                         AllowedScopes = { "api1" }
                     }
                 })
                 .AddInMemoryApiScopes(new[]
                 {
-                    new Duende.IdentityServer.Models.ApiScope("api1")
+                    new ApiScope("api1")
                 })
                 .AddDeveloperSigningCredential();
         });
@@ -35,39 +30,24 @@ public class IdentityServerTestFactory : WebApplicationFactory<Program>
 }
 ```
 
-## 2. Token Endpoint Test
+## Test
 
 ```csharp
-using IdentityModel.Client;
-using Xunit;
-
-public class TokenTests : IClassFixture<IdentityServerTestFactory>
+[Fact]
+public async Task CanGetClientCredentialsToken()
 {
-    private readonly HttpClient _client;
+    var client = _factory.CreateClient();
 
-    public TokenTests(IdentityServerTestFactory factory)
-    {
-        _client = factory.CreateClient();
-    }
+    var response = await client.RequestClientCredentialsTokenAsync(
+        new ClientCredentialsTokenRequest
+        {
+            Address = "https://localhost/connect/token",
+            ClientId = "test.client",
+            ClientSecret = "secret",
+            Scope = "api1"
+        });
 
-    [Fact]
-    public async Task CanGetClientCredentialsToken()
-    {
-        var disco = await _client.GetDiscoveryDocumentAsync();
-
-        var tokenResponse = await _client.RequestClientCredentialsTokenAsync(
-            new ClientCredentialsTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-                ClientId = "test-client",
-                ClientSecret = "secret",
-                Scope = "api1"
-            });
-
-        Assert.False(tokenResponse.IsError);
-        Assert.NotNull(tokenResponse.AccessToken);
-    }
+    Assert.False(response.IsError);
+    Assert.NotEmpty(response.AccessToken);
 }
 ```
-
-This sets up an in-process IdentityServer with a test client and makes a client credentials token request.

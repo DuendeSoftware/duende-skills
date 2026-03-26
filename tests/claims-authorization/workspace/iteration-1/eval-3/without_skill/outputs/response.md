@@ -1,14 +1,14 @@
-# Missing 'department' Claim in Access Token
+# Missing Department Claim in Access Tokens
 
-## Likely Cause
+## The Issue
 
-If your `IProfileService` is emitting the `department` claim but it's not showing up in the access token, the most likely issue is that the claim isn't registered on the scope or resource that the client is requesting.
+If your `IProfileService` is emitting the `department` claim but it's not appearing in the access token, the most likely cause is that the claim isn't being requested through the proper scope configuration.
 
-In IdentityServer, you need to declare which user claims are associated with each scope. If the `department` claim isn't listed, it won't be included.
+In IdentityServer, claims need to be associated with a scope or resource. If the claim type isn't declared on any scope the client is requesting, it won't be included.
 
 ## Fix
 
-You need to add `department` to the `UserClaims` on your API scope:
+Add the `department` claim to your API scope definition:
 
 ```csharp
 public static IEnumerable<ApiScope> ApiScopes =>
@@ -20,10 +20,14 @@ public static IEnumerable<ApiScope> ApiScopes =>
 ];
 ```
 
-Also make sure the client is requesting the `api1` scope in its token request.
+Make sure the client also requests this scope:
 
-## Additional Checks
+```csharp
+new Client
+{
+    ClientId = "interactive",
+    AllowedScopes = { "openid", "profile", "api1" },
+}
+```
 
-- Make sure the client has `api1` in its `AllowedScopes`
-- Make sure the client actually requests the `api1` scope during authorization
-- Check your `IProfileService` implementation to ensure it's actually adding the claim
+This tells IdentityServer that when a client requests the `api1` scope, the `department` claim should be included in the token.

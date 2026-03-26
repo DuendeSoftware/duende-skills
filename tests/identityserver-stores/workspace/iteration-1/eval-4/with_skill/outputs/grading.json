@@ -1,1 +1,34 @@
-{"eval_id":4,"variant":"with_skill","assertions":[{"assertion":"Program.cs calls AddServerSideSessions() on the IdentityServer builder","pass":true,"rationale":"Calls .AddServerSideSessions() on the builder"},{"assertion":"AddOperationalStore is configured with EnableTokenCleanup set to true","pass":true,"rationale":"options.EnableTokenCleanup = true"},{"assertion":"AddOperationalStore options set RemoveConsumedTokens to true","pass":true,"rationale":"options.RemoveConsumedTokens = true"},{"assertion":"AddOperationalStore options set ConsumedTokenCleanupDelay to 300","pass":true,"rationale":"options.ConsumedTokenCleanupDelay = 300"},{"assertion":"AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store","pass":true,"rationale":"AddServerSideSessions() is called before AddOperationalStore()"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddServerSideSessions() is called."
+    },
+    {
+      "assertion": "AddOperationalStore is configured with EnableTokenCleanup set to true",
+      "pass": true,
+      "rationale": "EnableTokenCleanup = true."
+    },
+    {
+      "assertion": "AddOperationalStore options set RemoveConsumedTokens to true",
+      "pass": true,
+      "rationale": "RemoveConsumedTokens = true."
+    },
+    {
+      "assertion": "AddOperationalStore options set ConsumedTokenCleanupDelay to 300",
+      "pass": true,
+      "rationale": "ConsumedTokenCleanupDelay = 300."
+    },
+    {
+      "assertion": "AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store",
+      "pass": true,
+      "rationale": "AddServerSideSessions() is called before AddOperationalStore()."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

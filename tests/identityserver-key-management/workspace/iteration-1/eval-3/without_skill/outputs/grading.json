@@ -2,12 +2,28 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string", "pass": true, "rationale": "Code calls .AddOperationalStore(options => { options.ConfigureDbContext = b => b.UseSqlServer(connectionString); })"},
-    {"assertion": "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem", "pass": true, "rationale": "Code calls builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(\"/shared/dataprotection-keys\"))"},
-    {"assertion": "Program.cs calls SetApplicationName with an explicit application name string", "pass": false, "rationale": "Code does not call SetApplicationName anywhere in the response. The data protection configuration only includes PersistKeysToFileSystem without SetApplicationName."},
-    {"assertion": "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)", "pass": true, "rationale": "Code does not set KeyManagement.Enabled to false; automatic key management remains enabled by default"}
+    {
+      "assertion": "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string",
+      "pass": true,
+      "rationale": "Calls AddOperationalStore with UseSqlServer."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem",
+      "pass": true,
+      "rationale": "Calls AddDataProtection().PersistKeysToFileSystem()."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName with an explicit application name string",
+      "pass": true,
+      "rationale": "Calls .SetApplicationName(\"IdentityServer\")."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)",
+      "pass": true,
+      "rationale": "KeyManagement.Enabled is not set to false."
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 4,
   "total_count": 4,
-  "score": 0.75
+  "score": 1.0
 }

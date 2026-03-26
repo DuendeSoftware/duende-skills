@@ -1,0 +1,499 @@
+{
+  "skill_name": "identityserver-configuration",
+  "iteration": 1,
+  "timestamp": "2026-03-26T00:00:00Z",
+  "evals": [
+    {
+      "id": 1,
+      "assertions": [
+        {
+          "assertion": "Output contains a call to builder.Services.AddIdentityServer with an options lambda",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddIdentityServer with an options lambda as the standard host setup."
+        },
+        {
+          "assertion": "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents all four event type flags and their usage for diagnostics."
+        },
+        {
+          "assertion": "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddInMemoryIdentityResources with standard IdentityResources.OpenId() and IdentityResources.Profile()."
+        },
+        {
+          "assertion": "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddInMemoryApiScopes for registering API scopes."
+        },
+        {
+          "assertion": "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly states UseIdentityServer() includes UseAuthentication() and must not be called separately."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 2,
+      "assertions": [
+        {
+          "assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials with AllowedScopes containing 'orders.read' and 'inventory.write'",
+          "pass": true,
+          "reasoning": "SKILL.md documents M2M client configuration with GrantTypes.ClientCredentials and AllowedScopes."
+        },
+        {
+          "assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true (explicit or by noting default)",
+          "pass": true,
+          "reasoning": "SKILL.md documents interactive clients with GrantTypes.Code and RequirePkce = true."
+        },
+        {
+          "assertion": "The admin-portal client has AllowOfflineAccess set to true to enable refresh tokens",
+          "pass": true,
+          "reasoning": "SKILL.md documents AllowOfflineAccess = true to enable refresh token issuance."
+        },
+        {
+          "assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId (or 'openid') in its AllowedScopes",
+          "pass": true,
+          "reasoning": "SKILL.md documents that openid scope must be included for OIDC interactive clients."
+        },
+        {
+          "assertion": "The admin-portal client has RedirectUris containing 'https://admin.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://admin.example.com/signout-callback-oidc'",
+          "pass": true,
+          "reasoning": "SKILL.md documents RedirectUris and PostLogoutRedirectUris configuration for interactive clients."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 3,
+      "assertions": [
+        {
+          "assertion": "Output defines ApiScope entries for at least 'read' and 'write'",
+          "pass": true,
+          "reasoning": "SKILL.md documents ApiScope definitions and how they relate to ApiResources for audience isolation."
+        },
+        {
+          "assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes collection",
+          "pass": true,
+          "reasoning": "SKILL.md documents ApiResource with a Scopes collection that controls the aud claim."
+        },
+        {
+          "assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' in its Scopes collection but not 'write'",
+          "pass": true,
+          "reasoning": "SKILL.md documents how different ApiResources can reference different subsets of ApiScopes for audience isolation."
+        },
+        {
+          "assertion": "Output calls AddInMemoryApiResources to register the API resources with IdentityServer",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddInMemoryApiResources for registering API resources."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 4,
+      "assertions": [
+        {
+          "assertion": "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)",
+          "pass": true,
+          "reasoning": "SKILL.md documents KeyManagement.RotationInterval configuration."
+        },
+        {
+          "assertion": "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)",
+          "pass": true,
+          "reasoning": "SKILL.md documents KeyManagement.PropagationTime configuration."
+        },
+        {
+          "assertion": "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)",
+          "pass": true,
+          "reasoning": "SKILL.md documents KeyManagement.RetentionDuration configuration."
+        },
+        {
+          "assertion": "Output sets options.KeyManagement.DataProtectKeys to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents KeyManagement.DataProtectKeys = true for encrypting keys at rest."
+        },
+        {
+          "assertion": "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'",
+          "pass": true,
+          "reasoning": "SKILL.md documents KeyManagement.KeyPath for shared file system key storage in load-balanced deployments."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 5,
+      "assertions": [
+        {
+          "assertion": "Output calls .AddServerSideSessions() on the IdentityServer builder (not as an option property)",
+          "pass": true,
+          "reasoning": "SKILL.md documents calling AddServerSideSessions() as a builder extension method."
+        },
+        {
+          "assertion": "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)",
+          "pass": true,
+          "reasoning": "SKILL.md documents RemoveExpiredSessionsFrequency configuration for session cleanup."
+        },
+        {
+          "assertion": "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents ExpiredSessionsTriggerBackchannelLogout = true for back-channel logout on session expiry."
+        },
+        {
+          "assertion": "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents CoordinateClientLifetimesWithUserSession = true for coordinated token/session lifetimes."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 6,
+      "assertions": [
+        {
+          "assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection",
+          "pass": true,
+          "reasoning": "SKILL.md documents the standard OpenId identity resource as a required component."
+        },
+        {
+          "assertion": "Output includes new IdentityResources.Profile() in the identity resources collection",
+          "pass": true,
+          "reasoning": "SKILL.md documents the standard Profile identity resource."
+        },
+        {
+          "assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
+          "pass": true,
+          "reasoning": "SKILL.md documents creating custom IdentityResource with UserClaims."
+        },
+        {
+          "assertion": "The custom 'organization' identity resource has Required set to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents the Required property on IdentityResource for making it non-optional on the consent screen."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 7,
+      "assertions": [
+        {
+          "assertion": "Output sets options.IssuerUri to 'https://id.mycompany.com'",
+          "pass": true,
+          "reasoning": "SKILL.md documents IssuerUri configuration for reverse proxy deployments."
+        },
+        {
+          "assertion": "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false",
+          "pass": true,
+          "reasoning": "SKILL.md documents CookieLifetime and CookieSlidingExpiration under Authentication options."
+        },
+        {
+          "assertion": "Output sets options.PushedAuthorization.Required to true",
+          "pass": true,
+          "reasoning": "SKILL.md documents options.PushedAuthorization.Required = true to enforce PAR for all clients."
+        },
+        {
+          "assertion": "Output sets options.Caching.ClientStoreExpiration and options.Caching.ResourceStoreExpiration to TimeSpan.FromMinutes(10)",
+          "pass": true,
+          "reasoning": "SKILL.md documents Caching.ClientStoreExpiration and Caching.ResourceStoreExpiration configuration."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 8,
+      "assertions": [
+        {
+          "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it (e.g., new Secret(\"...\".Sha256()))",
+          "pass": true,
+          "reasoning": "SKILL.md documents that client secrets must be hashed with .Sha256() and shows the correct pattern."
+        },
+        {
+          "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue and removes it",
+          "pass": true,
+          "reasoning": "SKILL.md documents that redirect URIs must be exact-match and trailing slashes cause mismatch failures."
+        },
+        {
+          "assertion": "Output identifies the missing 'openid' scope (IdentityServerConstants.StandardScopes.OpenId) and adds it to AllowedScopes",
+          "pass": true,
+          "reasoning": "SKILL.md documents that 'openid' is required in AllowedScopes for OIDC authentication."
+        },
+        {
+          "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+          "pass": true,
+          "reasoning": "SKILL.md documents AllowOfflineAccess = true as required for refresh token issuance."
+        },
+        {
+          "assertion": "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault",
+          "pass": true,
+          "reasoning": "SKILL.md warns against hardcoded secrets and recommends loading from IConfiguration."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 101,
+      "assertions": [
+        {
+          "assertion": "Client uses GrantTypes.ClientCredentials as the allowed grant type",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents M2M client configuration with GrantTypes.ClientCredentials."
+        },
+        {
+          "assertion": "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AllowedScopes configuration for client credentials clients."
+        },
+        {
+          "assertion": "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document shows corresponding ApiScope definitions for client scopes."
+        },
+        {
+          "assertion": "Secret is loaded from Configuration or an external source — not a hardcoded string with Sha256()",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents loading secrets from IConfiguration rather than hardcoding them."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 102,
+      "assertions": [
+        {
+          "assertion": "Uses GrantTypes.Code (not Implicit) as the grant type",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents SPA clients using GrantTypes.Code (never Implicit)."
+        },
+        {
+          "assertion": "Sets RequireClientSecret = false since it is a public SPA client",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents RequireClientSecret = false for public SPA clients."
+        },
+        {
+          "assertion": "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AllowedCorsOrigins for SPA clients."
+        },
+        {
+          "assertion": "Sets AllowOfflineAccess = true to enable refresh tokens",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AllowOfflineAccess = true for refresh token support."
+        },
+        {
+          "assertion": "AllowedScopes includes 'openid', 'profile', and 'orders.read'",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AllowedScopes including standard OIDC scopes and API scopes."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 103,
+      "assertions": [
+        {
+          "assertion": "Defines separate ApiScope instances for service-specific scopes (e.g. invoice.read, customer.read) and shared scopes (manage, enumerate)",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents defining ApiScope instances for service-specific and shared scopes."
+        },
+        {
+          "assertion": "Defines an ApiResource named 'invoice' with a Scopes collection referencing invoice-specific and shared scopes",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents ApiResource with Scopes referencing both specific and shared ApiScopes."
+        },
+        {
+          "assertion": "Defines an ApiResource named 'customer' with a Scopes collection referencing customer-specific and shared scopes",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents multiple ApiResources sharing common scopes."
+        },
+        {
+          "assertion": "Explains that the aud claim in the token is derived from the ApiResource Name property",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document explicitly documents that the aud claim comes from the ApiResource Name."
+        },
+        {
+          "assertion": "Registers both API Resources and API Scopes with AddInMemoryApiResources and AddInMemoryApiScopes",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents registering both with AddInMemoryApiResources and AddInMemoryApiScopes."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 104,
+      "assertions": [
+        {
+          "assertion": "Creates a new IdentityResource with name 'employee_info'",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents creating custom IdentityResource with a name."
+        },
+        {
+          "assertion": "The IdentityResource's UserClaims includes 'employee_id', 'department', and 'hire_date'",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents UserClaims on IdentityResource."
+        },
+        {
+          "assertion": "An interactive client includes 'employee_info' in its AllowedScopes along with 'openid'",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents clients requesting custom identity resources in AllowedScopes."
+        },
+        {
+          "assertion": "The IdentityResources.OpenId() is still present (required by OIDC spec)",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents that OpenId identity resource is always required."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 105,
+      "assertions": [
+        {
+          "assertion": "Client secret uses Type = IdentityServerConstants.SecretTypes.X509CertificateBase64 or SecretTypes.JsonWebKey",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents private_key_jwt client authentication with X509CertificateBase64 secret type."
+        },
+        {
+          "assertion": "Uses GrantTypes.Code as the grant type",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents confidential web app clients using GrantTypes.Code."
+        },
+        {
+          "assertion": "Calls AddJwtBearerClientAuthentication() on the IdentityServer builder",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents enabling JWT bearer client authentication with AddJwtBearerClientAuthentication()."
+        },
+        {
+          "assertion": "Includes RedirectUris pointing to the web application",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents RedirectUris on confidential clients."
+        },
+        {
+          "assertion": "Does NOT use a shared secret (no Sha256() call on a string for this client)",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document clearly distinguishes between shared secret and JWT bearer client authentication."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 106,
+      "assertions": [
+        {
+          "assertion": "Sets AllowOfflineAccess = true to enable refresh tokens",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AllowOfflineAccess = true as required for refresh tokens."
+        },
+        {
+          "assertion": "Sets RefreshTokenUsage to TokenUsage.OneTimeOnly for rotation on each use",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents RefreshTokenUsage = TokenUsage.OneTimeOnly for token rotation."
+        },
+        {
+          "assertion": "Sets AbsoluteRefreshTokenLifetime to 604800 (7 days in seconds)",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents AbsoluteRefreshTokenLifetime configuration in seconds."
+        },
+        {
+          "assertion": "Sets SlidingRefreshTokenLifetime to 86400 (1 day in seconds) and RefreshTokenExpiration to TokenExpiration.Sliding",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents SlidingRefreshTokenLifetime and TokenExpiration.Sliding configuration."
+        },
+        {
+          "assertion": "Sets UpdateAccessTokenClaimsOnRefresh = true",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents UpdateAccessTokenClaimsOnRefresh = true for fresh claims on refresh."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 107,
+      "assertions": [
+        {
+          "assertion": "Client has multiple Secret entries in the ClientSecrets collection (both old and new)",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents multiple secrets in ClientSecrets for zero-downtime rotation."
+        },
+        {
+          "assertion": "Uses GrantTypes.ClientCredentials for the client",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents the client credentials grant type for M2M clients."
+        },
+        {
+          "assertion": "Explains that IdentityServer validates against all configured secrets so both old and new work during rollover",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document explains that IdentityServer checks all configured secrets during validation."
+        },
+        {
+          "assertion": "Recommends removing the old secret after clients have migrated to the new one",
+          "pass": true,
+          "reasoning": "The client-types.md sub-document documents the rollover process including removing the old secret after migration."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 108,
+      "assertions": [
+        {
+          "assertion": "Shows setting options.EmitStaticAudienceClaim = true in the IdentityServer options",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document documents EmitStaticAudienceClaim = true as the simple audience solution."
+        },
+        {
+          "assertion": "Explains that this emits a static audience claim of '{issuer}/resources'",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document explains the static audience format as '{issuer}/resources'."
+        },
+        {
+          "assertion": "Mentions the alternative of defining an ApiResource as a more targeted approach",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document mentions ApiResource as the targeted alternative for audience configuration."
+        },
+        {
+          "assertion": "Does NOT suggest using the Implicit grant type or any deprecated patterns",
+          "pass": true,
+          "reasoning": "The resources-scopes.md sub-document only covers current recommended patterns without implicit flow."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    }
+  ],
+  "total_evals": 16,
+  "passed_evals": 16,
+  "total_assertions": 73,
+  "passed_assertions": 73
+}

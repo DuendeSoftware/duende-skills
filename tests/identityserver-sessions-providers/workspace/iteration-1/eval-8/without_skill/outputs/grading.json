@@ -5,27 +5,27 @@
     {
       "assertion": "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
       "pass": false,
-      "rationale": "The without_skill response does not show the one-step `AddServerSideSessions<RedisSessionStore>()` pattern. Instead it shows separate DI registration via `AddSingleton<IServerSideSessionStore, RedisSessionStore>()` followed by `AddServerSideSessions()`, which is not the one-step pattern."
+      "rationale": "Only shows the two-step approach. Does not show AddServerSideSessions<CustomStore>()."
     },
     {
       "assertion": "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
       "pass": true,
-      "rationale": "Code shows `.AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>()`."
+      "rationale": "Shows AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>()."
     },
     {
       "assertion": "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
       "pass": false,
-      "rationale": "The response mentions 'the serialized authentication ticket' but does not explicitly state that it is protected by Data Protection. It mentions Data Protection keys for 'session decryption' in the notes but doesn't clearly state the AuthenticationTicket itself is Data Protection-protected."
+      "rationale": "Mentions 'serialized authentication ticket' but does not mention Data Protection."
     },
     {
       "assertion": "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
       "pass": false,
-      "rationale": "The response mentions subject ID and session ID but does not mention DisplayName as a queryable index. It only lists 'subject ID' and 'session ID' without framing them as queryable indices alongside DisplayName."
+      "rationale": "Mentions Subject ID and Session ID but not DisplayName as a queryable index."
     },
     {
       "assertion": "Response notes that UserDisplayNameClaimType is null by default due to PII concerns",
       "pass": false,
-      "rationale": "The response does not mention UserDisplayNameClaimType or that it is null by default due to PII concerns."
+      "rationale": "Does not mention UserDisplayNameClaimType or PII concerns."
     }
   ],
   "pass_count": 1,

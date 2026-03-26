@@ -1,8 +1,8 @@
-# Separate Database Schemas for EF Core Stores
+# Configuring Separate Database Schemas
 
 ```csharp
-var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
+var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 
 builder.Services.AddIdentityServer()
     .AddConfigurationStore(options =>
@@ -26,3 +26,5 @@ builder.Services.AddIdentityServer()
             });
     });
 ```
+
+Each schema gets its own migration history table so EF Core tracks migrations independently.

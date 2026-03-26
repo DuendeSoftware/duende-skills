@@ -1,116 +1,79 @@
 # DCR Security Hardening Guide
 
-Here are the common security mistakes and anti-patterns to avoid when implementing Dynamic Client Registration (DCR) in Duende IdentityServer.
+Here are the most common security mistakes with DCR and how to avoid them:
 
-## 1. Exposing the DCR Endpoint Without Authentication
+## 1. Unauthenticated DCR Endpoint
 
-**Anti-pattern**: Calling `MapDynamicClientRegistration()` without `RequireAuthorization()`.
-
-An unauthenticated DCR endpoint allows anyone on the internet to register clients. This is the single most dangerous DCR misconfiguration.
-
-**Fix**: Always secure the endpoint with an authorization policy:
+**Mistake:** Exposing `/connect/dcr` without authentication or authorization.
 
 ```csharp
+// WRONG - anyone can register clients
+app.MapDynamicClientRegistration();
+
+// CORRECT - require authorization
 app.MapDynamicClientRegistration()
-    .RequireAuthorization("dcr");
+    .RequireAuthorization("dcr-policy");
 ```
 
-Use JWT bearer authentication with a scope check so only authorized callers can register clients.
+Always secure the DCR endpoint with a JWT bearer authentication scheme and an authorization policy requiring a specific scope.
 
-## 2. Allowing Unrestricted Grant Types
+## 2. Unrestricted Grant Types
 
-**Anti-pattern**: Accepting any `grant_types` value in DCR requests without validation.
+**Mistake:** Allowing dynamically registered clients to use any grant type.
 
-If you allow dynamically registered clients to use any grant type (e.g., `client_credentials`, `implicit`), you open the door to:
-- Clients that bypass user consent
-- Clients that use insecure flows (implicit)
-- Machine-to-machine clients that shouldn't exist
-
-**Fix**: Override `ValidateGrantTypesAsync` in your `DynamicClientRegistrationValidator` to restrict allowed grant types, and enforce PKCE:
+A malicious registrant could create a client_credentials client and gain direct API access. Always restrict to `authorization_code` and enforce PKCE:
 
 ```csharp
 protected override Task ValidateGrantTypesAsync(
     DynamicClientRegistrationContext context)
 {
-    var grantTypes = context.Request.GrantTypes;
-    if (grantTypes.Any(gt => gt != "authorization_code"))
+    if (context.Request.GrantTypes.Any(gt => gt != "authorization_code"))
     {
-        context.SetError("Only authorization_code grant type is allowed");
+        context.SetError("Only authorization_code is allowed");
         return Task.CompletedTask;
     }
     return base.ValidateGrantTypesAsync(context);
 }
 ```
 
-Always set `RequirePkce = true` in `SetClientDefaultsAsync`.
+## 3. In-Memory Stores in Production
 
-## 3. Using In-Memory Stores in Production
+**Mistake:** Using in-memory stores for dynamically registered clients.
 
-**Anti-pattern**: Running DCR in production without configuring `IClientConfigurationStore` to use a persistent store.
+- Clients are lost on restart
+- No shared state across instances
+- No audit trail
 
-The default in-memory store loses all dynamically registered clients on restart. This means:
-- Clients that registered successfully suddenly can't authenticate
-- No audit trail of registered clients
-- No sharing across multiple instances
+Use `AddClientConfigurationStore()` from the EF package for production.
 
-**Fix**: Use the Entity Framework-backed store:
+## 4. Plaintext Secret Storage
 
-```bash
-dotnet add package Duende.IdentityServer.Configuration.EntityFramework
-```
+**Mistake:** Storing client secrets in plaintext.
 
-```csharp
-builder.Services.AddIdentityServerConfiguration()
-    .AddClientConfigurationStore();
-```
+IdentityServer hashes secrets before passing them to `IClientConfigurationStore`. If you implement a custom store, ensure you store the hashed values as-is. Never reverse the hash or store the original plaintext secret.
 
-## 4. Storing Client Secrets in Plaintext
+## 5. Unvalidated Software Statements
 
-**Anti-pattern**: Persisting client secrets without hashing in your `IClientConfigurationStore` implementation.
+**Mistake:** Accepting software statements without validating the signature or issuer.
 
-Dynamically registered clients receive generated secrets. If these are stored in plaintext in your database, a data breach exposes all client credentials.
-
-**Fix**: Always hash client secrets before storing them. Duende IdentityServer's `Secret` class supports `Sha256()` and `Sha512()` hashing. Ensure your `IClientConfigurationStore.AddAsync()` hashes secrets before persisting.
-
-## 5. Accepting Software Statements from Unknown Issuers
-
-**Anti-pattern**: Accepting software statements without validating the JWT signature against a known, trusted signing key.
-
-If you blindly accept software statements, an attacker can forge a software statement with arbitrary claims and register a client with elevated privileges.
-
-**Fix**: Always validate software statements against trusted signing keys:
+Software statements are signed JWTs. You must validate them against trusted signing keys and reject unknown issuers:
 
 ```csharp
-protected override async Task ValidateSoftwareStatementAsync(
-    DynamicClientRegistrationContext context)
-{
-    var handler = new JsonWebTokenHandler();
-    var validationResult = await handler.ValidateTokenAsync(
-        context.Request.SoftwareStatement,
-        new TokenValidationParameters
-        {
-            ValidIssuer = "https://trusted-authority.example.com",
-            IssuerSigningKeys = await GetTrustedKeysAsync(),
-            ValidateLifetime = true
-        });
-
-    if (!validationResult.IsValid)
+var result = await handler.ValidateTokenAsync(softwareStatement,
+    new TokenValidationParameters
     {
-        context.SetError("Invalid software statement");
-        return;
-    }
-
-    await base.ValidateSoftwareStatementAsync(context);
-}
+        ValidIssuer = "https://trusted-authority.example.com",
+        IssuerSigningKeys = trustedKeys,
+        ValidateLifetime = true
+    });
 ```
 
-Never accept software statements signed by unknown issuers.
+Never accept a software statement from an untrusted or unknown issuer.
 
-## 6. Additional Hardening Recommendations
+## 6. Additional Hardening
 
-- **Rate limit the DCR endpoint** to prevent abuse
-- **Log all registration attempts** for audit purposes
-- **Restrict redirect URIs to HTTPS** by overriding `ValidateRedirectUrisAsync`
-- **Set conservative token lifetimes** for dynamically registered clients
-- **Review registered clients periodically** and remove stale ones
-- **Require software statements** if you want pre-approval of client registrations
+- **Rate limit** the DCR endpoint to prevent abuse
+- **Log all registrations** for audit trails
+- **Restrict redirect URIs** to HTTPS
+- **Set short token lifetimes** for dynamically registered clients
+- **Validate redirect URI patterns** against an allowlist if possible

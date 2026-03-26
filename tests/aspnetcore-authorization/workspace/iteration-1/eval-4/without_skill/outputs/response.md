@@ -1,8 +1,6 @@
-# Grouping Admin Endpoints with MapGroup
+# Grouping Admin Endpoints with Authorization
 
-You can use `MapGroup` to group related endpoints and apply shared authorization.
-
-## Updated Program.cs
+You can use `MapGroup` to group your admin endpoints and apply a shared authorization policy. Here's how:
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,14 +35,14 @@ app.MapGet("/products", () => Results.Ok(new[]
 app.MapPost("/products", (object product) => Results.Created("/products/3", product));
 app.MapDelete("/products/{id}", (int id) => Results.NoContent());
 
-// Admin group with shared authorization
+// Admin endpoints grouped
 var adminGroup = app.MapGroup("/admin")
     .RequireAuthorization("admin");
 
 adminGroup.MapGet("/users", () => Results.Ok(new[] { "alice", "bob" }));
 adminGroup.MapPost("/users", (object user) => Results.Created("/admin/users/3", user));
 
-// Documents
+// Documents endpoint
 app.MapGet("/documents/{id}", (int id) =>
     Results.Ok(new { Id = id, Title = "Quarterly Report", Department = "finance", OwnerId = "user-1" }));
 app.MapPut("/documents/{id}", (int id, object doc) => Results.NoContent());
@@ -54,9 +52,4 @@ app.MapGet("/health", () => Results.Ok("healthy"));
 app.Run();
 ```
 
-## Explanation
-
-- `AddPolicy("admin", ...)` defines a policy requiring the `admin` role.
-- `app.MapGroup("/admin")` groups all admin endpoints under the `/admin` prefix.
-- `.RequireAuthorization("admin")` on the group applies the policy to all endpoints in the group.
-- Endpoints are registered on `adminGroup` instead of `app`.
+The `MapGroup("/admin")` creates a route group that prefixes all endpoints with `/admin`. Calling `.RequireAuthorization("admin")` on the group applies the admin policy to all endpoints within it. The individual endpoints (`/users` GET and POST) are then registered on `adminGroup` and inherit both the route prefix and the authorization requirement.

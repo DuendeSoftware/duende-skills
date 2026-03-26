@@ -1,14 +1,10 @@
-# SAML NuGet Package and License Requirements
+# SAML Support in Duende IdentityServer: Package and License Requirements
 
-## NuGet Package
+## No Separate NuGet Package
 
-**No separate NuGet package is needed.** SAML 2.0 IdP support is **built into `Duende.IdentityServer`** itself. Your existing package reference is all you need:
+SAML 2.0 Identity Provider support is **built into `Duende.IdentityServer`** — there is no separate NuGet package to install. If you already have the `Duende.IdentityServer` package referenced, you have SAML support available.
 
-```xml
-<PackageReference Include="Duende.IdentityServer" Version="8.0.0" />
-```
-
-Just call `.AddSaml()` on the IdentityServer builder to enable SAML support:
+Just call `.AddSaml()` on the IdentityServer builder:
 
 ```csharp
 builder.Services.AddIdentityServer()
@@ -16,10 +12,24 @@ builder.Services.AddIdentityServer()
     .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-## License Edition
+## Enterprise Edition License Required
 
-SAML 2.0 IdP support requires the **Enterprise Edition** license. Without an Enterprise Edition license, the SAML endpoints will not be available and you may see licensing warnings at startup.
+SAML 2.0 IdP functionality requires the **Enterprise Edition** license. This is the highest tier that includes all IdentityServer features:
 
-## Version Requirement
+- **Starter** — Core OIDC/OAuth features
+- **Business** — Adds Dynamic Client Registration, BFF, etc.
+- **Enterprise** — Adds SAML 2.0 IdP support and all other features
 
-SAML support was introduced in **Duende IdentityServer version 8.0**. If you're on an earlier version (e.g., v7.x), you'll need to upgrade to v8.0 or later to use SAML features.
+Without an Enterprise license, calling `.AddSaml()` will produce licensing warnings and the SAML endpoints will not function.
+
+## Version Requirements
+
+SAML 2.0 IdP support was **introduced in version 8.0** of Duende IdentityServer. If you're on an earlier version (v7 or below), you'll need to upgrade to v8.0+ to use SAML features.
+
+## Summary
+
+| Question | Answer |
+|---|---|
+| Separate NuGet package? | No — built into `Duende.IdentityServer` |
+| License edition? | Enterprise Edition |
+| Minimum version? | v8.0 |

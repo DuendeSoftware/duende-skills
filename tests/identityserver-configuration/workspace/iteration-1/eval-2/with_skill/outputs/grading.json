@@ -5,27 +5,27 @@
     {
       "assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials with AllowedScopes containing 'orders.read' and 'inventory.write'",
       "pass": true,
-      "rationale": "Response defines ClientId = \"batch-processor\" with AllowedGrantTypes = GrantTypes.ClientCredentials and AllowedScopes = { \"orders.read\", \"inventory.write\" }."
+      "rationale": "Client defined with ClientCredentials and both scopes"
     },
     {
       "assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true (explicit or by noting default)",
       "pass": true,
-      "rationale": "Response defines ClientId = \"admin-portal\" with AllowedGrantTypes = GrantTypes.Code and RequirePkce = true with a comment noting it's the default."
+      "rationale": "Client uses GrantTypes.Code with RequirePkce = true explicitly stated"
     },
     {
       "assertion": "The admin-portal client has AllowOfflineAccess set to true to enable refresh tokens",
       "pass": true,
-      "rationale": "Response explicitly sets AllowOfflineAccess = true on the admin-portal client."
+      "rationale": "AllowOfflineAccess = true with comment about refresh tokens"
     },
     {
       "assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId (or 'openid') in its AllowedScopes",
       "pass": true,
-      "rationale": "Response includes IdentityServerConstants.StandardScopes.OpenId in the admin-portal's AllowedScopes."
+      "rationale": "Includes IdentityServerConstants.StandardScopes.OpenId"
     },
     {
       "assertion": "The admin-portal client has RedirectUris containing 'https://admin.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://admin.example.com/signout-callback-oidc'",
       "pass": true,
-      "rationale": "Response sets RedirectUris = { \"https://admin.example.com/signin-oidc\" } and PostLogoutRedirectUris = { \"https://admin.example.com/signout-callback-oidc\" }."
+      "rationale": "Both URIs are present and correct"
     }
   ],
   "pass_count": 5,

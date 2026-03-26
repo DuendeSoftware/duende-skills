@@ -1,25 +1,19 @@
 # Configuring Key Rotation in IdentityServer
 
-Here's the updated `Program.cs` with key management configured for your requirements:
+To configure automatic key management with your specified rotation parameters, you'll need to modify the `AddIdentityServer()` call to include key management options.
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer(options =>
 {
-    // Rotate keys every 30 days
     options.KeyManagement.RotationInterval = TimeSpan.FromDays(30);
-
-    // Announce new keys 5 days before activation
     options.KeyManagement.PropagationTime = TimeSpan.FromDays(5);
-
-    // Retain old keys for 7 days after rotation
     options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
-
-    // Keep retired keys around, don't auto-delete them
     options.KeyManagement.DeleteRetiredKeys = false;
 })
     .AddInMemoryClients(new List<Client>
@@ -59,4 +53,11 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-This configures IdentityServer to automatically manage signing keys with a 30-day rotation cycle. New keys are announced 5 days before they become the active signing key, giving clients time to refresh their key caches. After rotation, old keys are retained for 7 days to validate existing tokens. Retired keys are not deleted, so they remain in storage for reference.
+## What these settings do
+
+- **RotationInterval**: Keys will rotate every 30 days
+- **PropagationTime**: New keys are published 5 days before becoming active, giving clients time to pick them up
+- **RetentionDuration**: Old keys are kept in the JWKS for 7 days after rotation
+- **DeleteRetiredKeys**: When set to false, keys won't be deleted from storage after the retention period
+
+This configuration ensures smooth key transitions. The propagation time gives clients time to learn about new keys before they start being used for signing, and the retention period ensures tokens signed with old keys can still be validated.

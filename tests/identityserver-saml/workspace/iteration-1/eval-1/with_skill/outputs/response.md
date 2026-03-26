@@ -1,15 +1,14 @@
 # Adding SAML 2.0 Support to Duende IdentityServer
 
-Great news — SAML 2.0 IdP support is **built into Duende.IdentityServer** (v8.0+), so you do **not** need a separate NuGet package. Your existing `Duende.IdentityServer` package reference is all you need. However, note that SAML requires the **Enterprise Edition** license.
+SAML 2.0 Identity Provider support is **built into Duende.IdentityServer** starting from v8.0 — you do **not** need to install a separate NuGet package. It does require an **Enterprise Edition** license.
 
-Here's how to add SAML support and register your CRM service provider:
+## Step 1: Enable SAML and Register the Service Provider
 
-## Updated Program.cs
+Update your `Program.cs` to call `.AddSaml()` on the IdentityServer builder chain and register your service provider using `AddInMemorySamlServiceProviders`:
 
 ```csharp
-// Program.cs — IdentityServer with OIDC + SAML support
+// Program.cs — IdentityServer with OIDC + SAML 2.0
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Models.Saml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +20,7 @@ builder.Services.AddIdentityServer(options =>
     .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
     .AddTestUsers(TestUsers.Users)
-    // Add SAML 2.0 IdP support — no extra NuGet package needed
     .AddSaml()
-    // Register SAML Service Providers (in-memory for dev/test)
     .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 
 builder.Services.AddRazorPages();
@@ -76,7 +73,6 @@ public static class Config
         }
     ];
 
-    // SAML Service Providers
     public static IEnumerable<SamlServiceProvider> SamlServiceProviders =>
     [
         new SamlServiceProvider
@@ -86,32 +82,26 @@ public static class Config
             AssertionConsumerServiceUrls =
             [
                 new Uri("https://crm.contoso.com/saml/acs")
-            ],
-            RequireConsent = false,
-            SigningBehavior = SamlSigningBehavior.SignAssertion
+            ]
         }
     ];
 }
 ```
 
-## Key Points
+## What This Does
 
-1. **`.AddSaml()`** enables SAML 2.0 IdP functionality on the IdentityServer builder chain. No separate NuGet package is required — it's built into `Duende.IdentityServer`.
+1. **`.AddSaml()`** — Enables SAML 2.0 IdP functionality. This registers the SAML middleware, endpoints (`/saml/metadata`, `/saml/signin`, `/saml/logout`, etc.), and required services.
 
-2. **`.AddInMemorySamlServiceProviders()`** registers the SAML service providers. For production, use a persistent store via `AddSamlServiceProviderStore<T>()`.
+2. **`.AddInMemorySamlServiceProviders(...)`** — Registers your SAML service providers in memory. For production, you'd use a persistent store (database) instead.
 
-3. The `SamlServiceProvider` is configured with:
-   - `EntityId = "https://crm.contoso.com"` — the SP's unique identifier
-   - `AssertionConsumerServiceUrls` containing `https://crm.contoso.com/saml/acs` — where SAML responses are posted
+3. **`SamlServiceProvider`** — The model representing a SAML SP:
+   - `EntityId` is set to `https://crm.contoso.com` (the SP's unique identifier)
+   - `AssertionConsumerServiceUrls` contains the URL where IdentityServer will POST the SAML assertion (`https://crm.contoso.com/saml/acs`)
 
-4. IdentityServer will expose SAML endpoints at `/saml/metadata`, `/saml/signin`, `/saml/logout`, etc.
+## No Additional NuGet Package Needed
 
-5. Your existing OIDC clients continue to work alongside the SAML service providers.
+Your existing `IdentityServer.csproj` already references `Duende.IdentityServer` version 8.0.0, which includes SAML support. No changes to the project file are required.
 
-## No Changes to .csproj
+## SAML Metadata
 
-Your existing project file already has `Duende.IdentityServer` v8.0.0 — no additional packages are needed:
-
-```xml
-<PackageReference Include="Duende.IdentityServer" Version="8.0.0" />
-```
+Once configured, your IdentityServer will expose a SAML metadata endpoint at `/saml/metadata`. Point the Contoso CRM SP at this URL so it can discover your IdP's signing certificates, supported bindings, and endpoints.

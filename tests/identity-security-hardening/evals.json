@@ -51,6 +51,7 @@
       "id": 4,
       "prompt": "Add Content Security Policy headers and rate limiting to our IdentityServer. The CSP should protect our login and consent UI pages against XSS and clickjacking. Rate limiting should protect the token endpoint with a sliding window of 20 requests per minute per IP, and the authorize endpoint with 10 requests per minute per IP.",
       "expected_output": "Program.cs adds CSP middleware that sets Content-Security-Policy with at minimum default-src 'self', frame-ancestors 'none', and object-src 'none'. X-Frame-Options: DENY and X-Content-Type-Options: nosniff headers are also set. Rate limiting is configured with AddRateLimiter using a sliding window policy for the token endpoint (20 permits/minute) and a fixed window for the authorize endpoint (10 permits/minute), both partitioned by client IP.",
+      "sub_documents": ["cors-csp.md", "rate-limiting.md"],
       "files": [
         "files/begin-state/Program.cs"
       ],
@@ -81,6 +82,7 @@
       "id": 6,
       "prompt": "Configure server-side sessions with hardened lifetimes for our IdentityServer. We need: absolute cookie lifetime of 8 hours with no sliding expiration, expired session cleanup every 10 minutes, back-channel logout triggered when sessions expire, and client token lifetimes coordinated with user sessions. Also configure the web.app client to support back-channel logout at https://app.example.com/bff/backchannel.",
       "expected_output": "Program.cs configures server-side sessions with CookieLifetime = 8 hours, CookieSlidingExpiration = false, RemoveExpiredSessions = true, RemoveExpiredSessionsFrequency = 10 minutes, ExpiredSessionsTriggerBackchannelLogout = true, and CoordinateClientLifetimesWithUserSession = true. AddServerSideSessions() is called on the IdentityServer builder. The web.app client is updated with BackChannelLogoutUri and BackChannelLogoutSessionRequired = true.",
+      "sub_documents": ["session-hardening.md"],
       "files": [
         "files/begin-state/Program.cs"
       ],
@@ -107,6 +109,17 @@
         "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
         "All access token lifetimes are 900 seconds or less for interactive clients",
         "The output includes a summary or explanation listing the security issues found and how they were remediated"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "What are the three most important IdentityServer client hardening steps according to the identity-security-hardening skill?",
+      "expected_output": "PKCE required on all authorization code clients (RequirePkce = true, never disabled), exact-match redirect URIs (no wildcards), and principle of least grant (no unused grant types, no implicit flow).",
+      "files": [],
+      "assertions": [
+        "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+        "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+        "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow"
       ]
     }
   ]

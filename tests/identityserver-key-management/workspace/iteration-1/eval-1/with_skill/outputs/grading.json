@@ -2,10 +2,26 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'options.KeyManagement.RotationInterval' set to TimeSpan.FromDays(30)", "pass": true, "rationale": "Code contains options.KeyManagement.RotationInterval = TimeSpan.FromDays(30)"},
-    {"assertion": "Program.cs contains 'options.KeyManagement.PropagationTime' set to TimeSpan.FromDays(5)", "pass": true, "rationale": "Code contains options.KeyManagement.PropagationTime = TimeSpan.FromDays(5)"},
-    {"assertion": "Program.cs contains 'options.KeyManagement.RetentionDuration' set to TimeSpan.FromDays(7)", "pass": true, "rationale": "Code contains options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7)"},
-    {"assertion": "Program.cs contains 'options.KeyManagement.DeleteRetiredKeys = false'", "pass": true, "rationale": "Code contains options.KeyManagement.DeleteRetiredKeys = false"}
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RotationInterval' set to TimeSpan.FromDays(30)",
+      "pass": true,
+      "rationale": "The response sets options.KeyManagement.RotationInterval = TimeSpan.FromDays(30) in the AddIdentityServer options lambda."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.PropagationTime' set to TimeSpan.FromDays(5)",
+      "pass": true,
+      "rationale": "The response sets options.KeyManagement.PropagationTime = TimeSpan.FromDays(5)."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RetentionDuration' set to TimeSpan.FromDays(7)",
+      "pass": true,
+      "rationale": "The response sets options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7)."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.DeleteRetiredKeys = false'",
+      "pass": true,
+      "rationale": "The response explicitly sets options.KeyManagement.DeleteRetiredKeys = false."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

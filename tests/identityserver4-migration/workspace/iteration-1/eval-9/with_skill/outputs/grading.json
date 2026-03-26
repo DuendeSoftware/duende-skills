@@ -1,29 +1,25 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 9,
-  "variant": "with_skill",
+  "mode": "with_skill",
   "assertions": [
     {
       "assertion": "Response shows configuring the license key via options.LicenseKey inside AddIdentityServer",
-      "pass": true,
-      "rationale": "Shows code: 'options.LicenseKey = builder.Configuration[\"IdentityServer:LicenseKey\"];' inside AddIdentityServer."
+      "passed": true
     },
     {
       "assertion": "Response recommends loading the key from configuration, environment variables, or a secret manager rather than hardcoding",
-      "pass": true,
-      "rationale": "Lists user secrets, environment variables, and secret managers (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault) as recommended approaches."
+      "passed": true
     },
     {
       "assertion": "Response warns against storing the license key in source-controlled files like appsettings.json",
-      "pass": true,
-      "rationale": "States 'never store it in source-controlled files like appsettings.json' (bold emphasis)."
+      "passed": true
     },
     {
       "assertion": "Response explains that without a license key, IdentityServer runs in community or trial mode and logs a warning on startup",
-      "pass": true,
-      "rationale": "States 'Without a license key, IdentityServer runs in community/trial mode and logs a warning on startup.'"
+      "passed": true
     }
   ],
-  "pass_count": 4,
-  "total_count": 4,
-  "score": 1.0
+  "passed": 4,
+  "total": 4
 }

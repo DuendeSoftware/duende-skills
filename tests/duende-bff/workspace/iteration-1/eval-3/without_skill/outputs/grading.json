@@ -2,13 +2,33 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)", "pass": false, "rationale": "Calls both AddServerSideSessions() AND AddEntityFrameworkServerSideSessions — should use only AddEntityFrameworkServerSideSessions"},
-    {"assertion": "Configures UseSqlServer with the connection string from configuration", "pass": true, "rationale": "Shows UseSqlServer with GetConnectionString"},
-    {"assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))", "pass": true, "rationale": "Shows SessionCleanupInterval = TimeSpan.FromMinutes(10)"},
-    {"assertion": "Calls AddSessionCleanupBackgroundProcess()", "pass": false, "rationale": "Does not call AddSessionCleanupBackgroundProcess()"},
-    {"assertion": "Warns against or does NOT use in-memory sessions for production", "pass": true, "rationale": "Mentions it's important for production where sessions need to survive restarts"}
+    {
+      "assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+      "pass": false,
+      "rationale": "Uses AddServerSideSessions() without EntityFramework \u2014 this is the in-memory variant, not the EF-backed one"
+    },
+    {
+      "assertion": "Configures UseSqlServer with the connection string from configuration",
+      "pass": false,
+      "rationale": "AddDbContext is called separately but not wired into the BFF session store via AddEntityFrameworkServerSideSessions"
+    },
+    {
+      "assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+      "pass": false,
+      "rationale": "SessionCleanupInterval is not set at all"
+    },
+    {
+      "assertion": "Calls AddSessionCleanupBackgroundProcess()",
+      "pass": false,
+      "rationale": "AddSessionCleanupBackgroundProcess() is not called"
+    },
+    {
+      "assertion": "Warns against or does NOT use in-memory sessions for production",
+      "pass": false,
+      "rationale": "Uses AddServerSideSessions() which is the in-memory variant, and does not warn against it"
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 0,
   "total_count": 5,
-  "score": 0.6
+  "score": 0.0
 }

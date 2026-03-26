@@ -2,11 +2,31 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Configures both AddJwtBearer and AddOAuth2Introspection handlers", "pass": true, "rationale": "Code configures both AddJwtBearer(\"Bearer\", ...) and AddOAuth2Introspection(\"Introspection\", ...)"},
-    {"assertion": "Uses ForwardReferenceToken (via Selector.ForwardReferenceToken) to route reference tokens to the introspection handler", "pass": false, "rationale": "Response uses a custom ForwardDefaultSelector lambda instead of the Duende Selector.ForwardReferenceToken helper. The assertion specifically requires Selector.ForwardReferenceToken."},
-    {"assertion": "The scheme name passed to ForwardReferenceToken matches the scheme name used in AddOAuth2Introspection", "pass": false, "rationale": "ForwardReferenceToken is not used at all; a custom lambda is used instead"},
-    {"assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler", "pass": false, "rationale": "Neither code sample sets TokenValidationParameters.ValidTypes to include at+jwt"},
-    {"assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package", "pass": false, "rationale": "The response does not mention the Duende.AspNetCore.Authentication.JwtBearer package at all"}
+    {
+      "assertion": "Configures both AddJwtBearer and AddOAuth2Introspection handlers",
+      "pass": true,
+      "rationale": "Response configures both AddJwtBearer and AddOAuth2Introspection"
+    },
+    {
+      "assertion": "Uses ForwardReferenceToken (via Selector.ForwardReferenceToken) to route reference tokens to the introspection handler",
+      "pass": false,
+      "rationale": "Response uses a manual ForwardDefaultSelector lambda instead of Selector.ForwardReferenceToken from the Duende package"
+    },
+    {
+      "assertion": "The scheme name passed to ForwardReferenceToken matches the scheme name used in AddOAuth2Introspection",
+      "pass": false,
+      "rationale": "ForwardReferenceToken is not used at all"
+    },
+    {
+      "assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+      "pass": false,
+      "rationale": "Response does not set ValidTypes"
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package",
+      "pass": false,
+      "rationale": "Response does not mention the Duende.AspNetCore.Authentication.JwtBearer package"
+    }
   ],
   "pass_count": 1,
   "total_count": 5,

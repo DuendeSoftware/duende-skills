@@ -1,48 +1,34 @@
-# Setting Up a Minimal Duende IdentityServer
-
-Here's how to set up a minimal IdentityServer with in-memory configuration:
+# Minimal IdentityServer Setup
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add IdentityServer services
 builder.Services.AddIdentityServer()
-    .AddInMemoryApiScopes(new List<ApiScope>
+    .AddInMemoryApiScopes(new[]
     {
         new ApiScope("api1", "My API")
     })
-    .AddInMemoryClients(new List<Client>
+    .AddInMemoryClients(new[]
     {
         new Client
         {
             ClientId = "m2m.client",
-            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.ClientCredentials,
+            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedScopes = { "api1" }
         }
     });
 
 var app = builder.Build();
 
-// Configure middleware pipeline
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseIdentityServer();
+app.UseAuthorization();
 
 app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-## Explanation
-
-- `AddIdentityServer()` registers IdentityServer services.
-- `AddInMemoryApiScopes` defines the API scope `api1`.
-- `AddInMemoryClients` defines the M2M client with client credentials grant.
-- The middleware pipeline sets up routing, authentication, authorization, and IdentityServer endpoints.
-
-The client uses the `client_credentials` grant type, which is appropriate for machine-to-machine communication where there is no interactive user.
+This sets up IdentityServer with one API scope and one M2M client.

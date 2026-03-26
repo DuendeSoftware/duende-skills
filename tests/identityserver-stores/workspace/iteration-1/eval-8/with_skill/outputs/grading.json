@@ -1,1 +1,29 @@
-{"eval_id":8,"variant":"with_skill","assertions":[{"assertion":"A class implementing IClientStore is created with constructor parameters for a DbContext and ITenantContext (or equivalent tenant resolver)","pass":true,"rationale":"TenantAwareClientStore implements IClientStore with AppDbContext and ITenantContext constructor parameters"},{"assertion":"FindClientByIdAsync applies a Where filter that includes both the clientId parameter AND the tenant identifier from ITenantContext","pass":true,"rationale":".Where(c => c.TenantId == _tenantContext.TenantId && c.ClientId == clientId)"},{"assertion":"The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient","pass":true,"rationale":"Uses .AddClientStore<TenantAwareClientStore>() on the IdentityServer builder"},{"assertion":"An ITenantContext interface (or equivalent) is defined or referenced that exposes the current tenant identifier","pass":true,"rationale":"Defines ITenantContext interface with TenantId property"}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A class implementing IClientStore is created with constructor parameters for a DbContext and ITenantContext (or equivalent tenant resolver)",
+      "pass": true,
+      "rationale": "TenantAwareClientStore has AppDbContext and ITenantContext."
+    },
+    {
+      "assertion": "FindClientByIdAsync applies a Where filter that includes both the clientId parameter AND the tenant identifier from ITenantContext",
+      "pass": true,
+      "rationale": "Filters by TenantId and ClientId."
+    },
+    {
+      "assertion": "The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient",
+      "pass": true,
+      "rationale": "Uses .AddClientStore<TenantAwareClientStore>()."
+    },
+    {
+      "assertion": "An ITenantContext interface (or equivalent) is defined or referenced that exposes the current tenant identifier",
+      "pass": true,
+      "rationale": "ITenantContext interface defined with TenantId property."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

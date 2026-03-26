@@ -1,19 +1,13 @@
-# Integration Testing a Protected API with a Custom Auth Handler
+# Testing Protected APIs with a Custom Auth Handler
 
-Here's how to set up integration tests for your protected API using a custom authentication handler.
+## Create a Test Authentication Handler
 
-## 1. Custom Test Authentication Handler
+You can create a custom authentication handler that lets you inject claims for testing:
 
 ```csharp
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
-
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public static IList<Claim>? Claims { get; set; }
+    public static IList<Claim>? TestClaims { get; set; }
 
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -25,62 +19,51 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (Claims == null || !Claims.Any())
+        if (TestClaims is null || TestClaims.Count == 0)
             return Task.FromResult(AuthenticateResult.Fail("No claims configured"));
 
-        var identity = new ClaimsIdentity(Claims, "Test");
+        var identity = new ClaimsIdentity(TestClaims, "Test");
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, "Test");
-
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
 ```
 
-## 2. WebApplicationFactory Setup
+## WebApplicationFactory Setup
 
 ```csharp
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication;
-
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class ApiFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureTestServices(services =>
         {
             services.AddAuthentication("Test")
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
         });
     }
 }
 ```
 
-## 3. Test Examples
+## Tests
 
 ```csharp
-using System.Net;
-using System.Security.Claims;
-using Xunit;
-
-public class ApiTests : IClassFixture<CustomWebApplicationFactory>
+public class ApiTests : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client;
 
-    public ApiTests(CustomWebApplicationFactory factory)
+    public ApiTests(ApiFactory factory)
     {
         _client = factory.CreateClient();
     }
 
     [Fact]
-    public async Task GetProducts_WithValidClaims_Returns200()
+    public async Task GetProducts_WithAuth_Returns200()
     {
-        TestAuthHandler.Claims = new List<Claim>
+        TestAuthHandler.TestClaims = new List<Claim>
         {
-            new Claim("sub", "test-user"),
+            new Claim("sub", "user-1"),
             new Claim("scope", "api1")
         };
 
@@ -89,14 +72,12 @@ public class ApiTests : IClassFixture<CustomWebApplicationFactory>
     }
 
     [Fact]
-    public async Task GetProducts_NoClaims_Returns401()
+    public async Task GetProducts_NoAuth_Returns401()
     {
-        TestAuthHandler.Claims = null;
+        TestAuthHandler.TestClaims = null;
 
         var response = await _client.GetAsync("/api/products");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }
 ```
-
-This approach replaces the JWT bearer authentication with a simple test handler that lets you control the claims per test via a static property.

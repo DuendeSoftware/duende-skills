@@ -1,6 +1,10 @@
-# Shortening Token Lifetimes and Configuring Token Cleanup
+# Applying Token Lifetime Best Practices and Configuring Token Cleanup
 
-Here's the updated configuration with security-hardened token lifetimes and operational store token cleanup:
+## Why Shorten Access Token Lifetimes?
+
+JWT access tokens **cannot be revoked** before expiration. A 1-hour lifetime means a leaked token is valid for up to 1 hour. Shorter lifetimes (5-15 minutes) significantly reduce this risk window. Clients use refresh tokens to get new access tokens when needed.
+
+## Updated Program.cs
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -19,7 +23,9 @@ builder.Services.AddIdentityServer()
             RedirectUris = { "https://localhost:5002/signin-oidc" },
             PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc" },
             AllowedScopes = { "openid", "profile", "api1" },
-            AccessTokenLifetime = 300  // 5 minutes
+
+            // 5-minute access token lifetime
+            AccessTokenLifetime = 300
         },
         new Client
         {
@@ -28,7 +34,9 @@ builder.Services.AddIdentityServer()
             AllowedGrantTypes = GrantTypes.ClientCredentials,
             ClientSecrets = { new Secret("m2m_secret".Sha256()) },
             AllowedScopes = { "api1" },
-            AccessTokenLifetime = 600  // 10 minutes
+
+            // 10-minute access token lifetime for M2M
+            AccessTokenLifetime = 600
         },
         new Client
         {
@@ -40,7 +48,9 @@ builder.Services.AddIdentityServer()
             PostLogoutRedirectUris = { "myapp://signout" },
             AllowedScopes = { "openid", "profile", "api1" },
             RequirePkce = true,
-            AccessTokenLifetime = 300  // 5 minutes
+
+            // 5-minute access token lifetime
+            AccessTokenLifetime = 300
         }
     })
     .AddInMemoryApiScopes(new List<ApiScope>
@@ -49,10 +59,7 @@ builder.Services.AddIdentityServer()
     })
     .AddInMemoryApiResources(new List<ApiResource>
     {
-        new ApiResource("api1_resource")
-        {
-            Scopes = { "api1" }
-        }
+        new ApiResource("api1_resource") { Scopes = { "api1" } }
     })
     .AddInMemoryIdentityResources(new List<IdentityResource>
     {
@@ -72,9 +79,9 @@ builder.Services.AddIdentityServer()
     {
         // Token cleanup configuration
         options.EnableTokenCleanup = true;
-        options.TokenCleanupInterval = 1800;       // Run every 30 minutes (in seconds)
-        options.RemoveConsumedTokens = true;         // Clean up consumed tokens too
-        options.ConsumedTokenCleanupDelay = 300;     // Wait 5 minutes after consumption before cleanup
+        options.TokenCleanupInterval = 1800;         // Run every 30 minutes
+        options.RemoveConsumedTokens = true;           // Clean up consumed refresh tokens
+        options.ConsumedTokenCleanupDelay = 300;       // Wait 5 minutes after consumption before cleanup
     });
 
 var app = builder.Build();
@@ -86,21 +93,21 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-## Best Practices Applied
+## Token Lifetime Rationale
 
-### Token Lifetime Reductions
+| Client       | Lifetime | Rationale                                                                                                    |
+|-------------|----------|--------------------------------------------------------------------------------------------------------------|
+| `web_app`    | 300s (5 min) | Interactive user flow with refresh tokens available. Short lifetime limits exposure from leaked JWTs.       |
+| `m2m_client` | 600s (10 min) | Machine-to-machine flow. Slightly longer since there's no user interaction and the client can easily re-request. |
+| `mobile_app` | 300s (5 min) | Mobile apps are more susceptible to token theft. Short lifetime combined with refresh tokens is best practice. |
 
-| Client | Before | After | Rationale |
-|--------|--------|-------|-----------|
-| web_app | 3600s (1 hour) | 300s (5 min) | JWT access tokens cannot be revoked; short lifetimes limit exposure |
-| m2m_client | default (1 hour) | 600s (10 min) | M2M tokens typically don't need long lifetimes |
-| mobile_app | default (1 hour) | 300s (5 min) | Mobile tokens are at risk of device theft |
+## Token Cleanup Configuration
 
-Short-lived JWT access tokens (5-15 minutes) are a security best practice because JWTs cannot be revoked before expiration. Use refresh tokens for long-lived API access.
+| Setting                    | Value | Description                                                                |
+|---------------------------|-------|----------------------------------------------------------------------------|
+| `EnableTokenCleanup`       | `true` | Activates the background cleanup job                                       |
+| `TokenCleanupInterval`     | `1800` | Runs every 30 minutes (in seconds)                                         |
+| `RemoveConsumedTokens`     | `true` | Cleans up consumed one-time-use refresh tokens                             |
+| `ConsumedTokenCleanupDelay`| `300`  | Waits 5 minutes after consumption before removing — allows grace periods   |
 
-### Token Cleanup
-
-- **`EnableTokenCleanup = true`**: Enables the background cleanup task for expired and consumed grants
-- **`TokenCleanupInterval = 1800`**: Runs cleanup every 30 minutes
-- **`RemoveConsumedTokens = true`**: Also cleans up consumed tokens (e.g., used one-time refresh tokens)
-- **`ConsumedTokenCleanupDelay = 300`**: Waits 5 minutes after a token is consumed before removing it, which allows for grace period replay detection
+The `ConsumedTokenCleanupDelay` is particularly important if you're using one-time refresh tokens with a grace period for network failures. It ensures consumed tokens remain available long enough for retry scenarios before being cleaned up.

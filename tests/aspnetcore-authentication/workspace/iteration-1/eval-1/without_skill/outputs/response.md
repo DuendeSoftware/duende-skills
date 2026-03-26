@@ -1,17 +1,20 @@
-# Configuring OIDC Authentication
+# OIDC Authentication Setup
 
-Here's how to set up OpenID Connect authentication for your web app:
+Here's how to configure OIDC authentication in your web app:
 
 ```csharp
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "oidc";
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-.AddCookie("Cookies")
-.AddOpenIdConnect("oidc", options =>
+.AddCookie()
+.AddOpenIdConnect(options =>
 {
     options.Authority = "https://identity.example.com";
     options.ClientId = "web.app";
@@ -23,8 +26,6 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("api1");
 
     options.SaveTokens = true;
-
-    options.GetClaimsFromUserInfoEndpoint = true;
 });
 
 builder.Services.AddAuthorization();
@@ -39,12 +40,4 @@ app.MapGet("/", () => "Hello World!");
 app.Run();
 ```
 
-## What This Does
-
-1. **Cookie Authentication**: The `DefaultScheme` is set to `Cookies` which handles session management
-2. **OIDC Challenge**: When the user isn't authenticated, they're redirected to IdentityServer
-3. **Authorization Code Flow**: `ResponseType = "code"` uses the secure authorization code flow
-4. **Scopes**: Requesting `openid`, `profile`, and `api1` scopes
-5. **Save Tokens**: Tokens are saved in the cookie so you can use them to call APIs later
-
-The middleware ordering is important — `UseAuthentication()` must come before `UseAuthorization()` so the user's identity is established before access checks happen.
+This configures cookie-based authentication with OIDC challenge. The `ResponseType = "code"` uses the authorization code flow. `SaveTokens = true` stores tokens in the authentication properties.

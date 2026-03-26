@@ -1,22 +1,14 @@
-# Custom Key Storage and Settings
-
-Here's the updated `Program.cs` with custom key path, cache duration, and RSA key size:
+# Custom Key Storage Path and Key Size
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer(options =>
 {
-    // Store keys on shared filesystem
     options.KeyManagement.KeyPath = "/mnt/shared/identity-keys";
-
-    // Refresh key cache every hour
     options.KeyManagement.KeyCacheDuration = TimeSpan.FromHours(1);
-
-    // Use stronger 4096-bit RSA keys
     options.KeyManagement.RsaKeySize = 4096;
 })
     .AddInMemoryClients(new List<Client>
@@ -48,14 +40,9 @@ builder.Services.AddIdentityServer(options =>
     });
 
 var app = builder.Build();
-
 app.UseIdentityServer();
-
 app.MapGet("/", () => "IdentityServer is running");
-
 app.Run();
 ```
 
-This changes the key storage to `/mnt/shared/identity-keys` (useful for sharing keys across load-balanced instances), sets the cache to refresh every hour, and increases the RSA key size to 4096 bits for stronger signatures.
-
-Make sure all instances have read/write access to the shared path. You may also want to configure data protection for shared access if running multiple instances.
+This sets the key storage path to the shared volume, reduces cache duration to 1 hour for faster key propagation, and increases RSA key size to 4096 bits.

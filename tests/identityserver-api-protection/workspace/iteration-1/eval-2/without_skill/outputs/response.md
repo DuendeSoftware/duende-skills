@@ -1,22 +1,17 @@
-# Validating Reference Tokens with Introspection
+# Setting Up Reference Token Validation
 
-Reference tokens (opaque tokens) need to be validated by calling back to the authorization server's introspection endpoint. Here's how to set that up.
+For opaque/reference tokens, you need to use token introspection. Here's how:
 
-## Step 1: Add a Token Introspection Package
-
-You'll need a package that supports OAuth 2.0 token introspection. For IdentityServer-based setups, you can use:
+## Install Package
 
 ```bash
 dotnet add package IdentityModel.AspNetCore.OAuth2Introspection
 ```
 
-## Step 2: Configure the API
+## Configure Introspection
 
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
 
 builder.Services.AddAuthentication("Bearer")
     .AddOAuth2Introspection("Bearer", options =>
@@ -26,26 +21,19 @@ builder.Services.AddAuthentication("Bearer")
         options.ClientSecret = "invoicing_secret";
     });
 
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
 
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllers();
 
 app.MapGet("/data", () => Results.Ok(new { message = "Protected data" }))
     .RequireAuthorization();
 
 app.Run();
-
-public record DataModel(int Id, string Name, string Description);
 ```
 
-## How Introspection Works
+## How It Works
 
-When a request comes in with an opaque bearer token, the middleware sends the token to the authorization server's introspection endpoint (`/connect/introspect`). The server checks if the token is still valid and returns the associated claims.
+The introspection handler sends the opaque token to the authorization server's introspection endpoint. The server validates the token and returns whether it's active along with associated claims.
 
-This approach allows for immediate token revocation since the authorization server checks the token's status on every API call. The trade-off is that every API request requires a network call to the authorization server.
+The `ClientId` and `ClientSecret` are used to authenticate the API to the introspection endpoint.

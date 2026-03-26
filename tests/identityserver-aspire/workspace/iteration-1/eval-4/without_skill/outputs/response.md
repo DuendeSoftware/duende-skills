@@ -1,6 +1,6 @@
-# Running Multiple IdentityServer Replicas
+# Running Multiple IdentityServer Replicas in Aspire
 
-## AppHost Configuration
+You can scale IdentityServer with `WithReplicas`:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
@@ -16,14 +16,16 @@ var identityServer = builder.AddProject<Projects.IdentityServer>("identity-serve
 builder.Build().Run();
 ```
 
-## Considerations for Multiple Instances
+## Considerations
 
-When running multiple instances of IdentityServer, you need to ensure state is shared:
+When running multiple instances, you need to ensure:
 
-1. **Database-backed stores** — Use a shared database for configuration and operational data so all instances can access the same clients, resources, and grants.
+1. **Database**: All instances should connect to the same database for client and resource configuration.
 
-2. **Data Protection keys** — ASP.NET Core Data Protection keys must be shared across instances. Store them in a database or Redis so cookies encrypted by one instance can be decrypted by another.
+2. **Session State**: If using server-side sessions, ensure they're stored in a shared location (like a database or Redis).
 
-3. **Session state** — If using server-side sessions, ensure they're stored in a shared location.
+3. **Load Balancing**: Aspire handles load balancing across replicas automatically.
 
-4. **Load balancer** — You'll need a load balancer in front of the replicas to distribute traffic.
+4. **Sticky Sessions**: Consider using sticky sessions if you rely on in-memory state.
+
+The main thing to be aware of is that all replicas should share the same configuration and persistent state through the database.

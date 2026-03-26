@@ -1,40 +1,22 @@
-# Cookie Size Exceeding 4KB Limit
+# Cookie Size Too Large
 
-## Problem
+When your authentication cookie exceeds 4KB, browsers silently truncate or reject it. Here are options:
 
-Authentication cookies can grow too large when you store tokens and many claims inside them. Browsers enforce a ~4KB limit per cookie, and when exceeded, the cookie gets silently truncated or rejected.
+## Solutions
 
-## Options
+1. **Use chunked cookies** — ASP.NET Core can chunk large cookies across multiple cookies using `ChunkingCookieManager`, but this has its own limits.
 
-### 1. Reduce claims in the cookie
-
-You can remove claims you don't need. The OIDC handler allows you to filter claims:
-
+2. **Filter claims** — Remove unnecessary claims before they're stored:
 ```csharp
-.AddOpenIdConnect("oidc", options =>
-{
-    // Remove unnecessary claims
-    options.ClaimActions.DeleteClaim("sid");
-    options.ClaimActions.DeleteClaim("idp");
-    options.ClaimActions.DeleteClaim("auth_time");
-});
+options.ClaimActions.DeleteClaim("sid");
+options.ClaimActions.DeleteClaim("amr");
 ```
 
-### 2. Use session storage
-
-Instead of storing everything in the cookie, you can store the authentication ticket on the server side and only put a session identifier in the cookie. ASP.NET Core supports this through `ITicketStore`:
-
+3. **Use session store** — Store the authentication ticket server-side using a distributed cache:
 ```csharp
-.AddCookie("Cookies", options =>
-{
-    options.SessionStore = new MyTicketStore(); // Your implementation backed by a database or cache
-});
+builder.Services.AddDistributedMemoryCache();
 ```
 
-This way the cookie only contains a session reference, keeping it well under the size limit.
+4. **Reduce token size** — Consider whether you really need `SaveTokens = true`. If you're not making API calls from the web app, you may not need the tokens stored.
 
-### 3. Don't save tokens you don't need
-
-If you don't need to call APIs on behalf of the user, you can set `SaveTokens = false` to avoid storing the access and refresh tokens in the cookie.
-
-The tokens stored when `SaveTokens = true` include the access token, refresh token, and ID token, which can significantly increase cookie size.
+The `SaveTokens = true` setting stores all tokens (access, refresh, ID) in the cookie, which is typically the largest contributor to size.

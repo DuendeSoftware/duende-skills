@@ -1,82 +1,14 @@
-# Security Audit Report — IdentityServer Setup
+# IdentityServer Security Audit Report
 
 ## Findings and Remediations
 
 ### Critical Issues
 
-| # | Finding | Severity | Remediation |
-|---|---------|----------|-------------|
-| 1 | `AddDeveloperSigningCredential()` used in production | Critical | Replaced with automatic key management (ES256 + RS256) |
-| 2 | `spa.legacy` uses `GrantTypes.Implicit` | Critical | Migrated to `GrantTypes.Code` with `RequirePkce = true` |
-| 3 | `web.app` has wildcard redirect URIs (`https://*.example.com/*`) | Critical | Replaced with exact-match HTTPS URIs |
-| 4 | `web.app` has `RequirePkce = false` | Critical | Set to `RequirePkce = true` |
-| 5 | Hardcoded client secrets in source code | High | Loaded from `IConfiguration` |
-| 6 | `web.app` AccessTokenLifetime = 28800 (8 hours) | High | Reduced to 300 seconds (5 minutes) |
-| 7 | `web.app` RefreshTokenUsage = ReUse | High | Changed to `TokenUsage.OneTimeOnly` |
-| 8 | No HTTPS redirection or HSTS | High | Added with 308 redirect and 365-day HSTS |
-| 9 | No CSP or security headers | Medium | Added CSP with `frame-ancestors 'none'`, X-Frame-Options |
-| 10 | No rate limiting | Medium | Added rate limiting on token and authorize endpoints |
-| 11 | `web.app` uses `GrantTypes.CodeAndClientCredentials` | Medium | Changed to `GrantTypes.Code` only |
-| 12 | Missing CORS origins on `web.app` | Low | Added explicit `AllowedCorsOrigins` |
-
-## Remediated Program.cs
+#### 1. Developer Signing Credential in Production
+**Finding:** `AddDeveloperSigningCredential()` generates an ephemeral RSA key not suitable for production.
+**Remediation:** Replace with automatic key management using ES256 + RS256:
 
 ```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
-using System.Net;
-using System.Threading.RateLimiting;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Console()
-    .ReadFrom.Configuration(ctx.Configuration));
-
-// ForwardedHeaders for reverse proxy
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
-});
-
-// HSTS
-builder.Services.AddHsts(options =>
-{
-    options.MaxAge = TimeSpan.FromDays(365);
-    options.IncludeSubDomains = true;
-    options.Preload = true;
-});
-
-// HTTPS Redirection
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-    options.HttpsPort = 443;
-});
-
-// Data Protection
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/var/identity/dp-keys"))
-    .SetApplicationName("identity-server");
-
-// Rate Limiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddPolicy("token-endpoint", context =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new SlidingWindowRateLimiterOptions
-            {
-                PermitLimit = 20, Window = TimeSpan.FromMinutes(1), SegmentsPerWindow = 4
-            }));
-});
-
-// IdentityServer with automatic key management
 builder.Services.AddIdentityServer(options =>
 {
     options.KeyManagement.RotationInterval = TimeSpan.FromDays(90);
@@ -88,133 +20,104 @@ builder.Services.AddIdentityServer(options =>
         new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256),
         new SigningAlgorithmOptions(SecurityAlgorithms.RsaSha256)
     };
-
-    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
-    options.Authentication.CookieSlidingExpiration = false;
-    options.Authentication.CoordinateClientLifetimesWithUserSession = true;
-
-    options.Events.RaiseErrorEvents = true;
-    options.Events.RaiseFailureEvents = true;
-})
-// NO AddDeveloperSigningCredential() — automatic key management handles signing
-.AddInMemoryIdentityResources(new List<IdentityResource>
-{
-    new IdentityResources.OpenId(),
-    new IdentityResources.Profile(),
-    new IdentityResources.Email()
-})
-.AddInMemoryApiScopes(new List<ApiScope>
-{
-    new ApiScope("catalog.read"), new ApiScope("catalog.write"),
-    new ApiScope("orders.manage"), new ApiScope("internal-api")
-})
-.AddInMemoryClients(new List<Client>
-{
-    // web.app — HARDENED
-    new Client
-    {
-        ClientId = "web.app",
-        ClientName = "Main Web Application",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) },
-        RedirectUris = { "https://app.example.com/signin-oidc" },
-        PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
-        AllowedScopes = { "openid", "profile", "email", "catalog.read", "catalog.write" },
-        AllowOfflineAccess = true,
-        AccessTokenLifetime = 300,
-        RefreshTokenUsage = TokenUsage.OneTimeOnly,
-        RefreshTokenExpiration = TokenExpiration.Absolute,
-        AbsoluteRefreshTokenLifetime = 86400,
-        CoordinateLifetimeWithUserSession = true,
-        AllowedCorsOrigins = { "https://app.example.com" },
-        BackChannelLogoutUri = "https://app.example.com/bff/backchannel",
-        BackChannelLogoutSessionRequired = true
-    },
-
-    // spa.legacy — MIGRATED from Implicit to Code+PKCE
-    new Client
-    {
-        ClientId = "spa.legacy",
-        ClientName = "Legacy SPA",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        RequireClientSecret = false,
-        RedirectUris = { "https://spa.example.com/callback" },
-        PostLogoutRedirectUris = { "https://spa.example.com" },
-        AllowedScopes = { "openid", "profile", "catalog.read" },
-        AllowedCorsOrigins = { "https://spa.example.com" },
-        AccessTokenLifetime = 300
-    },
-
-    // background.worker — secret from config
-    new Client
-    {
-        ClientId = "background.worker",
-        ClientName = "Background Processing Service",
-        AllowedGrantTypes = GrantTypes.ClientCredentials,
-        ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:BackgroundWorker"].Sha256()) },
-        AllowedScopes = { "internal-api", "orders.manage" },
-        AccessTokenLifetime = 900
-    },
-
-    // internal.api.consumer
-    new Client
-    {
-        ClientId = "internal.api.consumer",
-        ClientName = "Internal API Consumer",
-        AllowedGrantTypes = GrantTypes.ClientCredentials,
-        ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:InternalService"].Sha256()) },
-        AllowedScopes = { "internal-api" },
-        AccessTokenType = AccessTokenType.Jwt,
-        AccessTokenLifetime = 900
-    },
-
-    // native.app — already well-configured
-    new Client
-    {
-        ClientId = "native.app",
-        ClientName = "Mobile Application",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        RequireClientSecret = false,
-        RedirectUris = { "com.example.app:/callback", "https://app.example.com/callback" },
-        AllowedScopes = { "openid", "profile", "catalog.read" },
-        AllowOfflineAccess = true,
-        RefreshTokenUsage = TokenUsage.OneTimeOnly,
-        AccessTokenLifetime = 300
-    }
-})
-.AddServerSideSessions();
-
-builder.Services.AddRazorPages();
-var app = builder.Build();
-
-app.UseForwardedHeaders();
-app.UseHttpsRedirection();
-app.UseHsts();
-
-// CSP middleware
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path.Value ?? "";
-    if (path.StartsWith("/account", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/consent", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/connect", StringComparison.OrdinalIgnoreCase))
-    {
-        context.Response.Headers.Append("Content-Security-Policy",
-            "default-src 'self'; frame-ancestors 'none'; object-src 'none'");
-        context.Response.Headers.Append("X-Frame-Options", "DENY");
-        context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    }
-    await next();
 });
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseRateLimiter();
-app.UseIdentityServer();
-app.UseAuthorization();
-app.MapRazorPages();
-app.Run();
 ```
+
+#### 2. Implicit Flow Client (spa.legacy)
+**Finding:** `spa.legacy` uses `GrantTypes.Implicit` with `AllowAccessTokensViaBrowser = true`. Tokens are exposed in URL fragments, browser history, and referrer headers.
+**Remediation:** Migrate to authorization code + PKCE:
+
+```csharp
+new Client
+{
+    ClientId = "spa.legacy",
+    AllowedGrantTypes = GrantTypes.Code,
+    RequirePkce = true,
+    RequireClientSecret = false,
+    // Remove AllowAccessTokensViaBrowser
+    RedirectUris = { "https://spa.example.com/callback" },
+    PostLogoutRedirectUris = { "https://spa.example.com" },
+    AllowedScopes = { "openid", "profile", "catalog.read" },
+    AllowedCorsOrigins = { "https://spa.example.com" }
+}
+```
+
+#### 3. PKCE Disabled on web.app
+**Finding:** `RequirePkce = false` on the web.app client.
+**Remediation:** Set `RequirePkce = true`.
+
+### High Issues
+
+#### 4. Wildcard Redirect URIs (web.app)
+**Finding:** `RedirectUris = { "https://*.example.com/signin-oidc" }` — allows redirect to any subdomain, enabling open redirector attacks.
+**Remediation:** Replace with exact-match URIs:
+
+```csharp
+RedirectUris = { "https://app.example.com/signin-oidc" },
+PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" }
+```
+
+#### 5. Hardcoded Client Secrets
+**Finding:** `"SuperSecret123".Sha256()`, `"WorkerSecret!".Sha256()`, `"InternalSecret".Sha256()` are hardcoded in source.
+**Remediation:** Load from configuration:
+
+```csharp
+ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) }
+```
+
+#### 6. 8-Hour Access Tokens (web.app)
+**Finding:** `AccessTokenLifetime = 28800` (8 hours). A stolen token has an 8-hour replay window.
+**Remediation:** Reduce to 5 minutes:
+
+```csharp
+AccessTokenLifetime = 300, // 5 minutes
+```
+
+#### 7. Refresh Token Reuse (web.app)
+**Finding:** `RefreshTokenUsage = TokenUsage.ReUse` means a stolen refresh token remains valid indefinitely.
+**Remediation:** Use one-time rotation:
+
+```csharp
+RefreshTokenUsage = TokenUsage.OneTimeOnly,
+RefreshTokenExpiration = TokenExpiration.Absolute,
+AbsoluteRefreshTokenLifetime = 86400
+```
+
+#### 8. Mixed Grant Types (web.app)
+**Finding:** `GrantTypes.CodeAndClientCredentials` combines user and machine flows.
+**Remediation:** Use `GrantTypes.Code` only.
+
+### Medium Issues
+
+#### 9. No HTTPS/HSTS Configuration
+**Finding:** No `UseHttpsRedirection()`, `UseHsts()`, or `UseForwardedHeaders()` in the middleware pipeline.
+**Remediation:** Add transport security middleware.
+
+#### 10. No Rate Limiting
+**Finding:** Token and authorize endpoints are unprotected against brute-force.
+**Remediation:** Add `AddRateLimiter` with per-endpoint policies.
+
+#### 11. No CSP Headers
+**Finding:** UI pages have no Content-Security-Policy, exposing them to XSS and clickjacking.
+**Remediation:** Add CSP middleware with `frame-ancestors 'none'` and `object-src 'none'`.
+
+#### 12. Empty CORS Origins on web.app
+**Finding:** `AllowedCorsOrigins = { }` — no CORS origins configured.
+**Remediation:** Add the application origin.
+
+## Audit Summary
+
+| # | Finding | Severity | Status |
+|---|---------|----------|--------|
+| 1 | Developer signing credential | Critical | Fixed — automatic key management |
+| 2 | Implicit flow (spa.legacy) | Critical | Fixed — migrated to Code + PKCE |
+| 3 | PKCE disabled (web.app) | Critical | Fixed — RequirePkce = true |
+| 4 | Wildcard redirect URIs | High | Fixed — exact-match URIs |
+| 5 | Hardcoded client secrets | High | Fixed — loaded from configuration |
+| 6 | 8-hour access tokens | High | Fixed — reduced to 5 minutes |
+| 7 | Refresh token reuse | High | Fixed — OneTimeOnly rotation |
+| 8 | Mixed grant types | High | Fixed — Code only |
+| 9 | No HTTPS/HSTS | Medium | Fixed — added transport security |
+| 10 | No rate limiting | Medium | Recommended — add per-endpoint limits |
+| 11 | No CSP headers | Medium | Recommended — add CSP middleware |
+| 12 | Empty CORS origins | Medium | Fixed — added app origin |

@@ -1,23 +1,34 @@
-# Fixing IDX20803 Configuration Error in Aspire
+# Fixing IDX20803 Discovery Configuration Error
 
-## The Problem
+The error `IDX20803: Unable to obtain configuration from .well-known/openid-configuration` means your API can't reach the IdentityServer discovery endpoint.
 
-This error occurs because your API is trying to reach IdentityServer's discovery endpoint before IdentityServer is ready to serve requests.
+## Common Causes and Fixes
 
-## Solution
+1. **IdentityServer isn't running**: Make sure IdentityServer is started before the API tries to connect.
 
-Make sure your API depends on IdentityServer in the AppHost:
+2. **Wrong authority URL**: Check that the authority URL in your API configuration matches the actual IdentityServer URL:
+
+```csharp
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = "https://localhost:5001"; // Make sure this is correct
+    });
+```
+
+3. **Network/certificate issues**: If using HTTPS, ensure the dev certificate is trusted.
+
+4. **In Aspire**, make sure the projects are connected:
 
 ```csharp
 var api = builder.AddProject<Projects.WeatherApi>("weather-api")
-    .WithReference(identityServer)
-    .WaitFor(identityServer);
+    .WithReference(identityServer);
 ```
 
-`WaitFor` ensures the API doesn't start until IdentityServer is healthy, and `WithReference` makes the endpoint URL available.
+5. **Retry policy**: Consider adding a retry policy for the backchannel HTTP handler:
 
-## Additional Tips
+```csharp
+options.BackchannelHttpHandler = new HttpClientHandler();
+```
 
-- Make sure IdentityServer's URL is correctly configured in the API
-- Check that IdentityServer can serve the discovery document at `/.well-known/openid-configuration`
-- Consider adding retry logic in the API for resilience
+The most common fix is ensuring the authority URL is correct and IdentityServer is accessible from the API.

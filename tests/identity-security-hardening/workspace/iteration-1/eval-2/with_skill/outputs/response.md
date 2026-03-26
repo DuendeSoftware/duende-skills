@@ -1,67 +1,61 @@
 # Hardening the web.app Client — OAuth 2.0 Security BCP (RFC 9700)
 
-The `web.app` client has multiple security issues per RFC 9700. Here's the hardened configuration:
+## Issues Found
 
-## Issues Found and Fixes
+1. **PKCE disabled** (`RequirePkce = false`) — authorization code interception attack
+2. **Wildcard redirect URIs** (`https://*.example.com/...`) — open redirector
+3. **Mixed grant types** (`GrantTypes.CodeAndClientCredentials`) — violates least privilege
+4. **8-hour access tokens** (`AccessTokenLifetime = 28800`) — massive replay window
+5. **Refresh token reuse** (`TokenUsage.ReUse`) — stolen refresh tokens remain valid
 
-1. **PKCE disabled** (`RequirePkce = false`) — Must be `true` for all authorization code clients
-2. **Wildcard redirect URIs** (`https://*.example.com/signin-oidc`) — Must use exact-match fully-qualified URIs
-3. **Wrong grant type** (`GrantTypes.CodeAndClientCredentials`) — Interactive clients should use `GrantTypes.Code` only
-4. **8-hour access token** (`AccessTokenLifetime = 28800`) — Must be reduced to ≤ 5 minutes (300 seconds)
-5. **Refresh token reuse** (`TokenUsage.ReUse`) — Must use `TokenUsage.OneTimeOnly` to prevent replay
-6. **Sliding refresh expiration** — Should use `Absolute` with a reasonable lifetime
-
-## Hardened web.app Client
+## Hardened Client Configuration
 
 ```csharp
 new Client
 {
     ClientId = "web.app",
     ClientName = "Main Web Application",
-    
-    // ✅ Authorization code only — never combine with client credentials
+
+    // Use authorization code only — no client credentials mixed in
     AllowedGrantTypes = GrantTypes.Code,
-    
-    // ✅ PKCE is non-negotiable for all authorization code clients
+
+    // PKCE is mandatory for all authorization code clients (RFC 9700)
     RequirePkce = true,
 
-    // Secret loaded from configuration, not hardcoded
     ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) },
 
-    // ✅ Exact-match fully-qualified HTTPS URIs — no wildcards
+    // Exact-match redirect URIs — no wildcards
     RedirectUris = { "https://app.example.com/signin-oidc" },
     PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
 
     AllowedScopes = { "openid", "profile", "email", "catalog.read", "catalog.write" },
 
     AllowOfflineAccess = true,
-    
-    // ✅ Short access token — 5 minutes reduces replay window
+
+    // Short access token — 5 minutes reduces replay window
     AccessTokenLifetime = 300,
-    
-    // ✅ Refresh tokens rotate on every use — each use issues a new token
+
+    // One-time refresh tokens — each use issues a new token
     RefreshTokenUsage = TokenUsage.OneTimeOnly,
-    
-    // ✅ Absolute expiration — prevents indefinitely-extended sessions
+
+    // Absolute expiration — session cannot extend indefinitely
     RefreshTokenExpiration = TokenExpiration.Absolute,
     AbsoluteRefreshTokenLifetime = 86400, // 24 hours
-    
-    // ✅ Revoke refresh tokens when the user's session ends
+
+    // Revoke tokens when user session ends
     CoordinateLifetimeWithUserSession = true,
 
     AllowedCorsOrigins = { "https://app.example.com" }
 }
 ```
 
-## Summary of Changes
+## Changes Summary
 
-| Setting | Before (Insecure) | After (Hardened) |
-|---------|-------------------|-----------------|
-| `AllowedGrantTypes` | `CodeAndClientCredentials` | `Code` |
-| `RequirePkce` | `false` | `true` |
-| `RedirectUris` | `https://*.example.com/signin-oidc` | `https://app.example.com/signin-oidc` |
-| `AccessTokenLifetime` | `28800` (8 hours) | `300` (5 minutes) |
-| `RefreshTokenUsage` | `ReUse` | `OneTimeOnly` |
-| `RefreshTokenExpiration` | `Sliding` | `Absolute` |
-| `AbsoluteRefreshTokenLifetime` | `2592000` (30 days) | `86400` (24 hours) |
-| `CoordinateLifetimeWithUserSession` | not set | `true` |
+| Setting | Before | After | RFC 9700 Requirement |
+|---------|--------|-------|---------------------|
+| `RequirePkce` | `false` | `true` | Section 2.1.1 — PKCE required |
+| `RedirectUris` | `https://*.example.com/...` | `https://app.example.com/signin-oidc` | Section 2.3 — exact match |
+| `AllowedGrantTypes` | `CodeAndClientCredentials` | `Code` | Least privilege |
+| `AccessTokenLifetime` | `28800` (8h) | `300` (5min) | Section 2.2 — short-lived |
+| `RefreshTokenUsage` | `ReUse` | `OneTimeOnly` | Section 2.2.2 — rotation |
+| `RefreshTokenExpiration` | `Sliding` | `Absolute` | Prevents indefinite sessions |

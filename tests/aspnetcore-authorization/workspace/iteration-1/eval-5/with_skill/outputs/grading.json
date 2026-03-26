@@ -1,13 +1,34 @@
 {
   "eval_id": 5,
+  "variant": "with_skill",
   "assertions": [
-    {"assertion": "A Document class/record is defined with at least Department and OwnerId properties", "pass": true, "rationale": "Response defines public record Document(int Id, string Title, string Department, string OwnerId)"},
-    {"assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit", "pass": true, "rationale": "Response defines Operations class with static Read and Edit OperationAuthorizationRequirement fields"},
-    {"assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>", "pass": true, "rationale": "Response shows DocumentAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Document>"},
-    {"assertion": "The Read operation checks the user's 'department' claim against the resource's Department property", "pass": true, "rationale": "Response checks context.User.FindFirst(\"department\")?.Value against resource.Department"},
-    {"assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property", "pass": true, "rationale": "Response checks context.User.FindFirst(\"sub\")?.Value against resource.OwnerId"}
+    {
+      "assertion": "A Document class/record is defined with at least Department and OwnerId properties",
+      "pass": true,
+      "rationale": "The code defines 'public record Document(int Id, string Title, string Department, string OwnerId)'."
+    },
+    {
+      "assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit",
+      "pass": true,
+      "rationale": "The code defines 'public static class Operations' with 'public static readonly OperationAuthorizationRequirement Read' and 'Edit' fields."
+    },
+    {
+      "assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>",
+      "pass": true,
+      "rationale": "The handler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>."
+    },
+    {
+      "assertion": "The Read operation checks the user's 'department' claim against the resource's Department property",
+      "pass": true,
+      "rationale": "The code checks context.User.HasClaim(\"department\", resource.Department) for the Read operation."
+    },
+    {
+      "assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property",
+      "pass": true,
+      "rationale": "The code gets userId from context.User.FindFirst(\"sub\")?.Value and compares resource.OwnerId == userId for the Edit operation."
+    }
   ],
-  "passed": 5,
-  "failed": 0,
-  "total": 5
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
 }

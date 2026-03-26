@@ -1,1 +1,25 @@
-{"eval_id":5,"variant":"with_skill","assertions":[{"assertion":"Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler","pass":true,"rationale":"Uses AddUserAccessTokenHttpClient(\"invoices\", ...) with BaseAddress set to the invoice API URL."},{"assertion":"Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler","pass":true,"rationale":"Uses AddClientAccessTokenHttpClient(\"masterdata\", ...) with BaseAddress set to the master data API URL."},{"assertion":"Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management","pass":true,"rationale":"builder.Services.AddOpenIdConnectAccessTokenManagement() is called, enabling both user and client token flows."},{"assertion":"Output sets distinct named or typed clients for each API with the correct BaseAddress","pass":true,"rationale":"Two distinct named clients: \"invoices\" with BaseAddress https://api.example.com/invoices/ and \"masterdata\" with BaseAddress https://api.example.com/masterdata/."}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 5,
+  "mode": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler",
+      "passed": true
+    },
+    {
+      "assertion": "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler",
+      "passed": true
+    },
+    {
+      "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management",
+      "passed": true
+    },
+    {
+      "assertion": "Output sets distinct named or typed clients for each API with the correct BaseAddress",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

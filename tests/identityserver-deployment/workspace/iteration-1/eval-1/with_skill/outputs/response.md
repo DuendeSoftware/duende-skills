@@ -1,38 +1,38 @@
-# Fixing HTTP URLs in the Discovery Document Behind Nginx
+# Fixing Discovery Document HTTP URLs Behind Nginx Reverse Proxy
 
-## The Problem
+When IdentityServer runs behind a TLS-terminating reverse proxy like Nginx, the middleware sees the internal HTTP request, not the original HTTPS request. This causes the discovery document at `/.well-known/openid-configuration` to advertise `http://` URLs instead of `https://`.
 
-When IdentityServer runs behind a reverse proxy (like Nginx) that terminates TLS, the middleware sees the internal HTTP request — not the original HTTPS request from the client. This causes the discovery document at `/.well-known/openid-configuration` to publish `http://` URLs instead of `https://`.
+## Root Cause
 
-The root cause is that ASP.NET Core doesn't automatically read the `X-Forwarded-Proto` and `X-Forwarded-Host` headers that Nginx sets. You need to configure the **ForwardedHeaders middleware** to process these headers.
+The reverse proxy terminates TLS and forwards the request to IdentityServer over plain HTTP. ASP.NET Core sees `Request.Scheme = "http"` unless you configure it to read the forwarded headers set by the proxy.
 
 ## Solution: Configure ForwardedHeaders Middleware
 
-### Option 1: Explicit Configuration (Recommended for Production)
+### Option 1: Environment Variable (Simplest)
 
-Update your `Program.cs` to configure and use `ForwardedHeadersOptions`:
+Set the `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` environment variable. This automatically adds the ForwardedHeaders middleware and accepts forwarded headers from any single proxy. This is the simplest approach for cloud-hosted or Kubernetes environments.
+
+### Option 2: Explicit Configuration (More Control)
 
 ```csharp
-using Duende.IdentityServer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure forwarded headers for reverse proxy
+// Configure ForwardedHeaders
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedProto |
                                 ForwardedHeaders.XForwardedHost;
 
-    // Add the IP address of your Nginx proxy
-    options.KnownProxies.Add(IPAddress.Parse("10.0.0.5")); // Replace with your Nginx IP
+    // In production, add the IP address of your Nginx proxy
+    options.KnownProxies.Add(IPAddress.Parse("10.0.0.1"));
 
-    // Or use a network range if your proxy IP may vary
-    // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 16));
+    // Or use a network range for dynamic proxy IPs
+    // options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
 
-    // Number of proxies in front of the app
+    // Number of proxies in the chain
     options.ForwardLimit = 1;
 });
 
@@ -43,7 +43,7 @@ builder.Services.AddIdentityServer()
 
 var app = builder.Build();
 
-// IMPORTANT: ForwardedHeaders middleware MUST run before IdentityServer middleware
+// IMPORTANT: ForwardedHeaders middleware must run BEFORE IdentityServer
 app.UseForwardedHeaders();
 
 app.UseIdentityServer();
@@ -53,40 +53,19 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-### Option 2: Environment Variable (Simplest)
-
-Alternatively, set the `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` environment variable. This automatically adds the ForwardedHeaders middleware and accepts forwarded headers from any single proxy. This is convenient for cloud-hosted environments and Kubernetes but offers less control.
-
-```bash
-# In your deployment configuration (e.g., Kubernetes manifest, Docker Compose)
-ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
-```
-
 ## Key Points
 
-### Middleware Ordering
+1. **Pipeline order matters**: `UseForwardedHeaders()` must run **before** `UseIdentityServer()` and before any authentication middleware. Otherwise, IdentityServer will see the unmodified HTTP scheme when generating URLs for the discovery document.
 
-The `UseForwardedHeaders()` call **must come before** `UseIdentityServer()` in the pipeline. If it runs after IdentityServer has already processed the request, the scheme and host corrections won't be applied, and the discovery document will still show `http://` URLs.
+2. **KnownProxies/KnownNetworks**: By default, only `127.0.0.1` (localhost) and `::1` are trusted. In production, you **must** add your Nginx proxy's IP address to `KnownProxies` or add its network range to `KnownNetworks`. If the proxy IP isn't trusted, the forwarded headers are ignored.
 
-### KnownProxies and KnownNetworks
+3. **XForwardedProto is the critical header**: The `ForwardedHeaders.XForwardedProto` flag is what fixes the `http://` vs `https://` issue. It tells ASP.NET Core to read the `X-Forwarded-Proto` header set by Nginx (which should be `https`) and use that as the request scheme.
 
-By default, ASP.NET Core only trusts proxies on localhost (`127.0.0.1/8` and `::1`). This works for local development, but **in production you must explicitly configure the IP addresses of your proxy servers**:
+4. **Nginx configuration**: Ensure your Nginx config sets the proper headers:
+   ```nginx
+   proxy_set_header X-Forwarded-Proto $scheme;
+   proxy_set_header X-Forwarded-Host $host;
+   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+   ```
 
-- **`KnownProxies`**: Add specific IP addresses of your proxy servers
-- **`KnownNetworks`**: Add CIDR ranges if proxy IPs may vary within a subnet
-
-If you don't configure these, the ForwardedHeaders middleware will silently ignore the forwarded headers from untrusted proxies.
-
-### Why XForwardedProto Is Critical
-
-The `ForwardedHeaders.XForwardedProto` flag is the one that specifically fixes the `http://` vs `https://` issue. When Nginx terminates TLS and forwards the request to Kestrel over HTTP, it sets `X-Forwarded-Proto: https`. The middleware reads this header and sets `HttpContext.Request.Scheme = "https"`, which IdentityServer then uses to generate correct URLs in the discovery document.
-
-## Verification
-
-After deploying the change, verify by hitting the discovery endpoint:
-
-```bash
-curl https://your-domain/.well-known/openid-configuration | jq .issuer
-```
-
-The `issuer` and all endpoint URLs should now show `https://` instead of `http://`.
+After applying this configuration, the discovery document will correctly show `https://` URLs.

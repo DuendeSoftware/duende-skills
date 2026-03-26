@@ -2,62 +2,116 @@
 
 ## Pushed Authorization Requests (PAR)
 
-PAR (RFC 9126) moves the authorization parameters from the query string to a **backchannel POST** to the authorization server's PAR endpoint (`/connect/par` in Duende IdentityServer). Instead of putting all parameters in the authorize URL, the client:
+### What It Is
 
-1. **POSTs** all authorization parameters (client_id, scope, redirect_uri, code_challenge, etc.) to `/connect/par`
-2. Receives a `request_uri` in the response
-3. Redirects the user to the authorize endpoint with just `client_id` and `request_uri`
+PAR (RFC 9126) moves the authorization parameters from the **browser query string** to a **backchannel POST** between the client and IdentityServer. Instead of stuffing all parameters into the authorize URL, the client first POSTs them to the PAR endpoint and receives a `request_uri` in return.
+
+### How It Works
 
 ```
-Step 1: POST /connect/par
-  client_id=web.app
-  &scope=openid profile api1
-  &redirect_uri=https://app.example.com/callback
-  &code_challenge=...
-  &code_challenge_method=S256
+Step 1: Client → IdentityServer (backchannel)
+POST /connect/par
+Content-Type: application/x-www-form-urlencoded
 
-Response: { "request_uri": "urn:ietf:params:oauth:request_uri:abc123", "expires_in": 60 }
+client_id=web.app
+&client_secret=secret
+&response_type=code
+&scope=openid profile api1
+&redirect_uri=https://webapp.example.com/callback
+&code_challenge=xxx
+&code_challenge_method=S256
 
-Step 2: Redirect to /authorize?client_id=web.app&request_uri=urn:ietf:params:oauth:request_uri:abc123
+Response:
+{
+    "request_uri": "urn:ietf:params:oauth:request_uri:abc123",
+    "expires_in": 60
+}
+
+Step 2: Client → Browser redirect
+GET /connect/authorize?
+    client_id=web.app
+    &request_uri=urn:ietf:params:oauth:request_uri:abc123
 ```
 
-### Why PAR Improves Security
+### Security Benefits
 
-- **Prevents parameter tampering** — Authorization parameters are sent directly to the server over a secure backchannel, not through the browser's URL bar where they could be intercepted or modified
-- **Eliminates URL length issues** — Complex authorization requests with many parameters no longer hit URL length limits
-- **Enables authenticated requests** — The client authenticates to the PAR endpoint, proving the request came from a legitimate client
+1. **Prevents parameter tampering** — Authorization parameters are sent directly to the server via a secure backchannel. An attacker cannot modify parameters in the browser URL.
+2. **Eliminates URL length issues** — Complex authorization requests with many parameters or JWT request objects can exceed URL length limits. PAR avoids this by sending parameters in a POST body.
+3. **Server-side parameter validation** — The server can validate all parameters before the user is redirected, returning errors immediately rather than after the user interacts.
+4. **Reduces information leakage** — Parameters are not exposed in browser history, referrer headers, or server access logs.
 
 ## DPoP (Demonstrating Proof-of-Possession)
 
-DPoP (RFC 9449) **binds access tokens to a client's cryptographic key pair**. This prevents token theft and replay — even if an attacker steals an access token, they cannot use it without the corresponding private key.
+### What It Is
 
-### How DPoP Works
+DPoP (RFC 9449) **binds access tokens to a client's cryptographic key pair**, preventing stolen tokens from being used by attackers. Standard bearer tokens can be used by anyone who possesses them. DPoP tokens are only usable by the client that holds the private key.
 
-1. The client generates an asymmetric key pair
-2. For every request to the token endpoint and every API call, the client creates a **DPoP proof** — a signed JWT containing the public key, the HTTP method, and the target URL
-3. The token endpoint binds the issued access token to the client's public key via a **`cnf` (confirmation) claim**
-4. When the API receives the token, it verifies the DPoP proof matches the token's `cnf` claim
+### How It Works
 
-If an attacker steals the access token, they cannot produce valid DPoP proofs because they don't have the private key. The token is useless without the matching proof.
+```
+Step 1: Client generates an asymmetric key pair (once)
 
-### Why DPoP Improves Security
+Step 2: Token Request
+- Client creates a DPoP proof JWT, signed with the private key
+- The proof contains the public key (jwk header), the HTTP method, and the target URL
+- Client sends the proof in the "DPoP" HTTP header alongside the token request
 
-- **Prevents stolen token replay** — Access tokens bound to a key pair are useless without the private key
-- **Complements PKCE** — PKCE protects the authorization code exchange; DPoP protects the access token itself
-- **Works with bearer token infrastructure** — DPoP is an upgrade path from bearer tokens without requiring mTLS infrastructure
+POST /connect/token
+DPoP: eyJ...  (DPoP proof JWT)
+
+grant_type=authorization_code
+&code=xxx
+&code_verifier=yyy
+&client_id=web.app
+
+Step 3: IdentityServer Response
+- IdentityServer validates the DPoP proof
+- Issues an access token with a "cnf" (confirmation) claim containing the hash of the client's public key
+- Token type is "DPoP" instead of "Bearer"
+
+{
+    "access_token": "eyJ...cnf:{jkt: 'hash-of-public-key'}...",
+    "token_type": "DPoP"
+}
+
+Step 4: API Call
+- Client creates a new DPoP proof for the API request
+- Sends both the access token and the proof
+
+GET /api/resource
+Authorization: DPoP eyJ...
+DPoP: eyJ... (new proof for this specific request)
+
+Step 5: API Validation
+- API verifies the DPoP proof is signed by the key matching the token's "cnf" claim
+- If they don't match, the token is rejected
+```
+
+### Security Benefits
+
+1. **Prevents token theft/replay** — A stolen DPoP-bound access token is useless without the private key. An attacker would need both the token AND the key.
+2. **Request binding** — Each DPoP proof is bound to a specific HTTP method and URL, preventing replay across different endpoints.
+3. **Sender-constrained tokens** — Unlike bearer tokens which work for anyone, DPoP tokens only work for the holder of the private key.
 
 ## FAPI 2.0
 
-**FAPI 2.0** (Financial-grade API Security Profile) is a stringent security profile that **requires PAR and DPoP (or mTLS)** for enhanced security. It's designed for financial services and other high-security APIs. Duende IdentityServer supports FAPI 2.0 compliance from v7.3+.
+The **Financial-grade API (FAPI) 2.0** security profile requires both PAR and proof-of-possession (DPoP or mTLS) for enhanced security. FAPI 2.0 is designed for high-security scenarios like financial services, healthcare, and government APIs.
 
-FAPI 2.0 mandates:
-- PAR for all authorization requests
-- DPoP or mTLS for sender-constrained tokens
-- Stricter redirect URI validation
-- Additional protections against token leakage
+Duende IdentityServer supports FAPI 2.0 compliance from v7.3+. Clients can be configured with:
 
-## When Would You Need Them?
+```csharp
+new Client
+{
+    RequirePushedAuthorization = true,  // PAR required
+    RequireDPoP = true                  // DPoP required
+}
+```
 
-- **PAR** — When your authorization requests contain sensitive data, when you need to prevent parameter tampering, or when you're building a financial-grade application
-- **DPoP** — When token theft is a significant risk, when you need proof-of-possession without mTLS infrastructure, or when targeting FAPI 2.0 compliance
-- **Both** — When building financial services, healthcare, or other regulated applications requiring the highest security guarantees
+## Standard Auth Code + PKCE vs PAR + DPoP
+
+| Threat | Auth Code + PKCE | + PAR | + DPoP |
+|--------|-----------------|-------|--------|
+| Code interception | ✅ Protected (PKCE) | ✅ Protected | ✅ Protected |
+| Parameter tampering | ❌ Possible in URL | ✅ Protected | ✅ Protected |
+| Token theft/replay | ❌ Bearer tokens reusable | ❌ Bearer tokens reusable | ✅ Protected |
+| URL length limits | ❌ Possible | ✅ Eliminated | ✅ Eliminated |

@@ -2,11 +2,31 @@
   "eval_id": 6,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'", "pass": true, "rationale": "Implements IExtensionGrantValidator with correct GrantType"},
-    {"assertion": "Extracts and validates the subject_token from the request", "pass": true, "rationale": "Extracts and validates subject_token correctly"},
-    {"assertion": "Returns a GrantValidationResult with a subject ID and custom claims array", "pass": true, "rationale": "Returns GrantValidationResult with sub and claims array"},
-    {"assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder", "pass": true, "rationale": "Shows AddExtensionGrantValidator<TokenExchangeValidator>()"},
-    {"assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further", "pass": false, "rationale": "No mention of IProfileService being called after the grant validator"}
+    {
+      "assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'",
+      "pass": true,
+      "rationale": "GrantType property returns the correct URI"
+    },
+    {
+      "assertion": "Extracts and validates the subject_token from the request",
+      "pass": true,
+      "rationale": "Gets subject_token from request, though validation uses JwtSecurityTokenHandler instead of ITokenValidator"
+    },
+    {
+      "assertion": "Returns a GrantValidationResult with a subject ID and custom claims array",
+      "pass": true,
+      "rationale": "new GrantValidationResult with subject and claims array"
+    },
+    {
+      "assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": ".AddExtensionGrantValidator<TokenExchangeValidator>() is shown"
+    },
+    {
+      "assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further",
+      "pass": false,
+      "rationale": "No mention of IProfileService being called after the grant validator to augment claims"
+    }
   ],
   "pass_count": 4,
   "total_count": 5,

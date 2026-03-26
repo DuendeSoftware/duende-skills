@@ -1,30 +1,36 @@
-# Multi-Tenant Token Customization
+# Multi-Tenant Token Request Customization
 
-For a multi-tenant app where each tenant needs different API scopes/resources, you can customize token requests dynamically.
+For a multi-tenant SaaS app where each tenant needs different scopes and resources, you can customize token requests dynamically.
 
-## Custom Token Request Middleware
+## Approach
+
+Duende.AccessTokenManagement supports customizing token requests per-call. You can implement a customizer that modifies token parameters based on the tenant context.
 
 ```csharp
-public class TenantTokenCustomizer
+public class TenantTokenCustomizer : ITokenRequestCustomizer
 {
     private readonly ITenantResolver _tenantResolver;
+    private readonly ITenantConfigStore _configStore;
 
-    public TenantTokenCustomizer(ITenantResolver tenantResolver)
+    public TenantTokenCustomizer(ITenantResolver resolver, ITenantConfigStore configStore)
     {
-        _tenantResolver = tenantResolver;
+        _tenantResolver = resolver;
+        _configStore = configStore;
     }
 
-    public async Task<TokenRequestParameters> CustomizeAsync(
-        HttpContext httpContext, 
-        TokenRequestParameters parameters)
+    public async Task<TokenRequestParameters> Customize(
+        HttpRequestMessage httpRequest,
+        TokenRequestParameters baseParameters,
+        CancellationToken cancellationToken)
     {
-        var tenantId = await _tenantResolver.ResolveAsync(httpContext);
-        var tenantConfig = await GetTenantConfig(tenantId);
+        var tenantId = await _tenantResolver.GetTenantIdAsync(httpRequest, cancellationToken);
+        var config = await _configStore.GetConfigurationAsync(tenantId, cancellationToken);
 
-        return new TokenRequestParameters
+        // Create a modified copy with tenant-specific values
+        return baseParameters with
         {
-            Scope = tenantConfig.RequiredScopes,
-            Resource = tenantConfig.ApiResource,
+            Resource = Resource.Parse(config.ApiResource),
+            Scope = Scope.Parse(config.RequiredScopes)
         };
     }
 }
@@ -33,38 +39,15 @@ public class TenantTokenCustomizer
 ## Registration
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie")
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-    });
-
-builder.Services.AddAccessTokenManagement();
 builder.Services.AddSingleton<ITenantResolver, HeaderTenantResolver>();
+builder.Services.AddSingleton<ITenantConfigStore, DbTenantConfigStore>();
 
-builder.Services.AddHttpClient("tenant-api", client =>
-{
-    client.BaseAddress = new Uri("https://api.example.com/");
-}).AddUserAccessTokenHandler();
+var customizer = new TenantTokenCustomizer(
+    tenantResolver, tenantConfigStore);
 
-var app = builder.Build();
-app.Run();
+builder.Services.AddHttpClient("tenant-api")
+    .AddClientCredentialsTokenHandler(customizer,
+        ClientCredentialsClientName.Parse("api.client"));
 ```
 
-## Explanation
-
-- Create a customizer class that resolves the tenant from the request context
-- Modify the token request parameters (scope, resource) based on the tenant configuration
-- Register the HTTP client with appropriate token handler
-- Each outgoing request will have tenant-specific token parameters
+The customizer is invoked on every outgoing request, allowing you to inspect the request and determine the appropriate tenant-specific token parameters. The library handles caching separate tokens for different scope/resource combinations automatically.

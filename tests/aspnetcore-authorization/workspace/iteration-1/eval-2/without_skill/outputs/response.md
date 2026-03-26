@@ -1,8 +1,6 @@
-# Scope-Based Authorization for Products API
+# Adding Scope-Based Authorization to Products API
 
-Here's how to add scope-based authorization policies for your products API endpoints.
-
-## Updated Program.cs
+You can use ASP.NET Core's policy-based authorization to enforce scope requirements on your API endpoints. Here's how to set it up:
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,9 +53,10 @@ app.MapGet("/health", () => Results.Ok("healthy"));
 app.Run();
 ```
 
-## How It Works
+## Explanation
 
-1. Two policies are defined: `CatalogRead` requires the `scope` claim with value `catalog.read`, and `CatalogWrite` requires `catalog.write`.
-2. `.RequireAuthorization("CatalogRead")` is applied to GET /products.
-3. `.RequireAuthorization("CatalogWrite")` is applied to POST /products.
-4. The `RequireClaim` method performs an exact match on the claim type and value.
+The `AddAuthorization` method lets you define named policies. Each policy uses `RequireClaim` to check that the JWT token contains a `scope` claim with the expected value.
+
+The `RequireAuthorization` method on the minimal API endpoint builder applies the named policy to that endpoint. When a request comes in, ASP.NET Core will check whether the token satisfies the policy before executing the handler.
+
+Make sure the scopes are configured correctly on your identity provider side so that the access tokens actually contain these scope values.

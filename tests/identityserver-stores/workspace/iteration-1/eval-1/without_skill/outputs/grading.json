@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs calls AddConfigurationStore with options that include ConfigureDbContext using UseSqlServer", "pass": true, "rationale": "AddConfigurationStore calls ConfigureDbContext with UseSqlServer"},
-    {"assertion": "Program.cs calls AddOperationalStore with options that include ConfigureDbContext using UseSqlServer", "pass": true, "rationale": "AddOperationalStore calls ConfigureDbContext with UseSqlServer"},
-    {"assertion": "Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)", "pass": false, "rationale": "Neither store registration includes MigrationsAssembly"},
-    {"assertion": "AddOperationalStore options set EnableTokenCleanup to true and TokenCleanupInterval to 1800", "pass": true, "rationale": "Sets EnableTokenCleanup = true and TokenCleanupInterval = 1800"},
-    {"assertion": "The connection string is read from configuration via builder.Configuration.GetConnectionString(\"IdentityServer\") or equivalent", "pass": true, "rationale": "Uses builder.Configuration.GetConnectionString(\"IdentityServer\")"}
+    {
+      "assertion": "Program.cs calls AddConfigurationStore with options that include ConfigureDbContext using UseSqlServer",
+      "pass": true,
+      "rationale": "AddConfigurationStore with UseSqlServer present."
+    },
+    {
+      "assertion": "Program.cs calls AddOperationalStore with options that include ConfigureDbContext using UseSqlServer",
+      "pass": true,
+      "rationale": "AddOperationalStore with UseSqlServer present."
+    },
+    {
+      "assertion": "Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)",
+      "pass": false,
+      "rationale": "MigrationsAssembly is not set in either store registration. This is the most common EF setup error."
+    },
+    {
+      "assertion": "AddOperationalStore options set EnableTokenCleanup to true and TokenCleanupInterval to 1800",
+      "pass": true,
+      "rationale": "EnableTokenCleanup = true and TokenCleanupInterval = 1800."
+    },
+    {
+      "assertion": "The connection string is read from configuration via builder.Configuration.GetConnectionString(\"IdentityServer\") or equivalent",
+      "pass": true,
+      "rationale": "Uses builder.Configuration.GetConnectionString(\"IdentityServer\")."
+    }
   ],
   "pass_count": 4,
   "total_count": 5,

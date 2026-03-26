@@ -2,10 +2,26 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Response explains that UseRouting() must come before UseIdentityServer() in the pipeline", "pass": true, "rationale": "Response correctly identifies that UseRouting should come first"},
-    {"assertion": "Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally", "pass": false, "rationale": "Response does NOT mention that UseAuthentication is redundant; it actually keeps UseAuthentication in the corrected pipeline"},
-    {"assertion": "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization", "pass": false, "rationale": "Response places UseAuthentication between UseRouting and UseIdentityServer, while the correct pattern is UseRouting, UseIdentityServer, UseAuthorization without separate UseAuthentication"},
-    {"assertion": "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template", "pass": false, "rationale": "Response does not mention the Duende UI template requirement for UseAuthorization"}
+    {
+      "assertion": "Response explains that UseRouting() must come before UseIdentityServer() in the pipeline",
+      "pass": true,
+      "rationale": "Shows UseRouting() first and mentions it needs to come first for endpoint matching"
+    },
+    {
+      "assertion": "Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally",
+      "pass": false,
+      "rationale": "Keeps UseAuthentication() in the pipeline and places it before UseIdentityServer(); does not explain it's redundant"
+    },
+    {
+      "assertion": "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization",
+      "pass": false,
+      "rationale": "Places UseAuthentication() between UseRouting and UseIdentityServer, and the order UseAuthentication->UseIdentityServer is wrong (UseIdentityServer includes UseAuthentication)"
+    },
+    {
+      "assertion": "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template",
+      "pass": false,
+      "rationale": "No mention of why UseAuthorization is required or the Duende UI template"
+    }
   ],
   "pass_count": 1,
   "total_count": 4,

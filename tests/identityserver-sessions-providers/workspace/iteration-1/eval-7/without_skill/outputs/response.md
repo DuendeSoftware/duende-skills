@@ -1,8 +1,8 @@
 # Configuring Session Cleanup
 
-Here's how to configure session cleanup in Duende IdentityServer.
+Here's how to configure the automatic cleanup of expired sessions.
 
-## Updated Program.cs
+## Configuration
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
@@ -13,33 +13,20 @@ builder.Services.AddIdentityServer(options =>
     // Process 200 records per batch
     options.ServerSideSessions.RemoveExpiredSessionsBatchSize = 200;
 
-    // Disable back-channel logout on expiration
+    // Don't send back-channel logout on cleanup
     options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false;
 })
-    .AddInMemoryIdentityResources(new List<IdentityResource>
+    .AddServerSideSessions()
+    .AddOperationalStore(options =>
     {
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile(),
-        new IdentityResources.Email()
-    })
-    .AddInMemoryApiScopes(new List<ApiScope>
-    {
-        new ApiScope("catalog.read", "Read access to the catalog"),
-        new ApiScope("catalog.write", "Write access to the catalog"),
-        new ApiScope("orders.manage", "Manage orders")
-    })
-    .AddInMemoryClients(new List<Client>
-    {
-        // ... existing clients ...
-    })
-    .AddServerSideSessions();
+        options.ConfigureDbContext = b =>
+            b.UseSqlServer(connectionString);
+    });
 ```
 
-## Summary
+## Notes
 
-- The cleanup job runs every 5 minutes instead of the default 10 minutes
-- Each batch processes up to 200 expired sessions
-- Back-channel logout is disabled since clients don't support it
-- Server-side sessions are enabled via `AddServerSideSessions()`
-
-This should help clear out expired sessions more aggressively. Make sure your database can handle the additional load from the more frequent cleanup.
+- The cleanup job runs in the background and removes expired session records
+- Batch processing prevents overwhelming the database with large deletes
+- Disable back-channel logout if clients don't support it
+- For multi-instance deployments, consider using distributed locking to avoid concurrent cleanup runs

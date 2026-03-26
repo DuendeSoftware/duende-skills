@@ -1,1 +1,34 @@
-{"eval_id":2,"variant":"with_skill","assertions":[{"assertion":"A class implementing IClientStore is created with a constructor accepting IMongoDatabase","pass":true,"rationale":"MongoClientStore implements IClientStore with IMongoDatabase constructor parameter"},{"assertion":"The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)","pass":true,"rationale":"FindClientByIdAsync(string clientId) has no CancellationToken parameter"},{"assertion":"Registration calls AddClientStore<T> where T is the custom store class","pass":true,"rationale":"Calls AddClientStore<MongoClientStore>()"},{"assertion":"Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching","pass":true,"rationale":"Calls AddInMemoryCaching() and AddClientStoreCache<MongoClientStore>()"},{"assertion":"ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration","pass":true,"rationale":"Sets options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(5)"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A class implementing IClientStore is created with a constructor accepting IMongoDatabase",
+      "pass": true,
+      "rationale": "MongoClientStore implements IClientStore and accepts IMongoDatabase."
+    },
+    {
+      "assertion": "The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)",
+      "pass": true,
+      "rationale": "FindClientByIdAsync has only string clientId parameter, no CancellationToken."
+    },
+    {
+      "assertion": "Registration calls AddClientStore<T> where T is the custom store class",
+      "pass": true,
+      "rationale": "Uses .AddClientStore<MongoClientStore>()."
+    },
+    {
+      "assertion": "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching",
+      "pass": true,
+      "rationale": "Calls both AddInMemoryCaching() and AddClientStoreCache<MongoClientStore>()."
+    },
+    {
+      "assertion": "ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration",
+      "pass": true,
+      "rationale": "Sets options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(5)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

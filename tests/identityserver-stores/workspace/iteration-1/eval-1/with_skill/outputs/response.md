@@ -1,4 +1,6 @@
-# EF Core Configuration and Operational Stores with SQL Server
+# Setting Up EF Core Configuration and Operational Stores
+
+## Updated Program.cs
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -6,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
+var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 
 builder.Services.AddIdentityServer()
     .AddConfigurationStore(options =>
@@ -29,17 +31,25 @@ builder.Services.AddIdentityServer()
 var app = builder.Build();
 
 app.UseIdentityServer();
-
 app.MapGet("/", () => "IdentityServer is running");
-
 app.Run();
 
-public partial class Program { }
+// Config class unchanged...
 ```
 
-**Key points:**
-- `AddConfigurationStore` and `AddOperationalStore` both use `UseSqlServer` with the connection string.
-- `MigrationsAssembly` is set to the host project assembly (`typeof(Program).Assembly.GetName().Name`) so EF Core knows where to find migrations.
-- `EnableTokenCleanup = true` enables automatic cleanup of expired grants.
-- `TokenCleanupInterval = 1800` sets cleanup to run every 30 minutes (1800 seconds).
-- The connection string is read from `builder.Configuration.GetConnectionString("IdentityServer")`.
+## Key Points
+
+- **`AddConfigurationStore`** — Stores clients, API scopes, identity resources, and CORS policies in SQL Server via `ConfigurationDbContext`
+- **`AddOperationalStore`** — Stores persisted grants (tokens, codes, consent), device codes, signing keys, and sessions via `PersistedGrantDbContext`
+- **`MigrationsAssembly`** — Must be set to the host project assembly since that's where EF migrations will live. Without this, EF Core looks for migrations in the `Duende.IdentityServer.EntityFramework` assembly and fails.
+- **Token cleanup** — `EnableTokenCleanup = true` with `TokenCleanupInterval = 1800` runs cleanup every 30 minutes
+
+## Next Steps
+
+Create migrations:
+```bash
+dotnet ef migrations add InitConfig -c ConfigurationDbContext -o Data/Migrations/ConfigurationDb
+dotnet ef migrations add InitOps -c PersistedGrantDbContext -o Data/Migrations/OperationalDb
+dotnet ef database update -c ConfigurationDbContext
+dotnet ef database update -c PersistedGrantDbContext
+```

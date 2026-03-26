@@ -1,65 +1,61 @@
-# Customizing SAML Claim-to-Attribute Mapping
+# Custom SAML Attribute Mapping in IdentityServer
 
-To map claims to custom SAML attribute names, you can configure custom claim mappings in your SAML service provider configuration.
+To customize how claims are mapped to SAML attributes, you'll need to create a custom claim mapper. Here's how:
 
-## Approach 1: Use the ClaimMappings Dictionary
-
-The simplest approach is to use the `ClaimMappings` property on your service provider:
+## Creating a Custom Claims Mapper
 
 ```csharp
-var sp = new SamlServiceProvider
+using System.Security.Claims;
+
+public class CustomClaimsMapper
 {
-    EntityId = "https://legacy-crm.example.com",
-    ClaimMappings = new Dictionary<string, string>
+    public Dictionary<string, string> MapClaims(IEnumerable<Claim> claims)
     {
-        ["urn:custom:email"] = ClaimTypes.Email,
-        ["urn:custom:name"] = ClaimTypes.Name,
-        ["urn:custom:role"] = ClaimTypes.Role,
-    }
-};
-```
+        var mapped = new Dictionary<string, string>();
 
-## Approach 2: Create a Custom Claim Mapper
-
-For more control, implement a custom claim mapping service:
-
-```csharp
-public class CustomClaimsMapper : IClaimsMapper
-{
-    public IEnumerable<SamlAttribute> MapClaims(IEnumerable<Claim> claims)
-    {
-        var attributes = new List<SamlAttribute>();
-        
         foreach (var claim in claims)
         {
-            var name = claim.Type switch
+            var attributeName = claim.Type switch
             {
-                ClaimTypes.Email => "urn:custom:email",
-                ClaimTypes.Name => "urn:custom:name",
+                "email" => "urn:custom:email",
+                "name" => "urn:custom:displayname",
+                "given_name" => "urn:custom:firstname",
+                "family_name" => "urn:custom:lastname",
                 _ => claim.Type
             };
 
-            attributes.Add(new SamlAttribute
-            {
-                Name = name,
-                Value = claim.Value
-            });
+            mapped[attributeName] = claim.Value;
         }
 
-        return attributes;
+        return mapped;
     }
 }
 ```
 
-Register it:
+## Registration
 
 ```csharp
-builder.Services.AddSingleton<IClaimsMapper, CustomClaimsMapper>();
+builder.Services.AddSingleton<CustomClaimsMapper>();
 ```
 
-## Key Points
+## Usage
 
-- ClaimMappings on the service provider is the simplest approach for static mappings
-- For dynamic or complex mapping logic, implement a custom mapper
-- You can use different mappings per service provider
-- Test your mappings with the SP to ensure they accept the attribute format
+You'll need to hook this mapper into the SAML response generation pipeline. The exact approach depends on the extensibility points available, but typically you'd configure it as part of the SAML options or through middleware:
+
+```csharp
+builder.Services.AddIdentityServer()
+    .AddSaml(options =>
+    {
+        options.ClaimMappings = new Dictionary<string, string>
+        {
+            ["email"] = "urn:custom:email",
+            ["name"] = "urn:custom:displayname"
+        };
+    });
+```
+
+## Notes
+
+- You may need to extend the default mappings rather than completely replacing them
+- Test thoroughly with your SP to ensure the attribute format matches expectations
+- Consider caching mapped claims for performance

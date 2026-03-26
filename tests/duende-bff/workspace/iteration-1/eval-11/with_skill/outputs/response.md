@@ -1,4 +1,4 @@
-# Blazor WASM + BFF Integration
+# Blazor WASM with BFF Integration
 
 ## Server-Side Program.cs
 
@@ -8,18 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddBff()
     .ConfigureOpenIdConnect(options =>
     {
-        options.Authority = "https://identity.example.com";
-        options.ClientId = "blazor-wasm";
+        options.Authority = "https://idp.example.com";
+        options.ClientId = "blazor-wasm-bff";
         options.ClientSecret = "secret";
         options.ResponseType = "code";
         options.SaveTokens = true;
-
         options.Scope.Add("openid");
         options.Scope.Add("profile");
-        options.Scope.Add("api1");
         options.Scope.Add("offline_access");
+        options.Scope.Add("api1");
     })
-    .AddBffBlazorClient(); // Integrates BFF session management with Blazor WASM
+    .AddBffBlazorClient();
 
 builder.Services.AddAuthorization();
 builder.Services.AddRazorComponents()
@@ -32,15 +31,12 @@ app.UseAuthentication();
 app.UseBff();
 app.UseAuthorization();
 
+app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode();
 
 app.Run();
 ```
-
-Key points on the server side:
-- `AddBff().ConfigureOpenIdConnect(...)` sets up the BFF with OIDC authentication using the V4 fluent API.
-- `.AddBffBlazorClient()` integrates BFF session management with the Blazor WASM client. This ensures the WASM client can check authentication state and route API calls through the BFF host.
 
 ## Client-Side Program.cs (WASM Project)
 
@@ -51,40 +47,20 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddBffBlazorClient(options =>
 {
-    options.RemoteApiPath = "/api/remote";
     options.Polling = new BffBlazorClientPollingOptions
     {
-        Interval = TimeSpan.FromSeconds(30) // Poll session status every 30 seconds (default is 5s)
+        Interval = TimeSpan.FromSeconds(30)
     };
 });
 
-// Typed HTTP client that routes through the BFF host — CSRF headers are added automatically
+// Typed HTTP client that routes through the BFF host
 builder.Services.AddLocalApiHttpClient<WeatherClient>();
 
 await builder.Build().RunAsync();
 ```
 
-Key points on the client side:
-- `AddBffBlazorClient` configures the WASM app to communicate with the BFF host for authentication state. The `Polling.Interval` controls how often the client checks `/bff/user` to detect session expiry.
-- `AddLocalApiHttpClient<WeatherClient>()` creates a typed HTTP client that automatically routes requests through the BFF host and includes the required `X-CSRF: 1` header. Use this for calling local BFF API endpoints from your Blazor components.
+## How It Works
 
-## WeatherClient Example
-
-```csharp
-public class WeatherClient
-{
-    private readonly HttpClient _httpClient;
-
-    public WeatherClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
-    public async Task<WeatherForecast[]?> GetForecastAsync()
-    {
-        return await _httpClient.GetFromJsonAsync<WeatherForecast[]>("/api/weather");
-    }
-}
-```
-
-The `WeatherClient` is a standard typed HTTP client — the BFF infrastructure handles token management and CSRF headers transparently.
+- **Server-side `AddBffBlazorClient()`** integrates BFF session management with Blazor WASM's hosting model. It configures the server to serve the WASM client and manage authentication.
+- **Client-side `AddBffBlazorClient`** with polling enables the WASM app to periodically check session status. The 30-second interval means the app checks every 30 seconds if the user is still authenticated.
+- **`AddLocalApiHttpClient<WeatherClient>()`** creates a typed `HttpClient` that automatically includes the BFF anti-forgery header and routes requests through the BFF host, so the WASM app never touches tokens directly.

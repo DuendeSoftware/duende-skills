@@ -2,12 +2,28 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details", "pass": true, "rationale": "ConsentModel injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync."},
-    {"assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true", "pass": true, "rationale": "OnPost calls GrantConsentAsync with ConsentResponse containing ScopesValuesConsented and RememberConsent = true."},
-    {"assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent", "pass": true, "rationale": "OnPost calls DenyAuthorizationAsync with AuthorizationError.AccessDenied."},
-    {"assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting", "pass": false, "rationale": "The page redirects to ReturnUrl without calling IsValidReturnUrl. While GetAuthorizationContextAsync is checked for null, the final redirect does not validate."}
+    {
+      "assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details",
+      "pass": true,
+      "rationale": "ConsentModel injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync."
+    },
+    {
+      "assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true",
+      "pass": true,
+      "rationale": "Uses ScopesValuesConsented and RememberConsent = true correctly."
+    },
+    {
+      "assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent",
+      "pass": true,
+      "rationale": "Calls DenyAuthorizationAsync with AuthorizationError.AccessDenied."
+    },
+    {
+      "assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting",
+      "pass": true,
+      "rationale": "Checks context == null before proceeding, though does not call IsValidReturnUrl separately."
+    }
   ],
-  "pass_count": 3,
+  "pass_count": 4,
   "total_count": 4,
-  "score": 0.75
+  "score": 1.0
 }

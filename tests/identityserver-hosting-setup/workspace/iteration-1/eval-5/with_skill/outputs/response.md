@@ -1,31 +1,37 @@
-# Configuring IdentityServerOptions, License Key, and Data Protection
+# Configuring IdentityServerOptions, License, and Data Protection
 
-Here's the updated `Program.cs` with all requested configurations:
+## Program.cs
 
 ```csharp
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure IdentityServer with options
+// Configure IdentityServer options
 builder.Services.AddIdentityServer(options =>
 {
     // Set the issuer URI explicitly
     options.IssuerUri = "https://identity.mycompany.com";
 
-    // Load the license key from configuration (never hardcode)
+    // Load the license key from configuration (not hardcoded)
     options.LicenseKey = builder.Configuration["IdentityServer:LicenseKey"];
 
-    // Emit scopes as a space-delimited string in JWTs (per RFC 9068)
+    // Emit scopes as space-delimited string in JWTs
     options.EmitScopesAsSpaceDelimitedStringInJwt = true;
 })
+.AddInMemoryIdentityResources(Config.IdentityResources)
 .AddInMemoryApiScopes(Config.ApiScopes)
 .AddInMemoryClients(Config.Clients);
 
 // Configure Data Protection for multi-instance deployment
 builder.Services.AddDataProtection()
-    .PersistKeysToDbContext<DataProtectionKeyContext>()
+    .PersistKeysToDbContext<DataProtectionDbContext>()
     .SetApplicationName("IdentityServer");
+
+// Register the Data Protection DbContext
+builder.Services.AddDbContext<DataProtectionDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -34,23 +40,45 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 
-app.MapDefaultControllerRoute();
+app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
+
+// Data Protection DbContext for key storage
+public class DataProtectionDbContext : DbContext, IDataProtectionKeyContext
+{
+    public DataProtectionDbContext(DbContextOptions<DataProtectionDbContext> options)
+        : base(options) { }
+
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+}
 ```
 
-## Configuration Explained
+## Configuration Details
 
 ### IssuerUri
-Setting `options.IssuerUri = "https://identity.mycompany.com"` forces all tokens and the discovery document to use this exact value. By default, IdentityServer infers the issuer from the incoming request URL, but you may need to set it explicitly for your use case.
 
-### License Key from Configuration
-The license key is loaded from `builder.Configuration["IdentityServer:LicenseKey"]` rather than being hardcoded. Store the actual key in a secret manager, environment variable, or key vault — never in source-controlled `appsettings.json`.
+`options.IssuerUri = "https://identity.mycompany.com"` sets the issuer identifier that appears in:
+- The `issuer` field in the discovery document
+- The `iss` claim in issued tokens
+
+**Note**: In most cases, it's recommended to leave IssuerUri unset and let IdentityServer infer it from the incoming request URL. Set it explicitly only when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address vs public URL).
+
+### License Key
+
+Loading via `builder.Configuration["IdentityServer:LicenseKey"]` keeps the key out of source code. Store it in:
+- Environment variables
+- Azure Key Vault / AWS Secrets Manager
+- User secrets (development)
+
+Never hardcode the license key in source-controlled files.
 
 ### EmitScopesAsSpaceDelimitedStringInJwt
-When set to `true`, the `scope` claim in JWTs is emitted as a single space-delimited string (e.g., `"api1 profile"`) instead of a JSON array. This follows RFC 9068 for JWT access tokens.
+
+When `true`, scopes in JWT access tokens are emitted as a single space-delimited string (e.g., `"scope": "api1 api2"`) instead of the default JSON array format.
 
 ### Data Protection
-For multi-instance deployments, data protection keys must be shared across all instances:
-- **`PersistKeysToDbContext`** stores keys in a database (Entity Framework)
-- **`SetApplicationName("IdentityServer")`** prevents key isolation across instances — without this, each deployment name creates its own isolated key ring
+
+For multi-instance deployment:
+- **`PersistKeysToDbContext<DataProtectionDbContext>()`** stores keys in a SQL database accessible by all instances
+- **`SetApplicationName("IdentityServer")`** ensures all instances use the same key ring, preventing key isolation when instances have different filesystem paths

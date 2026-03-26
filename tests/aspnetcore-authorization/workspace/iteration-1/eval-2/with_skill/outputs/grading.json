@@ -1,13 +1,34 @@
 {
   "eval_id": 2,
+  "variant": "with_skill",
   "assertions": [
-    {"assertion": "An authorization policy requiring the 'catalog.read' scope is defined using RequireClaim", "pass": true, "rationale": "Response defines policy with policy.RequireClaim(\"scope\", \"catalog.read\")"},
-    {"assertion": "An authorization policy requiring the 'catalog.write' scope is defined using RequireClaim", "pass": true, "rationale": "Response defines policy with policy.RequireClaim(\"scope\", \"catalog.write\")"},
-    {"assertion": "The GET /products endpoint uses .RequireAuthorization() referencing the read policy", "pass": true, "rationale": "Response shows .RequireAuthorization(\"catalog:read\") on the GET /products endpoint"},
-    {"assertion": "The POST /products endpoint uses .RequireAuthorization() referencing the write policy", "pass": true, "rationale": "Response shows .RequireAuthorization(\"catalog:write\") on the POST /products endpoint"},
-    {"assertion": "builder.Services.AddAuthorization is called to register the policies", "pass": true, "rationale": "Response shows builder.Services.AddAuthorization(options => { ... }) with both policies"}
+    {
+      "assertion": "An authorization policy requiring the 'catalog.read' scope is defined using RequireClaim",
+      "pass": true,
+      "rationale": "The code defines options.AddPolicy(\"catalog.read\", policy => policy.RequireClaim(\"scope\", \"catalog.read\"))."
+    },
+    {
+      "assertion": "An authorization policy requiring the 'catalog.write' scope is defined using RequireClaim",
+      "pass": true,
+      "rationale": "The code defines options.AddPolicy(\"catalog.write\", policy => policy.RequireClaim(\"scope\", \"catalog.write\"))."
+    },
+    {
+      "assertion": "The GET /products endpoint uses .RequireAuthorization() referencing the read policy",
+      "pass": true,
+      "rationale": "The GET /products endpoint chain includes .RequireAuthorization(\"catalog.read\")."
+    },
+    {
+      "assertion": "The POST /products endpoint uses .RequireAuthorization() referencing the write policy",
+      "pass": true,
+      "rationale": "The POST /products endpoint chain includes .RequireAuthorization(\"catalog.write\")."
+    },
+    {
+      "assertion": "builder.Services.AddAuthorization is called to register the policies",
+      "pass": true,
+      "rationale": "The code calls builder.Services.AddAuthorization(options => { ... }) to register policies."
+    }
   ],
-  "passed": 5,
-  "failed": 0,
-  "total": 5
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
 }

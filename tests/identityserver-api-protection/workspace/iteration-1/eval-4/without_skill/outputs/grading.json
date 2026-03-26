@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'", "pass": true, "rationale": "Code defines policies using RequireClaim(\"scope\", \"api1.read\") and RequireClaim(\"scope\", \"api1.write\")"},
-    {"assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization", "pass": true, "rationale": "GET /data uses .RequireAuthorization(\"read\") and POST /data uses .RequireAuthorization(\"write\")"},
-    {"assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims", "pass": false, "rationale": "Response implements a custom IAuthorizationHandler (ScopeHandler) instead of an IClaimsTransformation. The assertion specifically requires IClaimsTransformation."},
-    {"assertion": "Registers the IClaimsTransformation implementation in the DI container", "pass": false, "rationale": "No IClaimsTransformation is registered. Instead, IAuthorizationHandler is registered."}
+    {
+      "assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'",
+      "pass": true,
+      "rationale": "Response defines policies using RequireClaim('scope', 'api1.read') and RequireClaim('scope', 'api1.write')"
+    },
+    {
+      "assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization",
+      "pass": true,
+      "rationale": "GET uses RequireAuthorization('read') and POST uses RequireAuthorization('write')"
+    },
+    {
+      "assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims",
+      "pass": false,
+      "rationale": "Response mentions the need but does not implement IClaimsTransformation. Only vaguely suggests middleware or custom handler."
+    },
+    {
+      "assertion": "Registers the IClaimsTransformation implementation in the DI container",
+      "pass": false,
+      "rationale": "No IClaimsTransformation implementation or registration is shown"
+    }
   ],
   "pass_count": 2,
   "total_count": 4,

@@ -1,39 +1,37 @@
-# Configuring CIBA for the Kiosk App
+# Configuring CIBA (Client Initiated Backchannel Authentication)
 
-CIBA (Client Initiated Backchannel Authentication) allows a user to authenticate on a different device than the one running the client application — for example, a bank kiosk where the user authenticates via their mobile phone.
+CIBA allows users to authenticate on a different device than the one running the client. It requires the **Enterprise Edition** license.
 
-**Important**: CIBA requires the **Duende IdentityServer Enterprise Edition**.
-
-## 1. Update the kiosk.app Client
-
-Update the `kiosk.app` client configuration to use the CIBA grant type:
+## Update the kiosk.app Client
 
 ```csharp
 new Client
 {
     ClientId = "kiosk.app",
     ClientName = "Bank Kiosk Application",
-    AllowedGrantTypes = GrantTypes.Ciba,
+
+    // CIBA grant type for backchannel authentication
+    AllowedGrantTypes = { GrantType.Ciba },
 
     ClientSecrets = { new Secret("KioskSecret".Sha256()) },
     AllowedScopes = { "openid", "profile", "catalog.read" },
 
-    // Poll mode — client polls the token endpoint for results
-    // (this is the default CIBA delivery mode in Duende IdentityServer)
+    // Poll delivery mode — client polls token endpoint for result
+    CibaLifetime = 300, // 5-minute CIBA request lifetime
+    PollingInterval = 5  // Client can poll every 5 seconds
 }
 ```
 
-## 2. Implement IBackchannelAuthenticationUserValidator
+## Implement IBackchannelAuthenticationUserValidator
 
-This interface validates the incoming CIBA request and identifies the user. The user is identified by their `login_hint`:
+This interface validates the backchannel authentication request and identifies the user via `login_hint`:
 
 ```csharp
 using Duende.IdentityServer.Validation;
-using System.Security.Claims;
 
 public class CibaUserValidator : IBackchannelAuthenticationUserValidator
 {
-    private readonly IUserStore _userStore; // Your user store
+    private readonly IUserStore _userStore;
 
     public CibaUserValidator(IUserStore userStore)
     {
@@ -45,21 +43,29 @@ public class CibaUserValidator : IBackchannelAuthenticationUserValidator
     {
         var result = new BackchannelAuthenticationUserValidationResult();
 
-        // Identify the user by login_hint
+        // Identify user by login_hint
         if (context.LoginHint != null)
         {
             var user = await _userStore.FindByUsernameAsync(context.LoginHint);
             if (user != null)
             {
-                result.Subject = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[]
-                    {
-                        new Claim("sub", user.SubjectId),
-                        new Claim("name", user.DisplayName)
-                    },
-                    "ciba"
-                ));
+                result.Subject = new System.Security.Claims.ClaimsPrincipal(
+                    new System.Security.Claims.ClaimsIdentity(
+                    [
+                        new System.Security.Claims.Claim("sub", user.SubjectId),
+                        new System.Security.Claims.Claim("name", user.Username)
+                    ], "ciba"));
             }
+            else
+            {
+                result.Error = "unknown_user";
+                result.ErrorDescription = "User not found by login_hint";
+            }
+        }
+        else
+        {
+            result.Error = "unknown_user_id";
+            result.ErrorDescription = "login_hint is required";
         }
 
         return result;
@@ -67,57 +73,56 @@ public class CibaUserValidator : IBackchannelAuthenticationUserValidator
 }
 ```
 
-## 3. Implement IBackchannelAuthenticationUserNotificationService
+## Implement IBackchannelAuthenticationUserNotificationService
 
-This interface is responsible for notifying the user about the pending authentication request (e.g., via push notification, email, or SMS):
+This interface sends a notification to the user to approve/deny the request:
 
 ```csharp
 using Duende.IdentityServer.Services;
 
-public class CibaUserNotificationService : IBackchannelAuthenticationUserNotificationService
+public class CibaNotificationService : IBackchannelAuthenticationUserNotificationService
 {
-    private readonly IPushNotificationService _pushService; // Your notification service
+    private readonly IPushNotificationService _pushService;
+    private readonly ILogger<CibaNotificationService> _logger;
 
-    public CibaUserNotificationService(IPushNotificationService pushService)
+    public CibaNotificationService(
+        IPushNotificationService pushService,
+        ILogger<CibaNotificationService> logger)
     {
         _pushService = pushService;
+        _logger = logger;
     }
 
     public async Task SendLoginRequestAsync(BackchannelUserLoginRequest request)
     {
-        // Send a notification to the user's device
-        // The request contains:
-        // - request.Subject: the authenticated user
-        // - request.InternalId: unique ID for this login request
-        // - request.Client: the requesting client
-        // - request.ValidatedResources: the requested scopes/resources
+        _logger.LogInformation("Sending CIBA notification for request {InternalId}",
+            request.InternalId);
 
-        var userId = request.Subject.FindFirst("sub")?.Value;
-        await _pushService.SendAsync(userId!, new
-        {
-            Title = $"Login request from {request.Client.ClientName}",
-            Message = "Tap to approve the login request",
-            RequestId = request.InternalId
-        });
+        // Send push notification, email, SMS, etc.
+        await _pushService.SendAsync(
+            request.Subject.FindFirst("sub")!.Value,
+            new
+            {
+                Message = $"Authentication request from {request.Client.ClientName}",
+                RequestId = request.InternalId,
+                ApprovalUrl = $"https://identity.example.com/ciba/approve?id={request.InternalId}"
+            });
     }
 }
 ```
 
-## 4. Register in DI
+## Register in DI
 
 ```csharp
-// Program.cs
 builder.Services.AddTransient<IBackchannelAuthenticationUserValidator, CibaUserValidator>();
-builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, CibaUserNotificationService>();
+builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, CibaNotificationService>();
 ```
 
-## Complete CIBA Flow
+## Key Points
 
-1. **Kiosk** sends a backchannel authentication request to `/connect/ciba` with `login_hint` identifying the user
-2. **IdentityServer** calls your `IBackchannelAuthenticationUserValidator` to validate the request and identify the user
-3. **IdentityServer** creates a pending login request in the store
-4. **IdentityServer** calls your `IBackchannelAuthenticationUserNotificationService` to notify the user
-5. **User** reviews and approves/denies the request on their device; your approval UI calls `IBackchannelAuthenticationInteractionService.CompleteLoginRequestAsync`
-6. **Kiosk** polls the token endpoint and receives tokens (or an error if denied/timed out)
-
-Both `IBackchannelAuthenticationUserValidator` and `IBackchannelAuthenticationUserNotificationService` **must** be implemented and registered — IdentityServer does not provide default implementations.
+- **Enterprise Edition required** for CIBA
+- The client uses `GrantType.Ciba` and poll delivery mode
+- `IBackchannelAuthenticationUserValidator` resolves the user from the `login_hint`
+- `IBackchannelAuthenticationUserNotificationService` delivers the approval request to the user
+- Both interfaces must be implemented and registered — IdentityServer provides no defaults
+- After user approves, call `IBackchannelAuthenticationInteractionService.CompleteLoginRequestAsync`

@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs calls builder.AddSqlServer() to create a SQL Server resource", "pass": true, "rationale": "Code shows builder.AddSqlServer(\"sql\")"},
-    {"assertion": "Program.cs calls .AddDatabase() to create a database resource from the SQL Server", "pass": true, "rationale": "Code shows sqlServer.AddDatabase(\"identitydb\")"},
-    {"assertion": "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource", "pass": true, "rationale": "Code shows .WithReference(identityDb) and .WaitFor(sqlServer) on the IdentityServer project"},
-    {"assertion": "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)", "pass": true, "rationale": "Code shows .WithReference(identityServer) and .WaitFor(identityServer) on the weather API"},
-    {"assertion": "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)", "pass": true, "rationale": "Code shows .WithReference(identityServer) and .WaitFor(identityServer) on the web app"}
+    {
+      "assertion": "Program.cs calls builder.AddSqlServer() to create a SQL Server resource",
+      "pass": true,
+      "rationale": "Code clearly shows `var sqlServer = builder.AddSqlServer(\"sql\");`"
+    },
+    {
+      "assertion": "Program.cs calls .AddDatabase() to create a database resource from the SQL Server",
+      "pass": true,
+      "rationale": "Code shows `var identityDb = sqlServer.AddDatabase(\"identitydb\");`"
+    },
+    {
+      "assertion": "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource",
+      "pass": true,
+      "rationale": "Code shows `.WithReference(identityDb).WaitFor(sqlServer)` on the IdentityServer project"
+    },
+    {
+      "assertion": "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": true,
+      "rationale": "Code shows `.WithReference(identityServer).WaitFor(identityServer)` on the weather-api project"
+    },
+    {
+      "assertion": "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": true,
+      "rationale": "Code shows `.WithReference(identityServer).WaitFor(identityServer)` on the web-app project"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

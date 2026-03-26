@@ -2,10 +2,26 @@
   "eval_id": 11,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration", "pass": false, "rationale": "Server-side code uses AddBff().ConfigureOpenIdConnect() but does NOT chain .AddBffBlazorClient() — the Blazor-specific integration method is missing."},
-    {"assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))", "pass": false, "rationale": "Client-side does NOT use AddBffBlazorClient. Instead uses manual AuthenticationStateProvider and standard HttpClient setup."},
-    {"assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'", "pass": false, "rationale": "Client-side uses standard AddHttpClient<WeatherClient> instead of the Duende-specific AddLocalApiHttpClient<WeatherClient>()"},
-    {"assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'", "pass": true, "rationale": "Shows builder.Services.AddBff().ConfigureOpenIdConnect(options => { ... }) with correct V4 fluent API"}
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": false,
+      "rationale": "AddBffBlazorClient() is NOT present on the server side \u2014 required for Blazor WASM integration"
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": false,
+      "rationale": "Client uses generic AddAuthorizationCore and AddHttpClient, not AddBffBlazorClient with polling"
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": false,
+      "rationale": "Uses generic AddHttpClient, not AddLocalApiHttpClient<WeatherClient>()"
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": true,
+      "rationale": "AddBff().ConfigureOpenIdConnect() is present"
+    }
   ],
   "pass_count": 1,
   "total_count": 4,

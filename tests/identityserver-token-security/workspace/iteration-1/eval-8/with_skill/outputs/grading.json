@@ -2,10 +2,26 @@
   "eval_id": 8,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Calls AddClientCredentialsTokenManagement and AddClient with DPoPJsonWebKey set on the client options", "pass": true, "rationale": "Code calls AddClientCredentialsTokenManagement().AddClient(...) with client.DPoPJsonWebKey = dpopJwk."},
-    {"assertion": "Sets the TokenEndpoint to 'https://identity.example.com/connect/token'", "pass": true, "rationale": "Code sets client.TokenEndpoint = 'https://identity.example.com/connect/token'."},
-    {"assertion": "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256", "pass": true, "rationale": "Code shows new RsaSecurityKey(RSA.Create(2048)), JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey), and jsonWebKey.Alg = 'PS256'."},
-    {"assertion": "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security", "pass": true, "rationale": "Response includes a 'Critical Security Warning' section stating both that losing the key makes tokens unusable and leaking it nullifies DPoP security."}
+    {
+      "assertion": "Calls AddClientCredentialsTokenManagement and AddClient with DPoPJsonWebKey set on the client options",
+      "pass": true,
+      "rationale": "AddClientCredentialsTokenManagement().AddClient with client.DPoPJsonWebKey = dpopKey."
+    },
+    {
+      "assertion": "Sets the TokenEndpoint to 'https://identity.example.com/connect/token'",
+      "pass": true,
+      "rationale": "client.TokenEndpoint = \"https://identity.example.com/connect/token\" is set."
+    },
+    {
+      "assertion": "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256",
+      "pass": true,
+      "rationale": "Full JWK generation shown: RsaSecurityKey(RSA.Create(2048)), JsonWebKeyConverter.ConvertFromSecurityKey, jsonWebKey.Alg = \"PS256\"."
+    },
+    {
+      "assertion": "Warns that the DPoPJsonWebKey is a critical secret \u2014 losing it makes bound tokens unusable, leaking it nullifies DPoP security",
+      "pass": true,
+      "rationale": "Explicit warning about losing (tokens unusable) and leaking (nullifies security) the key."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

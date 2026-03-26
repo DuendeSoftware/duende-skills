@@ -1,14 +1,29 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 3,
-  "variant": "without_skill",
+  "mode": "without_skill",
   "assertions": [
-    {"assertion": "Code fetches the discovery document to resolve the introspection endpoint rather than hardcoding it", "pass": true, "rationale": "Code calls GetDiscoveryDocumentAsync and uses disco.IntrospectionEndpoint."},
-    {"assertion": "Code calls IntrospectTokenAsync (or POSTs to the introspection endpoint) with the API's ClientId and ClientSecret for authentication", "pass": true, "rationale": "Code calls IntrospectTokenAsync with ClientId='catalog-api' and ClientSecret='api-secret'."},
-    {"assertion": "Code checks the IsActive property (or 'active' field) of the introspection response to determine if the token is valid", "pass": true, "rationale": "Code checks response.IsActive to determine validity."},
-    {"assertion": "Response explains that reference tokens are opaque identifiers (not self-contained JWTs) and require server-side validation via introspection", "pass": true, "rationale": "Explains reference tokens are opaque identifiers requiring server-side introspection."},
-    {"assertion": "Response mentions that reference tokens enable immediate revocation unlike JWTs which are valid until expiry", "pass": true, "rationale": "Explains that reference tokens can be revoked immediately, while JWTs remain valid until expiration."}
+    {
+      "assertion": "Code fetches the discovery document to resolve the introspection endpoint rather than hardcoding it",
+      "passed": true
+    },
+    {
+      "assertion": "Code calls IntrospectTokenAsync (or POSTs to the introspection endpoint) with the API's ClientId and ClientSecret for authentication",
+      "passed": true
+    },
+    {
+      "assertion": "Code checks the IsActive property (or 'active' field) of the introspection response to determine if the token is valid",
+      "passed": true
+    },
+    {
+      "assertion": "Response explains that reference tokens are opaque identifiers (not self-contained JWTs) and require server-side validation via introspection",
+      "passed": true
+    },
+    {
+      "assertion": "Response mentions that reference tokens enable immediate revocation unlike JWTs which are valid until expiry",
+      "passed": true
+    }
   ],
-  "pass_count": 5,
-  "total_count": 5,
-  "score": 1.0
+  "passed": 5,
+  "total": 5
 }

@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses CookieContainer and HttpClientHandler with AllowAutoRedirect = false for cookie-based session simulation",
+      "pass": true,
+      "rationale": "CookieContainer + HttpClientHandler with AllowAutoRedirect = false"
+    },
+    {
+      "assertion": "Test asserts /bff/user returns HttpStatusCode.Unauthorized (401) without a prior login",
+      "pass": true,
+      "rationale": "Assert.Equal(HttpStatusCode.Unauthorized) for /bff/user without session"
+    },
+    {
+      "assertion": "Test asserts the local API route returns HttpStatusCode.BadRequest (400) when the x-csrf header is missing",
+      "pass": true,
+      "rationale": "Assert.Equal(HttpStatusCode.BadRequest) for /api/data without x-csrf header"
+    },
+    {
+      "assertion": "Includes the x-csrf: 1 header on the antiforgery-passing test case",
+      "pass": true,
+      "rationale": "_client.DefaultRequestHeaders.Add(\"x-csrf\", \"1\") before the passing test"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,29 +1,80 @@
 {
-  "metadata": {"skill_name": "aspnetcore-authorization", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "aspnetcore-authorization",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 31, "passed": 31, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 31, "passed": 29, "failed": 2, "pass_rate": 93.5},
-    "delta": {"assertions_improved": 2, "delta_pass_rate": 6.5}
+    "with_skill": {
+      "total_assertions": 31,
+      "passed": 31,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 31,
+      "passed": 30,
+      "failed": 1,
+      "pass_rate": 96.8
+    },
+    "delta": {
+      "assertions_improved": 1,
+      "delta_pass_rate": 3.2
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
       "delta": 0.2,
       "without_skill_failures": [
         "The handler calls context.Succeed(requirement) when the scope matches, and does NOT call context.Fail() on mismatch"
@@ -31,31 +82,73 @@
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
-      "without_skill": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": [
-        "The response explains that scopes represent client permissions and roles/claims represent user permissions, and both should be checked"
-      ]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     }

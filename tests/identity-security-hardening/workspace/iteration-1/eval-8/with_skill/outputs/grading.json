@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Explicitly states RequirePkce = true is required and warns 'NEVER set to false'"
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Clearly states 'Every redirect URI must be fully qualified' with 'No wildcards' and shows examples"
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "Explicitly names 'Principle of Least Grant', states each client should only have needed grants, and says 'Never use GrantTypes.Implicit'"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

@@ -2,10 +2,26 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'", "pass": true, "rationale": "Code contains options.KeyManagement.Enabled = false in the AddIdentityServer options lambda"},
-    {"assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2", "pass": true, "rationale": "Code uses new X509Certificate2(\"/certs/signing.pfx\", certPassword) which satisfies the assertion's 'or X509Certificate2' alternative"},
-    {"assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')", "pass": true, "rationale": "Code calls idsvrBuilder.AddSigningCredential(certificate, SecurityAlgorithms.RsaSha256)"},
-    {"assertion": "Program.cs does not remove the existing client and scope configuration", "pass": true, "rationale": "The existing web-app client, machine-client, api1 scope, and identity resources are all preserved"}
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "Sets options.KeyManagement.Enabled = false."
+    },
+    {
+      "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+      "pass": true,
+      "rationale": "Uses new X509Certificate2('/certs/signing.pfx', certPassword) which is acceptable."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+      "pass": true,
+      "rationale": "Calls AddSigningCredential with the certificate and 'RS256' string."
+    },
+    {
+      "assertion": "Program.cs does not remove the existing client and scope configuration",
+      "pass": true,
+      "rationale": "All existing clients and scopes are preserved."
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

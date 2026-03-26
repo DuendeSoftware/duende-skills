@@ -1,34 +1,20 @@
-# Fixing IdentityServer Integration Test Failures in CI
-
-## Key Management Issues
-
-IdentityServer tries to create and persist signing keys to disk. In CI environments, this may fail due to read-only filesystems or permission issues.
-
-**Solution:** Use a developer signing credential that doesn't persist:
-
-```csharp
-services.AddIdentityServer()
-    .AddDeveloperSigningCredential();
-```
-
-You might also consider configuring key storage to a writable location in CI.
+# Common Integration Test Pitfalls
 
 ## Port Conflicts
 
-If your tests are configured to use `localhost:5001`, you'll get port conflicts when multiple tests run simultaneously.
-
-**Solution:** Use `WebApplicationFactory` which creates an in-memory test server that doesn't bind to a real port:
+Don't hard-code ports like `localhost:5001`. Use the factory's `CreateClient()` method which gives you an HttpClient with the correct base address.
 
 ```csharp
 var client = factory.CreateClient();
-// The client.BaseAddress is already configured correctly
+// client.BaseAddress is set to the test server
 ```
 
-Avoid hard-coding URLs like `http://localhost:5001` in your test code.
+## Key Files in CI
 
-## General Tips
+If you're using `AddDeveloperSigningCredential()`, it writes a key file to disk. In CI, you may want to use an in-memory approach.
 
-- Make sure your test configuration is separate from production configuration
-- Use `WebApplicationFactory<Program>` for integration tests
-- Consider using xUnit's collection fixtures to share expensive setup between tests
-- Be careful with static state that can leak between tests
+## Shared State
+
+Be careful about sharing HttpClient instances across tests. State can bleed between tests if you're not careful with setup/teardown.
+
+Consider using `IAsyncLifetime` to reset state between tests.

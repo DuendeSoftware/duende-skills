@@ -1,79 +1,56 @@
-# Configuring JWT Secured Authorization Requests (JAR)
+# JWT Secured Authorization Requests (JAR) with RSA Key
 
-JAR wraps authorization request parameters in a signed JWT, making them tamperproof. Instead of passing `scope`, `redirect_uri`, `state`, etc. as plain query parameters in the authorize URL, the client packages them into a JWT signed with its private key and sends only the JWT (via the `request` parameter) or a reference to it (via `request_uri`).
+JAR packages authorization request parameters inside a signed JWT, making them tamperproof. The client sends this signed JWT as the `request` parameter in the authorize request.
 
-## Server-Side Client Configuration
+## Client Configuration
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddIdentityServer()
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
-
-var app = builder.Build();
-
-app.UseIdentityServer();
-app.UseAuthorization();
-
-app.Run();
-
-public static class Config
+new Client
 {
-    public static IEnumerable<IdentityResource> IdentityResources =>
-    [
-        new IdentityResources.OpenId(),
-        new IdentityResources.Profile()
-    ];
+    ClientId = "secure_app",
+    AllowedGrantTypes = GrantTypes.Code,
+    RequirePkce = true,
+    RedirectUris = { "https://secure.example.com/callback" },
+    AllowedScopes = { "openid", "profile", "api1" },
 
-    public static IEnumerable<ApiScope> ApiScopes =>
-    [
-        new ApiScope("api1", "My API")
-    ];
+    // Require signed request objects (JAR)
+    RequireRequestObject = true,
 
-    public static IEnumerable<Client> Clients =>
-    [
-        new Client
+    ClientSecrets =
+    {
+        // RSA key for verifying request objects (and optionally client authentication via private_key_jwt)
+        new Secret
         {
-            ClientId = "secure_app",
-            AllowedGrantTypes = GrantTypes.Code,
-            RequirePkce = true,
-            RedirectUris = { "https://secure-app.example.com/callback" },
-            AllowedScopes = { "openid", "profile", "api1" },
-
-            // Require signed request objects (JAR)
-            RequireRequestObject = true,
-
-            ClientSecrets =
-            {
-                new Secret
-                {
-                    // Register the client's public key as a JWK for request object signature validation
-                    Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                    Value = "{'e':'AQAB','kid':'secure_app_key','kty':'RSA','n':'...'}"
-                }
-            }
+            Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+            Value = "{\"kty\":\"RSA\",\"e\":\"AQAB\",\"kid\":\"secure_app_key\",\"n\":\"...\"}"
         }
-    ];
+    }
 }
 ```
 
-## How the Client's Signing Key is Registered
+## How JAR Works
 
-The client registers its **public key** as a `ClientSecret` with one of these types:
+1. **Client builds the request JWT**: The client takes all authorization parameters (response_type, scope, redirect_uri, state, nonce, code_challenge, etc.) and wraps them in a JWT, signed with its private RSA key.
 
-- **`IdentityServerConstants.SecretTypes.JsonWebKey`** — The public key in JWK format (JSON). This is the most common approach for RSA or ECDSA keys.
-- **`IdentityServerConstants.SecretTypes.X509CertificateBase64`** — The public certificate in base64 DER encoding. Use this when the client has an X.509 certificate.
+2. **Authorization request**: The client sends:
+   ```
+   GET /connect/authorize?client_id=secure_app&request=eyJhbGciOiJSUzI1NiIs...
+   ```
 
+3. **Server validation**: IdentityServer validates the JWT signature using the client's registered public key (the `JsonWebKey` secret), then extracts the authorization parameters from the JWT payload.
+
+4. **Tamperproof**: Because the parameters are signed, an attacker cannot modify them in transit (e.g., changing the scope or redirect_uri).
+
+## Key Points
+
+### Secret Type
+The `IdentityServerConstants.SecretTypes.JsonWebKey` type tells IdentityServer this secret contains a JWK (JSON Web Key) with the client's public key. The `Value` should be the serialized JWK containing the RSA public key components (`kty`, `e`, `n`, `kid`).
+
+Alternatively, you can use `IdentityServerConstants.SecretTypes.X509CertificateBase64`:
 ```csharp
-// Alternative: Using an X.509 certificate
 new Secret
 {
     Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
@@ -81,25 +58,14 @@ new Secret
 }
 ```
 
-The same key can be shared between **client authentication** (`private_key_jwt`) and **JAR** (signed authorization requests). This simplifies key management — the client uses one key pair for both proving its identity at the token endpoint and signing authorize request parameters.
+### Shared Key for Authentication and JAR
+The same RSA key can be used for both:
+- **Client authentication** via `private_key_jwt` at the token endpoint
+- **JAR** for signing authorization request objects
 
-## How JAR Works
+This simplifies key management — one key pair serves both purposes.
 
-1. **Client builds a request JWT**: The client creates a JWT containing all authorization parameters (`response_type`, `client_id`, `redirect_uri`, `scope`, `state`, `nonce`, `code_challenge`, etc.) and signs it with its private key.
-2. **Client sends the signed request**: The authorize URL includes `request=<signed_jwt>` (by value) or `request_uri=<url>` (by reference).
-3. **IdentityServer validates the signature**: It verifies the JWT signature using the registered `ClientSecret` (the public key).
-4. **Parameters are extracted from the JWT**: IdentityServer uses the parameters from inside the JWT, ignoring any plain query parameters that conflict.
-
-## Accessing Request Object Data
-
-In custom code, you can access the original request object values:
-
-- In `ValidatedAuthorizeRequest`: use the `RequestObjectValues` dictionary
-- In UI code: call `IIdentityServerInteractionService.GetAuthorizationContextAsync()`, then access `RequestObjectValues` on the returned `AuthorizationRequest`
-
-## Why JAR Matters
-
-- **Tamperproof**: An attacker cannot modify authorization parameters in the redirect URL — the signature would be invalid.
-- **Confidentiality**: When combined with encryption (JWE), parameters can be hidden from the browser.
-- **Non-repudiation**: The signed JWT proves which client initiated the request.
-- **FAPI compliance**: JAR is one of the mechanisms accepted by the FAPI 2.0 Security Profile.
+### Security Benefits
+- Authorization parameters cannot be tampered with in the browser
+- Protects against parameter injection attacks
+- Required or recommended by FAPI 2.0 and other security profiles

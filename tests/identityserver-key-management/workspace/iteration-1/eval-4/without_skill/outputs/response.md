@@ -1,15 +1,23 @@
-# Configuring Multiple Signing Algorithms in IdentityServer
+# Multi-Algorithm Signing Configuration
 
-Here's the updated `Program.cs` with RS256 and ES256 support, plus a mobile-app client configured for ES256:
+To support multiple signing algorithms in IdentityServer:
+
+## Updated Program.cs
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddIdentityServer()
+builder.Services.AddIdentityServer(options =>
+{
+    options.KeyManagement.SigningAlgorithms = new[]
+    {
+        new SigningAlgorithmOptions(SecurityAlgorithms.RsaSha256),
+        new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256)
+    };
+})
     .AddInMemoryClients(new List<Client>
     {
         new Client
@@ -30,10 +38,12 @@ builder.Services.AddIdentityServer()
         new Client
         {
             ClientId = "mobile-app",
-            ClientSecrets = { new Secret("secret".Sha256()) },
+            ClientSecrets = { new Secret("mobile_secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.Code,
-            RedirectUris = { "com.example.mobileapp://callback" },
-            AllowedScopes = { "openid", "profile", "api1" }
+            RequirePkce = true,
+            RedirectUris = { "myapp://callback" },
+            AllowedScopes = { "openid", "profile", "api1" },
+            AllowedIdentityTokenSigningAlgorithms = { "ES256" }
         }
     })
     .AddInMemoryApiScopes(new List<ApiScope>
@@ -55,16 +65,4 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-To support multiple signing algorithms, you would typically register multiple signing credentials. For RS256, load an X.509 certificate and call `AddSigningCredential`. For ES256, you'd create an ECDSA key:
-
-```csharp
-// Load RS256 certificate
-var rsaCert = new X509Certificate2("rs256-cert.pfx", "password");
-idsvrBuilder.AddSigningCredential(rsaCert, "RS256");
-
-// Create ES256 key
-var ecdsaKey = new ECDsaSecurityKey(ECDsa.Create(ECCurve.NamedCurves.nistP256));
-idsvrBuilder.AddSigningCredential(ecdsaKey, "ES256");
-```
-
-For the mobile-app client to specifically use ES256, you may need to configure that at the token level. The exact configuration depends on your IdentityServer version and setup.
+RS256 is configured first as the default, with ES256 as secondary. The mobile-app client uses ES256 for identity tokens.

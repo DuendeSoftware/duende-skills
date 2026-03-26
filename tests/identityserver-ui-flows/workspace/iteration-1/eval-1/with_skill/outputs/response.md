@@ -1,8 +1,8 @@
-# Login Page with IIdentityServerInteractionService
+# Login Page Implementation for IdentityServer
 
-Here's a complete Razor Pages login implementation for your IdentityServer.
+Here's a complete Razor Pages implementation for the login page that uses `IIdentityServerInteractionService` and `TestUserStore`.
 
-## Pages/Login.cshtml.cs
+## Login.cshtml.cs (Page Model)
 
 ```csharp
 using Duende.IdentityServer;
@@ -17,14 +17,14 @@ namespace IdentityServer.Pages;
 public class LoginModel : PageModel
 {
     private readonly IIdentityServerInteractionService _interaction;
-    private readonly TestUserStore _users;
+    private readonly TestUserStore _userStore;
 
     public LoginModel(
         IIdentityServerInteractionService interaction,
-        TestUserStore users)
+        TestUserStore userStore)
     {
         _interaction = interaction;
-        _users = users;
+        _userStore = userStore;
     }
 
     [BindProperty]
@@ -44,9 +44,10 @@ public class LoginModel : PageModel
 
         // Use IIdentityServerInteractionService to get the authorization context
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
         if (context != null)
         {
-            // Display the client name to the user
+            // Display the client name to the user for branding
             ClientName = context.Client?.ClientName ?? context.Client?.ClientId;
         }
 
@@ -56,9 +57,9 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPost()
     {
         // Validate credentials against TestUserStore
-        if (_users.ValidateCredentials(Username, Password))
+        if (_userStore.ValidateCredentials(Username, Password))
         {
-            var user = _users.FindByUsername(Username);
+            var user = _userStore.FindByUsername(Username);
 
             // Create an IdentityServerUser with the subject ID
             var isUser = new IdentityServerUser(user.SubjectId)
@@ -84,7 +85,7 @@ public class LoginModel : PageModel
 }
 ```
 
-## Pages/Login.cshtml
+## Login.cshtml (Razor View)
 
 ```html
 @page
@@ -98,27 +99,30 @@ public class LoginModel : PageModel
 }
 
 <form method="post">
-    <input type="hidden" asp-for="ReturnUrl" />
-    
     <div asp-validation-summary="ModelOnly"></div>
-    
+
     <div>
         <label asp-for="Username"></label>
         <input asp-for="Username" autofocus />
     </div>
-    
+
     <div>
         <label asp-for="Password"></label>
         <input asp-for="Password" type="password" />
     </div>
-    
+
+    <input type="hidden" asp-for="ReturnUrl" />
+
     <button type="submit">Login</button>
 </form>
 ```
 
-### Key Points
+## Key Design Decisions
 
-1. **`IIdentityServerInteractionService`** is injected via constructor and used to call `GetAuthorizationContextAsync(returnUrl)` to retrieve the authorization context — never parse the returnUrl manually.
-2. **`TestUserStore`** validates credentials with `ValidateCredentials(username, password)`.
-3. **`IdentityServerUser`** is created with the user's `SubjectId` and passed to `HttpContext.SignInAsync()` to establish the authentication session.
-4. **Open redirect protection**: The `returnUrl` is validated using both `_interaction.IsValidReturnUrl(ReturnUrl)` and `Url.IsLocalUrl(ReturnUrl)` before redirecting.
+1. **Authorization Context**: The page calls `GetAuthorizationContextAsync(returnUrl)` to retrieve the authorization context rather than parsing the returnUrl manually. This is critical — the interaction service safely deserializes the return URL and gives you access to the client, requested scopes, IdP hints, and more.
+
+2. **IdentityServerUser**: We create an `IdentityServerUser` with the user's `SubjectId` and call `HttpContext.SignInAsync()` to establish the authentication session. The `sub` claim is required and must uniquely identify the user.
+
+3. **Open Redirect Protection**: Before redirecting back to the `returnUrl`, we validate it using both `_interaction.IsValidReturnUrl()` (which checks IdentityServer's internal URL validation) and `Url.IsLocalUrl()` as a fallback. This prevents open redirect attacks where a malicious returnUrl could send the user to an attacker-controlled site.
+
+4. **TestUserStore**: We inject `TestUserStore` for credential validation via `ValidateCredentials()` and user lookup via `FindByUsername()`. In production, you'd replace this with ASP.NET Identity or your own user store.

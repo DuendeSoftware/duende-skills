@@ -2,11 +2,31 @@
   "eval_id": 5,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "A class extending DefaultRefreshTokenService is defined", "pass": true, "rationale": "ResilientRefreshTokenService extends DefaultRefreshTokenService."},
-    {"assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime", "pass": true, "rationale": "AcceptConsumedTokenAsync checks refreshToken.ConsumedTime and compares against TimeSpan.FromSeconds(30)."},
-    {"assertion": "The service is registered as IRefreshTokenService in the DI container", "pass": true, "rationale": "Code registers via builder.Services.TryAddTransient<IRefreshTokenService, ResilientRefreshTokenService>()."},
-    {"assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly", "pass": true, "rationale": "mobile_app client has RefreshTokenUsage = TokenUsage.OneTimeOnly."},
-    {"assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options", "pass": true, "rationale": "options.DeleteOneTimeOnlyRefreshTokensOnUse = false is set in AddOperationalStore."}
+    {
+      "assertion": "A class extending DefaultRefreshTokenService is defined",
+      "pass": true,
+      "rationale": "ResilientRefreshTokenService extends DefaultRefreshTokenService."
+    },
+    {
+      "assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime",
+      "pass": true,
+      "rationale": "Overrides AcceptConsumedTokenAsync, checks ConsumedTime within 30-second window."
+    },
+    {
+      "assertion": "The service is registered as IRefreshTokenService in the DI container",
+      "pass": true,
+      "rationale": "builder.Services.TryAddTransient<IRefreshTokenService, ResilientRefreshTokenService>()."
+    },
+    {
+      "assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "mobile_app has RefreshTokenUsage = TokenUsage.OneTimeOnly."
+    },
+    {
+      "assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options",
+      "pass": true,
+      "rationale": "options.PersistentGrants.DeleteOneTimeOnlyRefreshTokensOnUse = false is set."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

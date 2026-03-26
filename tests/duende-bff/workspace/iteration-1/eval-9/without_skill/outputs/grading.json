@@ -2,11 +2,31 @@
   "eval_id": 9,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup", "pass": true, "rationale": "Shows AddBff().ConfigureOpenIdConnect().ConfigureCookies() and the manual AddAuthentication/AddCookie/AddOpenIdConnect is removed from code"},
-    {"assertion": "Output does NOT contain 'MapBffManagementEndpoints'", "pass": false, "rationale": "Code block still contains app.MapBffManagementEndpoints() — developer did not know it was auto-registered in V4"},
-    {"assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'", "pass": false, "rationale": "Code still uses .RequireAccessToken(TokenType.User) — V3 syntax not updated to V4"},
-    {"assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints", "pass": false, "rationale": "AddRemoteApis() does not appear anywhere in the response"},
-    {"assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)", "pass": true, "rationale": "Preserves Authority='https://identity.example.com', ClientId='spa', ClientSecret='secret', ResponseType='code', Scope.Add('api1'), SaveTokens=true"}
+    {
+      "assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
+      "pass": true,
+      "rationale": "AddBff().ConfigureOpenIdConnect() is used"
+    },
+    {
+      "assertion": "Output does NOT contain 'MapBffManagementEndpoints'",
+      "pass": false,
+      "rationale": "MapBffManagementEndpoints() is still present \u2014 should be removed in v4"
+    },
+    {
+      "assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+      "pass": false,
+      "rationale": "Still uses .RequireAccessToken(TokenType.User) \u2014 the v3 API"
+    },
+    {
+      "assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
+      "pass": false,
+      "rationale": "AddRemoteApis() is not called"
+    },
+    {
+      "assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)",
+      "pass": true,
+      "rationale": "Original settings are preserved"
+    }
   ],
   "pass_count": 2,
   "total_count": 5,

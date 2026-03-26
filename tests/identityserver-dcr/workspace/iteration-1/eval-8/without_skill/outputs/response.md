@@ -1,35 +1,15 @@
-# Common Security Mistakes with Dynamic Client Registration
+# DCR Security Best Practices
 
-Here's a list of common security issues to watch out for when implementing DCR.
+Common mistakes to avoid:
 
-## 1. Not Securing the DCR Endpoint
+1. **No authentication on DCR endpoint** - Always require authorization. Use JWT bearer with a scope check.
 
-The biggest mistake is leaving the registration endpoint open to anyone. Always require authentication and authorization on the DCR endpoint. Use a policy that checks for a valid token and appropriate scope.
+2. **Allowing all grant types** - Restrict to authorization_code and enforce PKCE to prevent malicious client registration.
 
-## 2. Allowing Any Grant Type
+3. **In-memory stores** - Don't use in-memory for production. Clients disappear on restart.
 
-If you allow clients to register with any grant type, they could register with `client_credentials` and access APIs without user involvement, or use `implicit` flow which is less secure. Restrict the allowed grant types and consider requiring PKCE for authorization code flows.
+4. **Software statement validation** - Always validate the signature and issuer of software statements. Don't accept JWTs from unknown issuers.
 
-## 3. Not Validating Redirect URIs
+5. **Redirect URI validation** - Enforce HTTPS and validate against known patterns.
 
-Accept only HTTPS redirect URIs. Open redirect vulnerabilities are a major risk if you accept arbitrary redirect URIs.
-
-## 4. Using In-Memory Storage
-
-In-memory stores lose all registered clients on restart. Use a database-backed store for production deployments.
-
-## 5. Not Hashing Secrets
-
-Client secrets should be hashed before storage, just like passwords. Never store them in plaintext.
-
-## 6. Trusting Any Software Statement
-
-If you support software statements, make sure you validate the JWT signature against known signing keys. Don't accept statements from unknown issuers.
-
-## 7. No Rate Limiting
-
-Without rate limiting, an attacker could flood your DCR endpoint with registration requests, potentially exhausting resources.
-
-## 8. Not Logging Registrations
-
-Keep audit logs of all client registrations for security monitoring and compliance.
+Make sure to log all DCR requests for auditing and rate-limit the endpoint.

@@ -1,1 +1,29 @@
-{"eval_id":10,"variant":"without_skill","assertions":[{"assertion":"Implements IClientAssertionService with a GetClientAssertionAsync method","pass":true,"rationale":"JwtClientAssertionService implements IClientAssertionService with GetClientAssertionAsync method."},{"assertion":"Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL","pass":false,"rationale":"Sets Audience to _tokenEndpoint ('https://sts.example.com/connect/token') — the token endpoint URL, which is exactly the wrong value that caused the CVEs."},{"assertion":"Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values","pass":false,"rationale":"No mention of any CVE. The response does not warn about the audience vulnerability at all."},{"assertion":"Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')","pass":true,"rationale":"Type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer' is used (the string equivalent)."},{"assertion":"Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)","pass":true,"rationale":"builder.Services.AddSingleton<IClientAssertionService>(new JwtClientAssertionService(...)) is called."}],"pass_count":3,"total_count":5,"score":0.6}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 10,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IClientAssertionService with a GetClientAssertionAsync method",
+      "passed": true
+    },
+    {
+      "assertion": "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
+      "passed": false
+    },
+    {
+      "assertion": "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
+      "passed": false
+    },
+    {
+      "assertion": "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
+      "passed": true
+    },
+    {
+      "assertion": "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)",
+      "passed": true
+    }
+  ],
+  "passed": 3,
+  "total": 5
+}

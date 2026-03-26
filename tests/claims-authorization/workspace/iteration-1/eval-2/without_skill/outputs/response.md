@@ -1,14 +1,14 @@
-# User.FindFirst("sub") Returns Null
+# Fixing User.FindFirst("sub") Returning Null
 
 ## The Problem
 
-This is a common issue with ASP.NET Core's JWT bearer handler. By default, the handler maps JWT claim names to the longer Microsoft/WS-Federation XML namespace claim types. The `sub` claim gets renamed to `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`.
+The issue is that ASP.NET Core's JWT bearer handler remaps JWT claim types by default. The `sub` claim in the JWT gets renamed to the long Microsoft namespace URI `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`.
 
-So when you call `User.FindFirst("sub")`, it returns null because the claim is stored under the longer name.
+So `User.FindFirst("sub")` returns null because the claim is stored under a different name in the ClaimsPrincipal.
 
 ## The Fix
 
-You need to disable the inbound claim type mapping on your JWT bearer handler:
+Disable the claim mapping on the JWT bearer handler:
 
 ```csharp
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -20,13 +20,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 ```
 
-With `MapInboundClaims = false`, the handler preserves the original JWT claim names like `sub`, `name`, `email`, etc.
+With `MapInboundClaims = false`, the JWT handler will keep the original claim names from the token. Now `User.FindFirst("sub")` will work correctly.
 
-You may also want to update the `TokenValidationParameters` so that `User.Identity.Name` still works:
+You might also want to set the name and role claim types:
 
 ```csharp
 options.TokenValidationParameters.NameClaimType = "name";
 options.TokenValidationParameters.RoleClaimType = "role";
 ```
-
-The claim is definitely in the token (you confirmed via jwt.io). It's just being renamed during deserialization.

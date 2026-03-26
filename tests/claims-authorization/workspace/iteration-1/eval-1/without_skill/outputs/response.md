@@ -1,8 +1,8 @@
-# Custom IProfileService for IdentityServer
+# Custom Profile Service for IdentityServer
 
-To include custom claims like `department` and `tenant_id` in access tokens from Duende IdentityServer, you need to implement `IProfileService`.
+To add custom claims to access tokens, you can implement `IProfileService` and register it with IdentityServer.
 
-## Implementation
+## Profile Service Implementation
 
 ```csharp
 using System.Security.Claims;
@@ -30,42 +30,27 @@ public class CustomProfileService : IProfileService
         {
             new Claim("department", user.Department),
             new Claim("tenant_id", user.TenantId),
+            new Claim("name", user.DisplayName),
+            new Claim("email", user.Email),
         };
 
+        // Add all claims to the issued claims
         context.IssuedClaims.AddRange(claims);
     }
 
-    public async Task IsActiveAsync(IsActiveContext context)
+    public Task IsActiveAsync(IsActiveContext context)
     {
-        var subjectId = context.Subject.FindFirst("sub")?.Value;
-        if (subjectId == null)
-        {
-            context.IsActive = false;
-            return;
-        }
-
-        var user = await _users.FindBySubjectIdAsync(subjectId);
-        context.IsActive = user != null && user.IsEnabled;
+        context.IsActive = true;
+        return Task.CompletedTask;
     }
 }
 ```
 
 ## Registration
 
-Register it in your `Program.cs`:
-
 ```csharp
 builder.Services.AddIdentityServer()
-    .AddInMemoryClients(Config.Clients)
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
     .AddProfileService<CustomProfileService>();
 ```
 
-This will ensure both `department` and `tenant_id` are included in access tokens issued by your IdentityServer.
-
-## Notes
-
-- The `GetProfileDataAsync` method is called when tokens are being issued
-- `IsActiveAsync` checks whether the user account is still valid
-- You can inject any services you need through the constructor
+This will add your custom claims including `department` and `tenant_id` to the access tokens. The `IsActiveAsync` method is required by the interface and should return whether the user is still active.

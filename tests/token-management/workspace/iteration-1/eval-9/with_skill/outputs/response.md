@@ -1,89 +1,78 @@
-# Blazor Server Token Management
+# Blazor Server Token Management — Fixing Expired Token Issues
 
 ## The Problem
 
-In Blazor Server, once a SignalR circuit is established, `HttpContext` becomes `null`. The initial HTTP request that establishes the circuit has an `HttpContext`, but all subsequent interactions happen over the SignalR channel without one. The default cookie-based `IUserTokenStore` relies on `HttpContext` to read and write tokens, so after the circuit is established it cannot access or refresh tokens — causing 401 errors when the access token expires.
+In Blazor Server, the application runs on the server over a persistent SignalR connection called a "circuit." The initial HTTP request that starts the circuit has an `HttpContext`, but once the circuit is established, **`HttpContext` becomes `null`**. This means the default cookie-based token storage (which relies on `HttpContext`) cannot read or refresh tokens after the circuit is up.
+
+This is why your API calls start failing with 401s after a while — the access token expires, and the library can't access the refresh token through `HttpContext` to get a new one.
 
 ## The Solution
 
-Duende.AccessTokenManagement provides `AddBlazorServerAccessTokenManagement<T>()` specifically for this scenario. You must implement a custom `IUserTokenStore` backed by persistent storage (database, etc.) so tokens survive across circuit reconnections, and capture tokens during the initial OIDC authentication flow via the `OnTokenValidated` event.
+Use `AddBlazorServerAccessTokenManagement<T>()` with a custom `IUserTokenStore` backed by persistent storage (e.g., a database), and capture tokens during the `OnTokenValidated` OIDC event — the only point where `HttpContext` is available during authentication.
 
-## Program.cs
+## Implementation
+
+### 1. Program.cs — Registration
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Authentication: cookie + OIDC ──
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = "cookie";
-        options.DefaultChallengeScheme = "oidc";
-    })
-    .AddCookie("cookie", options =>
-    {
-        options.Events.OnSigningOut = async e =>
-        {
-            await e.HttpContext.RevokeRefreshTokenAsync();
-        };
-    })
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://sts.example.com";
-        options.ClientId = "webapp";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("api1");
-        options.Scope.Add("offline_access");
-
-        options.SaveTokens = true;
-
-        // ✅ Capture tokens during initial OIDC flow — the only point where HttpContext is available
-        options.Events.OnTokenValidated = async context =>
-        {
-            var store = context.HttpContext.RequestServices
-                .GetRequiredService<IUserTokenStore>();
-            var token = new UserToken
-            {
-                AccessToken = context.TokenEndpointResponse?.AccessToken,
-                RefreshToken = context.TokenEndpointResponse?.RefreshToken,
-                Expiration = DateTimeOffset.UtcNow.AddSeconds(
-                    int.Parse(context.TokenEndpointResponse?.ExpiresIn ?? "3600"))
-            };
-            await store.StoreTokenAsync(context.Principal!, token);
-        };
-    });
-
-// ── Token management with Blazor Server support ──
-builder.Services.AddOpenIdConnectAccessTokenManagement()
-    .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>();
-
-// ── Register EF Core for token storage ──
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "cookie";
+    options.DefaultChallengeScheme = "oidc";
+})
+.AddCookie("cookie")
+.AddOpenIdConnect("oidc", options =>
+{
+    options.Authority = "https://sts.example.com";
+    options.ClientId = "blazor-app";
+    options.ClientSecret = "secret";
+    options.ResponseType = "code";
+    options.SaveTokens = true;
+    options.Scope.Add("openid");
+    options.Scope.Add("profile");
+    options.Scope.Add("api1");
+    options.Scope.Add("offline_access");
 
-var app = builder.Build();
+    // Capture tokens during initial OIDC authentication
+    options.Events.OnTokenValidated = async context =>
+    {
+        var store = context.HttpContext.RequestServices
+            .GetRequiredService<IUserTokenStore>();
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+        var token = new UserToken
+        {
+            AccessToken = context.TokenEndpointResponse?.AccessToken,
+            RefreshToken = context.TokenEndpointResponse?.RefreshToken,
+            Expiration = DateTimeOffset.UtcNow.AddSeconds(
+                int.Parse(context.TokenEndpointResponse?.ExpiresIn ?? "3600"))
+        };
 
-app.Run();
+        await store.StoreTokenAsync(context.Principal!, token);
+    };
+});
+
+// Register token management with Blazor Server support
+builder.Services.AddOpenIdConnectAccessTokenManagement()
+    .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>();
+
+// Register HTTP clients
+builder.Services.AddUserAccessTokenHttpClient("api",
+    configureClient: client =>
+    {
+        client.BaseAddress = new Uri("https://api.example.com");
+    });
 ```
 
-## Custom `IUserTokenStore` Implementation
+### 2. Custom IUserTokenStore Implementation
+
+The store must implement `GetTokenAsync`, `StoreTokenAsync`, and `ClearTokenAsync`, backed by persistent storage:
 
 ```csharp
-using System.Security.Claims;
-using Duende.AccessTokenManagement.OpenIdConnect;
-
 public class ServerSideTokenStore : IUserTokenStore
 {
     private readonly IDbContextFactory<AppDbContext> _dbFactory;
@@ -100,6 +89,7 @@ public class ServerSideTokenStore : IUserTokenStore
         var sub = user.FindFirst("sub")?.Value;
         using var db = await _dbFactory.CreateDbContextAsync();
         var stored = await db.UserTokens.FindAsync(sub);
+
         return new UserToken
         {
             AccessToken = stored?.AccessToken,
@@ -116,11 +106,13 @@ public class ServerSideTokenStore : IUserTokenStore
         var sub = user.FindFirst("sub")?.Value;
         using var db = await _dbFactory.CreateDbContextAsync();
         var stored = await db.UserTokens.FindAsync(sub);
+
         if (stored == null)
         {
             stored = new StoredUserToken { SubjectId = sub! };
             db.UserTokens.Add(stored);
         }
+
         stored.AccessToken = token.AccessToken;
         stored.RefreshToken = token.RefreshToken;
         stored.Expiration = token.Expiration;
@@ -134,6 +126,7 @@ public class ServerSideTokenStore : IUserTokenStore
         var sub = user.FindFirst("sub")?.Value;
         using var db = await _dbFactory.CreateDbContextAsync();
         var stored = await db.UserTokens.FindAsync(sub);
+
         if (stored != null)
         {
             db.UserTokens.Remove(stored);
@@ -143,12 +136,31 @@ public class ServerSideTokenStore : IUserTokenStore
 }
 ```
 
-## Why This Is Needed
+### 3. Entity for Token Storage
 
-A Blazor Server circuit is a long-lived SignalR connection. The initial HTTP request that establishes the circuit has an `HttpContext`, but all subsequent interactions happen over the SignalR channel without one. Any code that reads `IHttpContextAccessor.HttpContext` or the authentication cookie store after circuit setup will find `null` or stale data.
+```csharp
+public class StoredUserToken
+{
+    public string SubjectId { get; set; } = default!;
+    public string? AccessToken { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTimeOffset Expiration { get; set; }
+}
+```
 
-By using `AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()`:
-1. Tokens are captured during `OnTokenValidated` (the only point with `HttpContext`)
-2. Stored in a persistent backend (database) via the custom `IUserTokenStore`
-3. Read from that store during the circuit lifetime — no dependency on `HttpContext`
-4. Refreshed automatically when they expire (the library calls `StoreTokenAsync` with the new token)
+## Why This Works
+
+1. **`OnTokenValidated`** fires during the initial OIDC authentication HTTP request — the only time `HttpContext` is available. The tokens are persisted to the database immediately.
+
+2. **`AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()`** replaces the default cookie-based `IUserTokenStore` with your database-backed implementation. When the token management library needs to read or refresh tokens during the circuit's lifetime, it reads from the database instead of trying to access `HttpContext`.
+
+3. When the access token expires, the library reads the refresh token from the database, requests a new access token from the authorization server, and stores the updated tokens back — all without needing `HttpContext`.
+
+## Common Mistake
+
+```csharp
+// ❌ This will throw NullReferenceException in Blazor Server circuits
+var token = await HttpContext.GetUserAccessTokenAsync();
+
+// ✅ Use the IUserTokenStore-backed approach above
+```

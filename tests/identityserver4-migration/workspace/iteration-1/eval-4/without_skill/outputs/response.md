@@ -1,8 +1,8 @@
-# Database Migrations After Duende IdentityServer Upgrade
-
-After upgrading, you'll need to create EF Core migrations to update the database schema.
+# Database Migrations for Duende IdentityServer
 
 ## Creating Migrations
+
+After updating your packages, you need to create new EF Core migrations:
 
 ```bash
 dotnet ef migrations add DuendeUpgrade -c PersistedGrantDbContext
@@ -16,12 +16,22 @@ dotnet ef database update -c PersistedGrantDbContext
 dotnet ef database update -c ConfigurationDbContext
 ```
 
-## Expected Schema Changes
+## New Tables
 
-Duende IdentityServer adds several new tables and columns compared to IdentityServer4:
+Duende IdentityServer adds several new tables compared to IdentityServer4:
 
-- **Keys table** — for automatic key management
-- **ServerSideSessions table** — for server-side session support
-- Various new columns on existing client and resource tables
+### Keys Table
+The **`Keys`** table is used for **automatic key management**. Duende IdentityServer can automatically create, rotate, and retire signing keys, and this table stores them.
 
-Review the generated migration code carefully before applying to production databases.
+### ServerSideSessions Table
+The **`ServerSideSessions`** table supports server-side session management, allowing you to query and manage active user sessions.
+
+## New Columns
+
+Duende adds new columns to existing tables:
+- New client properties for features like **DPoP** (`RequireDPoP`) and **Pushed Authorization Requests** (`RequirePushedAuthorization`)
+- Various timestamp columns for tracking
+
+## Important
+
+Review the generated migration carefully before applying it to production. Back up your database first.

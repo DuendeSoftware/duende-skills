@@ -1,30 +1,23 @@
-# Custom Profile Service for Scope-Based Claims
+# Custom Profile Service
 
-Here's how to create a profile service that loads claims from a database and emits only the claims requested by the client's scopes.
-
-## ProfileService Implementation
+To create a custom profile service that loads claims from a database and filters them by scope:
 
 ```csharp
-using System.Security.Claims;
-using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Models;
+using System.Security.Claims;
 
-public class CustomProfileService : IProfileService
+public class DatabaseProfileService : IProfileService
 {
     public async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
-        // Load claims from database
-        var claims = await LoadClaimsFromDatabase(context.Subject.FindFirst("sub")?.Value);
+        var subjectId = context.Subject.FindFirst("sub")?.Value;
 
-        // Add all loaded claims to issued claims
-        context.IssuedClaims.AddRange(claims);
+        // Load all claims from database
+        var claims = await GetUserClaimsAsync(subjectId);
 
-        // For token exchange, pass through the act claim
-        var actClaim = context.Subject.FindFirst("act");
-        if (actClaim != null)
-        {
-            context.IssuedClaims.Add(actClaim);
-        }
+        // Add only requested claims based on scopes
+        context.AddRequestedClaims(claims);
     }
 
     public Task IsActiveAsync(IsActiveContext context)
@@ -33,35 +26,23 @@ public class CustomProfileService : IProfileService
         return Task.CompletedTask;
     }
 
-    private Task<List<Claim>> LoadClaimsFromDatabase(string? subjectId)
+    private Task<List<Claim>> GetUserClaimsAsync(string subjectId)
     {
-        // Hypothetical database lookup
-        var claims = new List<Claim>
+        // Database lookup here
+        return Task.FromResult(new List<Claim>
         {
-            new Claim("name", "Alice Smith"),
-            new Claim("email", "alice@example.com"),
-            new Claim("role", "admin")
-        };
-        return Task.FromResult(claims);
+            new Claim("name", "Alice"),
+            new Claim("email", "alice@example.com")
+        });
     }
 }
 ```
 
-## Registration
-
-In `Program.cs`, register the profile service:
+Register it:
 
 ```csharp
-var idsvrBuilder = builder.Services.AddIdentityServer()
-    // ... existing configuration
-    ;
-
-idsvrBuilder.AddProfileService<CustomProfileService>();
+builder.Services.AddIdentityServer()
+    .AddProfileService<DatabaseProfileService>();
 ```
 
-## Notes
-
-- The profile service is called whenever tokens are issued to populate claims.
-- `GetProfileDataAsync` receives a context with information about the caller, requested resources, and the subject.
-- `IsActiveAsync` is called to determine if the user is still active/allowed to receive tokens.
-- The `act` claim is checked and forwarded when present, which supports token exchange scenarios.
+This ensures only claims matching the requested scopes are emitted in tokens.

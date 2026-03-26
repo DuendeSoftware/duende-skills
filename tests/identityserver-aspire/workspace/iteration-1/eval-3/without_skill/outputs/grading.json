@@ -1,1 +1,29 @@
-{"eval_id": 3, "variant": "without_skill", "assertions": [{"assertion": "The tracing configuration includes .AddSource(\"Duende.IdentityServer\")", "pass": true, "rationale": "Code shows .AddSource(\"Duende.IdentityServer\")"}, {"assertion": "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)", "pass": false, "rationale": "Only the main Duende.IdentityServer source is added. No sub-sources (Cache, Services, Stores, Validation) are included."}, {"assertion": "The metrics configuration includes .AddMeter(\"Duende.IdentityServer\")", "pass": true, "rationale": "Code shows .AddMeter(\"Duende.IdentityServer\")"}, {"assertion": "All source and meter names are string literals, not constants from any Duende package", "pass": true, "rationale": "String literals are used throughout"}], "pass_count": 3, "total_count": 4, "score": 0.75}
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The tracing configuration includes .AddSource(\"Duende.IdentityServer\")",
+      "pass": true,
+      "rationale": "Code shows `.AddSource(\"Duende.IdentityServer\")`"
+    },
+    {
+      "assertion": "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)",
+      "pass": false,
+      "rationale": "Only includes the main Duende.IdentityServer source, not the sub-sources"
+    },
+    {
+      "assertion": "The metrics configuration includes .AddMeter(\"Duende.IdentityServer\")",
+      "pass": true,
+      "rationale": "Code shows `.AddMeter(\"Duende.IdentityServer\")`"
+    },
+    {
+      "assertion": "All source and meter names are string literals, not constants from any Duende package",
+      "pass": true,
+      "rationale": "All names are string literals"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,79 +1,67 @@
-# Home Realm Discovery for IdentityServer Login
+# Home Realm Discovery
 
-Here's how to implement HRD with multiple external providers.
+## Client Configuration
+
+```csharp
+new Client
+{
+    ClientId = "spa.app",
+    // ... existing config ...
+    IdentityProviderRestrictions = { "Google", "local" }
+}
+```
 
 ## Login Page with HRD
 
 ```csharp
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
 public class LoginModel : PageModel
 {
+    private readonly IIdentityServerInteractionService _interaction;
+
+    public LoginModel(IIdentityServerInteractionService interaction)
+    {
+        _interaction = interaction;
+    }
+
     [BindProperty]
     public string Email { get; set; }
-
-    [BindProperty]
-    public string Password { get; set; }
-
     [BindProperty]
     public string ReturnUrl { get; set; }
 
     public async Task<IActionResult> OnGet(string returnUrl)
     {
         ReturnUrl = returnUrl;
+        var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
+        // Check for IdP hint in acr_values
+        if (context?.IdP != null)
+        {
+            var props = new AuthenticationProperties
+            {
+                RedirectUri = "/callback",
+                Items = { { "returnUrl", returnUrl } }
+            };
+            return Challenge(props, context.IdP);
+        }
+
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public IActionResult OnPostRoute()
     {
-        // Check email domain for routing
-        if (!string.IsNullOrEmpty(Email))
+        if (Email.EndsWith("@contoso.com"))
         {
-            if (Email.EndsWith("@contoso.com"))
+            var props = new AuthenticationProperties
             {
-                // Route contoso users to AAD
-                var props = new AuthenticationProperties
-                {
-                    RedirectUri = "/ExternalLoginCallback",
-                    Items = { { "returnUrl", ReturnUrl } }
-                };
-                return Challenge(props, "AAD");
-            }
+                RedirectUri = "/callback",
+                Items = { { "returnUrl", ReturnUrl } }
+            };
+            return Challenge(props, "AAD");
         }
 
-        // Local login for non-contoso users
-        // Validate credentials...
-        
-        return Page();
+        return Page(); // Show other options
     }
 }
 ```
 
-## Program.cs — Provider Registration
-
-```csharp
-// Register external providers
-builder.Services.AddAuthentication()
-    .AddOpenIdConnect("AAD", "Corporate Login", options =>
-    {
-        options.Authority = "https://login.microsoftonline.com/contoso.com/v2.0";
-        options.ClientId = "your-client-id";
-        options.ResponseType = "code";
-    })
-    .AddGoogle("Google", options =>
-    {
-        options.ClientId = "google-client-id";
-        options.ClientSecret = "google-secret";
-    });
-```
-
-### Notes
-
-- Route users based on email domain — @contoso.com goes to AAD.
-- Show Google and local login as options for other users.
-- Use `Challenge()` to redirect to the appropriate external provider.
-- Consider restricting providers per client if needed.
+This implements HRD with acr_values hint detection and email-domain routing.

@@ -116,6 +116,138 @@
         "Output changes AllowOfflineAccess to true to enable refresh token issuance",
         "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault"
       ]
+    },
+    {
+      "id": 101,
+      "prompt": "I need to configure a machine-to-machine client called 'billing-service' for our payment processing backend. It needs access to two API scopes: 'invoices.read' and 'invoices.pay'. Show me the client definition and the API scope definitions. The secret should be loaded from configuration, not hardcoded.",
+      "expected_output": "A Client definition with GrantTypes.ClientCredentials, RequireClientSecret = true (or default), and AllowedScopes containing both scopes. Two ApiScope definitions. Secret loaded from configuration rather than hardcoded.",
+      "sub_documents": ["client-types.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Client uses GrantTypes.ClientCredentials as the allowed grant type",
+        "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+        "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+        "Secret is loaded from Configuration or an external source — not a hardcoded string with Sha256()"
+      ]
+    },
+    {
+      "id": 102,
+      "prompt": "I'm building a React SPA at https://spa.myapp.com that needs to authenticate users via our IdentityServer instance. The SPA needs to access user profile info and call our API at scope 'orders.read'. Configure the client properly. It also needs to be able to get refresh tokens.",
+      "expected_output": "A Client definition with GrantTypes.Code, RequireClientSecret = false (public client), RequirePkce = true, redirect URIs, CORS origins, AllowOfflineAccess = true, and appropriate scopes including openid, profile, and the API scope.",
+      "sub_documents": ["client-types.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Uses GrantTypes.Code (not Implicit) as the grant type",
+        "Sets RequireClientSecret = false since it is a public SPA client",
+        "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+        "Sets AllowOfflineAccess = true to enable refresh tokens",
+        "AllowedScopes includes 'openid', 'profile', and 'orders.read'"
+      ]
+    },
+    {
+      "id": 103,
+      "prompt": "We have two microservices: an Invoice API and a Customer API. They share some common scopes ('manage', 'enumerate') and each has their own specific scopes. I need the access tokens to include the correct 'aud' claim so each API can validate that the token is intended for it. Show me how to set up API Resources and API Scopes for this.",
+      "expected_output": "ApiScope definitions for service-specific scopes and shared scopes. Two ApiResource definitions ('invoice' and 'customer') that each reference their own scopes plus the shared scopes. Explanation that the aud claim is derived from the API Resource name.",
+      "sub_documents": ["resources-scopes.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Defines separate ApiScope instances for service-specific scopes (e.g. invoice.read, customer.read) and shared scopes (manage, enumerate)",
+        "Defines an ApiResource named 'invoice' with a Scopes collection referencing invoice-specific and shared scopes",
+        "Defines an ApiResource named 'customer' with a Scopes collection referencing customer-specific and shared scopes",
+        "Explains that the aud claim in the token is derived from the ApiResource Name property",
+        "Registers both API Resources and API Scopes with AddInMemoryApiResources and AddInMemoryApiScopes"
+      ]
+    },
+    {
+      "id": 104,
+      "prompt": "I want to define a custom identity resource called 'employee_info' that includes claims 'employee_id', 'department', and 'hire_date'. An interactive client should be able to request this scope. Show me the full configuration including the identity resource, client setup, and registration.",
+      "expected_output": "A custom IdentityResource with name 'employee_info' and UserClaims containing the three claim types. A client with 'employee_info' in its AllowedScopes alongside openid. Registration via AddInMemoryIdentityResources.",
+      "sub_documents": ["resources-scopes.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Creates a new IdentityResource with name 'employee_info'",
+        "The IdentityResource's UserClaims includes 'employee_id', 'department', and 'hire_date'",
+        "An interactive client includes 'employee_info' in its AllowedScopes along with 'openid'",
+        "The IdentityResources.OpenId() is still present (required by OIDC spec)"
+      ]
+    },
+    {
+      "id": 105,
+      "prompt": "I need to set up a confidential client that authenticates using private_key_jwt instead of a shared secret. The client has an X.509 certificate. Also enable JWT bearer client authentication on the server side. The client uses authorization code flow for a web app at https://webapp.example.com.",
+      "expected_output": "A Client definition with a Secret of type X509CertificateBase64 (or JsonWebKey), GrantTypes.Code, redirect URIs, and a call to AddJwtBearerClientAuthentication() on the IdentityServer builder.",
+      "sub_documents": ["client-types.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Client secret uses Type = IdentityServerConstants.SecretTypes.X509CertificateBase64 or SecretTypes.JsonWebKey",
+        "Uses GrantTypes.Code as the grant type",
+        "Calls AddJwtBearerClientAuthentication() on the IdentityServer builder",
+        "Includes RedirectUris pointing to the web application",
+        "Does NOT use a shared secret (no Sha256() call on a string for this client)"
+      ]
+    },
+    {
+      "id": 106,
+      "prompt": "I need to configure refresh token behavior for our mobile app client. Requirements: refresh tokens should be one-time use (rotated on each use), have an absolute lifetime of 7 days, a sliding window of 1 day, and claims should be updated on each refresh. Show me the client configuration.",
+      "expected_output": "A Client definition with AllowOfflineAccess = true, RefreshTokenUsage = OneTimeOnly, AbsoluteRefreshTokenLifetime = 604800, SlidingRefreshTokenLifetime = 86400, RefreshTokenExpiration = Sliding, and UpdateAccessTokenClaimsOnRefresh = true.",
+      "sub_documents": ["client-types.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Sets AllowOfflineAccess = true to enable refresh tokens",
+        "Sets RefreshTokenUsage to TokenUsage.OneTimeOnly for rotation on each use",
+        "Sets AbsoluteRefreshTokenLifetime to 604800 (7 days in seconds)",
+        "Sets SlidingRefreshTokenLifetime to 86400 (1 day in seconds) and RefreshTokenExpiration to TokenExpiration.Sliding",
+        "Sets UpdateAccessTokenClaimsOnRefresh = true"
+      ]
+    },
+    {
+      "id": 107,
+      "prompt": "I want to support zero-downtime secret rotation for our 'payment-gateway' client credentials client. It currently uses one shared secret but we need to add a new secret while keeping the old one valid during a transition period. Show me how to configure this and explain the rollover process.",
+      "expected_output": "A Client definition with multiple Secret entries in the ClientSecrets collection. Explanation that IdentityServer validates against all secrets, so the old one remains valid until removed.",
+      "sub_documents": ["client-types.md"],
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Client has multiple Secret entries in the ClientSecrets collection (both old and new)",
+        "Uses GrantTypes.ClientCredentials for the client",
+        "Explains that IdentityServer validates against all configured secrets so both old and new work during rollover",
+        "Recommends removing the old secret after clients have migrated to the new one"
+      ]
+    },
+    {
+      "id": 108,
+      "prompt": "Our access tokens don't have an 'aud' claim and we need one for our single API. We don't want to set up full API Resources because we only have one API. What's the simplest way to get an audience claim in our tokens?",
+      "expected_output": "Enable EmitStaticAudienceClaim in IdentityServerOptions, which emits '{issuer}/resources' as the aud claim. Alternatively, define a minimal ApiResource.",
+      "sub_documents": ["resources-scopes.md"],
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Shows setting options.EmitStaticAudienceClaim = true in the IdentityServer options",
+        "Explains that this emits a static audience claim of '{issuer}/resources'",
+        "Mentions the alternative of defining an ApiResource as a more targeted approach",
+        "Does NOT suggest using the Implicit grant type or any deprecated patterns"
+      ]
     }
   ]
 }

@@ -1,32 +1,20 @@
-# Custom MongoDB Client Store
+# MongoDB Client Store
 
 ```csharp
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using MongoDB.Driver;
 
 public class MongoClientStore : IClientStore
 {
-    private readonly IMongoDatabase _database;
+    private readonly IMongoCollection<Client> _clients;
 
     public MongoClientStore(IMongoDatabase database)
     {
-        _database = database;
+        _clients = database.GetCollection<Client>("clients");
     }
 
-    public async Task<Client?> FindClientByIdAsync(string clientId, CancellationToken cancellationToken = default)
+    public async Task<Client?> FindClientByIdAsync(string clientId, CancellationToken ct = default)
     {
-        var collection = _database.GetCollection<BsonDocument>("clients");
-        var filter = Builders<BsonDocument>.Filter.Eq("ClientId", clientId);
-        var doc = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
-        
-        if (doc == null) return null;
-        
-        return new Client
-        {
-            ClientId = doc["ClientId"].AsString,
-            ClientName = doc["ClientName"].AsString
-        };
+        return await _clients.Find(c => c.ClientId == clientId).FirstOrDefaultAsync(ct);
     }
 }
 ```
@@ -37,7 +25,10 @@ public class MongoClientStore : IClientStore
 builder.Services.AddIdentityServer()
     .AddClientStore<MongoClientStore>();
 
+// Add caching
 builder.Services.AddMemoryCache();
+builder.Services.AddIdentityServer(options =>
+{
+    options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(5);
+});
 ```
-
-Register the custom store with `AddClientStore<T>()` and add memory caching for performance.

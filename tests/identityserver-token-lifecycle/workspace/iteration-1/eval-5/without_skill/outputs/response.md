@@ -1,6 +1,6 @@
-# Resilient Refresh Token Handling
+# Handling Network Failures with One-Time Refresh Tokens
 
-To handle network failures during token refresh with one-time-use tokens, you can implement a custom service that accepts recently-consumed tokens.
+When using one-time refresh tokens, network failures can cause problems because the old token gets consumed but the client doesn't receive the new one. Here's how to add a grace period.
 
 ## Custom Refresh Token Service
 
@@ -8,9 +8,9 @@ To handle network failures during token refresh with one-time-use tokens, you ca
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
 
-public class ResilientRefreshTokenService : DefaultRefreshTokenService
+public class GracefulRefreshTokenService : DefaultRefreshTokenService
 {
-    public ResilientRefreshTokenService(
+    public GracefulRefreshTokenService(
         IRefreshTokenStore refreshTokenStore,
         IProfileService profile,
         IClock clock,
@@ -21,7 +21,7 @@ public class ResilientRefreshTokenService : DefaultRefreshTokenService
 
     protected override Task<bool> AcceptConsumedTokenAsync(RefreshToken refreshToken)
     {
-        // Accept consumed tokens within a 30-second window
+        // Allow consumed tokens within 30 seconds
         if (refreshToken.ConsumedTime.HasValue)
         {
             var elapsed = DateTime.UtcNow - refreshToken.ConsumedTime.Value;
@@ -35,29 +35,22 @@ public class ResilientRefreshTokenService : DefaultRefreshTokenService
 }
 ```
 
-## Registration and Configuration
+Register it:
 
 ```csharp
-// Register the custom service
-builder.Services.AddTransient<IRefreshTokenService, ResilientRefreshTokenService>();
+builder.Services.AddTransient<IRefreshTokenService, GracefulRefreshTokenService>();
 ```
 
-For the mobile_app client, make sure refresh tokens are configured:
+Configure the mobile client:
 
 ```csharp
 new Client
 {
     ClientId = "mobile_app",
-    ClientName = "Mobile Application",
-    AllowedGrantTypes = GrantTypes.Code,
-    RequireClientSecret = false,
-    RedirectUris = { "myapp://callback" },
-    PostLogoutRedirectUris = { "myapp://signout" },
-    AllowedScopes = { "openid", "profile", "api1" },
-    RequirePkce = true,
+    // ... existing config ...
     AllowOfflineAccess = true,
     RefreshTokenUsage = TokenUsage.OneTimeOnly
 }
 ```
 
-You should also ensure that consumed tokens are not immediately deleted so the grace period check works. Configure the operational store settings accordingly.
+This allows retries within a 30-second window if the network drops during refresh.

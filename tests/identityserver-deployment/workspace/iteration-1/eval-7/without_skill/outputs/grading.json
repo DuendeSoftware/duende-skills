@@ -1,1 +1,29 @@
-{"eval_id":7,"variant":"without_skill","assertions":[{"assertion":"Output enables all four event categories: RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents on the IdentityServer options","pass":true,"rationale":"Shows all four: RaiseSuccessEvents = true, RaiseFailureEvents = true, RaiseErrorEvents = true, RaiseInformationEvents = true"},{"assertion":"Output implements IEventSink with a PersistAsync method that receives Event objects","pass":true,"rationale":"Shows SeqEventSink : IEventSink with public Task PersistAsync(Event evt)"},{"assertion":"Output writes events to Seq using structured logging (e.g., Serilog WriteTo.Seq) with event name, id, and details","pass":true,"rationale":"Shows WriteTo.Seq with structured logging including evt.Name, evt.Id, and evt as details"},{"assertion":"Output registers the custom event sink in the DI container so IdentityServer uses it","pass":true,"rationale":"Shows builder.Services.AddTransient<IEventSink, SeqEventSink>()"}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output enables all four event categories: RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents on the IdentityServer options",
+      "pass": true,
+      "rationale": "All four event categories enabled"
+    },
+    {
+      "assertion": "Output implements IEventSink with a PersistAsync method that receives Event objects",
+      "pass": true,
+      "rationale": "SeqEventSink implements IEventSink with PersistAsync"
+    },
+    {
+      "assertion": "Output writes events to Seq using structured logging (e.g., Serilog WriteTo.Seq) with event name, id, and details",
+      "pass": true,
+      "rationale": "Uses Serilog WriteTo.Seq with event name, id, and destructured event"
+    },
+    {
+      "assertion": "Output registers the custom event sink in the DI container so IdentityServer uses it",
+      "pass": true,
+      "rationale": "Shows builder.Services.AddSingleton<IEventSink, SeqEventSink>()"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

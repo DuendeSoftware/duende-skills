@@ -1,6 +1,6 @@
-# BFF Setup for React SPA
+# Setting Up BFF with OpenID Connect
 
-Here's how to set up Duende BFF to secure your React SPA:
+Here's how to set up a BFF (Backend for Frontend) pattern for a React SPA:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -40,12 +40,9 @@ app.UseBff();
 app.UseAuthorization();
 
 app.MapBffManagementEndpoints();
+app.MapFallbackToFile("index.html");
 
 app.Run();
 ```
 
-This sets up:
-- Cookie authentication for the session
-- OIDC for the login flow with your IDP
-- BFF middleware for CSRF protection
-- Management endpoints for login/logout
+This sets up cookie-based authentication with OIDC and the BFF middleware for CSRF protection.

@@ -1,1 +1,29 @@
-{"eval_id": 5, "variant": "with_skill", "assertions": [{"assertion": "The response identifies the root cause as the API starting before IdentityServer is ready", "pass": true, "rationale": "Response states 'your API is starting before IdentityServer is ready'"}, {"assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost", "pass": true, "rationale": "Code shows .WaitFor(identityServer) with explanation"}, {"assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available", "pass": true, "rationale": "Code shows .WithReference(identityServer) with explanation"}, {"assertion": "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work", "pass": true, "rationale": "Dedicated section explaining health check requirement with code for AddHealthChecks() and MapHealthChecks(\"/health\")"}], "pass_count": 4, "total_count": 4, "score": 1.0}
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The response identifies the root cause as the API starting before IdentityServer is ready",
+      "pass": true,
+      "rationale": "Clearly states 'your API is starting before IdentityServer is ready'"
+    },
+    {
+      "assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+      "pass": true,
+      "rationale": "Code and explanation show `.WaitFor(identityServer)` on the API"
+    },
+    {
+      "assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+      "pass": true,
+      "rationale": "Code and explanation show `.WithReference(identityServer)` on the API"
+    },
+    {
+      "assertion": "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work",
+      "pass": true,
+      "rationale": "Dedicated section on health checks with AddHealthChecks() and MapHealthChecks(\"/health\")"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

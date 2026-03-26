@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Sets RequireDPoP = true on the client configuration", "pass": true, "rationale": "Code explicitly sets RequireDPoP = true on the dpop_client."},
-    {"assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client", "pass": true, "rationale": "Code sets DPoPClockSkew = TimeSpan.FromMinutes(2) on the client."},
-    {"assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value", "pass": true, "rationale": "Response explains the cnf claim with jkt thumbprint and the DPoP proof mechanism."},
-    {"assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3", "pass": false, "rationale": "The response does not mention any edition requirements or minimum version. A generic assistant would not know about Duende's licensing tiers."},
-    {"assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication", "pass": true, "rationale": "Client uses GrantTypes.ClientCredentials with shared secret and response notes DPoP is separate from client authentication."}
+    {
+      "assertion": "Sets RequireDPoP = true on the client configuration",
+      "pass": true,
+      "rationale": "RequireDPoP = true is set."
+    },
+    {
+      "assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client",
+      "pass": true,
+      "rationale": "DPoPClockSkew = TimeSpan.FromMinutes(2) is set."
+    },
+    {
+      "assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value",
+      "pass": true,
+      "rationale": "Mentions cnf claim with jkt (JWK Thumbprint)."
+    },
+    {
+      "assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3",
+      "pass": false,
+      "rationale": "No mention of Enterprise Edition requirement or version >= 6.3."
+    },
+    {
+      "assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication",
+      "pass": true,
+      "rationale": "Client uses ClientCredentials with shared secret and explains DPoP is additional layer."
+    }
   ],
   "pass_count": 4,
   "total_count": 5,

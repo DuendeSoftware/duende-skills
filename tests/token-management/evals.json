@@ -51,6 +51,7 @@
       "id": 4,
       "prompt": "I need to add DPoP (Demonstrating Proof-of-Possession) support to our client credentials token management. We have a JWK stored in configuration at DPoP:JsonWebKey. Show me how to configure the client credentials client with DPoP and make sure the key isn't regenerated on every restart.",
       "expected_output": "Code that loads the DPoP JWK from configuration (not generated ephemerally), sets DPoPJsonWebKey on the client credentials client options, and optionally mentions IDPoPKeyStore for dynamic key resolution.",
+      "sub_documents": ["dpop.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/WebApp.csproj",
@@ -125,6 +126,7 @@
       "id": 9,
       "prompt": "We have a Blazor Server app. Users authenticate via OIDC but after a while, API calls start failing with 401s. I think the tokens are expiring. Someone mentioned we can't use HttpContext in Blazor circuits. What's going on and how do I fix it?",
       "expected_output": "An explanation that Blazor Server circuits outlive the initial HTTP request so HttpContext is null after circuit establishment. The fix is to use AddBlazorServerAccessTokenManagement<T> with a custom IUserTokenStore, and capture tokens during the OnTokenValidated event.",
+      "sub_documents": ["blazor-server.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/WebApp.csproj"
@@ -140,6 +142,7 @@
       "id": 10,
       "prompt": "I want to use client assertions (signed JWTs) instead of shared secrets for authenticating my client to the token endpoint. Show me how to implement IClientAssertionService. Make sure to get the audience right — I heard there was a CVE about this.",
       "expected_output": "An IClientAssertionService implementation that creates a signed JWT with the audience set to the authorization server's issuer URL (NOT the token endpoint URL). Must reference CVE-2025-27370/CVE-2025-27371 and explain the security vulnerability.",
+      "sub_documents": ["client-assertions.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/WebApp.csproj"
@@ -156,6 +159,7 @@
       "id": 11,
       "prompt": "I have a multi-tenant SaaS app. Each tenant has a different API resource and required scopes. I need to customize the token request dynamically based on which tenant's API I'm calling. How can I do this with Duende.AccessTokenManagement v4?",
       "expected_output": "An ITokenRequestCustomizer implementation that resolves the tenant from the outgoing HTTP request and modifies the TokenRequestParameters accordingly, registered via the Add*Handler methods.",
+      "sub_documents": ["customization.md"],
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/WebApp.csproj"
@@ -165,6 +169,30 @@
         "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
         "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
         "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "What is the simplest way to set up client credentials token management in a .NET 9 worker service using Duende.AccessTokenManagement v4? Just show me the minimal registration code.",
+      "expected_output": "Minimal Program.cs calling AddClientCredentialsTokenManagement().AddClient() with a named client, then using AddClientCredentialsHttpClient() or AddClientCredentialsTokenHandler() on an HttpClient registration.",
+      "files": [],
+      "assertions": [
+        "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+        "Output calls .AddClient() with at least TokenEndpoint, ClientId, and Scope configured",
+        "Output registers an HTTP client with AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler",
+        "Output does NOT require any sub-documents to answer correctly (core SKILL.md is sufficient)"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "How does Duende.AccessTokenManagement v4 handle token caching and what cache does it use by default?",
+      "expected_output": "Explanation that v4 uses HybridCache (two-tier L1 in-memory + L2 distributed cache). No explicit AddDistributedMemoryCache() call is required. CacheLifetimeBuffer can be configured to refresh tokens before they expire.",
+      "files": [],
+      "assertions": [
+        "States that v4 uses HybridCache for token caching (not the old IDistributedCache directly)",
+        "Explains the two-tier L1 (in-memory) + L2 (distributed) cache architecture",
+        "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4",
+        "Mentions CacheLifetimeBuffer as a configuration option for controlling token refresh timing"
       ]
     }
   ]

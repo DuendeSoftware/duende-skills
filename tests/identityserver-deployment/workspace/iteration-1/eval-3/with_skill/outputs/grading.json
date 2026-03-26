@@ -1,1 +1,29 @@
-{"eval_id":3,"variant":"with_skill","assertions":[{"assertion":"Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler","pass":true,"rationale":"Shows DiscoveryHealthCheck implementing IHealthCheck that finds endpoint by IdentityServerConstants.EndpointNames.Discovery and invokes ProcessAsync"},{"assertion":"Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler","pass":true,"rationale":"Shows DiscoveryKeysHealthCheck implementing IHealthCheck that finds endpoint by IdentityServerConstants.EndpointNames.Jwks and checks for JsonWebKeysResult"},{"assertion":"Output registers the health checks using builder.Services.AddHealthChecks() and maps the health endpoint with app.MapHealthChecks()","pass":true,"rationale":"Shows AddHealthChecks().AddCheck<DiscoveryHealthCheck>().AddCheck<DiscoveryKeysHealthCheck>() and app.MapHealthChecks(\"/health\")"},{"assertion":"Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes","pass":true,"rationale":"Both health check classes inject IEnumerable<Hosting.Endpoint> and IHttpContextAccessor in constructors"}],"pass_count":4,"total_count":4,"score":1.0}
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler",
+      "pass": true,
+      "rationale": "DiscoveryHealthCheck class implements IHealthCheck and uses IdentityServerConstants.EndpointNames.Discovery"
+    },
+    {
+      "assertion": "Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler",
+      "pass": true,
+      "rationale": "DiscoveryKeysHealthCheck class implements IHealthCheck and uses IdentityServerConstants.EndpointNames.Jwks"
+    },
+    {
+      "assertion": "Output registers the health checks using builder.Services.AddHealthChecks() and maps the health endpoint with app.MapHealthChecks()",
+      "pass": true,
+      "rationale": "Shows AddHealthChecks().AddCheck<>() and app.MapHealthChecks('/health')"
+    },
+    {
+      "assertion": "Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes",
+      "pass": true,
+      "rationale": "Both classes inject IEnumerable<Hosting.Endpoint> and IHttpContextAccessor via constructor"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

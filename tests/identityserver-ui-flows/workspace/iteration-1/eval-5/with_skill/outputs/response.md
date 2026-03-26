@@ -1,25 +1,22 @@
 # Error Page Implementation
 
-Here's a complete error page implementation for IdentityServer.
-
-## Program.cs — Configure Error URL
+## 1. Configure Error URL in Program.cs
 
 ```csharp
-builder.Services.AddIdentityServer(options =>
+builder.Services.AddIdentityServer(opt =>
 {
-    options.UserInteraction.ErrorUrl = "/Error";
-    options.UserInteraction.ErrorId = "errorId"; // default query parameter name
+    opt.UserInteraction.ErrorUrl = "/Error";
+    opt.UserInteraction.ErrorId = "errorId"; // query string parameter name
 });
 ```
 
-## Pages/Error.cshtml.cs
+## 2. Error Page Model
 
 ```csharp
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
 
 public class ErrorModel : PageModel
 {
@@ -39,18 +36,18 @@ public class ErrorModel : PageModel
 
     public async Task<IActionResult> OnGet(string errorId)
     {
-        // Retrieve error details from IIdentityServerInteractionService
         var errorContext = await _interaction.GetErrorContextAsync(errorId);
 
         if (errorContext != null)
         {
-            // Display only the error code and request ID to the user
+            // Only expose error code and request ID to the user
             ErrorCode = errorContext.Error;
             RequestId = errorContext.RequestId;
 
-            // Log the full error details including ErrorDescription at Debug level
+            // Log the FULL error details at Debug level (including ErrorDescription)
             _logger.LogDebug(
-                "IdentityServer error: {Error}, Description: {ErrorDescription}, RequestId: {RequestId}, ClientId: {ClientId}",
+                "IdentityServer error: {Error}, Description: {ErrorDescription}, " +
+                "RequestId: {RequestId}, ClientId: {ClientId}",
                 errorContext.Error,
                 errorContext.ErrorDescription,
                 errorContext.RequestId,
@@ -62,36 +59,32 @@ public class ErrorModel : PageModel
 }
 ```
 
-## Pages/Error.cshtml
+## 3. Error Razor View
 
 ```html
 @page
-@model IdentityServer.Pages.ErrorModel
+@model ErrorModel
 
-<h1>Error</h1>
+<h2>Error</h2>
 
-@if (!string.IsNullOrEmpty(Model.ErrorCode))
-{
-    <p><strong>Error:</strong> @Model.ErrorCode</p>
-}
+<p>Sorry, there was an error processing your request.</p>
 
-@if (!string.IsNullOrEmpty(Model.RequestId))
-{
-    <p><strong>Request ID:</strong> @Model.RequestId</p>
-}
+<dl>
+    <dt>Error</dt>
+    <dd>@Model.ErrorCode</dd>
 
-<p>An error occurred processing your request. Please contact support with the above request ID.</p>
+    <dt>Request ID</dt>
+    <dd>@Model.RequestId</dd>
+</dl>
 
-@* 
-    IMPORTANT: Do NOT display ErrorDescription to the user.
-    It may contain sensitive information.
-    Full details are logged at Debug level for administrators.
-*@
+@* IMPORTANT: Do NOT display ErrorDescription to the user for security reasons *@
+<p>Please contact support and reference the Request ID above.</p>
 ```
 
-### Key Points
+## Key Points
 
-1. **`opt.UserInteraction.ErrorUrl`** is set to `"/Error"` in Program.cs.
-2. **`GetErrorContextAsync(errorId)`** retrieves the error details from `IIdentityServerInteractionService`.
-3. **Security**: The page displays only `Error` (error code) and `RequestId` to the user. `ErrorDescription` is **not** rendered in the view.
-4. **Logging**: Full error details including `ErrorDescription` are logged at `Debug` level using `ILogger`.
+1. **`opt.UserInteraction.ErrorUrl`**: Set to `/Error` so IdentityServer redirects to this page on protocol errors.
+2. **`opt.UserInteraction.ErrorId`**: The query parameter name (default: `errorId`).
+3. **`GetErrorContextAsync(errorId)`**: Retrieves the `ErrorMessage` with `Error`, `ErrorDescription`, `RequestId`, and `ClientId`.
+4. **Security**: Only `Error` and `RequestId` are shown to the user. `ErrorDescription` is NOT rendered — it may contain sensitive details.
+5. **Logging**: Full error details including `ErrorDescription` are logged at `Debug` level for troubleshooting.

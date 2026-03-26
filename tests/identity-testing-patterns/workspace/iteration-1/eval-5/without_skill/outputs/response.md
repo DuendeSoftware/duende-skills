@@ -1,80 +1,63 @@
-# Testing Authorization Policy on DELETE Endpoint
-
-## WebApplicationFactory
-
-```csharp
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication;
-
-public class TestFactory : WebApplicationFactory<Program>
-{
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureTestServices(services =>
-        {
-            services.AddAuthentication("Test")
-                .AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>("Test", o => { });
-        });
-    }
-}
-```
+# Testing AdminOnly Policy
 
 ## Tests
 
 ```csharp
-using System.Net;
-using System.Security.Claims;
-using Xunit;
-
-public class DeleteProductTests
+public class AdminPolicyTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    [Fact]
-    public async Task Admin_CanDeleteProduct()
-    {
-        var factory = new TestFactory();
-        FakeAuthHandler.Claims = new List<Claim>
-        {
-            new Claim("sub", "user-1"),
-            new Claim("role", "admin")
-        };
-        var client = factory.CreateClient();
+    private readonly WebApplicationFactory<Program> _factory;
 
+    public AdminPolicyTests(WebApplicationFactory<Program> factory)
+    {
+        _factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddAuthentication("Test")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+            });
+        });
+    }
+
+    [Fact]
+    public async Task Admin_Gets204()
+    {
+        TestAuthHandler.TestClaims = new List<Claim>
+        {
+            new("sub", "user-1"),
+            new("role", "admin")
+        };
+
+        var client = _factory.CreateClient();
         var response = await client.DeleteAsync("/api/products/1");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]
-    public async Task Viewer_GetsForbidden()
+    public async Task Viewer_Gets403()
     {
-        var factory = new TestFactory();
-        FakeAuthHandler.Claims = new List<Claim>
+        TestAuthHandler.TestClaims = new List<Claim>
         {
-            new Claim("sub", "user-2"),
-            new Claim("role", "viewer")
+            new("sub", "user-2"),
+            new("role", "viewer")
         };
-        var client = factory.CreateClient();
 
+        var client = _factory.CreateClient();
         var response = await client.DeleteAsync("/api/products/1");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
-    public async Task NoAuth_GetsUnauthorized()
+    public async Task NoAuth_Gets401()
     {
-        var factory = new TestFactory();
-        FakeAuthHandler.Claims = null;
-        var client = factory.CreateClient();
+        TestAuthHandler.TestClaims = null;
 
+        var client = _factory.CreateClient();
         var response = await client.DeleteAsync("/api/products/1");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }
 ```
-
-This uses a static claims pattern on the FakeAuthHandler to control what claims are available for each test.

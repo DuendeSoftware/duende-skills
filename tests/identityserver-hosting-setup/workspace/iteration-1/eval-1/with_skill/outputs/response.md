@@ -1,58 +1,61 @@
-# Setting Up a Minimal Duende IdentityServer with In-Memory Stores
+# Setting Up Minimal Duende IdentityServer with In-Memory Stores
 
-Here's the updated `Program.cs` with a minimal IdentityServer setup including an API scope `api1` and a machine-to-machine client `m2m.client` using `client_credentials` grant:
+Here's a complete `Program.cs` with a machine-to-machine client using `client_credentials` grant:
 
 ```csharp
-// Program.cs
 using Duende.IdentityServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure IdentityServer services in DI
+// Register IdentityServer services in DI
 builder.Services.AddIdentityServer()
-    .AddInMemoryApiScopes(new List<ApiScope>
+    .AddInMemoryApiScopes(new[]
     {
         new ApiScope("api1", "My API")
     })
-    .AddInMemoryClients(new List<Client>
+    .AddInMemoryClients(new[]
     {
         new Client
         {
             ClientId = "m2m.client",
-            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.ClientCredentials,
+            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedScopes = { "api1" }
         }
     });
 
 var app = builder.Build();
 
-// Middleware pipeline - order is critical
+// Middleware pipeline — order is critical
 app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();    // Includes UseAuthentication() internally
-app.UseAuthorization();
+app.UseAuthorization();     // Required — must not be omitted
 
 app.MapGet("/", () => "IdentityServer is running");
 
 app.Run();
 ```
 
-## Key Points
+## Pipeline Ordering
 
-1. **`AddIdentityServer()`** registers all IdentityServer services in the DI container. It also calls `AddAuthentication` internally.
+The middleware pipeline ordering is critical for IdentityServer to function correctly:
 
-2. **`AddInMemoryApiScopes`** registers the `api1` scope that the client can request.
+| Order | Middleware | Notes |
+|-------|-----------|-------|
+| 1 | `UseStaticFiles()` | Before IdentityServer |
+| 2 | `UseRouting()` | **Must** be before IdentityServer |
+| 3 | `UseIdentityServer()` | Includes `UseAuthentication()` internally — do not add both |
+| 4 | `UseAuthorization()` | **Required** after IdentityServer — must not be omitted |
 
-3. **`AddInMemoryClients`** registers the `m2m.client` with:
-   - `ClientCredentials` grant type (machine-to-machine)
-   - A hashed secret `"secret"`
-   - Access to the `api1` scope
+### Key Points
 
-4. **Middleware ordering** is critical:
-   - `UseStaticFiles()` — before IdentityServer
-   - `UseRouting()` — must come before `UseIdentityServer()`
-   - `UseIdentityServer()` — includes `UseAuthentication()` internally, so don't add that separately
-   - `UseAuthorization()` — must come after `UseIdentityServer()`, required by the Duende UI template
+- **`app.UseRouting()`** must come before `app.UseIdentityServer()`. Without routing, IdentityServer's endpoints won't be matched.
+- **`app.UseIdentityServer()`** already calls `UseAuthentication()` internally, so you should **not** add a separate `UseAuthentication()` call.
+- **`app.UseAuthorization()`** must come after `UseIdentityServer()` and must **not** be omitted — it is required by the Duende UI template.
 
-Do **not** add `UseAuthentication()` separately — `UseIdentityServer()` already calls it internally.
+## What This Configures
+
+- **API Scope**: `api1` — defines the scope that the client can request
+- **Client**: `m2m.client` using `client_credentials` grant type with shared secret `"secret"` (hashed with SHA-256)
+- The client can request access tokens for the `api1` scope by authenticating with its client ID and secret

@@ -2,13 +2,33 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Sets options.MutualTls.Enabled = true in AddIdentityServer options", "pass": true, "rationale": "Code sets options.MutualTls.Enabled = true."},
-    {"assertion": "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain", "pass": true, "rationale": "Code sets options.MutualTls.DomainName = \"mtls\"."},
-    {"assertion": "Calls AddMutualTlsSecretValidators() on the IdentityServer builder", "pass": true, "rationale": "Code calls idsvrBuilder.AddMutualTlsSecretValidators()."},
-    {"assertion": "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)", "pass": true, "rationale": "Client secret has Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint."},
-    {"assertion": "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme", "pass": false, "rationale": "The response does not add a certificate authentication scheme with AddCertificate() or set MutualTls.ClientCertificateAuthenticationScheme. It only configures the mTLS options and client secret but omits the authentication scheme setup needed to extract the certificate from the TLS connection."}
+    {
+      "assertion": "Sets options.MutualTls.Enabled = true in AddIdentityServer options",
+      "pass": true,
+      "rationale": "options.MutualTls.Enabled = true is set."
+    },
+    {
+      "assertion": "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain",
+      "pass": true,
+      "rationale": "options.MutualTls.DomainName = \"mtls\" is set."
+    },
+    {
+      "assertion": "Calls AddMutualTlsSecretValidators() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddMutualTlsSecretValidators() is called."
+    },
+    {
+      "assertion": "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)",
+      "pass": false,
+      "rationale": "Uses Type = \"X509Thumbprint\" which is incorrect. The correct value is IdentityServerConstants.SecretTypes.X509CertificateThumbprint or the string \"X509Thumbprint\" \u2014 actually this string is wrong, the correct constant value is \"X509CertificateThumbprint\" or SecretTypes.X509CertificateThumbprint."
+    },
+    {
+      "assertion": "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme",
+      "pass": false,
+      "rationale": "AddCertificate is called but MutualTls.ClientCertificateAuthenticationScheme is not set to reference it."
+    }
   ],
-  "pass_count": 4,
+  "pass_count": 3,
   "total_count": 5,
-  "score": 0.8
+  "score": 0.6
 }

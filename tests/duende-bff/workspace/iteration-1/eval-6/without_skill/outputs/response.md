@@ -1,14 +1,17 @@
-# Optional Token for /api/reports
+# Optional Token for API Endpoints
 
-For an endpoint that should work for both authenticated and anonymous users, you want to use an optional token mode.
+For endpoints that should work both for authenticated and anonymous users, you can configure the token type to be optional.
+
+```csharp
+app.MapRemoteBffApiEndpoint("/api/reports", new Uri("https://reports-service.internal/api"))
+    .WithOptionalUserAccessToken();
+```
+
+Or you could use:
 
 ```csharp
 app.MapRemoteBffApiEndpoint("/api/reports", new Uri("https://reports-service.internal/api"))
     .WithAccessToken(RequiredTokenType.UserOrNone);
 ```
 
-`RequiredTokenType.UserOrNone` will:
-- Attach the user's access token if they're logged in
-- Send no token if they're anonymous, without triggering a login challenge
-
-This is different from `RequiredTokenType.User` which would force a login redirect for anonymous users.
+This will attach the user's access token if they're logged in, but won't challenge them if they're anonymous. The request will be forwarded without a token for unauthenticated users.

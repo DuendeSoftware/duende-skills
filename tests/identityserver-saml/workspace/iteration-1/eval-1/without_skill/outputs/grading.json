@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "The code calls .AddSaml() on the IdentityServer builder chain", "pass": false, "rationale": "The code calls .AddSamlPlugin() instead of the correct .AddSaml() method."},
-    {"assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer", "pass": false, "rationale": "The response adds a separate NuGet package 'Duende.IdentityServer.Saml2p', which is incorrect — SAML is built into the main package."},
-    {"assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'", "pass": false, "rationale": "Uses 'ServiceProvider' class instead of 'SamlServiceProvider'. The EntityId is set but on the wrong type."},
-    {"assertion": "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'", "pass": false, "rationale": "Uses 'AssertionConsumerServices' with a different structure instead of 'AssertionConsumerServiceUrls'."},
-    {"assertion": "The code mentions or uses AddInMemorySamlServiceProviders to register the SP", "pass": false, "rationale": "Uses 'AddInMemoryServiceProviders' instead of the correct 'AddInMemorySamlServiceProviders'."}
+    {
+      "assertion": "The code calls .AddSaml() on the IdentityServer builder chain",
+      "pass": false,
+      "rationale": "Calls .AddSaml2p() instead of .AddSaml(). The correct method is AddSaml()."
+    },
+    {
+      "assertion": "No separate NuGet package is added \u2014 SAML is built into Duende.IdentityServer",
+      "pass": false,
+      "rationale": "Incorrectly suggests installing a separate NuGet package 'Duende.IdentityServer.Saml2p'. SAML is built into Duende.IdentityServer."
+    },
+    {
+      "assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+      "pass": false,
+      "rationale": "Uses 'ServiceProvider' instead of 'SamlServiceProvider' type. EntityId is set but the wrong type."
+    },
+    {
+      "assertion": "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'",
+      "pass": false,
+      "rationale": "Uses 'AssertionConsumerServiceUrl' (singular) as a string, not 'AssertionConsumerServiceUrls' (plural) as a Uri collection."
+    },
+    {
+      "assertion": "The code mentions or uses AddInMemorySamlServiceProviders to register the SP",
+      "pass": false,
+      "rationale": "Does not use AddInMemorySamlServiceProviders. Registration approach is vague and incorrect."
+    }
   ],
   "pass_count": 0,
   "total_count": 5,

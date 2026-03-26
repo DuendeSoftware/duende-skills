@@ -1,1 +1,29 @@
-{"eval_id":6,"variant":"without_skill","assertions":[{"assertion":"Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B","pass":false,"rationale":"Mentions state data being lost generically but does not specifically name the OIDC state data formatter or explain the IDistributedCache mechanism"},{"assertion":"Output configures a distributed cache implementation such as AddStackExchangeRedisCache or AddSqlServerCache","pass":true,"rationale":"Shows AddStackExchangeRedisCache configuration and mentions AddSqlServerCache as alternative"},{"assertion":"Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store","pass":false,"rationale":"Only mentions OIDC state storage and general caching; does not name JWT replay cache, device flow throttling, or PAR specifically"},{"assertion":"Output does NOT suggest using the default in-memory DistributedCache for multi-instance deployments","pass":true,"rationale":"States 'Do not use AddDistributedMemoryCache() in a multi-instance deployment'"}],"pass_count":2,"total_count":4,"score":0.5}
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B",
+      "pass": false,
+      "rationale": "Mentions state data can't be found across instances but doesn't explain the IDistributedCache mechanism or the OIDC state data formatter specifically"
+    },
+    {
+      "assertion": "Output configures a distributed cache implementation such as AddStackExchangeRedisCache or AddSqlServerCache",
+      "pass": true,
+      "rationale": "Shows AddStackExchangeRedisCache"
+    },
+    {
+      "assertion": "Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store",
+      "pass": false,
+      "rationale": "Only mentions OIDC state data and vaguely 'session management and token storage'; doesn't mention JWT replay cache, device flow throttling, or PAR"
+    },
+    {
+      "assertion": "Output does NOT suggest using the default in-memory DistributedCache for multi-instance deployments",
+      "pass": true,
+      "rationale": "Shows Redis instead; doesn't suggest using in-memory cache"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

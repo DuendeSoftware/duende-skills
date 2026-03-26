@@ -1,61 +1,38 @@
-# Security Audit of IdentityServer Setup
-
-Looking at the provided Program.cs, here are the security issues I found and how to fix them:
+# Security Audit
 
 ## Issues Found
 
-1. **Developer signing credential** — `AddDeveloperSigningCredential()` should not be used in production. Use proper key management.
+### 1. Developer Signing Credential
+Using `AddDeveloperSigningCredential()` in production is not recommended. Replace with a proper signing key.
 
-2. **Implicit flow** — The `spa.legacy` client uses `GrantTypes.Implicit` which is deprecated. Migrate to authorization code flow.
-
-3. **Wildcard redirect URIs** — The `web.app` client uses `https://*.example.com/signin-oidc` which allows redirection to attacker-controlled subdomains.
-
-4. **PKCE disabled** — `web.app` has `RequirePkce = false`.
-
-5. **Long access token lifetime** — `web.app` has 8-hour access tokens.
-
-6. **Hardcoded secrets** — Client secrets are string literals in source code.
-
-## Fixed Configuration
+### 2. Implicit Flow
+The `spa.legacy` client uses implicit flow which is deprecated. Switch to authorization code with PKCE:
 
 ```csharp
-builder.Services.AddIdentityServer(options =>
-{
-    options.KeyManagement.RotationInterval = TimeSpan.FromDays(90);
-})
-.AddInMemoryClients(new List<Client>
-{
-    new Client
-    {
-        ClientId = "web.app",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) },
-        RedirectUris = { "https://app.example.com/signin-oidc" },
-        AllowedScopes = { "openid", "profile", "email", "catalog.read", "catalog.write" },
-        AllowOfflineAccess = true,
-        AccessTokenLifetime = 3600,
-        RefreshTokenUsage = TokenUsage.OneTimeOnly,
-    },
-    new Client
-    {
-        ClientId = "spa.legacy",
-        AllowedGrantTypes = GrantTypes.Code,
-        RequirePkce = true,
-        RequireClientSecret = false,
-        RedirectUris = { "https://spa.example.com/callback" },
-        AllowedScopes = { "openid", "profile", "catalog.read" },
-    },
-    new Client
-    {
-        ClientId = "background.worker",
-        AllowedGrantTypes = GrantTypes.ClientCredentials,
-        ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:Worker"].Sha256()) },
-        AllowedScopes = { "internal-api", "orders.manage" },
-        AccessTokenLifetime = 3600
-    },
-    // ...
-});
+AllowedGrantTypes = GrantTypes.Code,
+RequirePkce = true,
+RequireClientSecret = false
 ```
 
-Key changes: removed implicit flow, enabled PKCE, fixed redirect URIs, moved secrets to config, removed developer signing credential.
+### 3. PKCE Disabled
+The `web.app` client has `RequirePkce = false`. This should be `true`.
+
+### 4. Wildcard Redirect URIs
+`https://*.example.com/signin-oidc` should be replaced with specific URIs.
+
+### 5. Long Access Token Lifetime
+8-hour access tokens are too long. Reduce to 15 minutes or less:
+
+```csharp
+AccessTokenLifetime = 900
+```
+
+### 6. Hardcoded Secrets
+Secrets should be loaded from configuration instead of hardcoded.
+
+### 7. No HTTPS Configuration
+Add HSTS and HTTPS redirection.
+
+## Summary
+
+The main issues are the developer signing credential, implicit flow usage, disabled PKCE, wildcard redirect URIs, long token lifetimes, and hardcoded secrets. These should all be remediated before going to production.

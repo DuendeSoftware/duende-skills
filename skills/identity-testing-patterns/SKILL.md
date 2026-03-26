@@ -35,6 +35,15 @@ Use this skill when:
 
 ---
 
+## Sub-Documents
+
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/bff-testing.md](docs/bff-testing.md) | BFF endpoint testing with cookie simulation, antiforgery headers, and OIDC redirect bypass | BFF testing, CookieContainer, x-csrf header, BffFactory, session simulation |
+| [docs/aspire-testing.md](docs/aspire-testing.md) | Full-stack Aspire testing with identity server health checks and token endpoint wiring | Aspire testing, DistributedApplicationTestingBuilder, WaitForResourceHealthyAsync, end-to-end |
+
+---
+
 ## Testing Strategy Overview
 
 | What to test | Recommended approach |
@@ -691,117 +700,17 @@ public async Task AdminEndpoint_WithAdminRole_ShouldReturn204()
 
 ## Pattern 7: Testing BFF Endpoints
 
-BFF tests require cookie-based session simulation. The `WebApplicationFactory` needs to track cookies between requests to simulate a logged-in user.
+BFF tests require cookie-based session simulation using `CookieContainer` + `HttpClientHandler`. Set `AllowAutoRedirect = false` so session redirects don't swallow status codes. Include `x-csrf: 1` header on all BFF local API calls — missing it returns 400. Override the OIDC `OnRedirectToIdentityProvider` event to bypass external redirects in tests.
 
-```csharp
-public sealed class BffFactory : WebApplicationFactory<Program>
-{
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureTestServices(services =>
-        {
-            // Replace OIDC with a short-circuit test handler
-            // that immediately signs in a test user on /bff/login
-            services.Configure<OpenIdConnectOptions>("oidc", options =>
-            {
-                options.Events.OnRedirectToIdentityProvider = ctx =>
-                {
-                    // In tests, bypass the external redirect and sign in directly
-                    ctx.HandleResponse();
-                    return Task.CompletedTask;
-                };
-            });
-        });
-    }
-}
-```
-
-### Cookie Jar for Session Tests
-
-```csharp
-public class BffUserEndpointTests : IClassFixture<BffFactory>
-{
-    private readonly HttpClient _client;
-
-    public BffUserEndpointTests(BffFactory factory)
-    {
-        // ✅ Use a CookieContainer so session cookies are stored and sent automatically
-        var cookieContainer = new CookieContainer();
-        var handler = new HttpClientHandler
-        {
-            CookieContainer = cookieContainer,
-            AllowAutoRedirect = false
-        };
-        _client = factory.CreateDefaultClient(handler);
-    }
-
-    [Fact]
-    public async Task UserEndpoint_WithoutSession_ShouldReturn401()
-    {
-        // Act — no prior login
-        var response = await _client.GetAsync("/bff/user");
-
-        // Assert — BFF user endpoint returns 401, not a redirect
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task ApiEndpoint_RequiresAntiForgeryHeader()
-    {
-        // ✅ BFF endpoints require x-csrf: 1 header
-        _client.DefaultRequestHeaders.Add("x-csrf", "1");
-
-        var response = await _client.GetAsync("/api/data");
-
-        // Without a session this is 401, but the header check passes
-        Assert.NotEqual(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task ApiEndpoint_WithoutAntiForgeryHeader_ShouldReturn400()
-    {
-        // ❌ Missing x-csrf: 1
-        var response = await _client.GetAsync("/api/data");
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-}
-```
+> See [docs/bff-testing.md](docs/bff-testing.md) for the complete `BffFactory`, `CookieContainer` setup, and antiforgery header test examples.
 
 ---
 
 ## Pattern 8: Testing with Aspire (Full-Stack)
 
-The identity-specific additions are:
+Wire IdentityServer as a named Aspire resource, then use `WaitForResourceHealthyAsync("idp", cts.Token)` before requesting tokens. Obtain `idp` endpoint via `_app.GetEndpoint("idp", "https")` and pass it to `RequestClientCredentialsTokenAsync`.
 
-```csharp
-// In your AppHost project, expose IdentityServer as a named resource
-var idp = builder.AddProject<Projects.IdentityServer>("idp")
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
-
-var api = builder.AddProject<Projects.Api>("api")
-    .WithReference(idp)
-    .WithEnvironment("Authentication__Authority", idp.GetEndpoint("https"));
-```
-
-```csharp
-// In the Aspire test fixture, wait for the identity server to be healthy
-await _app.ResourceNotifications.WaitForResourceHealthyAsync("idp", cts.Token);
-await _app.ResourceNotifications.WaitForResourceHealthyAsync("api", cts.Token);
-
-// Obtain tokens from the real in-process identity server
-var idpBaseUrl = _app.GetEndpoint("idp", "https");
-var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
-    new ClientCredentialsTokenRequest
-    {
-        Address = $"{idpBaseUrl}connect/token",
-        ClientId = "e2e.test.client",
-        ClientSecret = "e2e-secret",
-        Scope = "api1"
-    });
-
-Assert.False(tokenResponse.IsError, tokenResponse.Error);
-```
+> See [docs/aspire-testing.md](docs/aspire-testing.md) for the complete AppHost wiring and test fixture setup.
 
 ---
 

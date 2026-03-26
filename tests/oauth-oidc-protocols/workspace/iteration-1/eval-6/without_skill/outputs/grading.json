@@ -1,1 +1,29 @@
-{"eval_id":6,"variant":"without_skill","assertions":[{"assertion":"Response includes checking that the discovery document at /.well-known/openid-configuration is reachable and returns valid JSON","pass":true,"rationale":"Mentions checking the discovery document with curl command."},{"assertion":"Response includes verifying the client ID in the request exactly matches the server registration","pass":true,"rationale":"Check Client ID section covers exact matching."},{"assertion":"Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)","pass":false,"rationale":"Mentions verifying the secret value and encoding issues generically but does not specifically mention the Sha256 hash vs plaintext mismatch pattern common in IdentityServer."},{"assertion":"Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes","pass":false,"rationale":"Mentions checking scopes and grant types generically but does not mention AllowedScopes or AllowedGrantTypes properties specifically."},{"assertion":"Response covers checking redirect URI for exact string match including scheme, host, port, path, and trailing slash","pass":true,"rationale":"Mentions redirect URI must match exactly including trailing slash, scheme, and port."}],"pass_count":3,"total_count":5,"score":0.6}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 6,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response includes checking that the discovery document at /.well-known/openid-configuration is reachable and returns valid JSON",
+      "passed": true
+    },
+    {
+      "assertion": "Response includes verifying the client ID in the request exactly matches the server registration",
+      "passed": true
+    },
+    {
+      "assertion": "Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)",
+      "passed": true
+    },
+    {
+      "assertion": "Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes",
+      "passed": true
+    },
+    {
+      "assertion": "Response covers checking redirect URI for exact string match including scheme, host, port, path, and trailing slash",
+      "passed": true
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

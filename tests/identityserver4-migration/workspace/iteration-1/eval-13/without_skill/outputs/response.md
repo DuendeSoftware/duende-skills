@@ -1,34 +1,20 @@
 # Pre-Migration Analysis for IdentityServer4
 
-Before starting your migration, it's good practice to analyze your current setup. Here are some approaches:
+## Planning Your Migration
 
-## Code Analysis
+Before migrating, it's a good idea to assess your current IdentityServer4 setup. You should document:
 
-1. **Review your NuGet packages**: Check your `.csproj` for all IdentityServer4-related packages and note their versions. This tells you which Duende equivalents you'll need.
+- Your current .NET version and IdentityServer4 version
+- How many clients you have configured
+- What authentication schemes are registered
+- How signing keys are configured
+- Your data protection configuration
 
-2. **Search for namespace usage**: Use your IDE or `grep` to find all `IdentityServer4` namespace references across your codebase to understand the scope of changes needed.
+## Duende Migration Resources
 
-3. **Inventory your configuration**: Review your `Startup.cs`/`Program.cs` to catalog:
-   - Client definitions (how many, what grant types)
-   - Resource definitions
-   - Store configurations (in-memory, EF Core, custom)
-   - Signing credential setup
-   - External authentication providers
+Duende Software provides migration documentation and resources to help plan the upgrade. Check their documentation site for the latest guidance on upgrading from IdentityServer4.
 
-## Duende Resources
-
-Duende Software provides migration documentation and guidance for upgrading from IdentityServer4. Check their official docs at [docs.duendesoftware.com](https://docs.duendesoftware.com) for:
-- Detailed migration guides
-- Breaking changes documentation
-- Updated configuration examples
-
-## What to Look For
-
-Key areas to analyze before migrating:
-- **Target framework**: What .NET version are you on? You'll need to upgrade to .NET 8+
-- **Database schema**: If using EF Core stores, you'll need schema migrations
-- **Custom implementations**: Any custom stores, validators, or services that reference IS4 types
-- **Third-party integrations**: External auth providers that may need package updates
-- **Client configuration complexity**: Understanding your client setup helps plan the migration
-
-I'd recommend creating a spreadsheet or document that catalogs all of these items before starting the actual migration work.
+You could also review your current configuration programmatically by examining your DI container and configuration at runtime, checking things like:
+- Registered authentication handlers
+- Client store configuration
+- Signing credential setup

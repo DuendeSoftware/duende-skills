@@ -1,39 +1,16 @@
-# Custom IServerSideSessionStore with Redis
+# Custom Session Store with Redis
 
-Here's how to register a custom session store backed by Redis for Duende IdentityServer.
+To use Redis instead of EF Core for session storage, implement the session store interface and register it.
 
 ## Registration
 
 ```csharp
-// Program.cs
 builder.Services.AddIdentityServer()
     .AddServerSideSessions()
     .AddServerSideSessionStore<RedisSessionStore>();
 ```
 
-You can also register the store directly via DI:
-
-```csharp
-builder.Services.AddSingleton<IServerSideSessionStore, RedisSessionStore>();
-builder.Services.AddIdentityServer()
-    .AddServerSideSessions();
-```
-
-## What's Stored in a Session
-
-Each session record contains:
-- A unique key identifying the session
-- The user's subject ID
-- The session ID  
-- Creation and renewal timestamps
-- Expiration time
-- The serialized authentication ticket
-
-The authentication ticket includes all claims and authentication properties for the user's session.
-
 ## Implementation
-
-Your `RedisSessionStore` needs to implement `IServerSideSessionStore`:
 
 ```csharp
 public class RedisSessionStore : IServerSideSessionStore
@@ -45,33 +22,29 @@ public class RedisSessionStore : IServerSideSessionStore
         _redis = redis;
     }
 
-    public Task CreateSessionAsync(ServerSideSession session, CancellationToken cancellationToken = default)
+    public async Task CreateSessionAsync(ServerSideSession session,
+        CancellationToken cancellationToken = default)
     {
-        // Store session in Redis using session.Key as the key
-        throw new NotImplementedException();
+        var db = _redis.GetDatabase();
+        var serialized = JsonSerializer.Serialize(session);
+        await db.StringSetAsync($"session:{session.Key}", serialized);
     }
 
-    public Task<ServerSideSession?> GetSessionAsync(string key, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateSessionAsync(ServerSideSession session, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task DeleteSessionAsync(string key, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    // ... additional query and cleanup methods
+    // Implement other methods: GetSessionAsync, UpdateSessionAsync, DeleteSessionAsync, etc.
 }
 ```
 
+## Session Data
+
+The session stores the user's authentication state including their claims and session metadata. The data includes:
+
+- Subject ID (the user's unique identifier)
+- Session ID (the session's unique identifier)
+- Creation and expiration timestamps
+- The serialized authentication ticket
+
 ## Notes
 
-- Make sure your Redis instance is available and properly configured for production use
-- Consider using Redis sorted sets or secondary indices to efficiently query sessions by user
-- Data Protection keys should be shared across instances for consistent session decryption
+- Consider setting TTL on Redis keys matching the session expiration
+- Use Redis sorted sets for efficient querying by expiration time
+- Ensure Redis is configured for persistence if sessions must survive restarts

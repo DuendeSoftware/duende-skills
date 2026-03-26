@@ -1,64 +1,174 @@
 {
-  "metadata": {"skill_name": "identityserver-key-management", "iteration": 1, "model": "claude-opus-4-20250514", "date": "2026-03-23"},
+  "metadata": {
+    "skill_name": "identityserver-key-management",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-03-26"
+  },
   "summary": {
-    "with_skill": {"total_assertions": 32, "passed": 32, "failed": 0, "pass_rate": 100.0},
-    "without_skill": {"total_assertions": 32, "passed": 23, "failed": 9, "pass_rate": 71.9},
-    "delta": {"assertions_improved": 9, "delta_pass_rate": 28.1}
+    "with_skill": {
+      "total_assertions": 32,
+      "passed": 32,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 32,
+      "passed": 30,
+      "failed": 2,
+      "pass_rate": 93.8
+    },
+    "delta": {
+      "assertions_improved": 2,
+      "delta_pass_rate": 6.2
+    }
   },
   "evals": [
     {
       "eval_id": 1,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 2,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     },
     {
       "eval_id": 3,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["Program.cs calls SetApplicationName with an explicit application name string"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 4,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 0, "failed": 4, "total": 4, "pass_rate": 0.0},
-      "delta": 1.0,
-      "without_skill_failures": ["Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true", "Program.cs includes a SigningAlgorithmOptions for EcdsaSha256 (ES256) in the SigningAlgorithms array", "Program.cs defines a client with ClientId 'mobile-app' that has AllowedIdentityTokenSigningAlgorithms containing EcdsaSha256 or 'ES256'", "The RS256 algorithm entry appears before ES256 in the SigningAlgorithms array to be the default"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true"
+      ]
     },
     {
       "eval_id": 5,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5},
-      "delta": 0.5,
-      "without_skill_failures": ["Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)", "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management"
+      ]
     },
     {
       "eval_id": 6,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["Program.cs contains 'options.KeyManagement.Enabled = false'"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 7,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75},
-      "delta": 0.25,
-      "without_skill_failures": ["Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation"]
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 8,
-      "with_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
-      "without_skill": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0},
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1.0
+      },
       "delta": 0.0,
       "without_skill_failures": []
     }

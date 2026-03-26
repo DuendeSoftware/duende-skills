@@ -1,29 +1,25 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 15,
-  "variant": "with_skill",
+  "mode": "with_skill",
   "assertions": [
     {
       "assertion": "Response explains that third-party authentication handlers need NuGet package updates for the new .NET version",
-      "pass": true,
-      "rationale": "States 'their NuGet packages must be updated to versions compatible with the new .NET version' and 'Authentication handlers compiled against older ASP.NET Core versions may fail to load at runtime on the new framework.'"
+      "passed": true
     },
     {
       "assertion": "Response specifically mentions WS-Federation handler needing an update",
-      "pass": true,
-      "rationale": "Dedicated section 'WS-Federation (Microsoft.AspNetCore.Authentication.WsFederation)' states it 'needs a NuGet package update' and shows version-specific PackageReference examples."
+      "passed": true
     },
     {
       "assertion": "Response mentions SAML2P handler (Sustainsys.Saml2 or equivalent) needing a compatible version for .NET 8+",
-      "pass": true,
-      "rationale": "Dedicated section covers Sustainsys.Saml2 version history (v2.x for .NET Core 3.1/.NET 5, v3.x for .NET 8+) and states 'Sustainsys.Saml2 needs a compatible version for .NET 8+.'"
+      "passed": true
     },
     {
       "assertion": "Response recommends testing all external login flows end-to-end after migration",
-      "pass": true,
-      "rationale": "Dedicated 'Post-Migration Verification' section states 'Test all external login flows end-to-end after migration' with specific steps for Google, WS-Fed, and SAML2P flows."
+      "passed": true
     }
   ],
-  "pass_count": 4,
-  "total_count": 4,
-  "score": 1.0
+  "passed": 4,
+  "total": 4
 }

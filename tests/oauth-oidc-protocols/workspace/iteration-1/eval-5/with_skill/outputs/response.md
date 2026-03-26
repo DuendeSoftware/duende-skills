@@ -1,76 +1,71 @@
-# Don't Parse Access Tokens in Client Apps
+# Don't Parse Access Tokens in the Client
 
 ## The Problem
 
-Parsing access tokens in a client application is fundamentally wrong, and your breakage after the server upgrade proves exactly why.
+Your client application broke because it was **parsing the access token as a JWT** to extract user claims. When the server switched to reference tokens (opaque strings), JWT parsing fails because reference tokens are not JWTs.
 
-## Critical Rule: Clients Should Treat Access Tokens as Opaque
+This reveals a fundamental misuse of tokens: **clients should treat access tokens as opaque strings**, regardless of their actual format.
 
-Access tokens — whether JWTs or reference tokens — are meant for the **resource server (API)**, not for the client application. Clients should treat access tokens as opaque strings. They should never parse, decode, or inspect them.
+## Why Clients Should Not Parse Access Tokens
 
-```csharp
-// ❌ WRONG — Clients should treat access tokens as opaque
-var handler = new JwtSecurityTokenHandler();
-var jwt = handler.ReadJwtToken(accessToken);
-var name = jwt.Claims.First(c => c.Type == "name").Value;
-// This breaks when the server switches to reference tokens
+Access tokens are designed to be consumed by the **resource server (API)**, not the client. The OIDC specification is clear:
 
-// ✅ CORRECT — Only the resource server (API) validates access tokens
-// The client just forwards the token in the Authorization header
-httpClient.SetBearerToken(accessToken);
-```
+- **Access tokens** authorize API calls → consumed by the **API**
+- **ID tokens** prove user identity → consumed by the **client**
 
-## Why It Breaks
+| Token | Consumed By | Purpose |
+|-------|-------------|---------|
+| ID Token | Client application | User identity (name, email, sub) |
+| Access Token | Resource server (API) | Authorization for API access |
+| Refresh Token | Client application | Obtain new access tokens |
 
-When the server switched from JWT to reference tokens, the access token changed from a self-contained JWT (base64-encoded JSON) to an **opaque identifier** — a random string like `a5f3c8d2e1b4`. Trying to parse this as a JWT will fail because it's not valid JWT format. This is by design.
+When a client parses an access token, it creates a tight coupling to the token format. The server is free to change from JWT to reference tokens (or change the JWT claims structure) without notice — the access token format is an implementation detail between the authorization server and the API.
 
 ## The Correct Way to Get User Info
 
-### Use the ID Token
+### Option 1: ID Token (Primary)
 
-The **ID token** is the correct place to get user identity claims (name, email, etc.) in the client application. This is what OpenID Connect was designed for:
-
-- **ID tokens** prove user identity — consumed by the **client application**
-- **Access tokens** authorize API calls — consumed by the **resource server (API)**
+The ID token is a JWT that the client is explicitly designed to consume. It contains user identity claims:
 
 ```csharp
-// ✅ CORRECT — Read user claims from the ClaimsPrincipal
-// (populated from the ID token by the OIDC middleware)
+// In an ASP.NET Core app using OIDC authentication,
+// user claims from the ID token are available via the ClaimsPrincipal:
 var name = User.FindFirst("name")?.Value;
 var email = User.FindFirst("email")?.Value;
+var sub = User.FindFirst("sub")?.Value;
 ```
 
-In ASP.NET Core with the OIDC middleware, the ID token claims are automatically mapped to the `ClaimsPrincipal` (`HttpContext.User`). You don't need to decode anything manually.
-
-### Use the UserInfo Endpoint
-
-If the ID token doesn't contain all the claims you need (some providers limit ID token claims by default), you can call the **userinfo endpoint**:
+To get `name` and `email` in the ID token, request the `profile` and `email` scopes:
 
 ```csharp
-// The userinfo endpoint returns user claims for the current access token
-var userInfoEndpoint = disco.UserInfoEndpoint;
+options.Scope.Add("profile");
+options.Scope.Add("email");
+```
+
+### Option 2: UserInfo Endpoint
+
+If the ID token doesn't contain all the claims you need (some providers send minimal ID tokens and defer claims to the userinfo endpoint), you can call the userinfo endpoint:
+
+```csharp
+var disco = await httpClient.GetDiscoveryDocumentAsync(authority);
 var userInfoResponse = await httpClient.GetUserInfoAsync(new UserInfoRequest
 {
-    Address = userInfoEndpoint,
-    Token = accessToken
+    Address = disco.UserInfoEndpoint,
+    Token = accessToken  // Use the access token to authenticate
 });
 
 var name = userInfoResponse.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-var email = userInfoResponse.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
 ```
 
-Or configure the OIDC handler to do it automatically:
+Or configure the OIDC handler to call userinfo automatically:
 
 ```csharp
 options.GetClaimsFromUserInfoEndpoint = true;
 ```
 
-## Summary
+## Key Takeaway
 
-| Token | Purpose | Who Consumes It | Format |
-|-------|---------|----------------|--------|
-| **ID Token** | Proves user identity | Client application | Always JWT |
-| **Access Token** | Authorizes API calls | Resource server (API) | JWT or reference (opaque) |
-| **Refresh Token** | Obtains new access tokens | Client application | Opaque handle |
-
-The distinction is fundamental: **ID tokens prove who the user is (authentication)**, while **access tokens authorize what the user can do (authorization)**. Never confuse the two.
+- **Never parse access tokens in client code.** Treat them as opaque.
+- **Use the ID token** for user identity claims in the client.
+- **Use the userinfo endpoint** as a fallback for additional claims.
+- **ID tokens prove identity** (consumed by clients); **access tokens authorize API calls** (consumed by APIs).

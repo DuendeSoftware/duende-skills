@@ -1,8 +1,6 @@
 # Consent Page Implementation
 
-Here's a complete consent page implementation using Razor Pages and `IIdentityServerInteractionService`.
-
-## Pages/Consent.cshtml.cs
+## Consent.cshtml.cs
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -21,26 +19,19 @@ public class ConsentModel : PageModel
         _interaction = interaction;
     }
 
-    public string ClientName { get; set; }
-    public IEnumerable<string> RequestedScopes { get; set; }
+    [BindProperty]
+    public string ReturnUrl { get; set; } = string.Empty;
 
     [BindProperty]
-    public string ReturnUrl { get; set; }
+    public List<string> SelectedScopes { get; set; } = new();
 
-    [BindProperty]
-    public List<string> ConsentedScopes { get; set; } = new();
-
-    [BindProperty]
-    public bool RememberConsent { get; set; } = true;
-
-    [BindProperty]
-    public string Button { get; set; }
+    public string ClientName { get; set; } = string.Empty;
+    public IEnumerable<string> RequestedScopes { get; set; } = Enumerable.Empty<string>();
 
     public async Task<IActionResult> OnGet(string returnUrl)
     {
         ReturnUrl = returnUrl;
 
-        // Use IIdentityServerInteractionService to get the authorization context
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
         if (context == null)
         {
@@ -53,7 +44,7 @@ public class ConsentModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostGrant()
     {
         var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
         if (context == null)
@@ -61,20 +52,32 @@ public class ConsentModel : PageModel
             return RedirectToPage("/Error");
         }
 
-        if (Button == "grant")
+        // Grant consent with selected scopes
+        await _interaction.GrantConsentAsync(context, new ConsentResponse
         {
-            // User grants consent — call GrantConsentAsync with selected scopes
-            await _interaction.GrantConsentAsync(context, new ConsentResponse
-            {
-                ScopesValuesConsented = ConsentedScopes,
-                RememberConsent = true
-            });
-        }
-        else if (Button == "deny")
+            ScopesValuesConsented = SelectedScopes,
+            RememberConsent = true
+        });
+
+        // Validate returnUrl before redirecting
+        if (await _interaction.IsValidReturnUrl(ReturnUrl))
         {
-            // User denies consent — call DenyAuthorizationAsync with AccessDenied
-            await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+            return Redirect(ReturnUrl);
         }
+
+        return RedirectToPage("/Error");
+    }
+
+    public async Task<IActionResult> OnPostDeny()
+    {
+        var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
+        if (context == null)
+        {
+            return RedirectToPage("/Error");
+        }
+
+        // Deny consent
+        await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
 
         // Validate returnUrl before redirecting
         if (await _interaction.IsValidReturnUrl(ReturnUrl))
@@ -87,43 +90,9 @@ public class ConsentModel : PageModel
 }
 ```
 
-## Pages/Consent.cshtml
+## Key Design Decisions
 
-```html
-@page
-@model IdentityServer.Pages.ConsentModel
-
-<h1>Consent</h1>
-<p><strong>@Model.ClientName</strong> is requesting access to the following resources:</p>
-
-<form method="post">
-    <input type="hidden" asp-for="ReturnUrl" />
-
-    @foreach (var scope in Model.RequestedScopes)
-    {
-        <div>
-            <label>
-                <input type="checkbox" name="ConsentedScopes" value="@scope" checked />
-                @scope
-            </label>
-        </div>
-    }
-
-    <div>
-        <label>
-            <input type="checkbox" asp-for="RememberConsent" checked />
-            Remember my decision
-        </label>
-    </div>
-
-    <button type="submit" name="Button" value="grant">Allow</button>
-    <button type="submit" name="Button" value="deny">Deny</button>
-</form>
-```
-
-### Key Points
-
-1. **`IIdentityServerInteractionService`** is injected and used to call `GetAuthorizationContextAsync(returnUrl)` to get client and scope details.
-2. **Granting consent**: `GrantConsentAsync` is called with a `ConsentResponse` containing `ScopesValuesConsented` (the scopes the user approved) and `RememberConsent = true`.
-3. **Denying consent**: `DenyAuthorizationAsync` is called with `AuthorizationError.AccessDenied`.
-4. **returnUrl validation**: The `returnUrl` is validated using `_interaction.IsValidReturnUrl(ReturnUrl)` before redirecting. Additionally, `GetAuthorizationContextAsync` returning non-null confirms the returnUrl is valid.
+1. **GetAuthorizationContextAsync**: Used to retrieve the client and requested scopes from the returnUrl.
+2. **GrantConsentAsync**: Called with `ScopesValuesConsented` containing the user-selected scopes and `RememberConsent = true` to persist consent for future requests.
+3. **DenyAuthorizationAsync**: Called with `AuthorizationError.AccessDenied` when the user denies consent.
+4. **returnUrl validation**: Uses `IsValidReturnUrl` before redirecting to prevent open redirect attacks.

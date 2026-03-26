@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Calls AddBff() on builder.Services", "pass": true, "rationale": "Shows builder.Services.AddBff()"},
-    {"assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true", "pass": false, "rationale": "Uses manual AddOpenIdConnect instead of ConfigureOpenIdConnect"},
-    {"assertion": "Adds 'offline_access' to the OIDC scopes", "pass": true, "rationale": "Shows options.Scope.Add(\"offline_access\")"},
-    {"assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization", "pass": true, "rationale": "Correct middleware order shown"},
-    {"assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead", "pass": false, "rationale": "Manually calls AddAuthentication().AddCookie().AddOpenIdConnect() — this is the v3 pattern, not v4"}
+    {
+      "assertion": "Calls AddBff() on builder.Services",
+      "pass": true,
+      "rationale": "builder.Services.AddBff() is present"
+    },
+    {
+      "assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+      "pass": false,
+      "rationale": "Uses manual AddOpenIdConnect(\"oidc\", ...) instead of the v4 ConfigureOpenIdConnect fluent API"
+    },
+    {
+      "assertion": "Adds 'offline_access' to the OIDC scopes",
+      "pass": true,
+      "rationale": "options.Scope.Add(\"offline_access\") is present"
+    },
+    {
+      "assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization",
+      "pass": true,
+      "rationale": "Correct middleware order"
+    },
+    {
+      "assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() \u2014 uses the v4 fluent API instead",
+      "pass": false,
+      "rationale": "Manually calls AddAuthentication().AddCookie().AddOpenIdConnect() \u2014 this is the v3 pattern, not v4"
+    }
   ],
   "pass_count": 3,
   "total_count": 5,

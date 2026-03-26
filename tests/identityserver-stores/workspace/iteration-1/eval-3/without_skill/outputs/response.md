@@ -1,8 +1,7 @@
-# Configuring Separate Schemas
+# Separate Schemas for EF Stores
 
 ```csharp
 var connectionString = builder.Configuration.GetConnectionString("IdentityServer");
-var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 
 builder.Services.AddIdentityServer()
     .AddConfigurationStore(options =>
@@ -11,7 +10,7 @@ builder.Services.AddIdentityServer()
         options.ConfigureDbContext = b =>
             b.UseSqlServer(connectionString, sql =>
             {
-                sql.MigrationsAssembly(migrationsAssembly);
+                sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name);
                 sql.MigrationsHistoryTable("__EFMigrationsHistory", "idscfg");
             });
     })
@@ -21,7 +20,7 @@ builder.Services.AddIdentityServer()
         options.ConfigureDbContext = b =>
             b.UseSqlServer(connectionString, sql =>
             {
-                sql.MigrationsAssembly(migrationsAssembly);
+                sql.MigrationsAssembly(typeof(Program).Assembly.GetName().Name);
                 sql.MigrationsHistoryTable("__EFMigrationsHistory", "idsop");
             });
     });

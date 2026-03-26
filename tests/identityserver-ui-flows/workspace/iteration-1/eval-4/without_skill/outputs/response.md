@@ -1,65 +1,69 @@
-# Logout Flow for IdentityServer
+# Logout Flow
 
-Here's how to implement the logout flow.
-
-## Program.cs changes
-
-Add the logout URL configuration and back-channel logout URI to the client:
+## Configure Logout URL
 
 ```csharp
-builder.Services.AddIdentityServer(options =>
+builder.Services.AddIdentityServer(opt =>
 {
-    options.UserInteraction.LogoutUrl = "/Account/Logout";
-})
-.AddInMemoryClients(new List<Client>
-{
-    new Client
-    {
-        ClientId = "web.app",
-        ClientName = "Web Application",
-        AllowedGrantTypes = GrantTypes.Code,
-        // ... other settings ...
-        PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
-        // No BackChannelLogoutUri configured here
-    }
+    opt.UserInteraction.LogoutUrl = "/Account/Logout";
 });
+```
+
+## Update web.app Client
+
+```csharp
+new Client
+{
+    ClientId = "web.app",
+    // ... existing config ...
+    BackChannelLogoutUri = "https://app.example.com/bff/backchannel"
+}
 ```
 
 ## Logout Page
 
 ```csharp
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
 public class LogoutModel : PageModel
 {
+    private readonly IIdentityServerInteractionService _interaction;
+
+    public LogoutModel(IIdentityServerInteractionService interaction)
+    {
+        _interaction = interaction;
+    }
+
+    public string PostLogoutRedirectUri { get; set; }
+    public string SignOutIframeUrl { get; set; }
+
     public async Task<IActionResult> OnGet(string logoutId)
     {
-        // Sign the user out
+        var context = await _interaction.GetLogoutContextAsync(logoutId);
+
         await HttpContext.SignOutAsync();
 
-        // Redirect to post-logout URI or home
-        return Redirect("~/");
+        PostLogoutRedirectUri = context?.PostLogoutRedirectUri;
+        SignOutIframeUrl = context?.SignOutIFrameUrl;
+
+        return Page();
     }
 }
 ```
 
-## Logout View
+## Razor View
 
 ```html
 @page
-@model IdentityServer.Pages.LogoutModel
+@model LogoutModel
 
-<h1>Logged Out</h1>
-<p>You have been successfully signed out.</p>
+<h2>Logged Out</h2>
+
+@if (Model.SignOutIframeUrl != null)
+{
+    <iframe src="@Model.SignOutIframeUrl" width="0" height="0"></iframe>
+}
+
+@if (Model.PostLogoutRedirectUri != null)
+{
+    <a href="@Model.PostLogoutRedirectUri">Return to Application</a>
+}
 ```
-
-### Notes
-
-- Configure `UserInteraction.LogoutUrl` to point to your logout page.
-- Call `HttpContext.SignOutAsync()` to end the session.
-- If using front-channel logout, render the sign-out iframe on the logged-out page.
-- For back-channel logout, configure the `BackChannelLogoutUri` on each client that needs notification.

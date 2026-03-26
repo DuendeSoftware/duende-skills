@@ -1,19 +1,20 @@
 # Upgrading Token Management v3 to v4
 
-Here's the updated code for v4:
+## Updated Code
 
 ```csharp
+// Registration (v4)
 services.AddClientCredentialsTokenManagement()
     .AddClient("api-client", client =>
     {
-        client.TokenEndpoint = new Uri("https://sts.example.com/connect/token");
+        client.TokenEndpoint = "https://sts.example.com/connect/token";
         client.ClientId = "my-service";
         client.ClientSecret = "my-secret";
         client.Scope = "api1";
     });
 ```
 
-And the updated service:
+## Updated Service
 
 ```csharp
 public class MyService
@@ -23,12 +24,9 @@ public class MyService
     public async Task DoWork()
     {
         var token = await _tokenService.GetAccessTokenAsync("api-client");
-        if (token != null && !string.IsNullOrEmpty(token.AccessToken))
-        {
-            client.SetBearerToken(token.AccessToken);
-        }
+        client.SetBearerToken(token.AccessToken);
     }
 }
 ```
 
-Note: You may want to check the official v4 migration guide for any additional API changes.
+Check the Duende documentation for any breaking changes between v3 and v4.

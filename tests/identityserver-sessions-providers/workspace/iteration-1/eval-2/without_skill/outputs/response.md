@@ -1,58 +1,70 @@
-# Admin Session Management with ISessionManagementService
+# Managing Sessions with ISessionManagementService
 
-Here's how to query and revoke user sessions using Duende IdentityServer's `ISessionManagementService`.
+Here's how to build an admin endpoint for session management in IdentityServer.
 
-## Querying Sessions with Paging
-
-```csharp
-using Duende.IdentityServer.Services;
-
-app.MapGet("/admin/sessions", async (ISessionManagementService sessionManagement) =>
-{
-    // 1. Query the first page of 10 sessions
-    var firstPage = await sessionManagement.QuerySessionsAsync(new SessionQuery
-    {
-        CountRequested = 10
-    });
-
-    // 2. Get the next page using the ResultsToken
-    var nextPage = await sessionManagement.QuerySessionsAsync(new SessionQuery
-    {
-        ResultsToken = firstPage.ResultsToken,
-        CountRequested = 10
-    });
-
-    return Results.Ok(new
-    {
-        FirstPage = firstPage.Sessions,
-        NextPage = nextPage.Sessions
-    });
-});
-```
-
-## Revoking Sessions for a User
+## Session Admin Controller
 
 ```csharp
-app.MapDelete("/admin/sessions/{subjectId}", async (
-    string subjectId,
-    ISessionManagementService sessionManagement) =>
-{
-    await sessionManagement.RemoveSessionsAsync(new RemoveSessionsContext
-    {
-        SubjectId = subjectId,
-        RemoveServerSideSession = true,
-        RevokeTokens = true,
-        SendBackchannelLogoutNotification = true,
-        RevokeConsents = false  // Keep user consents intact
-    });
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-    return Results.NoContent();
-});
+[ApiController]
+[Route("api/admin/sessions")]
+[Authorize(Policy = "AdminOnly")]
+public class SessionAdminController : ControllerBase
+{
+    private readonly ISessionManagementService _sessionManagement;
+
+    public SessionAdminController(ISessionManagementService sessionManagement)
+    {
+        _sessionManagement = sessionManagement;
+    }
+
+    // Query first page
+    [HttpGet]
+    public async Task<IActionResult> GetSessions(int pageSize = 10)
+    {
+        var result = await _sessionManagement.QuerySessionsAsync(new SessionQuery
+        {
+            CountRequested = pageSize
+        });
+
+        return Ok(result);
+    }
+
+    // Next page
+    [HttpGet("page")]
+    public async Task<IActionResult> GetNextPage([FromQuery] string token, int pageSize = 10)
+    {
+        var result = await _sessionManagement.QuerySessionsAsync(new SessionQuery
+        {
+            ResultsToken = token,
+            CountRequested = pageSize
+        });
+
+        return Ok(result);
+    }
+
+    // Revoke sessions
+    [HttpDelete("{subjectId}")]
+    public async Task<IActionResult> RevokeSessions(string subjectId)
+    {
+        await _sessionManagement.RemoveSessionsAsync(new RemoveSessionsContext
+        {
+            SubjectId = subjectId,
+            RemoveServerSideSession = true,
+            RevokeTokens = true,
+            SendBackchannelLogoutNotification = true,
+            RevokeConsents = true
+        });
+
+        return NoContent();
+    }
+}
 ```
 
 ## Notes
 
-- `QuerySessionsAsync` supports paging via `ResultsToken` — pass the token from the previous result to get the next page
-- `RemoveSessionsAsync` lets you control exactly what gets revoked through its flags
-- Setting `RevokeConsents = false` preserves the user's consent grants while still terminating sessions and revoking tokens
-- Back-channel logout notifications are sent by default to any client with a `BackChannelLogoutUri` configured
+- Use paging tokens to navigate through large result sets
+- The remove operation cleans up sessions, tokens, consents, and sends logout notifications
+- Consider caching session queries for performance in admin dashboards

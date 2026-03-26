@@ -1,6 +1,10 @@
-# Protecting a Minimal API with JWT Bearer Authentication
+# Protecting Your Minimal API with JWT Bearer Authentication
 
-Here's how to set up JWT bearer authentication for your minimal API with IdentityServer as the authority.
+To protect your API with JWT bearer authentication from IdentityServer, you need to:
+
+1. Add the JWT bearer NuGet package
+2. Configure the authentication handler
+3. Set up the middleware pipeline correctly
 
 ## Step 1: Add the NuGet Package
 
@@ -8,17 +12,16 @@ Here's how to set up JWT bearer authentication for your minimal API with Identit
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 ```
 
-## Step 2: Configure Authentication and Authorization
+## Step 2: Configure JWT Bearer Authentication
 
 Update your `Program.cs`:
 
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Add JWT Bearer authentication
+// Add JWT bearer authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -35,7 +38,7 @@ var app = builder.Build();
 
 app.UseRouting();
 
-// Important: UseAuthentication must come before UseAuthorization
+// Authentication must come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -44,10 +47,8 @@ app.MapControllers();
 // Minimal API endpoints (now protected)
 app.MapGet("/data", () => Results.Ok(new { message = "Protected data" }))
     .RequireAuthorization();
-
 app.MapPost("/data", (DataModel model) => Results.Created($"/data/{model.Id}", model))
     .RequireAuthorization();
-
 app.MapDelete("/data/{id}", (int id) => Results.NoContent())
     .RequireAuthorization();
 
@@ -56,9 +57,21 @@ app.Run();
 public record DataModel(int Id, string Name, string Description);
 ```
 
-## Step 3: Update the Project File
+## Key Configuration Details
 
-Your `WebApi.csproj` should include the JWT bearer package:
+### Authority
+The `Authority` is set to `https://identity.example.com` — this is where the JWT bearer handler will download the discovery document and JWKS (signing keys) for token validation.
+
+### Audience
+The `Audience` is set to `api1`, which must match the `ApiResource` name configured in IdentityServer. This validates the `aud` claim in the access token.
+
+### ValidTypes (Critical for Security)
+Setting `TokenValidationParameters.ValidTypes = ["at+jwt"]` is essential. Without this, an attacker could present an identity token (also a JWT signed by the same issuer) to the API — this is known as a JWT confusion attack. IdentityServer sets the `typ` header to `at+jwt` on all access token JWTs per RFC 9068.
+
+### Middleware Ordering
+`UseAuthentication()` must come before `UseAuthorization()` in the pipeline. This ensures the request is authenticated before authorization policies are evaluated.
+
+## Updated WebApi.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -67,19 +80,8 @@ Your `WebApi.csproj` should include the JWT bearer package:
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
   </ItemGroup>
 </Project>
 ```
-
-## Key Security Points
-
-1. **`Authority`** — Points to your IdentityServer instance. The JWT bearer handler downloads the discovery document and JWKS from this URL to validate token signatures.
-
-2. **`Audience`** — Must match the `ApiResource` name configured in IdentityServer (`api1`). This validates the `aud` claim in the access token.
-
-3. **`ValidTypes = ["at+jwt"]`** — This is critical for security. It validates the `typ` header in the JWT is `at+jwt` (per RFC 9068). Without this, an attacker could present an identity token (which is also a JWT signed by the same issuer) to your API — a JWT confusion attack.
-
-4. **Middleware ordering** — `UseAuthentication()` must come before `UseAuthorization()` in the pipeline. Reversing the order means authorization runs before the user identity is established, and all requests will be treated as anonymous.

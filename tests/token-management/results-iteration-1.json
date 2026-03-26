@@ -1,0 +1,172 @@
+{
+  "skill_name": "token-management",
+  "iteration": 1,
+  "timestamp": "2026-03-26T00:00:00Z",
+  "evals": [
+    {
+      "id": 1,
+      "assertions": [
+        { "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services", "pass": true, "reasoning": "SKILL.md Pattern 1 shows AddClientCredentialsTokenManagement() registration explicitly." },
+        { "assertion": "Output calls AddClient() with configuration including TokenEndpoint, ClientId, ClientSecret, and Scope", "pass": true, "reasoning": "SKILL.md Pattern 1 shows .AddClient() with all four typed properties using Parse()." },
+        { "assertion": "Output registers an HTTP client using AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler with the client name", "pass": true, "reasoning": "SKILL.md Pattern 1 shows both AddClientCredentialsHttpClient and AddClientCredentialsTokenHandler with ClientCredentialsClientName.Parse()." },
+        { "assertion": "Output shows a BackgroundService or worker class that uses IHttpClientFactory.CreateClient to make API calls without manual token code", "pass": true, "reasoning": "SKILL.md Pattern 1 shows WorkerHttpClient : BackgroundService using factory.CreateClient() with no token code." },
+        { "assertion": "Output uses v4 strongly-typed ClientCredentialsClientName.Parse() for the client name (not a raw string)", "pass": true, "reasoning": "SKILL.md Pattern 1 explicitly uses ClientCredentialsClientName.Parse() throughout and the version table documents this v4 change." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 2,
+      "assertions": [
+        { "assertion": "Output sets SaveTokens = true on the OpenIdConnect handler options", "pass": true, "reasoning": "SKILL.md Pattern 2 prominently shows SaveTokens = true and marks it as REQUIRED." },
+        { "assertion": "Output includes 'offline_access' in the OIDC scope list to enable refresh tokens", "pass": true, "reasoning": "SKILL.md Pattern 2 shows offline_access scope with comment '← required for refresh tokens' and pitfall #2 explains it." },
+        { "assertion": "Output wires up RevokeRefreshTokenAsync() in the cookie OnSigningOut event handler", "pass": true, "reasoning": "SKILL.md Pattern 2 and pitfall #3 explicitly show OnSigningOut calling RevokeRefreshTokenAsync()." },
+        { "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to register user token management services", "pass": true, "reasoning": "SKILL.md Pattern 2 shows AddOpenIdConnectAccessTokenManagement() as the registration call." },
+        { "assertion": "Output registers a named HTTP client using AddUserAccessTokenHttpClient with the user's access token", "pass": true, "reasoning": "SKILL.md Pattern 2 shows AddUserAccessTokenHttpClient() for registering a named client with user tokens." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 3,
+      "assertions": [
+        { "assertion": "Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager", "pass": true, "reasoning": "SKILL.md version reference table explicitly maps v3 IClientCredentialsTokenManagementService to v4 IClientCredentialsTokenManager." },
+        { "assertion": "Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string", "pass": true, "reasoning": "SKILL.md version table and Pattern 1 examples consistently use ClientCredentialsClientName.Parse() over raw strings." },
+        { "assertion": "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value", "pass": true, "reasoning": "SKILL.md pitfall #5 and Pattern 1 manual retrieval code explicitly show checking .Succeeded before .GetToken()." },
+        { "assertion": "Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically", "pass": true, "reasoning": "SKILL.md core principle #5 and Pattern 3 explain v4 uses HybridCache with no explicit AddDistributedMemoryCache() needed." },
+        { "assertion": "Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()", "pass": true, "reasoning": "SKILL.md Pattern 1 registration shows client.ClientId = ClientId.Parse(), client.ClientSecret = ClientSecret.Parse(), client.Scope = Scope.Parse()." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 4,
+      "assertions": [
+        { "assertion": "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup", "pass": true, "reasoning": "dpop.md pitfall section shows loading from configuration['DPoP:JsonWebKey'] instead of generating ephemeral keys." },
+        { "assertion": "Output sets the DPoPJsonWebKey property on the client credentials client configuration", "pass": true, "reasoning": "dpop.md explicitly shows client.DPoPJsonWebKey = jwk in the client credentials configuration example." },
+        { "assertion": "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart", "pass": true, "reasoning": "dpop.md pitfall section marks RSA.Create() as ephemeral with a warning about 401 errors on restart." },
+        { "assertion": "Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured", "pass": true, "reasoning": "dpop.md shows the full AddClientCredentialsTokenManagement().AddClient() registration with DPoPJsonWebKey set inside." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 5,
+      "assertions": [
+        { "assertion": "Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler", "pass": true, "reasoning": "SKILL.md Pattern 2 shows both AddUserAccessTokenHttpClient and AddUserAccessTokenHandler for user token clients." },
+        { "assertion": "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler", "pass": true, "reasoning": "SKILL.md Pattern 2 shows AddClientAccessTokenHttpClient and AddClientAccessTokenHandler for M2M client credential clients." },
+        { "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management", "pass": true, "reasoning": "SKILL.md complete example and Pattern 2 show AddOpenIdConnectAccessTokenManagement() enabling both user and client token management." },
+        { "assertion": "Output sets distinct named or typed clients for each API with the correct BaseAddress", "pass": true, "reasoning": "SKILL.md Pattern 2 shows named clients with distinct names and configureClient setting BaseAddress for each." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 6,
+      "assertions": [
+        { "assertion": "Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier", "pass": true, "reasoning": "SKILL.md Pattern 3 v4 section shows AddStackExchangeRedisCache with Redis connection string." },
+        { "assertion": "Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options", "pass": true, "reasoning": "SKILL.md Pattern 3 and Pattern 4 show CacheLifetimeBuffer as a configurable option; value 120 would be set as shown." },
+        { "assertion": "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption", "pass": true, "reasoning": "SKILL.md Pattern 3 provides a complete EncryptedHybridCacheSerializer implementing IHybridCacheSerializer<ClientCredentialsToken> with IDataProtector." },
+        { "assertion": "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()", "pass": true, "reasoning": "SKILL.md Pattern 3 shows services.AddHybridCache().AddSerializer<ClientCredentialsToken, EncryptedHybridCacheSerializer>()." },
+        { "assertion": "Output calls AddDataProtection() to enable the data protection provider", "pass": true, "reasoning": "SKILL.md Pattern 3 shows services.AddDataProtection() alongside the encrypted serializer registration." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 7,
+      "assertions": [
+        { "assertion": "Output identifies that SaveTokens = true is missing on the OIDC handler and explains it's required for user token management", "pass": true, "reasoning": "SKILL.md pitfall #1 and core principle #3 explicitly call out missing SaveTokens = true as the most common misconfiguration." },
+        { "assertion": "Output identifies that offline_access scope is missing so no refresh tokens will be issued", "pass": true, "reasoning": "SKILL.md pitfall #2 explains offline_access is required for refresh tokens." },
+        { "assertion": "Output identifies the manual _cachedToken field as incorrect double-caching that won't stay in sync with the library's cache", "pass": true, "reasoning": "SKILL.md pitfall #4 explicitly shows the _cachedToken anti-pattern as double-caching with stale token risk." },
+        { "assertion": "Output identifies that .GetToken() is called without first checking .Succeeded, which will throw InvalidOperationException on failure", "pass": true, "reasoning": "SKILL.md pitfall #5 explicitly shows .GetToken() without .Succeeded check throws InvalidOperationException." },
+        { "assertion": "Output identifies that AddClientCredentialsTokenHandler is used without AddDefaultAccessTokenResiliency(), meaning 401 responses won't be retried", "pass": true, "reasoning": "SKILL.md pitfall #6 shows that using AddClientCredentialsTokenHandler without AddDefaultAccessTokenResiliency() means 401s are returned directly." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 8,
+      "assertions": [
+        { "assertion": "Output uses AddGrpcClient<T>() to register the typed gRPC client with the downstream endpoint address", "pass": true, "reasoning": "SKILL.md Pattern 2 gRPC section shows AddGrpcClient<Greeter.GreeterClient>() with Address configured." },
+        { "assertion": "Output chains .AddUserAccessTokenHandler() on the gRPC client registration to attach user tokens automatically", "pass": true, "reasoning": "SKILL.md Pattern 2 gRPC section shows .AddUserAccessTokenHandler() chained on AddGrpcClient." },
+        { "assertion": "Output includes or references AddOpenIdConnectAccessTokenManagement() as prerequisite for user token management", "pass": true, "reasoning": "SKILL.md core principles and Pattern 2 establish AddOpenIdConnectAccessTokenManagement() as the prerequisite for user token management." }
+      ],
+      "pass": true,
+      "total_assertions": 3,
+      "passed_assertions": 3
+    },
+    {
+      "id": 9,
+      "assertions": [
+        { "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request", "pass": true, "reasoning": "blazor-server.md explicitly explains HttpContext is null after circuit establishment due to SignalR connection lifecycle." },
+        { "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation", "pass": true, "reasoning": "blazor-server.md shows AddOpenIdConnectAccessTokenManagement().AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()." },
+        { "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods", "pass": true, "reasoning": "blazor-server.md provides a complete ServerSideTokenStore implementing all three IUserTokenStore methods." },
+        { "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store", "pass": true, "reasoning": "blazor-server.md shows OnTokenValidated handler that calls store.StoreTokenAsync with the token data." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 10,
+      "assertions": [
+        { "assertion": "Implements IClientAssertionService with a GetClientAssertionAsync method", "pass": true, "reasoning": "client-assertions.md provides a complete JwtClientAssertionService implementing IClientAssertionService with GetClientAssertionAsync." },
+        { "assertion": "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL", "pass": true, "reasoning": "client-assertions.md critical section shows Audience = 'https://identity.example.com' (issuer) not the token endpoint." },
+        { "assertion": "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values", "pass": true, "reasoning": "client-assertions.md explicitly references CVE-2025-27370 and CVE-2025-27371 with explanation of the vulnerability." },
+        { "assertion": "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string)", "pass": true, "reasoning": "client-assertions.md shows Type = OidcConstants.ClientAssertionTypes.JwtBearer in the returned ClientAssertion." },
+        { "assertion": "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)", "pass": true, "reasoning": "client-assertions.md shows builder.Services.AddSingleton<IClientAssertionService, JwtClientAssertionService>()." }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 11,
+      "assertions": [
+        { "assertion": "Implements ITokenRequestCustomizer interface with a Customize method", "pass": true, "reasoning": "customization.md provides a complete TenantTokenRequestCustomizer implementing ITokenRequestCustomizer with a Customize method." },
+        { "assertion": "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken", "pass": true, "reasoning": "customization.md shows the Customize method signature with all three parameters." },
+        { "assertion": "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)", "pass": true, "reasoning": "customization.md explicitly uses 'return baseParameters with { Resource = ..., Scope = ... }' with a comment not to mutate." },
+        { "assertion": "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler", "pass": true, "reasoning": "customization.md registration section shows passing the customizer to both AddClientCredentialsTokenHandler and AddUserAccessTokenHandler." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 12,
+      "assertions": [
+        { "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services", "pass": true, "reasoning": "SKILL.md Pattern 1 shows AddClientCredentialsTokenManagement() as the core registration call." },
+        { "assertion": "Output calls .AddClient() with at least TokenEndpoint, ClientId, and Scope configured", "pass": true, "reasoning": "SKILL.md Pattern 1 shows AddClient() with TokenEndpoint, ClientId, ClientSecret, and Scope." },
+        { "assertion": "Output registers an HTTP client with AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler", "pass": true, "reasoning": "SKILL.md Pattern 1 shows both registration options for HTTP client with automatic token management." },
+        { "assertion": "Output does NOT require any sub-documents to answer correctly (core SKILL.md is sufficient)", "pass": true, "reasoning": "SKILL.md Pattern 1 contains complete end-to-end registration without requiring any sub-document." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 13,
+      "assertions": [
+        { "assertion": "States that v4 uses HybridCache for token caching (not the old IDistributedCache directly)", "pass": true, "reasoning": "SKILL.md core principle #5 and Pattern 3 explicitly state v4 uses HybridCache." },
+        { "assertion": "Explains the two-tier L1 (in-memory) + L2 (distributed) cache architecture", "pass": true, "reasoning": "SKILL.md Pattern 3 v4 section describes 'two-tier: in-memory L1 + optional remote L2'." },
+        { "assertion": "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4", "pass": true, "reasoning": "SKILL.md version reference table and Pattern 3 explicitly state no explicit cache registration required in v4." },
+        { "assertion": "Mentions CacheLifetimeBuffer as a configuration option for controlling token refresh timing", "pass": true, "reasoning": "SKILL.md Pattern 3 and Pattern 4 show CacheLifetimeBuffer as a key configuration option." }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    }
+  ],
+  "total_evals": 13,
+  "passed_evals": 13,
+  "total_assertions": 57,
+  "passed_assertions": 57
+}

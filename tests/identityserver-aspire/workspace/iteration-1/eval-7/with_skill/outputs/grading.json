@@ -1,1 +1,34 @@
-{"eval_id": 7, "variant": "with_skill", "assertions": [{"assertion": "The fixture class implements IAsyncLifetime with InitializeAsync and DisposeAsync methods", "pass": true, "rationale": "Class implements IAsyncLifetime with both InitializeAsync and DisposeAsync"}, {"assertion": "InitializeAsync uses DistributedApplicationTestingBuilder.CreateAsync to build the AppHost", "pass": true, "rationale": "Code shows DistributedApplicationTestingBuilder.CreateAsync<Projects.MyApp_AppHost>()"}, {"assertion": "The fixture calls WaitForResourceHealthyAsync(\"identity-server\") or equivalent to wait for IdentityServer readiness", "pass": true, "rationale": "Code shows WaitForResourceHealthyAsync(\"identity-server\")"}, {"assertion": "The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent", "pass": true, "rationale": "GetAuthorityUrl() method returns _app!.GetEndpoint(\"identity-server\", \"https\")"}, {"assertion": "DisposeAsync calls StopAsync and/or DisposeAsync on the DistributedApplication to clean up", "pass": true, "rationale": "DisposeAsync calls both StopAsync() and DisposeAsync() on _app"}], "pass_count": 5, "total_count": 5, "score": 1.0}
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The fixture class implements IAsyncLifetime with InitializeAsync and DisposeAsync methods",
+      "pass": true,
+      "rationale": "Class implements IAsyncLifetime with both InitializeAsync and DisposeAsync"
+    },
+    {
+      "assertion": "InitializeAsync uses DistributedApplicationTestingBuilder.CreateAsync to build the AppHost",
+      "pass": true,
+      "rationale": "Code shows `DistributedApplicationTestingBuilder.CreateAsync<Projects.MyApp_AppHost>()`"
+    },
+    {
+      "assertion": "The fixture calls WaitForResourceHealthyAsync(\"identity-server\") or equivalent to wait for IdentityServer readiness",
+      "pass": true,
+      "rationale": "Code shows `_app.ResourceNotifications.WaitForResourceHealthyAsync(\"identity-server\")`"
+    },
+    {
+      "assertion": "The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent",
+      "pass": true,
+      "rationale": "Code shows `GetAuthorityUrl()` method returning `_app!.GetEndpoint(\"identity-server\", \"https\")`"
+    },
+    {
+      "assertion": "DisposeAsync calls StopAsync and/or DisposeAsync on the DistributedApplication to clean up",
+      "pass": true,
+      "rationale": "DisposeAsync calls both `_app.StopAsync()` and `_app.DisposeAsync()`"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

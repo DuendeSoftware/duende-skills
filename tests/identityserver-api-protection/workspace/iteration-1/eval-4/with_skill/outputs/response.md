@@ -1,14 +1,9 @@
-# Scope-Based Authorization with Space-Delimited Scope Normalization
-
-Here's how to implement scope-based authorization policies and handle space-delimited scope claims.
+# Scope-Based Authorization with Space-Delimited Scope Handling
 
 ## Step 1: Define Authorization Policies
 
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -18,7 +13,7 @@ builder.Services.AddAuthentication("Bearer")
         options.TokenValidationParameters.ValidTypes = ["at+jwt"];
     });
 
-// Register the claims transformation to normalize space-delimited scopes
+// Register claims transformation to handle space-delimited scopes
 builder.Services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>();
 
 builder.Services.AddAuthorization(options =>
@@ -38,11 +33,8 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllers();
 
 app.MapGet("/data", () => Results.Ok(new { message = "Protected data" }))
     .RequireAuthorization("read");
@@ -50,35 +42,22 @@ app.MapGet("/data", () => Results.Ok(new { message = "Protected data" }))
 app.MapPost("/data", (DataModel model) => Results.Created($"/data/{model.Id}", model))
     .RequireAuthorization("write");
 
-app.MapDelete("/data/{id}", (int id) => Results.NoContent())
-    .RequireAuthorization("write");
-
 app.Run();
-
-public record DataModel(int Id, string Name, string Description);
 ```
 
-## Step 2: Implement the IClaimsTransformation
+## Step 2: Handle Space-Delimited Scopes
 
-IdentityServer can emit scopes in two formats depending on the `EmitScopesAsSpaceDelimitedStringInJwt` setting:
+IdentityServer can emit scopes as a space-delimited string (e.g., `"api1.read api1.write"`) depending on the `EmitScopesAsSpaceDelimitedStringInJwt` setting. When this happens, `RequireClaim("scope", "api1.read")` won't match because it looks for an exact claim value.
 
-- **Array format (default):** `"scope": ["api1.read", "api1.write"]`
-- **Space-delimited:** `"scope": "api1.read api1.write"`
-
-When space-delimited, the `scope` claim is a single string. The `RequireClaim("scope", "api1.read")` policy check compares against the full string value, so it won't match. The solution is a custom `IClaimsTransformation` that splits it into individual claims:
+Implement `IClaimsTransformation` to split them:
 
 ```csharp
-// ScopeClaimsTransformation.cs
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-
 public class ScopeClaimsTransformation : IClaimsTransformation
 {
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         var identity = (ClaimsIdentity)principal.Identity!;
         var scopeClaim = identity.FindFirst("scope");
-        
         if (scopeClaim != null && scopeClaim.Value.Contains(' '))
         {
             identity.RemoveClaim(scopeClaim);
@@ -87,21 +66,17 @@ public class ScopeClaimsTransformation : IClaimsTransformation
                 identity.AddClaim(new Claim("scope", scope));
             }
         }
-        
         return Task.FromResult(principal);
     }
 }
 ```
 
-This transformation:
-1. Finds the `scope` claim on the principal
-2. If it contains spaces (indicating space-delimited format), removes the original claim
-3. Splits the string and adds each scope as an individual `scope` claim
-4. Authorization policies then work correctly regardless of the format
+## Step 3: Register the Transformation
 
-## How the Policies Work
+The `IClaimsTransformation` is registered in DI:
 
-- `RequireClaim("scope", "api1.read")` checks that the user has a `scope` claim with value `api1.read`
-- After the claims transformation, both array-format and space-delimited scopes produce individual claims
-- The `"read"` policy is applied to `GET /data` via `.RequireAuthorization("read")`
-- The `"write"` policy is applied to `POST /data` via `.RequireAuthorization("write")`
+```csharp
+builder.Services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>();
+```
+
+This ensures that regardless of the scope format, the authorization policies will correctly match individual scopes.

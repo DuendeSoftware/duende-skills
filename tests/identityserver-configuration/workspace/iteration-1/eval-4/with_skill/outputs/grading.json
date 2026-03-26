@@ -5,27 +5,27 @@
     {
       "assertion": "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.RotationInterval = TimeSpan.FromDays(60);'."
+      "rationale": "Code shows `options.KeyManagement.RotationInterval = TimeSpan.FromDays(60)`"
     },
     {
       "assertion": "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.PropagationTime = TimeSpan.FromDays(7);'."
+      "rationale": "Code shows `options.KeyManagement.PropagationTime = TimeSpan.FromDays(7)`"
     },
     {
       "assertion": "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21);'."
+      "rationale": "Code shows `options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21)`"
     },
     {
       "assertion": "Output sets options.KeyManagement.DataProtectKeys to true",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.DataProtectKeys = true;'."
+      "rationale": "Code shows `options.KeyManagement.DataProtectKeys = true`"
     },
     {
       "assertion": "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\";'."
+      "rationale": "Code shows `options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\"`"
     }
   ],
   "pass_count": 5,

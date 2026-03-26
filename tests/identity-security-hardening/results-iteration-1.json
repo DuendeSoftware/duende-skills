@@ -1,0 +1,260 @@
+{
+  "skill_name": "identity-security-hardening",
+  "iteration": 1,
+  "timestamp": "2026-03-26T00:00:00Z",
+  "evals": [
+    {
+      "id": 1,
+      "assertions": [
+        {
+          "assertion": "Program.cs contains ForwardedHeaders configuration with XForwardedFor and XForwardedProto",
+          "pass": true,
+          "reasoning": "SKILL.md documents ForwardedHeaders middleware with XForwardedFor and XForwardedProto configuration including KnownProxies."
+        },
+        {
+          "assertion": "Program.cs restricts KnownProxies to the proxy IP address 10.0.0.1 and does not accept forwarded headers from any source",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly shows options.KnownProxies.Add(IPAddress.Parse(\"...\"))) to restrict trusted proxy IPs."
+        },
+        {
+          "assertion": "Program.cs configures HSTS with MaxAge of at least 365 days and IncludeSubDomains = true",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddHsts with MaxAge of 365 days, IncludeSubDomains = true, and Preload = true."
+        },
+        {
+          "assertion": "Program.cs calls UseForwardedHeaders() before UseHttpsRedirection() and UseIdentityServer() in the middleware pipeline",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly states ForwardedHeaders must come first in the middleware pipeline before HttpsRedirection and IdentityServer."
+        },
+        {
+          "assertion": "Program.cs uses StatusCodes.Status308PermanentRedirect or equivalent 308 status code for HTTPS redirection",
+          "pass": true,
+          "reasoning": "SKILL.md documents HttpsRedirection configuration with StatusCodes.Status308PermanentRedirect."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 2,
+      "assertions": [
+        {
+          "assertion": "The web.app client has RequirePkce = true and does not set it to false",
+          "pass": true,
+          "reasoning": "SKILL.md documents RequirePkce = true as a mandatory control and explicitly warns against setting it to false."
+        },
+        {
+          "assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly prohibits wildcard redirect URIs and requires exact-match fully-qualified HTTPS URIs."
+        },
+        {
+          "assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+          "pass": true,
+          "reasoning": "SKILL.md documents that interactive clients should use GrantTypes.Code only and CodeAndClientCredentials is an incorrect combination."
+        },
+        {
+          "assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+          "pass": true,
+          "reasoning": "SKILL.md specifies short access token lifetimes (300-900 seconds) following OAuth 2.0 Security BCP."
+        },
+        {
+          "assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly",
+          "pass": true,
+          "reasoning": "SKILL.md documents RefreshTokenUsage = TokenUsage.OneTimeOnly as a required security control for refresh token rotation."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 3,
+      "assertions": [
+        {
+          "assertion": "No client uses GrantTypes.Implicit anywhere in the file",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly prohibits implicit flow and documents migration to authorization code + PKCE."
+        },
+        {
+          "assertion": "The spa.legacy client uses GrantTypes.Code with RequirePkce = true",
+          "pass": true,
+          "reasoning": "SKILL.md documents migrating legacy implicit clients to GrantTypes.Code with RequirePkce = true."
+        },
+        {
+          "assertion": "The spa.legacy client does not have AllowAccessTokensViaBrowser = true",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly warns to set AllowAccessTokensViaBrowser = false when migrating away from implicit flow."
+        },
+        {
+          "assertion": "Client secrets are loaded from configuration (builder.Configuration, config[], or IConfiguration) rather than hardcoded string literals passed to Sha256()",
+          "pass": true,
+          "reasoning": "SKILL.md documents loading secrets from IConfiguration rather than hardcoding them and shows how to call Sha256() after loading."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 4,
+      "passed_assertions": 4
+    },
+    {
+      "id": 4,
+      "assertions": [
+        {
+          "assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+          "pass": true,
+          "reasoning": "The cors-csp.md sub-document documents CSP headers including frame-ancestors 'none' for IdentityServer UI pages."
+        },
+        {
+          "assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+          "pass": true,
+          "reasoning": "The cors-csp.md sub-document includes X-Frame-Options: DENY as part of security headers middleware."
+        },
+        {
+          "assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+          "pass": true,
+          "reasoning": "The rate-limiting.md sub-document shows AddRateLimiter with sliding window policies for the token endpoint."
+        },
+        {
+          "assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+          "pass": true,
+          "reasoning": "The rate-limiting.md sub-document documents rate limiting for the authorize endpoint with configurable permit limits."
+        },
+        {
+          "assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline",
+          "pass": true,
+          "reasoning": "The rate-limiting.md sub-document shows UseRateLimiter() being called in the middleware pipeline."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 5,
+      "assertions": [
+        {
+          "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents replacing AddDeveloperSigningCredential with automatic key management for production."
+        },
+        {
+          "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+          "pass": true,
+          "reasoning": "SKILL.md documents configuring SigningAlgorithms with ES256 as primary and RS256 as fallback."
+        },
+        {
+          "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+          "pass": true,
+          "reasoning": "SKILL.md documents RotationInterval and PropagationTime configuration with example values."
+        },
+        {
+          "assertion": "Program.cs configures DataProtectKeys = true for key management",
+          "pass": true,
+          "reasoning": "SKILL.md documents DataProtectKeys = true to encrypt signing keys at rest using Data Protection."
+        },
+        {
+          "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+          "pass": true,
+          "reasoning": "SKILL.md documents AddDataProtection with PersistKeysToFileSystem and SetApplicationName for load-balanced deployments."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 6,
+      "assertions": [
+        {
+          "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
+          "pass": true,
+          "reasoning": "The session-hardening.md sub-document documents CookieLifetime and CookieSlidingExpiration configuration."
+        },
+        {
+          "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
+          "pass": true,
+          "reasoning": "The session-hardening.md sub-document documents ExpiredSessionsTriggerBackchannelLogout = true."
+        },
+        {
+          "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+          "pass": true,
+          "reasoning": "SKILL.md and session-hardening.md both document calling AddServerSideSessions() on the IdentityServer builder."
+        },
+        {
+          "assertion": "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
+          "pass": true,
+          "reasoning": "The session-hardening.md sub-document documents configuring BackChannelLogoutUri on clients."
+        },
+        {
+          "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+          "pass": true,
+          "reasoning": "The session-hardening.md sub-document documents CoordinateClientLifetimesWithUserSession = true."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 7,
+      "assertions": [
+        {
+          "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+          "pass": true,
+          "reasoning": "SKILL.md's production security checklist explicitly prohibits implicit flow and RequirePkce = false."
+        },
+        {
+          "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
+          "pass": true,
+          "reasoning": "SKILL.md documents exact-match redirect URIs as a mandatory security control."
+        },
+        {
+          "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+          "pass": true,
+          "reasoning": "SKILL.md's production checklist includes replacing AddDeveloperSigningCredential with automatic key management."
+        },
+        {
+          "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
+          "pass": true,
+          "reasoning": "SKILL.md documents short access token lifetimes (300-900 seconds) as a security requirement."
+        },
+        {
+          "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
+          "pass": true,
+          "reasoning": "SKILL.md provides a comprehensive production security checklist that structures security audit findings and remediations."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 5,
+      "passed_assertions": 5
+    },
+    {
+      "id": 8,
+      "assertions": [
+        {
+          "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly documents RequirePkce = true as a required control and warns against disabling it."
+        },
+        {
+          "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+          "pass": true,
+          "reasoning": "SKILL.md explicitly requires exact-match fully-qualified HTTPS redirect URIs with no wildcards."
+        },
+        {
+          "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+          "pass": true,
+          "reasoning": "SKILL.md documents the principle of least grant and explicitly prohibits implicit flow."
+        }
+      ],
+      "pass": true,
+      "total_assertions": 3,
+      "passed_assertions": 3
+    }
+  ],
+  "total_evals": 8,
+  "passed_evals": 8,
+  "total_assertions": 38,
+  "passed_assertions": 38
+}

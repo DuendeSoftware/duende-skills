@@ -1,20 +1,24 @@
 # Detecting SAML AuthnRequests in the Login UI
 
-To detect whether an incoming authentication request is a SAML AuthnRequest (vs. OIDC), use `ISamlInteractionService` from Duende IdentityServer. Inject it into your login controller/page and call `GetRequestContextAsync`.
+To detect whether an incoming authentication request is a SAML AuthnRequest and access details about the requesting service provider, use `ISamlInteractionService`.
 
-## Login Controller Example
+## Injecting and Using ISamlInteractionService
 
 ```csharp
-using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Mvc;
 
 public class AccountController : Controller
 {
     private readonly ISamlInteractionService _samlInteraction;
+    private readonly IIdentityServerInteractionService _interaction;
 
-    public AccountController(ISamlInteractionService samlInteraction)
+    public AccountController(
+        ISamlInteractionService samlInteraction,
+        IIdentityServerInteractionService interaction)
     {
         _samlInteraction = samlInteraction;
+        _interaction = interaction;
     }
 
     [HttpGet]
@@ -26,30 +30,44 @@ public class AccountController : Controller
         if (samlContext != null)
         {
             // This is a SAML authentication request
-            var servicProvider = samlContext.ServiceProvider;
+            var serviceProvider = samlContext.ServiceProvider;
             var requestedNameIdFormat = samlContext.RequestedNameIdFormat;
 
-            ViewData["IsSaml"] = true;
-            ViewData["SpName"] = servicProvider.DisplayName;
-            ViewData["NameIdFormat"] = requestedNameIdFormat;
+            ViewBag.IsSaml = true;
+            ViewBag.SpDisplayName = serviceProvider.DisplayName;
+            ViewBag.SpEntityId = serviceProvider.EntityId;
+            ViewBag.NameIdFormat = requestedNameIdFormat;
         }
         else
         {
-            // This is an OIDC request (or direct navigation)
-            ViewData["IsSaml"] = false;
+            // Check if it's an OIDC request instead
+            var oidcContext = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (oidcContext != null)
+            {
+                ViewBag.IsSaml = false;
+                ViewBag.ClientName = oidcContext.Client.ClientName;
+            }
         }
 
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        return View();
     }
 }
 ```
 
-## Razor Page Example
+## How It Works
+
+1. **Inject `ISamlInteractionService`** via constructor injection
+2. **Call `GetRequestContextAsync(returnUrl)`** with the return URL from the login page
+3. **Check if the result is non-null** — if it's not null, the request originated from a SAML AuthnRequest
+4. **Access SP details** via the context:
+   - `context.ServiceProvider` — the full `SamlServiceProvider` model (EntityId, DisplayName, etc.)
+   - `context.RequestedNameIdFormat` — the Name ID format requested by the SP
+
+## Razor Pages Example
+
+If you're using Razor Pages instead of MVC:
 
 ```csharp
-using Duende.IdentityServer.Saml;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
 public class LoginModel : PageModel
 {
     private readonly ISamlInteractionService _samlInteraction;
@@ -62,24 +80,23 @@ public class LoginModel : PageModel
     public bool IsSamlRequest { get; set; }
     public string? ServiceProviderName { get; set; }
 
-    public async Task OnGetAsync(string returnUrl)
+    public async Task<IActionResult> OnGetAsync(string returnUrl)
     {
-        var context = await _samlInteraction.GetRequestContextAsync(returnUrl);
+        var samlContext = await _samlInteraction.GetRequestContextAsync(returnUrl);
 
-        if (context != null)
+        if (samlContext != null)
         {
             IsSamlRequest = true;
-            ServiceProviderName = context.ServiceProvider.DisplayName;
-            // context.RequestedNameIdFormat — what Name ID format the SP wants
+            ServiceProviderName = samlContext.ServiceProvider.DisplayName;
         }
+
+        return Page();
     }
 }
 ```
 
 ## Key Points
 
-- **`ISamlInteractionService`** is injected via dependency injection — it's automatically available when you call `.AddSaml()`
-- **`GetRequestContextAsync(returnUrl)`** returns a context object if the `returnUrl` corresponds to a SAML AuthnRequest, or `null` if it's not SAML
-- **`context.ServiceProvider`** gives you the `SamlServiceProvider` configuration for the requesting SP
-- **`context.RequestedNameIdFormat`** tells you what Name ID format the SP requested
-- This allows you to customize the login experience based on whether the request is SAML or OIDC
+- `ISamlInteractionService` is automatically registered when you call `.AddSaml()`
+- Use it alongside `IIdentityServerInteractionService` (for OIDC) to handle both protocol types in a unified login page
+- The `returnUrl` parameter is the same one ASP.NET Core's authentication middleware provides to your login page

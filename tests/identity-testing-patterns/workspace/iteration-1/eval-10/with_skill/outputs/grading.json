@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+      "pass": true,
+      "rationale": "WebApplicationFactory<Program> with ConfigureTestServices"
+    },
+    {
+      "assertion": "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+      "pass": true,
+      "rationale": "options.KeyManagement.Enabled = false is set"
+    },
+    {
+      "assertion": "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+      "pass": true,
+      "rationale": ".AddDeveloperSigningCredential(persistKey: false) is called"
+    },
+    {
+      "assertion": "Registers clients via AddInMemoryClients \u2014 no sub-documents needed for this core pattern",
+      "pass": true,
+      "rationale": "AddInMemoryClients with a client credentials client"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

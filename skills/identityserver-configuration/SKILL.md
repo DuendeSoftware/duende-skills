@@ -1,6 +1,6 @@
 ---
 name: identityserver-configuration
-description: Configure Duende IdentityServer including client definitions, API resources, identity resources, scopes, signing credentials, and server-side sessions. Covers both in-memory and database-backed configuration.
+description: Configure Duende IdentityServer including client definitions, API resources, identity resources, scopes, signing credentials, and server-side sessions. Covers client types (M2M, interactive, SPA), grant types, API Scopes vs API Resources vs Identity Resources, secret management, and client authentication methods. Includes both in-memory and database-backed configuration.
 invocable: false
 ---
 
@@ -27,12 +27,22 @@ Use this skill when:
 
 ## Related Skills
 
-- `identityserver-clients-resources` — Detailed client types (M2M, interactive, SPA), grant type selection, API Scopes vs API Resources vs Identity Resources, secret management, and client authentication methods
 - `identityserver-stores` — EF Core persistence for configuration and operational data
 - `oauth-oidc-protocols` — Protocol fundamentals that underpin these configuration choices
 - `identity-security-hardening` — Production hardening of IdentityServer deployments
 - `token-management` — Client-side token lifecycle with Duende.AccessTokenManagement
 - `aspnetcore-authentication` — Configuring OIDC authentication in client applications
+
+---
+
+## Sub-Documents
+
+Load these sub-documents when the user's question specifically targets one of these areas:
+
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/client-types.md](docs/client-types.md) | Grant type selection matrix, client property reference tables, client authentication methods (shared secret, private_key_jwt, mTLS), secret rollover, and CORS | private_key_jwt, mTLS, secret rotation, refresh token settings, client authentication, CORS origins |
+| [docs/resources-scopes.md](docs/resources-scopes.md) | Resource type decision matrix, identity resources, API scopes (including parameterized scopes), and API resources with audience isolation | aud claim, audience isolation, parameterized scopes, EmitStaticAudienceClaim, API Resources, Identity Resources |
 
 ---
 

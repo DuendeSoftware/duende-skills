@@ -1,35 +1,38 @@
 # Fixing "Response Has Expired" SAML Errors
 
-The "response has expired" error is typically caused by clock skew between your IdentityServer and the SAML service provider. The relevant setting is **`DefaultClockSkew`** in the SAML options.
+The "response has expired" error from SAML service providers is commonly caused by clock skew between your IdentityServer (IdP) and the service provider. Even if your server's clock is synchronized, the SP's clock tolerance may be tighter than expected.
 
-## Configuration
+## The Fix: Increase DefaultClockSkew
+
+The relevant setting is `DefaultClockSkew` in `IdentityServerOptions.Saml`. The default is **5 minutes**, which works for most SPs, but some environments need more tolerance:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
-    // Increase SAML clock skew tolerance
-    // Default is 5 minutes — increase if SPs report expiration errors
+    // Increase clock skew tolerance for SAML assertions
+    // Default is 5 minutes — increase if SPs report expired responses
     options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(10);
-    
-    // You may also want to increase the maximum age for authentication requests
-    options.Saml.DefaultRequestMaxAge = TimeSpan.FromMinutes(15);
 })
     .AddSaml()
     .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-## What `DefaultClockSkew` Does
+## What This Controls
 
-The `DefaultClockSkew` setting (configured via `options.Saml.DefaultClockSkew`) controls the tolerance window for time-based validation in SAML responses. The default is **5 minutes**. When an SP validates a SAML response, it checks timestamps like `NotBefore` and `NotOnOrAfter`. If the clock difference between your IdP and the SP exceeds the allowed skew, the response is rejected as expired.
+`DefaultClockSkew` adds a tolerance window to the validity period of SAML assertions. If set to 10 minutes, an assertion timestamped at 12:00 would be considered valid by the SP from 11:50 to 12:10 (assuming the SP respects the skew).
+
+## Other Useful Settings
+
+If you're also seeing "request too old" errors, you can increase the maximum age of incoming AuthnRequests:
+
+```csharp
+options.Saml.DefaultRequestMaxAge = TimeSpan.FromMinutes(15);
+```
 
 ## Recommendations
 
-1. **Start by increasing to 10 minutes**: `options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(10)` — this handles most real-world clock drift scenarios.
-
-2. **Investigate the root cause**: While increasing clock skew is a valid workaround, consider:
-   - Ensure both servers use NTP for time synchronization
-   - Check if the SP has its own clock skew setting that can be adjusted
-
-3. **Don't set it too high**: Excessively large clock skew windows reduce security by allowing replay of older responses.
-
-4. **This is SAML-specific**: The `options.Saml.DefaultClockSkew` setting only affects SAML response validation. It does not impact OIDC or OAuth token lifetimes.
+1. Start by increasing `DefaultClockSkew` to 10 minutes
+2. If that doesn't resolve it, check the SP's own clock skew tolerance
+3. If the SP allows configuration, have them increase their tolerance as well
+4. Monitor with structured logging — IdentityServer logs SAML assertion timestamps
+5. As a last resort, verify NTP synchronization on both sides

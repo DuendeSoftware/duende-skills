@@ -1,12 +1,29 @@
 {
   "eval_id": 4,
+  "variant": "without_skill",
   "assertions": [
-    {"assertion": "An authorization policy named 'admin' is defined using RequireRole(\"admin\")", "pass": true, "rationale": "Response defines options.AddPolicy(\"admin\", policy => policy.RequireRole(\"admin\"))"},
-    {"assertion": "app.MapGroup(\"/admin\") is used to group the admin endpoints", "pass": true, "rationale": "Response shows var adminGroup = app.MapGroup(\"/admin\")"},
-    {"assertion": ".RequireAuthorization(\"admin\") or equivalent is applied to the group", "pass": true, "rationale": "Response shows .RequireAuthorization(\"admin\") on the group"},
-    {"assertion": "The individual admin endpoints are registered on the group rather than on app directly", "pass": true, "rationale": "Response shows adminGroup.MapGet and adminGroup.MapPost"}
+    {
+      "assertion": "An authorization policy named 'admin' is defined using RequireRole(\"admin\")",
+      "pass": true,
+      "rationale": "The code defines options.AddPolicy(\"admin\", policy => policy.RequireRole(\"admin\"))."
+    },
+    {
+      "assertion": "app.MapGroup(\"/admin\") is used to group the admin endpoints",
+      "pass": true,
+      "rationale": "The code uses var adminGroup = app.MapGroup(\"/admin\")."
+    },
+    {
+      "assertion": ".RequireAuthorization(\"admin\") or equivalent is applied to the group",
+      "pass": true,
+      "rationale": "The code applies .RequireAuthorization(\"admin\") to the MapGroup call."
+    },
+    {
+      "assertion": "The individual admin endpoints are registered on the group rather than on app directly",
+      "pass": true,
+      "rationale": "Endpoints are registered as adminGroup.MapGet(\"/users\", ...) and adminGroup.MapPost(\"/users\", ...) instead of on app."
+    }
   ],
-  "passed": 4,
-  "failed": 0,
-  "total": 4
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
 }

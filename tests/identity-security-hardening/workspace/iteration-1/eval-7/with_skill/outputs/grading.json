@@ -5,27 +5,27 @@
     {
       "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
       "pass": true,
-      "rationale": "spa.legacy uses GrantTypes.Code with RequirePkce = true; no client has RequirePkce = false"
+      "rationale": "spa.legacy migrated to GrantTypes.Code, web.app has RequirePkce = true"
     },
     {
       "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
       "pass": true,
-      "rationale": "All redirect URIs are exact-match: https://app.example.com/signin-oidc, https://spa.example.com/callback, etc."
+      "rationale": "All redirect URIs are exact-match \u2014 https://app.example.com/signin-oidc, https://spa.example.com/callback"
     },
     {
       "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
       "pass": true,
-      "rationale": "AddDeveloperSigningCredential removed; KeyManagement configured with ES256+RS256 algorithms"
+      "rationale": "Replaced with KeyManagement configuration including SigningAlgorithms"
     },
     {
       "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
       "pass": true,
-      "rationale": "web.app: 300s, spa.legacy: 300s, native.app: 300s; M2M clients at 900s"
+      "rationale": "web.app AccessTokenLifetime = 300 (5 minutes)"
     },
     {
       "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
       "pass": true,
-      "rationale": "Detailed findings table with 12 issues, severity ratings, and specific remediations"
+      "rationale": "Comprehensive audit summary table with 12 findings, severity ratings, and fix descriptions"
     }
   ],
   "pass_count": 5,

@@ -1,1 +1,34 @@
-{"eval_id":6,"variant":"without_skill","assertions":[{"assertion":"Implements the IClientConfigurationStore interface","pass":true,"rationale":"MongoClientConfigurationStore implements IClientConfigurationStore (though it also redefines the interface)"},{"assertion":"Includes an AddAsync method for persisting new clients","pass":true,"rationale":"AddAsync method is implemented with InsertOneAsync"},{"assertion":"Includes a FindByClientIdAsync method that returns Client or null","pass":true,"rationale":"FindByClientIdAsync returns Client? via ternary with null check"},{"assertion":"Includes UpdateAsync and DeleteAsync methods for client lifecycle management","pass":true,"rationale":"Both UpdateAsync (ReplaceOneAsync) and DeleteAsync (DeleteOneAsync) are implemented"},{"assertion":"Mentions that client secrets should be stored securely (hashed, not plaintext)","pass":true,"rationale":"States 'Make sure to hash client secrets before storing them'"}],"pass_count":5,"total_count":5,"score":1.0}
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements the IClientConfigurationStore interface",
+      "pass": true,
+      "rationale": "Implements the interface"
+    },
+    {
+      "assertion": "Includes an AddAsync method for persisting new clients",
+      "pass": true,
+      "rationale": "Present"
+    },
+    {
+      "assertion": "Includes a FindByClientIdAsync method that returns Client or null",
+      "pass": true,
+      "rationale": "Returns Client? correctly"
+    },
+    {
+      "assertion": "Includes UpdateAsync and DeleteAsync methods for client lifecycle management",
+      "pass": true,
+      "rationale": "Both present"
+    },
+    {
+      "assertion": "Mentions that client secrets should be stored securely (hashed, not plaintext)",
+      "pass": false,
+      "rationale": "No mention of secret security or hashing"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

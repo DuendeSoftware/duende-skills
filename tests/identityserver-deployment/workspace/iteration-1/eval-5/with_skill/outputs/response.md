@@ -1,18 +1,16 @@
-# Fixing Verbose IdentityServer Logging in Production
+# Fixing Verbose Logging and Filtering OperationCanceledException
 
 ## Problem
 
-Your current `appsettings.json` has `Debug` level logging across the board. For Duende IdentityServer, **`Trace` and `Debug` log levels expose sensitive data including tokens, authorization codes, and client secrets**. This is a security risk in production and generates excessive log volume.
+Your IdentityServer logs are too verbose in production and may expose sensitive data like tokens. The current `appsettings.json` has `Default` and `Microsoft.AspNetCore` both set to `Debug`, which is inappropriate for production.
 
-## Step 1: Fix appsettings.json Logging Levels
-
-Replace your current logging configuration with production-appropriate levels:
+## 1. Fix appsettings.json Logging Configuration
 
 ```json
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Information",
+      "Default": "Warning",
       "Microsoft.AspNetCore": "Warning",
       "Duende.IdentityServer": "Warning"
     }
@@ -24,48 +22,36 @@ Replace your current logging configuration with production-appropriate levels:
 }
 ```
 
-### Log Level Guidelines
+### Why These Levels Matter
 
-| Level | Usage | Production? |
-|-------|-------|-------------|
-| `Trace` | **Exposes tokens and sensitive data** | **NEVER** |
-| `Debug` | Internal flow and decisions — **also exposes sensitive data** | **NEVER** |
-| `Information` | General application flow | Short-term troubleshooting only |
-| `Warning` | Abnormal or unexpected events | **Recommended default** |
-| `Error` | Failed validation, unhandled exceptions | Always enabled |
-| `Critical` | Missing store implementations, invalid key material | Always enabled |
+- **`Duende.IdentityServer: Warning`** — This is the critical setting. At `Trace` or `Debug` levels, IdentityServer logs **sensitive data including tokens, authorization codes, and client secrets**. These levels must **never** be used in production.
+- **`Default: Warning`** — Reduces overall log noise. Use `Information` only if you need general application flow details.
+- **`Microsoft.AspNetCore: Warning`** — Reduces ASP.NET Core framework noise.
 
-Setting `Duende.IdentityServer` to `Warning` ensures you still see abnormal conditions and errors while eliminating the verbose internal processing logs and sensitive data exposure.
+If you need temporary troubleshooting, briefly raise `Duende.IdentityServer` to `Information` — but never `Debug` or `Trace` in production.
 
-Setting `Default` to `Information` (from `Debug`) reduces noise from all other components while keeping useful general flow information.
+## 2. Filter OperationCanceledException
 
-## Step 2: Filter OperationCanceledException
-
-When clients abort requests (e.g., navigating away during a login flow), ASP.NET Core throws `OperationCanceledException`. These are expected and harmless, but they pollute your error logs. IdentityServer provides a built-in filter for this.
-
-Update your `Program.cs`:
+When clients disconnect or cancel requests (common with browser navigation or timeouts), ASP.NET Core throws `OperationCanceledException`. These fill your logs with noise. Configure the IdentityServer exception logging filter:
 
 ```csharp
-using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer(options =>
 {
-    // Filter out OperationCanceledException noise from cancelled requests
+    // Filter out noise from cancelled requests
     options.Logging.UnhandledExceptionLoggingFilter = (ctx, ex) =>
     {
-        // Return false to suppress logging, true to log the exception
+        // Suppress OperationCanceledException when the request was aborted
         if (ctx.RequestAborted.IsCancellationRequested && ex is OperationCanceledException)
-            return false;
+            return false; // Don't log
 
-        return true;
+        return true; // Log everything else
     };
 })
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
+.AddInMemoryIdentityResources(Config.IdentityResources)
+.AddInMemoryApiScopes(Config.ApiScopes)
+.AddInMemoryClients(Config.Clients);
 
 var app = builder.Build();
 
@@ -76,11 +62,16 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-The `UnhandledExceptionLoggingFilter` receives the `HttpContext` and the exception. When the request has been aborted (`ctx.RequestAborted.IsCancellationRequested`) and the exception is an `OperationCanceledException`, returning `false` suppresses the log entry. All other exceptions are still logged normally.
+### How the Filter Works
 
-## Summary
+The `UnhandledExceptionLoggingFilter` is a `Func<HttpContext, Exception, bool>`:
+- **Return `false`** to suppress the log entry
+- **Return `true`** to log the exception normally
 
-1. **Set `Default` to `Information`** — stop the firehose of debug logs from all components
-2. **Set `Duende.IdentityServer` to `Warning`** — stop token values and internal flow details from appearing in logs
-3. **Never use `Trace` or `Debug` in production** — these levels intentionally include sensitive data for debugging purposes
-4. **Filter `OperationCanceledException`** — use `options.Logging.UnhandledExceptionLoggingFilter` to suppress expected cancellation noise
+The filter checks two conditions:
+1. `ctx.RequestAborted.IsCancellationRequested` — the client disconnected
+2. `ex is OperationCanceledException` — the exception is a cancellation
+
+When both are true, the exception is just a normal client disconnect, not an actual error worth logging.
+
+**Note**: This filter is actually the default behavior in IdentityServer, but you may need to configure it explicitly if you've customized exception handling or want to extend the filtering to suppress other noise.

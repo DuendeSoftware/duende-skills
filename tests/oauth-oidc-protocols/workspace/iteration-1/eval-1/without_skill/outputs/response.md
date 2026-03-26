@@ -1,57 +1,35 @@
-# Client Credentials Token Request with IdentityModel
+# Client Credentials Token Request
 
-Here's how to fetch a token using IdentityModel with the discovery document:
+Here's how to fetch a token using IdentityModel:
 
 ```csharp
 using IdentityModel.Client;
 
-var builder = WebApplication.CreateBuilder(args);
+var httpClient = new HttpClient();
 
-builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-app.MapGet("/call-api", async () =>
+// Fetch discovery document
+var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
+if (disco.IsError)
 {
-    using var httpClient = new HttpClient();
+    throw new Exception(disco.Error);
+}
 
-    // Fetch the discovery document
-    var disco = await httpClient.GetDiscoveryDocumentAsync("https://identity.example.com");
-
-    if (disco.IsError)
+// Request token
+var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
+    new ClientCredentialsTokenRequest
     {
-        return Results.Problem($"Error fetching discovery document: {disco.Error}");
-    }
+        Address = disco.TokenEndpoint,
+        ClientId = "backend-service",
+        ClientSecret = "service-secret",
+        Scope = "catalog.read"
+    });
 
-    // Request a client credentials token
-    var tokenResponse = await httpClient.RequestClientCredentialsTokenAsync(
-        new ClientCredentialsTokenRequest
-        {
-            Address = disco.TokenEndpoint,
-            ClientId = "backend-service",
-            ClientSecret = "service-secret",
-            Scope = "catalog.read"
-        });
+if (tokenResponse.IsError)
+{
+    throw new Exception(tokenResponse.Error);
+}
 
-    if (tokenResponse.IsError)
-    {
-        return Results.Problem($"Token error: {tokenResponse.Error}");
-    }
-
-    // Use the token
-    var apiClient = new HttpClient();
-    apiClient.SetBearerToken(tokenResponse.AccessToken!);
-
-    var response = await apiClient.GetAsync("https://api.example.com/catalog/items");
-    var content = await response.Content.ReadAsStringAsync();
-
-    return Results.Ok(content);
-});
-
-app.Run();
+Console.WriteLine(tokenResponse.AccessToken);
 ```
 
-This code uses the IdentityModel library to:
-1. Fetch the OpenID Connect discovery document
-2. Use the discovered token endpoint to request a client credentials token
-3. Attach the token to API calls
+This uses the discovery document to find the token endpoint, then makes a client credentials request with your client ID, secret, and desired scope.

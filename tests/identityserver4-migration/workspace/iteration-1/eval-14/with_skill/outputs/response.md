@@ -1,45 +1,52 @@
 # Issuer URI Preservation During Migration
 
-This is one of the most critical aspects of migrating from IdentityServer4 to Duende IdentityServer — if the issuer URI changes, **all existing tokens become invalid and client trust relationships break**.
+## Critical Warning: The Issuer URI Must Not Change
 
-## The Problem
+The issuer URI (`iss` claim in tokens) is the identity of your IdentityServer. It **must remain identical** after migration. If it changes:
 
-Your IdentityServer4 instance currently has no explicit `IssuerUri` configured, so it's inferred from the incoming request URL. When you move from IIS on Windows to Kestrel behind nginx on Linux, the request URL seen by the application may change due to:
+- **All existing access tokens become invalid** — APIs validate the `iss` claim against the expected issuer. A different issuer = rejected tokens.
+- **All existing refresh tokens break** — Refresh tokens are tied to the issuer that created them.
+- **Client trust relationships break** — Clients are configured with a specific authority URL. If the issuer changes, token validation fails.
+- **Discovery document changes** — Clients that cache the discovery document will get mismatched data.
 
-- Different ports, schemes (HTTP vs HTTPS), or hostnames
-- Reverse proxy forwarding headers not being configured correctly
-- Path base differences between IIS and nginx
+## Your Specific Risk
 
-The `iss` claim in every token and the `issuer` field in the `/.well-known/openid-configuration` discovery document must remain exactly the same after migration.
+Your IdentityServer4 has **no explicit `IssuerUri` configured** — the issuer is inferred from the incoming request URL. This means the issuer value depends on:
+- The scheme (HTTP vs HTTPS)
+- The host name
+- The port
+- The path
 
-## What to Do
+Since you're changing from **IIS on Windows to Kestrel behind nginx on Linux**, any of these could change:
+- IIS might have been on `https://identity.example.com:443` while nginx might use a different port or path
+- Reverse proxy header forwarding might not be configured correctly, causing Kestrel to see `http://localhost:5000` instead of `https://identity.example.com`
 
-### 1. Find your current issuer value
+## Steps to Safely Migrate
 
-Before changing anything, check the discovery document of your running IdentityServer4 instance:
+### Step 1: Record the Current Issuer
+
+Before changing anything, check your current IdentityServer4 discovery document:
 
 ```
-GET https://your-identity-server/.well-known/openid-configuration
+GET https://your-current-identityserver/.well-known/openid-configuration
 ```
 
-Note the `issuer` value in the JSON response — this is the value you must preserve.
+Note the `"issuer"` value from the JSON response. This is the value you must preserve.
 
-### 2. Explicitly set the issuer URI in Duende configuration
+### Step 2: Set the Issuer URI Explicitly in Duende
 
-In your new Duende IdentityServer `Program.cs`, explicitly set `options.IssuerUri` to match the value from the discovery document:
+In your Duende IdentityServer configuration, explicitly set the issuer URI to match:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
-    options.IssuerUri = "https://identity.example.com";  // match your current issuer exactly
+    options.IssuerUri = "https://identity.example.com";  // Match the value from Step 1
 });
 ```
 
-This ensures the issuer remains the same regardless of how the application is hosted or what URL Kestrel sees behind nginx.
+### Step 3: Configure Forwarded Headers for nginx
 
-### 3. Configure forwarded headers for nginx
-
-Even with an explicit `IssuerUri`, configure forwarded headers so other URL generation (redirect URIs, etc.) works correctly:
+Since you're behind nginx, configure forwarded headers so IdentityServer sees the correct scheme, host, and port:
 
 ```csharp
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -51,11 +58,23 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 app.UseForwardedHeaders();
 ```
 
-## Why This Matters
+And in your nginx configuration:
+```nginx
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header Host $host;
+```
 
-- **Existing access tokens** have an `iss` claim. APIs validate this claim against the discovery document. If the issuer changes, token validation fails.
-- **Existing refresh tokens** are tied to the issuer. A different issuer means refresh token grants fail.
-- **Client configurations** in downstream applications have the authority URL configured. If the issuer doesn't match, clients reject the identity provider.
-- **Federation trust** with external identity providers will break if they validate the issuer value.
+### Step 4: Verify After Deployment
 
-Always set `options.IssuerUri` explicitly when changing hosting infrastructure during a migration.
+After deploying, check the discovery document again:
+
+```
+GET https://your-new-deployment/.well-known/openid-configuration
+```
+
+Confirm the `"issuer"` value matches exactly what it was before.
+
+## Key Takeaway
+
+Setting `options.IssuerUri` explicitly is the safest approach — it eliminates dependence on request URL inference, which is fragile across hosting changes.

@@ -1,8 +1,6 @@
-# Migrated Config.cs for Duende IdentityServer v7
+# Migrated Config.cs — Duende IdentityServer v7
 
-The migration of `Config.cs` is straightforward — it's primarily a namespace change. The model types (`Client`, `ApiScope`, `ApiResource`, `IdentityResource`, `Secret`, `GrantTypes`) have the same names and API surface in Duende IdentityServer, so your definitions remain intact.
-
-Here is your migrated `Config.cs`:
+Here is your `Config.cs` updated for Duende IdentityServer:
 
 ```csharp
 using Duende.IdentityServer.Models;
@@ -61,9 +59,28 @@ namespace IdentityServerMigrationSample
 
 ## Changes Made
 
-1. **Namespace update**: Replaced `using IdentityServer4.Models` with `using Duende.IdentityServer.Models`
-2. **Everything else is unchanged**: The `Client`, `ApiScope`, `ApiResource`, `IdentityResource`, `Secret`, and `GrantTypes` types all exist in `Duende.IdentityServer.Models` with the same API surface. Your client definitions with `ClientId`, `AllowedGrantTypes`, `ClientSecrets`, and `AllowedScopes` are fully compatible.
+### Namespace Update
+The only required change is the `using` directive:
 
-The `Secret` type and its `Sha256()` extension method work identically in Duende. The `GrantTypes` static class provides the same grant type collections (`ClientCredentials`, `Code`, etc.).
+```csharp
+// Old
+using IdentityServer4.Models;
 
-If you had any additional `using IdentityServer4.*` directives in other files (e.g., `IdentityServer4.Services`, `IdentityServer4.Stores`), follow the same pattern: replace `IdentityServer4` with `Duende.IdentityServer`.
+// New
+using Duende.IdentityServer.Models;
+```
+
+### Everything Else Stays the Same
+
+All model types used in this file exist in Duende IdentityServer with the **same API surface**:
+
+| Type | Status |
+|------|--------|
+| `IdentityResource` | Same API — `IdentityResources.OpenId()`, `IdentityResources.Profile()` work identically |
+| `ApiScope` | Same constructor and properties |
+| `ApiResource` | Same — `Scopes` property accepts string scope names (v4 semantics, which you're already using) |
+| `Client` | Same — `ClientId`, `AllowedGrantTypes`, `ClientSecrets`, `AllowedScopes`, `RedirectUris`, `PostLogoutRedirectUris` all unchanged |
+| `Secret` | Same — `.Sha256()` extension method works identically |
+| `GrantTypes` | Same — `GrantTypes.ClientCredentials`, `GrantTypes.Code` are identical |
+
+Your Config.cs was already using v4 semantics (string-based `Scopes` on `ApiResource`, `ApiScope` as a separate collection), so no structural changes are needed — just the namespace swap.

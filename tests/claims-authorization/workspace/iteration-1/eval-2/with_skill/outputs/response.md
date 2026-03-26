@@ -1,20 +1,21 @@
 # Why User.FindFirst("sub") Returns Null
 
-## Root Cause: MapInboundClaims
+## Root Cause
 
-The issue is the JWT bearer handler's `MapInboundClaims` behavior. By default, the ASP.NET Core JWT bearer handler maps short OIDC/JWT claim names to the long Microsoft WS-Federation XML namespace URIs. So `sub` gets silently renamed to:
+The JWT bearer handler in ASP.NET Core has a default behavior called **`MapInboundClaims`** that renames standard OIDC/JWT claim types to long Microsoft WS-Federation namespace URIs. When `MapInboundClaims` is `true` (the default), the handler maps:
 
-```
-http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier
-```
+| JWT Claim | Mapped To |
+|-----------|-----------|
+| `sub` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier` |
+| `name` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` |
+| `email` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` |
+| `role` | `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` |
 
-This means `User.FindFirst("sub")` returns `null` — the claim exists, but under the long URI name instead.
+So the `sub` claim **is** in the token — you can see it at jwt.io — but after the handler processes it, it's stored in the `ClaimsPrincipal` under the long name `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`. That's why `User.FindFirst("sub")` returns null.
 
-The claim **is** in the token (you confirmed this at jwt.io). It's not missing — it's been renamed during deserialization.
+## Fix
 
-## The Fix
-
-Set `MapInboundClaims = false` on your JWT bearer handler configuration:
+Set `MapInboundClaims = false` on your JWT bearer handler:
 
 ```csharp
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -23,23 +24,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = "https://identity.example.com";
         options.Audience = "my_api";
         
-        // Keep standard OIDC short claim names (sub, name, email, etc.)
+        // Keep standard OIDC short claim names
         options.MapInboundClaims = false;
         
-        // Also set NameClaimType and RoleClaimType so User.Identity.Name 
-        // and [Authorize(Roles = "...")] work correctly with the short names
+        // Optional: ensure User.Identity.Name and IsInRole() work correctly
         options.TokenValidationParameters.NameClaimType = JwtClaimTypes.Name;   // "name"
         options.TokenValidationParameters.RoleClaimType = JwtClaimTypes.Role;   // "role"
     });
 ```
 
-## Claim Name Mapping Reference
+After this fix, `User.FindFirst("sub")` or `User.FindFirst(JwtClaimTypes.Subject)` will work as expected.
 
-| JWT / OIDC short name (`JwtClaimTypes`) | Microsoft long name (`ClaimTypes`) |
-|---|---|
-| `sub` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier` |
-| `name` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` |
-| `email` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` |
-| `role` | `http://schemas.microsoft.com/ws/2008/06/identity/claims/role` |
+## Why This Happens
 
-After applying the fix, `User.FindFirst("sub")` (or `User.FindFirst(JwtClaimTypes.Subject)`) will work correctly and return the subject claim value.
+This is a legacy behavior from when ASP.NET used WS-Federation. The JWT handler maintains backward compatibility by mapping short JWT names to long XML namespace URIs. For modern OIDC/OAuth2 applications using IdentityServer, you always want `MapInboundClaims = false`.

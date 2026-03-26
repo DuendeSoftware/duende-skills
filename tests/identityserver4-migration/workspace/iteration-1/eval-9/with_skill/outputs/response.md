@@ -2,7 +2,7 @@
 
 ## How to Configure
 
-Configure the license key via `options.LicenseKey` inside the `AddIdentityServer` call:
+The license key is set via `IdentityServerOptions.LicenseKey` in your `AddIdentityServer()` call:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
@@ -13,37 +13,40 @@ builder.Services.AddIdentityServer(options =>
 
 ## Where to Store the License Key
 
-Load the license key from a secure source — **never store it in source-controlled files** like `appsettings.json`. Recommended approaches:
+**Never store the license key in source-controlled files** like `appsettings.json` or `appsettings.Development.json`. Instead, use one of these approaches:
 
-1. **User Secrets** (local development):
-   ```bash
-   dotnet user-secrets set "IdentityServer:LicenseKey" "your-license-key"
-   ```
+### User Secrets (Development)
+```bash
+dotnet user-secrets set "IdentityServer:LicenseKey" "your-license-key-here"
+```
 
-2. **Environment variables** (CI/CD, containers):
-   ```bash
-   export IdentityServer__LicenseKey="your-license-key"
-   ```
+### Environment Variables (CI/CD, Containers)
+```bash
+export IdentityServer__LicenseKey="your-license-key-here"
+```
 
-3. **Secret manager / Key vault** (production):
-   - Azure Key Vault
-   - AWS Secrets Manager
-   - HashiCorp Vault
+### Azure Key Vault (Production)
+```csharp
+builder.Configuration.AddAzureKeyVault(
+    new Uri("https://your-vault.vault.azure.net/"),
+    new DefaultAzureCredential());
+```
 
-All of these integrate with `IConfiguration`, so the code stays the same regardless of the secret store.
+### AWS Secrets Manager, HashiCorp Vault, etc.
+Any secret management system that integrates with .NET's `IConfiguration` system works.
 
-## What Happens Without a License Key?
+## What Happens Without a License Key
 
-Without a license key, IdentityServer **runs in community/trial mode** and **logs a warning on startup**. This is acceptable for local development and testing, but a valid license is required for production use.
-
-The behavior in community/trial mode:
-- IdentityServer functions normally but logs a warning message
-- There are no hard functional blocks, but you must comply with the [license terms](https://duendesoftware.com/products/identityserver)
+Without a license key, Duende IdentityServer runs in **community/trial mode**:
+- It logs a **warning on startup** indicating that no license key is configured
+- All features remain functional during the trial period
+- This mode is acceptable for local development and evaluation
+- **Production deployments require a valid license key**
 
 ## Choosing the Right Edition
 
 The license edition depends on your client inventory:
-- Count **interactive clients** (authorization code grant — web apps, SPAs, native apps)
-- Count **non-interactive clients** (client credentials — machine-to-machine)
+- **Count interactive clients** (those using `authorization_code` grant — web apps, SPAs, native apps)
+- **Count non-interactive clients** (those using `client_credentials` — machine-to-machine)
 
-Use the Migration Analysis Tool against your running IdentityServer4 instance to get these counts automatically before purchasing.
+Run the Migration Analysis Tool against your running IdentityServer4 instance to get these counts automatically. See [Duende IdentityServer Pricing](https://duendesoftware.com/products/identityserver) for edition thresholds.

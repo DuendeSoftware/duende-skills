@@ -2,11 +2,31 @@
   "eval_id": 10,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'", "pass": true, "rationale": "Shows builder.Services.AddReverseProxy().AddBffExtensions()"},
-    {"assertion": "Program.cs contains 'LoadFromMemory' with RouteConfig and ClusterConfig", "pass": true, "rationale": "Shows proxyBuilder.LoadFromMemory with RouteConfig and ClusterConfig including route match and cluster destinations"},
-    {"assertion": "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)", "pass": true, "rationale": "Shows .WithAccessToken(TokenType.User) on the RouteConfig with a comment noting 'YARP uses TokenType, NOT RequiredTokenType'"},
-    {"assertion": "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig", "pass": true, "rationale": "Shows .WithAntiforgeryCheck() chained on the RouteConfig after WithAccessToken"},
-    {"assertion": "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'", "pass": true, "rationale": "Shows app.MapReverseProxy(proxyApp => { proxyApp.UseAntiforgeryCheck(); })"}
+    {
+      "assertion": "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'",
+      "pass": true,
+      "rationale": "AddReverseProxy().AddBffExtensions() is present"
+    },
+    {
+      "assertion": "Program.cs contains 'LoadFromMemory' with RouteConfig and ClusterConfig",
+      "pass": true,
+      "rationale": "LoadFromMemory with RouteConfig and ClusterConfig is present"
+    },
+    {
+      "assertion": "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+      "pass": true,
+      "rationale": ".WithAccessToken(TokenType.User) on RouteConfig \u2014 correctly uses TokenType"
+    },
+    {
+      "assertion": "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
+      "pass": true,
+      "rationale": ".WithAntiforgeryCheck() is chained on the RouteConfig"
+    },
+    {
+      "assertion": "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'",
+      "pass": true,
+      "rationale": "MapReverseProxy with proxyApp.UseAntiforgeryCheck() is present"
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

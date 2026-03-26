@@ -1,49 +1,31 @@
-# Migrating NuGet Packages from IdentityServer4 to Duende IdentityServer v7
+# Migrating IdentityServer4 v4.1.2 to Duende IdentityServer v7: NuGet Packages and Target Framework
 
-## Step 1: Update Target Framework
+## Target Framework Update
 
-```xml
-<!-- Old -->
-<TargetFramework>netcoreapp3.1</TargetFramework>
-
-<!-- New (pick a current LTS version) -->
-<TargetFramework>net8.0</TargetFramework>
-<!-- or -->
-<TargetFramework>net10.0</TargetFramework>
-```
-
-## Step 2: Replace NuGet Packages
+Your project currently targets `netcoreapp3.1`, which is end-of-life. Duende IdentityServer v7 requires at least **`net8.0`** (LTS) or **`net10.0`** (LTS). Update your `.csproj`:
 
 ```xml
-<!-- Old (IdentityServer4) -->
-<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.15" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.15" />
-
-<!-- New (Duende) -->
-<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.4.7" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+<PropertyGroup>
+  <TargetFramework>net8.0</TargetFramework>
+</PropertyGroup>
 ```
 
-If you use `IdentityModel` anywhere in your project, replace it with `Duende.IdentityModel`:
+## NuGet Package Replacements
 
-```xml
-<!-- Old -->
-<PackageReference Include="IdentityModel" Version="5.2.0" />
+Replace the IdentityServer4 packages with their Duende equivalents:
 
-<!-- New -->
-<PackageReference Include="Duende.IdentityModel" Version="8.0.0" />
-```
+| Old Package | New Package | Version |
+|-------------|-------------|---------|
+| `IdentityServer4.EntityFramework` (4.1.2) | `Duende.IdentityServer.EntityFramework` | 7.4.7 |
+| `IdentityModel` (if used) | `Duende.IdentityModel` | 8.0.0 |
 
-## Updated .csproj
+Your updated `.csproj` should look like:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -54,18 +36,28 @@ If you use `IdentityModel` anywhere in your project, replace it with `Duende.Ide
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
   </ItemGroup>
+
 </Project>
 ```
 
-## Important: License Key
+## Key Changes Explained
 
-Duende IdentityServer requires a license key for production use. Without one, it runs in community/trial mode and logs a warning on startup. Configure the license key via `options.LicenseKey` in `AddIdentityServer`:
+1. **`IdentityServer4.EntityFramework` → `Duende.IdentityServer.EntityFramework`**: This is the main package replacement. The `Duende.IdentityServer.EntityFramework` package transitively includes `Duende.IdentityServer`, so you don't need a separate `IdentityServer4` base package reference.
 
-```csharp
-builder.Services.AddIdentityServer(options =>
-{
-    options.LicenseKey = builder.Configuration["IdentityServer:LicenseKey"];
-});
-```
+2. **`Microsoft.EntityFrameworkCore.SqlServer` 3.1.15 → 8.0.0**: EF Core packages must match the target framework version. For `net8.0`, use EF Core 8.0.x packages.
 
-Store the license key in a secret manager or environment variable — never in source-controlled `appsettings.json`.
+3. **`Microsoft.EntityFrameworkCore.Design` 3.1.15 → 8.0.0**: Same version alignment requirement.
+
+4. **`IdentityModel` → `Duende.IdentityModel`**: If your project uses `IdentityModel` (the protocol client library) anywhere, replace it with `Duende.IdentityModel`. The old `IdentityModel` package is no longer maintained alongside Duende.
+
+## Licensing Note
+
+**Duende IdentityServer requires a license key for production use.** Without a license key, IdentityServer runs in community/trial mode and logs a warning on startup. Configure the license key via `options.LicenseKey` in your `AddIdentityServer()` call, loading it from configuration or a secret manager — never from source-controlled files.
+
+## Next Steps
+
+After updating packages and the target framework:
+- Update all `IdentityServer4.*` namespaces to `Duende.IdentityServer.*`
+- Remove `AddDeveloperSigningCredential()` and use Duende's automatic key management
+- Create and apply EF Core database migrations for the new schema
+- Configure the license key

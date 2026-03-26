@@ -1,29 +1,25 @@
 {
+  "model": "claude-opus-4-20250514",
   "eval_id": 8,
-  "variant": "with_skill",
+  "mode": "with_skill",
   "assertions": [
     {
       "assertion": "Output replaces 'using IdentityServer4.Models' with 'using Duende.IdentityServer.Models'",
-      "pass": true,
-      "rationale": "Code shows 'using Duende.IdentityServer.Models' and changes section confirms the replacement."
+      "passed": true
     },
     {
       "assertion": "Output preserves the Client definitions with ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes intact",
-      "pass": true,
-      "rationale": "Both Client definitions (m2m.client and interactive.client) are preserved exactly with all properties intact."
+      "passed": true
     },
     {
       "assertion": "Output preserves the ApiScope, ApiResource, and IdentityResource definitions",
-      "pass": true,
-      "rationale": "ApiScope('api1'), ApiResource('api1'), IdentityResources.OpenId() and .Profile() are all preserved."
+      "passed": true
     },
     {
       "assertion": "Output maintains the Secret and GrantTypes usage (these types exist in Duende with the same API surface)",
-      "pass": true,
-      "rationale": "Secret and GrantTypes are used identically. Response explicitly states these types exist in Duende with the same API surface."
+      "passed": true
     }
   ],
-  "pass_count": 4,
-  "total_count": 4,
-  "score": 1.0
+  "passed": 4,
+  "total": 4
 }

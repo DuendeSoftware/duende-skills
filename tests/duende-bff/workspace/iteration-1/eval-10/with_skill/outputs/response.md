@@ -1,22 +1,13 @@
 # YARP Reverse Proxy with BFF Integration
 
-First, add the YARP BFF integration package:
-
-```bash
-dotnet add package Duende.BFF.Yarp
-```
-
-## Program.cs
-
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// BFF setup with OIDC
 builder.Services.AddBff()
     .ConfigureOpenIdConnect(options =>
     {
         options.Authority = "https://idp.example.com";
-        options.ClientId = "bff-client";
+        options.ClientId = "spa-bff-client";
         options.ClientSecret = "secret";
         options.ResponseType = "code";
         options.SaveTokens = true;
@@ -27,11 +18,10 @@ builder.Services.AddBff()
 
 builder.Services.AddAuthorization();
 
-// YARP reverse proxy with BFF extensions
+// YARP with BFF extensions
 var proxyBuilder = builder.Services.AddReverseProxy()
     .AddBffExtensions();
 
-// In-code route and cluster configuration
 proxyBuilder.LoadFromMemory(
     routes:
     [
@@ -41,8 +31,8 @@ proxyBuilder.LoadFromMemory(
             ClusterId = "api-cluster",
             Match = new RouteMatch { Path = "/api/{**catch-all}" }
         }
-        .WithAccessToken(TokenType.User)   // Note: YARP uses TokenType, NOT RequiredTokenType
-        .WithAntiforgeryCheck()             // Enable anti-forgery validation on this route
+        .WithAccessToken(TokenType.User)
+        .WithAntiforgeryCheck()
     ],
     clusters:
     [
@@ -67,10 +57,10 @@ app.UseAuthentication();
 app.UseBff();
 app.UseAuthorization();
 
-// Map the YARP reverse proxy with anti-forgery enforcement in the pipeline
+// YARP pipeline with anti-forgery check
 app.MapReverseProxy(proxyApp =>
 {
-    proxyApp.UseAntiforgeryCheck(); // Must be explicitly added for YARP routes
+    proxyApp.UseAntiforgeryCheck();
 });
 
 app.Run();
@@ -78,8 +68,8 @@ app.Run();
 
 ## Key Points
 
-- **`AddBffExtensions()`** registers BFF token management for YARP so that tokens are automatically attached to proxied requests based on the route configuration.
-- **`TokenType.User`** (not `RequiredTokenType.User`) — YARP route extensions use `TokenType`, which is different from the `RequiredTokenType` used by `MapRemoteBffApiEndpoint`. This is a common source of confusion.
-- **`WithAntiforgeryCheck()`** on the route config marks the route as requiring the `X-CSRF: 1` header.
-- **`UseAntiforgeryCheck()`** inside `MapReverseProxy` actually enforces the anti-forgery check at runtime. Unlike `MapRemoteBffApiEndpoint`, YARP does **not** automatically enforce anti-forgery — you must explicitly add it to the proxy pipeline. Omitting it means the route is unprotected against CSRF even if `WithAntiforgeryCheck()` is set on the route.
-- **`LoadFromMemory`** provides in-code configuration as an alternative to `appsettings.json`. Both approaches work, but in-code configuration gives you compile-time checking of route/cluster IDs.
+- **`AddReverseProxy().AddBffExtensions()`** registers YARP with BFF token management support.
+- **`LoadFromMemory`** configures routes and clusters in code. The route matches `/api/{**catch-all}`.
+- **`.WithAccessToken(TokenType.User)`** — Note: YARP uses `TokenType` (not `RequiredTokenType` which is for `MapRemoteBffApiEndpoint`).
+- **`.WithAntiforgeryCheck()`** enables X-CSRF header validation on the route.
+- **`MapReverseProxy` with `UseAntiforgeryCheck()`** — Anti-forgery is NOT automatic in the YARP pipeline; it must be explicitly added.

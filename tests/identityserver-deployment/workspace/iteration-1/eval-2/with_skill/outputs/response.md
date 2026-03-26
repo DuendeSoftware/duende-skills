@@ -1,41 +1,27 @@
-# Fixing CryptographicException in Multi-Instance IdentityServer on Kubernetes
+# Fixing CryptographicException in Multi-Instance Kubernetes Deployment
 
 ## Root Cause
 
-The `CryptographicException` errors are caused by **ASP.NET Core Data Protection keys not being shared across your 3 Kubernetes replicas**. Each instance generates its own set of Data Protection keys on startup. When a user's request is load-balanced to a different instance than the one that encrypted the data (cookies, state parameters, etc.), the receiving instance doesn't have the key to decrypt it — resulting in `CryptographicException`.
+The intermittent `CryptographicException` errors occur because **Data Protection keys are not shared across your 3 Kubernetes replicas**. By default, ASP.NET Core generates Data Protection keys per instance and stores them in a local directory. When user A authenticates on instance 1 (which encrypts the cookie with instance 1's keys), and a subsequent request is routed to instance 2, that instance cannot decrypt the cookie because it has different keys.
 
-Typical error messages you'll see:
-- `CryptographicException: The key {GUID} was not found in the key ring`
-- `Error unprotecting key with kid {Signing Key ID}`
-
-## Solution: Shared Data Protection Configuration
-
-### Step 1: Add Redis for Key Storage
-
-First, add the Redis Data Protection NuGet package:
-
-```bash
-dotnet add package Microsoft.AspNetCore.DataProtection.StackExchangeRedis
-dotnet add package StackExchange.Redis
-```
-
-### Step 2: Configure Data Protection in Program.cs
+## Solution: Configure Shared Data Protection
 
 ```csharp
-using Duende.IdentityServer;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Connect to Redis
+// Configure Data Protection with shared storage
 var redis = ConnectionMultiplexer.Connect("redis-service:6379");
 
-// Configure Data Protection for multi-instance
 builder.Services.AddDataProtection()
+    // Persist keys to a shared Redis instance
     .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys")
-    .SetApplicationName("IdentityServer");  // MUST be consistent across all instances
+    // Set a consistent application name across ALL instances
+    .SetApplicationName("IdentityServer")
+    // Optionally protect keys at rest with a certificate
+    .ProtectKeysWithCertificate(/* your X509Certificate2 */);
 
 builder.Services.AddIdentityServer()
     .AddInMemoryIdentityResources(Config.IdentityResources)
@@ -51,48 +37,52 @@ app.MapGet("/", () => "IdentityServer is running");
 app.Run();
 ```
 
-### Key Configuration Points
+## Key Configuration Points
 
-1. **`PersistKeysToStackExchangeRedis()`** — Stores Data Protection keys in Redis, which is accessible to all replicas. Alternatives include:
-   - `PersistKeysToDbContext<T>()` — EF Core database
-   - `PersistKeysToAzureBlobStorage()` — Azure Blob Storage
-   - `PersistKeysToAWSSystemsManager()` — AWS Systems Manager
+### 1. Shared Key Persistence (`PersistKeysTo*`)
 
-2. **`SetApplicationName("IdentityServer")`** — This is **critical**. Without an explicit application name, ASP.NET Core derives one from the content root path, which differs across container instances. All instances must use the same application name to share the same key ring.
+You **must** persist Data Protection keys to a shared store accessible by all replicas. Options include:
 
-3. **Optional: Protect keys at rest** — For additional security, encrypt the keys with a certificate or key vault:
-   ```csharp
-   .ProtectKeysWithCertificate(certificate)
-   // or
-   .ProtectKeysWithAzureKeyVault(keyIdentifier, tokenCredential)
-   ```
+- **`PersistKeysToStackExchangeRedis`** — Recommended for Kubernetes; fast and commonly available
+- **`PersistKeysToDbContext`** — Uses Entity Framework; good if you already have a shared database
+- **`PersistKeysToAzureBlobStorage`** — For Azure deployments
+- **`PersistKeysToAWSSystemsManager`** — For AWS deployments
 
-## Don't Forget: Signing Keys Must Also Be Shared
+**Important**: If using Redis, ensure Redis itself has persistence configured (RDB snapshots or AOF). Without Redis persistence, a Redis restart loses all Data Protection keys.
 
-Data Protection is only half the story. **IdentityServer's signing keys** (used to sign JWTs — id_tokens, access tokens) must also be shared across instances. The default file-system key store writes keys to a local `~/keys` directory, which is per-instance in containers.
+### 2. Consistent Application Name (`SetApplicationName`)
 
-For multi-instance deployments, use the **EF Core operational store** which includes `ISigningKeyStore`:
+`SetApplicationName("IdentityServer")` ensures all instances use the same key ring. Without this, .NET may isolate keys by application path, meaning different pods with different filesystem paths can't share keys.
+
+### 3. Signing Key Store Must Also Be Shared
+
+Data Protection keys and IdentityServer signing keys are **separate**:
+
+| Aspect | Data Protection Keys | IdentityServer Signing Keys |
+|--------|--------------------|-----------------------------|
+| Purpose | Encrypt cookies, grants, sessions | Sign JWT tokens |
+| Storage | `PersistKeysTo*()` | `ISigningKeyStore` |
+
+For multi-instance deployments, the **signing key store must also be shared**. The default file-system signing key store is per-instance and won't work. Use the **Entity Framework operational store** which includes `ISigningKeyStore`:
 
 ```csharp
 builder.Services.AddIdentityServer()
     .AddOperationalStore(options =>
     {
         options.ConfigureDbContext = b =>
-            b.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    })
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
+            b.UseSqlServer(connectionString);
+    });
 ```
 
 Or implement a custom `ISigningKeyStore` backed by shared storage.
 
-## What NOT to Do
+### 4. Do NOT Use Default Keys
 
-- **Do NOT use the default ephemeral/file-system Data Protection keys** — They are local to each container and lost on restart.
-- **Do NOT use in-memory or file-based signing key storage** in multi-instance deployments — Each instance will generate different signing keys, causing token validation failures.
-- **Do NOT skip `SetApplicationName()`** — Without it, key isolation between instances causes the same symptoms as not sharing keys at all.
+The default Data Protection configuration uses ephemeral or file-system-based keys that are local to each container. These keys are lost when pods restart and cannot be read by other instances. **Never use the default in a multi-instance deployment.**
 
-## Redis Persistence Note
+## Symptoms of Data Protection Failure
 
-If using Redis for Data Protection keys, ensure Redis itself is configured with persistence (RDB snapshots or AOF). Otherwise, a Redis restart will lose all keys, causing widespread `CryptographicException` errors until new keys propagate.
+- `CryptographicException`: "The key {id} was not found in the key ring"
+- "Error unprotecting key with kid {Signing Key ID}"
+- Intermittent authentication failures after login
+- Session cookies becoming invalid when hitting a different pod

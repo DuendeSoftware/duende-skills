@@ -1,8 +1,8 @@
-# Migrating spa.legacy and Fixing Secrets
+# Migrating Implicit Flow and Fixing Secrets
 
-## 1. Migrate spa.legacy from Implicit to Authorization Code
+## Migrate spa.legacy to Code Flow
 
-Implicit flow is considered less secure as tokens are exposed in the URL. Let's switch to authorization code flow:
+The implicit flow is deprecated. Switch to authorization code flow with PKCE:
 
 ```csharp
 new Client
@@ -21,47 +21,16 @@ new Client
 }
 ```
 
-## 2. Fix Hardcoded Secrets
+## Fix Hardcoded Secrets
 
-Load secrets from environment variables or configuration:
+Move secrets to configuration:
 
 ```csharp
 // web.app
-new Client
-{
-    ClientId = "web.app",
-    ClientName = "Main Web Application",
-    AllowedGrantTypes = GrantTypes.Code,
-    RequirePkce = true,
-    ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) },
-    RedirectUris = { "https://app.example.com/signin-oidc" },
-    PostLogoutRedirectUris = { "https://app.example.com/signout-callback-oidc" },
-    AllowedScopes = { "openid", "profile", "email", "catalog.read", "catalog.write" },
-    AllowOfflineAccess = true,
-    AccessTokenLifetime = 3600,
-    RefreshTokenUsage = TokenUsage.OneTimeOnly,
-    AllowedCorsOrigins = { "https://app.example.com" }
-}
+ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:WebApp"].Sha256()) },
 
 // background.worker
-new Client
-{
-    ClientId = "background.worker",
-    ClientName = "Background Processing Service",
-    AllowedGrantTypes = GrantTypes.ClientCredentials,
-    ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:BackgroundWorker"].Sha256()) },
-    AllowedScopes = { "internal-api", "orders.manage" },
-    AccessTokenLifetime = 3600
-}
+ClientSecrets = { new Secret(builder.Configuration["ClientSecrets:BackgroundWorker"].Sha256()) },
 ```
 
-The secrets should be stored in `appsettings.json` (or preferably Azure Key Vault / AWS Secrets Manager):
-
-```json
-{
-  "ClientSecrets": {
-    "WebApp": "super-secret-value-from-config",
-    "BackgroundWorker": "worker-secret-value"
-  }
-}
-```
+Make sure you have the values in appsettings.json or your secrets manager.

@@ -77,31 +77,30 @@ cp /tmp/duende-skills/agents/*.md ~/.config/opencode/agents/
 
 ### Identity & OAuth
 
-| Skill | Description |
-|-------|-------------|
-| `aspnetcore-authentication` | ASP.NET Core authentication middleware — OIDC, JWT Bearer, cookies, schemes, external providers |
-| `aspnetcore-authorization` | ASP.NET Core authorization — policies, IAuthorizationHandler, scope-based API authz, minimal APIs |
-| `claims-authorization` | Claims-based authorization — policies, requirement handlers, resource-based authz, claims transformation |
-| `duende-bff` | Backend-for-Frontend security framework for SPAs — session management, API proxying, token management |
-| `identity-security-hardening` | Security hardening — key rotation, HTTPS, CORS, CSP, rate limiting, token lifetime tuning |
-| `identity-testing-patterns` | Testing IdentityServer integrations — WebApplicationFactory, mock token issuance, protocol validation |
-| `identityserver-api-protection` | Protecting APIs — JWT bearer authentication, reference token introspection, scope-based authorization, DPoP/mTLS proof-of-possession, local API auth |
-| `identityserver-aspire` | Aspire AppHost orchestration — dependency graphs, authority URL wiring, health checks, multi-instance |
-| `identityserver-clients-resources` | Client and resource configuration — client types (M2M, interactive, SPA), grant types, API Scopes vs API Resources vs Identity Resources, secret management |
-| `identityserver-configuration` | IdentityServer host configuration — clients, resources, scopes, signing credentials, server-side sessions |
-| `identityserver-dcr` | Dynamic Client Registration — endpoint setup, validation, software statements, client stores |
-| `identityserver-deployment` | Production deployment — reverse proxy configuration, data protection, health checks, distributed caching, OpenTelemetry, logging |
-| `identityserver-hosting-setup` | Setting up and hosting IdentityServer — DI registration, middleware pipeline, hosting patterns, license configuration, ASP.NET Identity integration |
-| `identityserver-key-management` | Cryptographic signing keys — automatic key management, data protection at rest, static key configuration, multi-instance deployment |
-| `identityserver-saml` | SAML 2.0 Identity Provider — service provider setup, endpoints, attribute mapping, signing behavior |
-| `identityserver-sessions-providers` | Server-side sessions, session management/querying, inactivity timeout, dynamic identity providers, CIBA |
-| `identityserver-stores` | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations |
-| `identityserver-token-lifecycle` | Token types, refresh token management, token exchange (RFC 8693), extension grants, IProfileService claims, lifetime best practices |
-| `identityserver-token-security` | Advanced token security — DPoP, mTLS certificate binding, Pushed Authorization Requests (PAR), JAR, FAPI 2.0 compliance |
-| `identityserver-ui-flows` | Login, logout, consent, error, and federation gateway UI pages — IIdentityServerInteractionService, external providers, Home Realm Discovery |
-| `identityserver4-migration` | Migrating from IdentityServer4 to Duende IdentityServer v7 — NuGet packages, namespaces, API changes, EF Core schema migrations, signing keys, license configuration |
-| `oauth-oidc-protocols` | OAuth 2.0 and OpenID Connect fundamentals — flows, PKCE, discovery, JWKS, introspection |
-| `token-management` | Token lifecycle with Duende.AccessTokenManagement — caching, refresh, DPoP, HttpClientFactory integration |
+| Skill                               | Description                                                                                                                                                                                                                                        |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aspnetcore-authentication`         | ASP.NET Core authentication middleware — OIDC, JWT Bearer, cookies, schemes, external providers                                                                                                                                                    |
+| `aspnetcore-authorization`          | ASP.NET Core authorization — policies, IAuthorizationHandler, scope-based API authz, minimal APIs                                                                                                                                                  |
+| `claims-authorization`              | Claims-based authorization — policies, requirement handlers, resource-based authz, claims transformation                                                                                                                                           |
+| `duende-bff`                        | Backend-for-Frontend security framework for SPAs — session management, API proxying, token management                                                                                                                                              |
+| `identity-security-hardening`       | Security hardening — key rotation, HTTPS, CORS, CSP, rate limiting, token lifetime tuning                                                                                                                                                          |
+| `identity-testing-patterns`         | Testing IdentityServer integrations — WebApplicationFactory, mock token issuance, protocol validation                                                                                                                                              |
+| `identityserver-api-protection`     | Protecting APIs — JWT bearer authentication, reference token introspection, scope-based authorization, DPoP/mTLS proof-of-possession, local API auth                                                                                               |
+| `identityserver-aspire`             | Aspire AppHost orchestration — dependency graphs, authority URL wiring, health checks, multi-instance                                                                                                                                              |
+| `identityserver-configuration`      | IdentityServer host configuration — clients, resources, scopes, signing credentials, server-side sessions, client types (M2M, interactive, SPA), grant types, API Scopes vs API Resources vs Identity Resources, and client authentication methods |
+| `identityserver-dcr`                | Dynamic Client Registration — endpoint setup, validation, software statements, client stores                                                                                                                                                       |
+| `identityserver-deployment`         | Production deployment — reverse proxy configuration, data protection, health checks, distributed caching, OpenTelemetry, logging                                                                                                                   |
+| `identityserver-hosting-setup`      | Setting up and hosting IdentityServer — DI registration, middleware pipeline, hosting patterns, license configuration, ASP.NET Identity integration                                                                                                |
+| `identityserver-key-management`     | Cryptographic signing keys — automatic key management, data protection at rest, static key configuration, multi-instance deployment                                                                                                                |
+| `identityserver-saml`               | SAML 2.0 Identity Provider — service provider setup, endpoints, attribute mapping, signing behavior                                                                                                                                                |
+| `identityserver-sessions-providers` | Server-side sessions, session management/querying, inactivity timeout, dynamic identity providers, CIBA                                                                                                                                            |
+| `identityserver-stores`             | Persistent stores — EF Core configuration/operational stores, migrations, custom implementations                                                                                                                                                   |
+| `identityserver-token-lifecycle`    | Token types, refresh token management, token exchange (RFC 8693), extension grants, IProfileService claims, lifetime best practices                                                                                                                |
+| `identityserver-token-security`     | Advanced token security — DPoP, mTLS certificate binding, Pushed Authorization Requests (PAR), JAR, FAPI 2.0 compliance                                                                                                                            |
+| `identityserver-ui-flows`           | Login, logout, consent, error, and federation gateway UI pages — IIdentityServerInteractionService, external providers, Home Realm Discovery                                                                                                       |
+| `identityserver4-migration`         | Migrating from IdentityServer4 to Duende IdentityServer v7 — NuGet packages, namespaces, API changes, EF Core schema migrations, signing keys, license configuration                                                                               |
+| `oauth-oidc-protocols`              | OAuth 2.0 and OpenID Connect fundamentals — flows, PKCE, discovery, JWKS, introspection                                                                                                                                                            |
+| `token-management`                  | Token lifecycle with Duende.AccessTokenManagement — caching, refresh, DPoP, HttpClientFactory integration                                                                                                                                          |
 
 > **Looking for general .NET skills?** C# coding standards, concurrency patterns, EF Core, database performance, Aspire configuration, dependency injection, Playwright testing, snapshot testing, project structure, package management, and more are available in **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**.
 
@@ -109,10 +108,10 @@ cp /tmp/duende-skills/agents/*.md ~/.config/opencode/agents/
 
 ## Agents
 
-| Agent | Description |
-|-------|-------------|
+| Agent                        | Description                                                                                                                                      |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | `identity-server-specialist` | Expert in Duende IdentityServer configuration, deployment, and troubleshooting. Clients, token flows, stores, key rotation, protocol compliance. |
-| `oauth-oidc-specialist` | Expert in OAuth 2.0 and OpenID Connect specifications. RFC guidance, flow selection, protocol debugging, security analysis, FAPI compliance. |
+| `oauth-oidc-specialist`      | Expert in OAuth 2.0 and OpenID Connect specifications. RFC guidance, flow selection, protocol debugging, security analysis, FAPI compliance.     |
 
 ---
 
@@ -126,45 +125,43 @@ Run evals for all skills using GitHub Models (via `gh` CLI):
 ./scripts/run-evals.sh --iteration 1 --verbose
 ```
 
-### Results — March 23, 2026 (claude-opus-4-20250514)
+### Results — March 26, 2026 (claude-opus-4-20250514)
 
-**196 evals across 23 skills — 881 total assertions**
+**202 evals across 22 skills — 904 total assertions**
 
 |             | With Skill         | Without Skill       | Delta      |
 |-------------|--------------------|---------------------|------------|
-| **Overall** | **881/881 (100%)** | **610/881 (69.2%)** | **+30.8%** |
+| **Overall** | **904/904 (100%)** | **645/904 (71.3%)** | **+28.7%** |
 
 | Skill                               | Evals | With Skill   | Without Skill |      Delta |
 |-------------------------------------|------:|--------------|---------------|-----------:|
-| `identityserver-saml`               |     8 | 35/35 (100%) | 12/35 (34.3%) | **+65.7%** |
+| `identityserver-saml`               |     8 | 35/35 (100%) | 10/35 (28.6%) | **+71.4%** |
 | `identityserver-api-protection`     |     7 | 30/30 (100%) | 12/30 (40.0%) | **+60.0%** |
-| `identityserver-ui-flows`           |     7 | 30/30 (100%) | 14/30 (46.7%) | **+53.3%** |
-| `token-management`                  |    11 | 49/49 (100%) | 23/49 (46.9%) | **+53.1%** |
+| `identityserver-aspire`             |     7 | 32/32 (100%) | 14/32 (43.8%) | **+56.2%** |
+| `duende-bff`                        |    11 | 50/50 (100%) | 22/50 (44.0%) | **+56.0%** |
+| `identityserver-deployment`         |     8 | 33/33 (100%) | 16/33 (48.5%) | **+51.5%** |
 | `identityserver-hosting-setup`      |     8 | 36/36 (100%) | 22/36 (61.1%) | **+38.9%** |
 | `identityserver-sessions-providers` |     8 | 37/37 (100%) | 23/37 (62.2%) | **+37.8%** |
-| `duende-bff`                        |    11 | 50/50 (100%) | 32/50 (64.0%) | **+36.0%** |
-| `aspnetcore-authentication`         |     8 | 32/32 (100%) | 21/32 (65.6%) | **+34.4%** |
-| `claims-authorization`              |     8 | 36/36 (100%) | 24/36 (66.7%) | **+33.3%** |
-| `identityserver-token-security`     |     8 | 36/36 (100%) | 25/36 (69.4%) | **+30.6%** |
-| `identityserver-deployment`         |     8 | 33/33 (100%) | 23/33 (69.7%) | **+30.3%** |
-| `identityserver4-migration`         |    15 | 69/69 (100%) | 49/69 (71.0%) | **+29.0%** |
-| `identityserver-stores`             |    12 | 56/56 (100%) | 40/56 (71.4%) | **+28.6%** |
-| `identityserver-key-management`     |     8 | 32/32 (100%) | 23/32 (71.9%) | **+28.1%** |
-| `identity-security-hardening`       |     7 | 34/34 (100%) | 25/34 (73.5%) | **+26.5%** |
-| `oauth-oidc-protocols`              |     8 | 37/37 (100%) | 28/37 (75.7%) | **+24.3%** |
-| `identity-testing-patterns`         |     8 | 39/39 (100%) | 30/39 (76.9%) | **+23.1%** |
-| `identityserver-aspire`             |     7 | 32/32 (100%) | 26/32 (81.3%) | **+18.8%** |
-| `identityserver-token-lifecycle`    |     8 | 36/36 (100%) | 31/36 (86.1%) | **+13.9%** |
-| `identityserver-configuration`      |     8 | 36/36 (100%) | 31/36 (86.1%) | **+13.9%** |
-| `identityserver-clients-resources`  |     8 | 36/36 (100%) | 31/36 (86.1%) | **+13.9%** |
-| `identityserver-dcr`                |     8 | 39/39 (100%) | 36/39 (92.3%) |  **+7.7%** |
-| `aspnetcore-authorization`          |     7 | 31/31 (100%) | 29/31 (93.5%) |  **+6.5%** |
+| `claims-authorization`              |     9 | 40/40 (100%) | 26/40 (65.0%) | **+35.0%** |
+| `identityserver-configuration`      |    16 | 72/72 (100%) | 52/72 (72.2%) | **+27.8%** |
+| `identityserver-ui-flows`           |     7 | 30/30 (100%) | 22/30 (73.3%) | **+26.7%** |
+| `token-management`                  |    13 | 57/57 (100%) | 42/57 (73.7%) | **+26.3%** |
+| `identityserver-token-security`     |     8 | 36/36 (100%) | 27/36 (75.0%) | **+25.0%** |
+| `aspnetcore-authentication`         |     8 | 32/32 (100%) | 25/32 (78.1%) | **+21.9%** |
+| `identity-security-hardening`       |     8 | 37/37 (100%) | 29/37 (78.4%) | **+21.6%** |
+| `identity-testing-patterns`         |    10 | 47/47 (100%) | 37/47 (78.7%) | **+21.3%** |
+| `identityserver4-migration`         |    15 | 69/69 (100%) | 57/69 (82.6%) | **+17.4%** |
+| `identityserver-stores`             |    12 | 56/56 (100%) | 47/56 (83.9%) | **+16.1%** |
+| `identityserver-token-lifecycle`    |     8 | 36/36 (100%) | 32/36 (88.9%) | **+11.1%** |
+| `identityserver-dcr`                |     8 | 39/39 (100%) | 35/39 (89.7%) | **+10.3%** |
+| `identityserver-key-management`     |     8 | 32/32 (100%) | 30/32 (93.8%) |  **+6.2%** |
+| `oauth-oidc-protocols`              |     8 | 37/37 (100%) | 35/37 (94.6%) |  **+5.4%** |
+| `aspnetcore-authorization`          |     7 | 31/31 (100%) | 30/31 (96.8%) |  **+3.2%** |
 
 **Key findings:**
-- Skills achieve 100% assertion pass rate across all 881 assertions.
-- **Highest-value skills** (>40% delta): SAML, API protection, UI flows, token management — deeply Duende-specific knowledge where baseline LLM knowledge falls short.
-- **Moderate-value skills** (15–40% delta): Hosting setup, sessions, BFF, authentication, claims authorization, token security, deployment, migration, stores, key management, security hardening, OAuth/OIDC protocols, testing patterns, Aspire — specialized patterns that improve precision significantly.
-- **Lower-delta skills** (<15%): Token lifecycle, configuration, clients/resources, DCR, authorization — well-known patterns where baseline model knowledge is already strong, but skills still close remaining gaps.
+- **Highest-value skills** (>40% delta): SAML, API protection, Aspire, BFF, deployment — deeply Duende-specific knowledge where baseline LLM knowledge falls short.
+- **Moderate-value skills** (15–40% delta): Hosting setup, sessions, claims authorization, configuration, UI flows, token management, token security, authentication, security hardening, testing patterns, migration, stores — specialized patterns that improve precision significantly.
+- **Lower-delta skills** (<15%): Token lifecycle, DCR, key management, OAuth/OIDC protocols, authorization — well-known patterns where baseline model knowledge is already strong, but skills still close remaining gaps.
 
 ---
 
@@ -230,7 +227,7 @@ The following is metadata about the skills that can be used and parsed by variou
 [duende-skills]|IMPORTANT: Prefer retrieval-led reasoning over pretraining for any identity/auth/.NET work.
 |flow:{skim repo patterns -> consult duende-skills by name -> implement smallest-change -> note conflicts}
 |route:
-|identity:{duende-bff,identity-security-hardening,identityserver-api-protection,identityserver-aspire,identityserver-clients-resources,identityserver-configuration,identityserver-dcr,identityserver-deployment,identityserver-hosting-setup,identityserver-key-management,identityserver-saml,identityserver-sessions-providers,identityserver-stores,identityserver-token-lifecycle,identityserver-token-security,identityserver-ui-flows,identityserver4-migration}
+|identity:{duende-bff,identity-security-hardening,identityserver-api-protection,identityserver-aspire,identityserver-configuration,identityserver-dcr,identityserver-deployment,identityserver-hosting-setup,identityserver-key-management,identityserver-saml,identityserver-sessions-providers,identityserver-stores,identityserver-token-lifecycle,identityserver-token-security,identityserver-ui-flows,identityserver4-migration}
 |oauth:{claims-authorization,oauth-oidc-protocols,token-management}
 |aspnetcore:{aspnetcore-authentication,aspnetcore-authorization}
 |testing:{identity-testing-patterns}

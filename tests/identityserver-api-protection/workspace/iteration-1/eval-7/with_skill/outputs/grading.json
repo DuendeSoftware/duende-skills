@@ -2,10 +2,26 @@
   "eval_id": 7,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Mentions audience mismatch as a common cause — Audience in JwtBearerOptions must match the ApiResource name in IdentityServer", "pass": true, "rationale": "Section 1 explicitly describes audience mismatch and states 'The Audience in your JwtBearerOptions must exactly match the ApiResource name configured in IdentityServer'"},
-    {"assertion": "Mentions the importance of ValidTypes = ['at+jwt'] and warns about JWT confusion attacks without it", "pass": true, "rationale": "Section 2 covers ValidTypes with at+jwt, explicitly mentions 'JWT confusion attack vector' and explains the security risk"},
-    {"assertion": "Mentions scope claim format inconsistency — space-delimited vs array — as a cause of silent authorization failures", "pass": true, "rationale": "Section 3 explains both formats, warns about 'Silent authorization failures', and recommends IClaimsTransformation to normalize"},
-    {"assertion": "Mentions checking the middleware pipeline ordering (UseAuthentication before UseAuthorization)", "pass": true, "rationale": "Section 4 covers middleware ordering with correct and incorrect code examples"}
+    {
+      "assertion": "Mentions audience mismatch as a common cause \u2014 Audience in JwtBearerOptions must match the ApiResource name in IdentityServer",
+      "pass": true,
+      "rationale": "Response clearly explains audience mismatch with ApiResource name"
+    },
+    {
+      "assertion": "Mentions the importance of ValidTypes = ['at+jwt'] and warns about JWT confusion attacks without it",
+      "pass": true,
+      "rationale": "Response explains ValidTypes and JWT confusion attacks"
+    },
+    {
+      "assertion": "Mentions scope claim format inconsistency \u2014 space-delimited vs array \u2014 as a cause of silent authorization failures",
+      "pass": true,
+      "rationale": "Response explains space-delimited scope format causing silent failures"
+    },
+    {
+      "assertion": "Mentions checking the middleware pipeline ordering (UseAuthentication before UseAuthorization)",
+      "pass": true,
+      "rationale": "Response explicitly covers middleware ordering with code examples"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

@@ -473,6 +473,26 @@ for skill_name in "${skill_list[@]}"; do
     eval_assertions=$(jq ".evals[$idx].assertions" "$evals_file")
     eval_assertions_count=$(echo "$eval_assertions" | jq 'length')
 
+    # Build skill content for this eval: SKILL.md + any sub-documents
+    eval_skill_content="$local_skill_content"
+    sub_docs=$(jq -r ".evals[$idx].sub_documents // [] | .[]" "$evals_file" 2>/dev/null || true)
+    if [ -n "$sub_docs" ]; then
+      while IFS= read -r sub_doc; do
+        sub_doc_path="$SKILLS_DIR/$skill_name/docs/$sub_doc"
+        if [ -f "$sub_doc_path" ]; then
+          sub_doc_content=$(cat "$sub_doc_path")
+          eval_skill_content="$eval_skill_content
+
+--- Sub-document: $sub_doc ---
+
+$sub_doc_content"
+          log_verbose "eval-$eval_id: loaded sub-document $sub_doc"
+        else
+          log_verbose "WARNING: sub-document not found: $sub_doc_path"
+        fi
+      done <<< "$sub_docs"
+    fi
+
     # Build user message with reference files
     user_message="$eval_prompt"
     file_count=$(jq -r ".evals[$idx].files | length" "$evals_file")
@@ -515,7 +535,7 @@ $file_content
         log_verbose "eval-$eval_id with_skill: generating response..."
         system_prompt="You are an expert .NET and identity/security developer. Use the following skill reference to inform your response.
 
-$local_skill_content"
+$eval_skill_content"
 
         throttle
         if ws_response=$(call_llm "$system_prompt" "$user_message" "$MODEL" "$MAX_TOKENS"); then

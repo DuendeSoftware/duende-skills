@@ -1,60 +1,32 @@
-# External Identity Provider: Azure AD with IdentityServer
+# Adding Azure AD as an External Identity Provider
 
-Here's a complete implementation for adding Azure AD as an external identity provider.
-
-## Program.cs — Register the External Provider
+## 1. Register Azure AD in Program.cs
 
 ```csharp
 using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorPages();
-
-builder.Services.AddIdentityServer(options =>
-    {
-        // existing configuration...
-    })
-    // ... existing client/resource configuration ...
-    .AddTestUsers(new List<Duende.IdentityServer.Test.TestUser>());
-
-// Register Azure AD as an external identity provider
+// Program.cs
 builder.Services.AddAuthentication()
     .AddOpenIdConnect("AAD", "Corporate Login", options =>
     {
         options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         options.Authority = "https://login.microsoftonline.com/{tenant-id}/v2.0";
-        options.ClientId = builder.Configuration["AzureAd:ClientId"];
-        options.ClientSecret = builder.Configuration["AzureAd:ClientSecret"];
+        options.ClientId = "your-aad-client-id";
+        options.ClientSecret = "your-aad-client-secret";
         options.ResponseType = "code";
+        options.CallbackPath = "/signin-aad";
         options.Scope.Add("openid");
         options.Scope.Add("profile");
         options.Scope.Add("email");
-        options.CallbackPath = "/signin-aad";
     });
-
-var app = builder.Build();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.UseIdentityServer();
-app.UseAuthorization();
-app.MapRazorPages();
-
-app.Run();
 ```
 
-## Pages/ExternalLogin.cshtml.cs — Trigger External Authentication
+The `SignInScheme` is set to `IdentityServerConstants.ExternalCookieAuthenticationScheme`. This tells the OIDC handler to store the external identity in a temporary cookie managed by IdentityServer, rather than the main application cookie.
+
+## 2. Trigger External Login
 
 ```csharp
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
 public class ExternalLoginModel : PageModel
 {
     public IActionResult OnGet(string provider, string returnUrl)
@@ -71,23 +43,16 @@ public class ExternalLoginModel : PageModel
             }
         };
 
-        // Issue a Challenge to the AAD provider, storing returnUrl in AuthenticationProperties.Items
-        return Challenge(props, provider);
+        return Challenge(props, provider);  // Challenge with "AAD"
     }
 }
 ```
 
-## Pages/ExternalLoginCallback.cshtml.cs — Handle the Callback
+The `returnUrl` is stored in `AuthenticationProperties.Items` so it survives the external authentication round-trip. The `Challenge` call redirects the user to Azure AD.
+
+## 3. Handle the Callback
 
 ```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace IdentityServer.Pages;
-
 public class ExternalLoginCallbackModel : PageModel
 {
     private readonly IIdentityServerInteractionService _interaction;
@@ -105,7 +70,7 @@ public class ExternalLoginCallbackModel : PageModel
 
         if (result?.Succeeded != true)
         {
-            throw new Exception("External authentication error");
+            throw new Exception("External authentication failed");
         }
 
         var externalUser = result.Principal;
@@ -114,47 +79,31 @@ public class ExternalLoginCallbackModel : PageModel
         var scheme = result.Properties.Items["scheme"];
         var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
 
-        // 2. Find or provision a local user based on the external identity
-        var localUser = FindOrProvisionUser(scheme, externalId, externalUser);
+        // 2. Find or provision local user
+        var localUser = FindOrProvisionUser(scheme, externalId, externalUser.Claims);
 
-        // 3. Establish the IdentityServer session with the external IdP recorded
+        // 3. Establish the IdentityServer session with external IdP recorded
         var isUser = new IdentityServerUser(localUser.SubjectId)
         {
             DisplayName = localUser.DisplayName,
-            IdentityProvider = scheme  // Record the external IdP in the session
+            IdentityProvider = scheme  // Records which external IdP was used
         };
+
         await HttpContext.SignInAsync(isUser);
 
         // 4. Clean up the external cookie
-        await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+        await HttpContext.SignOutAsync(
+            IdentityServerConstants.ExternalCookieAuthenticationScheme);
 
-        // 5. Redirect back to the authorization endpoint
+        // 5. Redirect back to IdentityServer protocol processing
         return Redirect(returnUrl);
     }
-
-    private LocalUser FindOrProvisionUser(string scheme, string externalId, System.Security.Claims.ClaimsPrincipal externalUser)
-    {
-        // Look up by external provider + external ID
-        // If not found, create a new local user
-        return new LocalUser
-        {
-            SubjectId = Guid.NewGuid().ToString(),
-            DisplayName = externalUser.FindFirst("name")?.Value ?? "Unknown"
-        };
-    }
-}
-
-public class LocalUser
-{
-    public string SubjectId { get; set; }
-    public string DisplayName { get; set; }
 }
 ```
 
-### Key Points
+## Key Points
 
-1. **SignInScheme**: The OpenIdConnect handler's `SignInScheme` is set to `IdentityServerConstants.ExternalCookieAuthenticationScheme` — this stores the external identity in a temporary cookie.
-2. **Challenge**: The external login trigger calls `Challenge` with `"AAD"` and stores `returnUrl` in `AuthenticationProperties.Items`.
-3. **Callback reads external cookie**: The callback calls `HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme)` to read the external identity.
-4. **IdentityProvider recorded**: The `IdentityServerUser` has `IdentityProvider = scheme` set to record which external IdP was used.
-5. **Cookie cleanup**: `HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme)` cleans up the temporary external cookie.
+- **SignInScheme**: `IdentityServerConstants.ExternalCookieAuthenticationScheme` is used as the temporary cookie scheme for external authentication. This separates the external identity from the main IdentityServer session.
+- **IdentityProvider**: Setting `IdentityProvider = scheme` on the `IdentityServerUser` records which external IdP authenticated the user. This is stored in the `idp` claim of the session.
+- **Cookie Cleanup**: Always call `SignOutAsync` on `ExternalCookieAuthenticationScheme` after processing to remove the temporary external cookie.
+- **returnUrl Preservation**: The `returnUrl` is stored in `AuthenticationProperties.Items` before the Challenge and retrieved from `result.Properties.Items` in the callback.

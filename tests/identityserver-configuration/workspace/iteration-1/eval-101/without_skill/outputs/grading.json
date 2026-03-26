@@ -1,0 +1,29 @@
+{
+  "eval_id": 101,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client uses GrantTypes.ClientCredentials as the allowed grant type",
+      "pass": true,
+      "rationale": "Uses GrantTypes.ClientCredentials"
+    },
+    {
+      "assertion": "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "Both scopes present"
+    },
+    {
+      "assertion": "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "Both ApiScope entries defined"
+    },
+    {
+      "assertion": "Secret is loaded from Configuration or an external source - not a hardcoded string with Sha256()",
+      "pass": false,
+      "rationale": "Uses hardcoded string \"billing-secret-2024\".Sha256()"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

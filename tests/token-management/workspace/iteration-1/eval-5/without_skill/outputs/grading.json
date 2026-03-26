@@ -1,1 +1,25 @@
-{"eval_id":5,"variant":"without_skill","assertions":[{"assertion":"Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler","pass":true,"rationale":"Uses AddHttpClient(\"invoices\", ...).AddUserAccessTokenHandler() for the invoice API."},{"assertion":"Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler","pass":false,"rationale":"Uses AddHttpClient(\"masterdata\", ...).AddClientCredentialsTokenHandler(\"masterdata-client\") instead of AddClientAccessTokenHttpClient or AddClientAccessTokenHandler. AddClientCredentialsTokenHandler is for standalone client credentials, not the OIDC-integrated client access token pattern."},{"assertion":"Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management","pass":false,"rationale":"Calls AddAccessTokenManagement() which is not the correct v4 method. The correct call is AddOpenIdConnectAccessTokenManagement()."},{"assertion":"Output sets distinct named or typed clients for each API with the correct BaseAddress","pass":true,"rationale":"Two distinct named clients \"invoices\" and \"masterdata\" with correct BaseAddress values."}],"pass_count":2,"total_count":4,"score":0.5}
+{
+  "model": "claude-opus-4-20250514",
+  "eval_id": 5,
+  "mode": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler",
+      "passed": true
+    },
+    {
+      "assertion": "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler",
+      "passed": true
+    },
+    {
+      "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management",
+      "passed": true
+    },
+    {
+      "assertion": "Output sets distinct named or typed clients for each API with the correct BaseAddress",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

@@ -1,14 +1,12 @@
-# Fixing the context.Fail() Issue
+# Fixing the Authorization Handler
 
 ## The Problem
 
-The issue is with `context.Fail()`. When you call `context.Fail()`, it causes authorization to be denied for that request. Even if another handler would call `context.Succeed()`, the `Fail()` takes precedence and the request is denied.
+The issue is with `context.Fail()` in your `ScopeHandler`. When you call `context.Fail()`, it acts as a **hard veto** — it tells the ASP.NET Core authorization system that authorization must be denied, and no other handler can override this. Even if you have another handler registered for `ApiAccessRequirement` that calls `context.Succeed()`, the `Fail()` from your scope handler takes precedence and blocks access.
 
 ## The Fix
 
-Remove the `context.Fail()` call. When a handler doesn't meet the condition, simply don't call `context.Succeed()` — this allows other handlers to still evaluate the requirement.
-
-### Fixed Code:
+Remove the `context.Fail()` call. Instead, only call `context.Succeed(requirement)` when the scope is present:
 
 ```csharp
 public class ScopeHandler : AuthorizationHandler<ApiAccessRequirement>
@@ -17,19 +15,23 @@ public class ScopeHandler : AuthorizationHandler<ApiAccessRequirement>
         AuthorizationHandlerContext context, ApiAccessRequirement requirement)
     {
         if (context.User.HasClaim("scope", "api.read"))
+        {
             context.Succeed(requirement);
-        
-        // Don't call Fail() — just don't call Succeed()
-        // This means "no opinion" and other handlers can still satisfy the requirement
+        }
+
         return Task.CompletedTask;
     }
 }
 ```
 
-## Explanation
+When your handler doesn't call `context.Succeed()`, it essentially has "no opinion" on the requirement. This allows other handlers to still evaluate and potentially satisfy the requirement. The authorization system will only deny access if no handler calls `Succeed()`.
 
-- `context.Succeed(requirement)` — marks the requirement as satisfied
-- `context.Fail()` — vetoes authorization, blocking all other handlers
-- Not calling either — means "I have no opinion", other handlers can still try
+## How Authorization Evaluation Works
 
-In most cases, you should avoid calling `context.Fail()` unless you specifically want to deny access regardless of other handlers.
+ASP.NET Core evaluates all handlers for a given requirement:
+
+- If any handler calls `Fail()`, the requirement is denied (hard veto)
+- If at least one handler calls `Succeed()` and none call `Fail()`, the requirement passes
+- If no handler calls `Succeed()` or `Fail()`, the requirement is denied
+
+So the pattern is: call `Succeed()` when your condition is met, and simply return without calling anything when it's not. Only use `Fail()` when you need to explicitly deny access regardless of other handlers.

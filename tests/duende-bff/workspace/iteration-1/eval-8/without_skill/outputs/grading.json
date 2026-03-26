@@ -2,13 +2,33 @@
   "eval_id": 8,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment", "pass": true, "rationale": "Shows builder.Services.AddUserAccessTokenHttpClient(\"remoteService\", configureClient: client => { client.BaseAddress = ... })"},
-    {"assertion": "Shows GetUserAccessTokenAsync for the manual pattern", "pass": true, "rationale": "Shows var token = await ctx.GetUserAccessTokenAsync() in the manual pattern"},
-    {"assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection", "pass": false, "rationale": "Neither endpoint uses .AsBffApiEndpoint(). Both only use .RequireAuthorization() without BFF CSRF protection."},
-    {"assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)", "pass": true, "rationale": "Neither endpoint returns the raw token to the browser. Both return Results.Text from the remote service response."},
-    {"assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement", "pass": true, "rationale": "States 'Duende.AccessTokenManagement, which automatically handles token refresh when the access token is expired'"}
+    {
+      "assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+      "pass": false,
+      "rationale": "Uses generic AddHttpClient, not AddUserAccessTokenHttpClient \u2014 no automatic token management"
+    },
+    {
+      "assertion": "Shows GetUserAccessTokenAsync for the manual pattern",
+      "pass": false,
+      "rationale": "Uses GetTokenAsync(\"access_token\") instead of GetUserAccessTokenAsync \u2014 misses the BFF/ATM integration that handles automatic refresh"
+    },
+    {
+      "assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+      "pass": false,
+      "rationale": ".AsBffApiEndpoint() is not used on either endpoint \u2014 missing CSRF protection"
+    },
+    {
+      "assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)",
+      "pass": true,
+      "rationale": "Returns the remote response, not the token"
+    },
+    {
+      "assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement",
+      "pass": false,
+      "rationale": "No mention of automatic token refresh or AccessTokenManagement"
+    }
   ],
-  "pass_count": 4,
+  "pass_count": 1,
   "total_count": 5,
-  "score": 0.8
+  "score": 0.2
 }

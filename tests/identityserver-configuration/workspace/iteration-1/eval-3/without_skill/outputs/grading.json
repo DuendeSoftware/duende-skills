@@ -4,26 +4,26 @@
   "assertions": [
     {
       "assertion": "Output defines ApiScope entries for at least 'read' and 'write'",
-      "pass": true,
-      "rationale": "Response defines ApiScope(\"read\", ...) and ApiScope(\"write\", ...) in the AddInMemoryApiScopes call."
+      "pass": false,
+      "rationale": "Defines 'catalog.read', 'catalog.write', 'orders.read' instead of generic 'read' and 'write' as asked"
     },
     {
       "assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes collection",
-      "pass": true,
-      "rationale": "Response defines ApiResource(\"catalog-api\", ...) with Scopes = { \"read\", \"write\" }."
+      "pass": false,
+      "rationale": "Does not define any ApiResource objects at all"
     },
     {
       "assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' in its Scopes collection but not 'write'",
-      "pass": true,
-      "rationale": "Response defines ApiResource(\"orders-api\", ...) with Scopes = { \"read\" }."
+      "pass": false,
+      "rationale": "Does not define any ApiResource objects"
     },
     {
       "assertion": "Output calls AddInMemoryApiResources to register the API resources with IdentityServer",
-      "pass": true,
-      "rationale": "Response calls .AddInMemoryApiResources(new List<ApiResource>{...})."
+      "pass": false,
+      "rationale": "Does not call AddInMemoryApiResources at all, only uses AddInMemoryApiScopes"
     }
   ],
-  "pass_count": 4,
+  "pass_count": 0,
   "total_count": 4,
-  "score": 1.0
+  "score": 0.0
 }

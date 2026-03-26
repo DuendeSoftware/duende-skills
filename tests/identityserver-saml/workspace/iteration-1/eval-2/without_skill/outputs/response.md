@@ -1,76 +1,58 @@
-# Production SAML Service Provider Store
+# Moving SAML Service Providers to Production
 
-## Moving Beyond In-Memory
-
-For production use, you should not rely on `AddInMemorySamlServiceProviders` as it stores data only in memory and loses all configuration on restart. Instead, implement a database-backed store.
+Using in-memory configuration for SAML service providers works for development, but **you should use a persistent store for production**. This ensures your SP configurations survive restarts and can be managed dynamically.
 
 ## Implementing a Custom Store
 
-### 1. Create a DbContext
+You'll want to implement a store interface that IdentityServer uses to look up service providers. Here's an EF Core-backed implementation:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
 
-public class SamlDbContext : DbContext
+public class SamlServiceProviderDbStore
 {
-    public SamlDbContext(DbContextOptions<SamlDbContext> options) : base(options) { }
+    private readonly AppDbContext _db;
 
-    public DbSet<SamlServiceProviderEntity> ServiceProviders => Set<SamlServiceProviderEntity>();
-}
-
-public class SamlServiceProviderEntity
-{
-    public int Id { get; set; }
-    public string EntityId { get; set; } = default!;
-    public string DisplayName { get; set; } = default!;
-    public string AcsUrl { get; set; } = default!;
-    public bool RequireSigned { get; set; }
-}
-```
-
-### 2. Implement the Store Interface
-
-```csharp
-public class EfCoreSamlServiceProviderStore : ISamlServiceProviderStore
-{
-    private readonly SamlDbContext _context;
-
-    public EfCoreSamlServiceProviderStore(SamlDbContext context)
+    public SamlServiceProviderDbStore(AppDbContext db)
     {
-        _context = context;
+        _db = db;
     }
 
-    public async Task<SamlServiceProvider?> FindByEntityIdAsync(string entityId)
+    public async Task<SamlServiceProvider?> GetByEntityIdAsync(string entityId)
     {
-        var entity = await _context.ServiceProviders
-            .FirstOrDefaultAsync(x => x.EntityId == entityId);
-
-        if (entity == null) return null;
-
-        return new SamlServiceProvider
-        {
-            EntityId = entity.EntityId,
-            DisplayName = entity.DisplayName,
-            AssertionConsumerServiceUrl = entity.AcsUrl,
-        };
+        return await _db.SamlServiceProviders
+            .FirstOrDefaultAsync(sp => sp.EntityId == entityId);
     }
 }
 ```
 
-### 3. Register the Store
+## DbContext
 
 ```csharp
-builder.Services.AddDbContext<SamlDbContext>(options =>
-    options.UseSqlServer(connectionString));
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    public DbSet<SamlServiceProvider> SamlServiceProviders => Set<SamlServiceProvider>();
+}
+```
+
+## Registration
+
+Register your store in the DI container:
+
+```csharp
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<SamlServiceProviderDbStore>();
 
 builder.Services.AddIdentityServer()
-    .AddSaml()
-    .AddSamlServiceProviderStore<EfCoreSamlServiceProviderStore>();
+    .AddSaml();
 ```
 
-## Key Points
+## Tips
 
-- Use a real database for production deployments
-- The store interface lets you implement custom lookup logic
-- Consider adding caching for better performance
-- Use EF Core migrations to manage the schema
+- Index the `EntityId` column for fast lookups
+- Consider caching frequently accessed service providers
+- Use migrations to version your schema

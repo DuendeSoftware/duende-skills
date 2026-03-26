@@ -3,7 +3,7 @@
     "skill_name": "identityserver-ui-flows",
     "iteration": 1,
     "model": "claude-opus-4-20250514",
-    "date": "2026-03-23"
+    "date": "2026-03-26"
   },
   "summary": {
     "with_skill": {
@@ -14,18 +14,19 @@
     },
     "without_skill": {
       "total_assertions": 30,
-      "passed": 14,
-      "failed": 16,
-      "pass_rate": 46.7
+      "passed": 22,
+      "failed": 8,
+      "pass_rate": 73.3
     },
     "delta": {
-      "assertions_improved": 16,
-      "delta_pass_rate": 53.3
+      "assertions_improved": 8,
+      "delta_pass_rate": 26.7
     }
   },
   "evals": [
     {
       "eval_id": 1,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 4,
         "failed": 0,
@@ -45,6 +46,7 @@
     },
     {
       "eval_id": 2,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 5,
         "failed": 0,
@@ -67,6 +69,7 @@
     },
     {
       "eval_id": 3,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 4,
         "failed": 0,
@@ -74,18 +77,17 @@
         "pass_rate": 1.0
       },
       "without_skill": {
-        "passed": 3,
-        "failed": 1,
+        "passed": 4,
+        "failed": 0,
         "total": 4,
-        "pass_rate": 0.75
+        "pass_rate": 1.0
       },
-      "delta": 0.25,
-      "without_skill_failures": [
-        "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting"
-      ]
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 4,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 5,
         "failed": 0,
@@ -93,20 +95,17 @@
         "pass_rate": 1.0
       },
       "without_skill": {
-        "passed": 2,
-        "failed": 3,
+        "passed": 5,
+        "failed": 0,
         "total": 5,
-        "pass_rate": 0.4
+        "pass_rate": 1.0
       },
-      "delta": 0.6,
-      "without_skill_failures": [
-        "A logout page calls GetLogoutContextAsync(logoutId) to retrieve the logout context",
-        "The logout page uses context.SignOutIFrameUrl for front-channel logout iframe rendering",
-        "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'"
-      ]
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 5,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 4,
         "failed": 0,
@@ -127,6 +126,7 @@
     },
     {
       "eval_id": 6,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 4,
         "failed": 0,
@@ -134,19 +134,17 @@
         "pass_rate": 1.0
       },
       "without_skill": {
-        "passed": 2,
-        "failed": 2,
+        "passed": 4,
+        "failed": 0,
         "total": 4,
-        "pass_rate": 0.5
+        "pass_rate": 1.0
       },
-      "delta": 0.5,
-      "without_skill_failures": [
-        "The login page checks context.IdP from GetAuthorizationContextAsync and bypasses the login UI when an IdP hint is present",
-        "The spa.app client is configured with IdentityProviderRestrictions that includes 'Google' and excludes 'AAD'"
-      ]
+      "delta": 0.0,
+      "without_skill_failures": []
     },
     {
       "eval_id": 7,
+      "prompt_summary": null,
       "with_skill": {
         "passed": 4,
         "failed": 0,
@@ -154,16 +152,14 @@
         "pass_rate": 1.0
       },
       "without_skill": {
-        "passed": 1,
-        "failed": 3,
+        "passed": 3,
+        "failed": 1,
         "total": 4,
-        "pass_rate": 0.25
+        "pass_rate": 0.75
       },
-      "delta": 0.75,
+      "delta": 0.25,
       "without_skill_failures": [
-        "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage",
-        "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme",
-        "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback"
+        "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage"
       ]
     }
   ]

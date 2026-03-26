@@ -5,27 +5,27 @@
     {
       "assertion": "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.RotationInterval = TimeSpan.FromDays(60);'."
+      "rationale": "Correct setting present"
     },
     {
       "assertion": "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.PropagationTime = TimeSpan.FromDays(7);'."
+      "rationale": "Correct setting present"
     },
     {
       "assertion": "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21);'."
+      "rationale": "Correct setting present"
     },
     {
       "assertion": "Output sets options.KeyManagement.DataProtectKeys to true",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.DataProtectKeys = true;'."
+      "rationale": "Correct setting present"
     },
     {
       "assertion": "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'",
       "pass": true,
-      "rationale": "Response contains 'options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\";'."
+      "rationale": "Correct setting present"
     }
   ],
   "pass_count": 5,

@@ -1,40 +1,35 @@
 # Enabling IdentityServer Events and Sending to Seq
 
-## Step 1: Enable All Event Categories
-
-IdentityServer has four event categories that can be individually enabled. For comprehensive auditing, enable all of them:
+## 1. Enable All Event Categories
 
 ```csharp
-using Duende.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentityServer(options =>
 {
-    // Enable all event categories for auditing
+    // Enable all event categories for comprehensive auditing
     options.Events.RaiseSuccessEvents = true;
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseErrorEvents = true;
     options.Events.RaiseInformationEvents = true;
 })
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
+.AddInMemoryIdentityResources(Config.IdentityResources)
+.AddInMemoryApiScopes(Config.ApiScopes)
+.AddInMemoryClients(Config.Clients);
+
+// Register the custom event sink
+builder.Services.AddTransient<Duende.IdentityServer.Services.IEventSink, SeqEventSink>();
+
+var app = builder.Build();
+
+app.UseIdentityServer();
+
+app.MapGet("/", () => "IdentityServer is running");
+
+app.Run();
 ```
 
-## Step 2: Create a Custom IEventSink for Seq
-
-IdentityServer raises events through the `IEventSink` interface. Implement a custom sink that writes events to your Seq server using Serilog:
-
-### Add NuGet Packages
-
-```bash
-dotnet add package Serilog
-dotnet add package Serilog.Sinks.Seq
-```
-
-### Implement the Event Sink
+## 2. Implement the Custom IEventSink
 
 ```csharp
 using Duende.IdentityServer.Events;
@@ -51,8 +46,7 @@ public class SeqEventSink : IEventSink
     {
         _log = new LoggerConfiguration()
             .MinimumLevel.Information()
-            .WriteTo.Seq("http://localhost:5341")  // Your Seq server URL
-            .Enrich.WithProperty("Application", "IdentityServer")
+            .WriteTo.Seq("http://localhost:5341")
             .CreateLogger();
     }
 
@@ -75,63 +69,43 @@ public class SeqEventSink : IEventSink
 }
 ```
 
-## Step 3: Register the Event Sink
+## 3. Add NuGet Packages
 
-Register your custom event sink in the DI container so IdentityServer uses it:
-
-```csharp
-// After AddIdentityServer()
-builder.Services.AddTransient<IEventSink, SeqEventSink>();
+```bash
+dotnet add package Serilog
+dotnet add package Serilog.Sinks.Seq
 ```
 
-## Complete Program.cs
+## How It Works
 
-```csharp
-using Duende.IdentityServer;
-using Duende.IdentityServer.Services;
-using Microsoft.EntityFrameworkCore;
+### Event Categories
 
-var builder = WebApplication.CreateBuilder(args);
+IdentityServer supports four event categories:
 
-builder.Services.AddIdentityServer(options =>
-{
-    options.Events.RaiseSuccessEvents = true;
-    options.Events.RaiseFailureEvents = true;
-    options.Events.RaiseErrorEvents = true;
-    options.Events.RaiseInformationEvents = true;
-})
-    .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddInMemoryClients(Config.Clients);
+| Property | What It Covers |
+|----------|---------------|
+| `RaiseSuccessEvents` | Successful authentication, token issuance, consent granted |
+| `RaiseFailureEvents` | Failed authentication, invalid tokens, denied consent |
+| `RaiseErrorEvents` | Unhandled exceptions, internal errors |
+| `RaiseInformationEvents` | General operations, grants revoked |
 
-// Register custom event sink for Seq
-builder.Services.AddTransient<IEventSink, SeqEventSink>();
+By default, all are `false`. Enabling all four gives you comprehensive audit coverage.
 
-var app = builder.Build();
+### IEventSink
 
-app.UseIdentityServer();
+The `IEventSink` interface has a single method: `PersistAsync(Event evt)`. IdentityServer calls this for every raised event. The `Event` object contains:
 
-app.MapGet("/", () => "IdentityServer is running");
+- `Name` — event name (e.g., "Token Issued Success")
+- `Id` — numeric event ID
+- `EventType` — Success, Failure, Error, or Information
+- `Category` — event category
+- `ActivityId` — correlation ID for tracing
+- Event-specific properties (client ID, scopes, etc.)
 
-app.Run();
-```
+### DI Registration
 
-## What Events You'll See in Seq
+Register the event sink as `IEventSink` in DI. IdentityServer resolves it automatically. You can register multiple sinks if needed — IdentityServer will call all of them.
 
-With all event categories enabled, you'll receive structured events including:
+### Seq Integration
 
-- **Success events**: `TokenIssuedSuccessEvent`, `UserLoginSuccessEvent`, `ConsentGrantedEvent`
-- **Failure events**: `UserLoginFailureEvent`, `ClientAuthenticationFailureEvent`, `TokenIssuedFailureEvent`
-- **Error events**: `UnhandledExceptionEvent`, various internal error events
-- **Information events**: `TokenRevokedSuccessEvent`, `DeviceAuthorizationSuccessEvent`
-
-Each event contains structured data with the event name, ID, timestamp, category, and event-specific details — making them easy to query and filter in Seq.
-
-## Seq Query Examples
-
-In Seq, you can filter events:
-
-```
-Application = "IdentityServer" and Name = "User Login Failure"
-Application = "IdentityServer" and EventType = "Error"
-```
+The `{@details}` destructuring operator in Serilog sends the full event object as structured data to Seq, making all properties searchable. The `WriteTo.Seq()` sink sends events over HTTP to the Seq ingestion endpoint.

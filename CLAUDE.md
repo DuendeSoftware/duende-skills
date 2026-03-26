@@ -75,6 +75,85 @@ color: purple  # optional
 5. Run `./scripts/generate-skill-index-snippets.sh --update-readme` to regenerate the compressed index
 6. Commit all changes together (SKILL.md, evals, plugin.json, and README.md)
 
+## Sub-Documents
+
+Large skills (approaching or exceeding 40 KB) should extract advanced or specialized content into **sub-documents** in a `docs/` subdirectory. The main `SKILL.md` stays focused on core patterns while sub-documents provide deep-dives that agents load on demand.
+
+### Directory Structure
+
+```
+skills/<skill-name>/
+├── SKILL.md              ← Core patterns, pitfalls, and cross-references (~400–600 lines)
+└── docs/
+    ├── topic1.md         ← Extracted deep-dive content (no frontmatter needed)
+    └── topic2.md
+```
+
+### SKILL.md Reference Table
+
+Add a `## Sub-Documents` section to `SKILL.md` (after the main patterns, before Common Pitfalls) with a reference table:
+
+```markdown
+## Sub-Documents
+
+Load these sub-documents when the user's question specifically targets one of these areas:
+
+| Document | Description | When to Load |
+|----------|-------------|--------------|
+| [docs/topic1.md](docs/topic1.md) | Brief description | Keywords that trigger this topic |
+| [docs/topic2.md](docs/topic2.md) | Brief description | Keywords that trigger this topic |
+```
+
+Keep a **one-paragraph summary** of each extracted topic in SKILL.md so agents know the topic exists. The summary should include enough context to know when to load the sub-document.
+
+### Sub-Document Format
+
+Sub-documents use the same markdown format as SKILL.md patterns but **without frontmatter**:
+
+```markdown
+## Topic Name
+
+Brief context paragraph referencing the parent skill (e.g., "These patterns extend `token-management` Pattern 1").
+
+### Sub-heading
+
+...code examples, patterns, pitfalls specific to this topic...
+```
+
+### Adding Evals for Sub-Documents
+
+When an eval exercises content that lives in a sub-document, tag it with a `sub_documents` field in `evals.json`:
+
+```json
+{
+  "id": 4,
+  "prompt": "User question about the specialized topic...",
+  "sub_documents": ["topic1.md"],
+  "assertions": [...]
+}
+```
+
+The eval runner will load both `SKILL.md` and the specified sub-documents as the system prompt for the `with_skill` variant.
+
+**Routing evals** test that the core SKILL.md (without sub-documents) still answers basic questions correctly. Do not add `sub_documents` to routing evals:
+
+```json
+{
+  "id": 12,
+  "prompt": "Basic question that should be answered by core SKILL.md alone...",
+  "assertions": [
+    "Response covers the core topic correctly",
+    "Response does NOT need to reference the specialized sub-document topic"
+  ]
+}
+```
+
+Add at least one routing eval when adding sub-documents to a skill.
+
+### Migrating Evals from Consolidated Skills
+
+When consolidating two overlapping skills into one, migrate evals from the removed skill into the target skill's `evals.json`. To avoid ID collisions, offset migrated eval IDs by 100 (e.g., original ID `1` → `101`, `2` → `102`). Update the `skill_name` field and add `sub_documents` fields pointing to the sub-document that contains the merged content.
+
 ### Adding Skills to Index Categories
 
 When adding a skill with a **new prefix pattern**, update `scripts/generate-skill-index-snippets.sh` to handle the new pattern in its `case` statement. Otherwise the skill will be silently ignored when generating the index.
