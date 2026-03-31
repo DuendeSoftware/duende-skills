@@ -2,9 +2,11 @@
 
 A set of agent skills and specialized agents for Duende IdentityServer, Backend-for-Frontend (BFF), and identity/access management development. Covers OAuth 2.0, OpenID Connect, Duende, token management, ASP.NET Core authentication and authorization, and related skills needed to build production-grade identity infrastructure.
 
-> **Tip: 📦 Use with [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)**
+> ## Your Feedback 🗣️
 >
-> Duende Skills focus on **identity and security**. For general .NET development skills (C# coding standards, EF Core, Aspire configuration, dependency injection, concurrency patterns, database performance, and more), install **[dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills)** as well. The skills in each repo are complementary and additive. No overlapping skills, with full coverage when used together.
+> We would love to hear your feedback about these skills! What's working? What's not? What's missing?
+>
+> For questions, feedback, or community discussions, visit the [Duende Community](https://duende.link/community).
 
 ## Installation
 
@@ -175,7 +177,7 @@ Run evals for all skills using GitHub Models (via `gh` CLI):
 
 ---
 
-## Support & Feedback
+## Support
 
 For questions, feedback, or community discussions, visit the [Duende Community](https://duende.link/community).
 
