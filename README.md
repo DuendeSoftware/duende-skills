@@ -64,9 +64,12 @@ git clone https://github.com/DuendeSoftware/duende-skills.git /tmp/duende-skills
 # Global installation (directory names must match frontmatter 'name' field)
 mkdir -p ~/.config/opencode/skills ~/.config/opencode/agents
 for skill_file in /tmp/duende-skills/skills/*/SKILL.md; do
+  skill_dir=$(dirname "$skill_file")
   skill_name=$(grep -m1 "^name:" "$skill_file" | sed 's/name: *//')
   mkdir -p ~/.config/opencode/skills/$skill_name
   cp "$skill_file" ~/.config/opencode/skills/$skill_name/SKILL.md
+  # Copy bundled resources (docs/, references/, etc.) if present
+  find "$skill_dir" -mindepth 1 -maxdepth 1 -type d -exec cp -r {} ~/.config/opencode/skills/$skill_name/ \;
 done
 cp /tmp/duende-skills/agents/*.md ~/.config/opencode/agents/
 ```
