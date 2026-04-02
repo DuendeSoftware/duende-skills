@@ -218,6 +218,7 @@ Skills are designed to reduce implementation errors, but they operate within the
 to the LLM's limitations. Skill outputs (including generated code, configuration, and recommendations) should be treated
 as developer assistance, not as production-ready artifacts. Test all skill outputs thoroughly in your own environment
 before deploying to staging or production.
+
 ---
 
 ## Skills Index
