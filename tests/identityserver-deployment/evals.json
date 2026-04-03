@@ -29,7 +29,8 @@
         "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
         "Output includes .SetApplicationName() with a consistent explicit name across all instances",
         "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
-        "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance"
+        "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+        "Output references the general data protection documentation or mentions this is a cross-cutting concern for all Duende SDKs"
       ]
     },
     {
