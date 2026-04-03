@@ -119,6 +119,10 @@ app.MapBffManagementEndpoints(); // ✅ Required in v3
 | Auth handler setup    | `ConfigureOpenIdConnect()` / `ConfigureCookies()` | Manual `AddCookie()` / `AddOpenIdConnect()` |
 | Management endpoints  | Auto-registered                                   | `MapBffManagementEndpoints()` required      |
 | Remote API token type | `.WithAccessToken(RequiredTokenType.User)`        | `.RequireAccessToken(TokenType.User)`       |
+| Session cleanup       | `.AddSessionCleanupBackgroundProcess()`           | `EnableSessionCleanup` option               |
+| Token retriever       | `IAccessTokenRetriever` (implement directly)      | `DefaultAccessTokenRetriever` (inheritable) |
+| Multi-frontend        | Built-in `AddFrontend()` API                      | Not supported                               |
+| Middleware control     | `AutomaticallyRegisterBffMiddleware` option       | Always automatic                            |
 
 ---
 
@@ -217,6 +221,30 @@ app.MapPost("/api/webhook", (WebhookPayload payload) => Results.Ok())
     .SkipAntiforgery();
 ```
 
+### Skipping Response Handling (V4)
+
+By default, BFF converts 401/403 responses from local API endpoints into JSON-friendly responses (no redirect). Use `.SkipResponseHandling()` to bypass this and trigger normal ASP.NET Core authentication redirects:
+
+```csharp
+// ✅ Skip BFF's automatic 401/403 conversion — triggers actual OIDC redirect on challenge
+app.MapGet("/api/interactive", () => Results.Ok("data"))
+    .RequireAuthorization()
+    .AsBffApiEndpoint()
+    .SkipResponseHandling();
+```
+
+### Conditional Anti-Forgery (V4)
+
+In v4, `DisableAntiForgeryCheck` is a delegate that allows conditionally skipping anti-forgery per-request:
+
+```csharp
+builder.Services.AddBff(options =>
+{
+    options.DisableAntiForgeryCheck = context =>
+        context.Request.Path.StartsWithSegments("/api/webhook");
+});
+```
+
 ---
 
 ## Pattern 4: Remote API Proxying
@@ -253,7 +281,43 @@ app.MapRemoteBffApiEndpoint("/api/internal", new Uri("https://internal-service/a
 | `User` | Forwards the current user's access token; challenges if unauthenticated |
 | `Client` | Forwards a client credentials token; works even without a logged-in user |
 | `UserOrClient` | Forwards user token if available, falls back to client token |
-| `UserOrNone` | Forwards user token if logged in, no token if anonymous (no challenge) |
+| `UserOrNone` | Forwards user token if logged in, no token if anonymous (no challenge). Replaces v3's `OptionalUserToken` |
+
+### Custom Access Token Retriever (V4)
+
+Implement `IAccessTokenRetriever` to customize per-route token retrieval. In v4, `DefaultAccessTokenRetriever` is internal — implement the interface directly:
+
+```csharp
+// ✅ Custom token retriever: select token based on route or request context
+public class MyTokenRetriever : IAccessTokenRetriever
+{
+    public Task<AccessTokenResult> GetAccessToken(GetAccessTokenContext context)
+    {
+        // Custom logic — e.g., choose token based on route or header
+        return Task.FromResult<AccessTokenResult>(
+            new BearerTokenResult(context.UserToken, "Bearer"));
+    }
+}
+
+// Register per-endpoint
+app.MapRemoteBffApiEndpoint("/api/custom", new Uri("https://api.example.com"))
+    .WithAccessToken(RequiredTokenType.User)
+    .WithAccessTokenRetriever<MyTokenRetriever>();
+```
+
+### ForwarderRequestConfig (V4)
+
+Configure per-endpoint activity timeout and response buffering for remote API proxying:
+
+```csharp
+app.MapRemoteBffApiEndpoint("/api/long-running", new Uri("https://api.example.com"))
+    .WithAccessToken(RequiredTokenType.User)
+    .WithForwarderRequestConfig(new ForwarderRequestConfig
+    {
+        ActivityTimeout = TimeSpan.FromMinutes(5),
+        AllowResponseBuffering = true
+    });
+```
 
 ```csharp
 // ✅ Restrict access in addition to token requirements
@@ -522,7 +586,7 @@ app.UseCors("SpaPolicy");
 
 ### Data Protection in Clustered Deployments
 
-When running multiple BFF instances, cookies and anti-forgery tokens must be decryptable by all nodes. Configure a shared Data Protection key store.
+When running multiple BFF instances, cookies and anti-forgery tokens must be decryptable by all nodes. Configure a shared Data Protection key store. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive configuration guidance — BFF depends on Data Protection equally to IdentityServer.
 
 ```csharp
 // ✅ Shared key ring (e.g., Azure Blob Storage + Key Vault)
@@ -654,7 +718,90 @@ Note: YARP routes use `TokenType` (not `RequiredTokenType` which is used by `Map
 
 ---
 
-## Pattern 10: Blazor Integration
+## Pattern 10: Multi-Frontend (V4)
+
+BFF v4 supports serving multiple frontends from a single BFF host. Each frontend gets its own OIDC, cookie, and API configuration. The default single-frontend behavior is an implicit multi-frontend setup with one frontend.
+
+### AutomaticallyRegisterBffMiddleware
+
+By default, BFF middleware is auto-registered. In multi-frontend scenarios, disable this for manual control:
+
+```csharp
+builder.Services.AddBff(options =>
+{
+    options.AutomaticallyRegisterBffMiddleware = false;
+});
+
+var app = builder.Build();
+
+app.UseRouting();
+app.UseAuthentication();
+
+// ✅ Register BFF middleware components individually for multi-frontend control
+app.UseBffPreProcessing();
+app.UseBffFrontendSelection();
+app.UseBffPathMapping();
+app.UseBffOpenIdCallbacks();
+app.UseBffStaticFileProxying();
+
+app.UseAuthorization();
+```
+
+### Frontend Configuration (Code)
+
+```csharp
+builder.Services.AddBff()
+    .AddFrontend("admin", frontend =>
+    {
+        frontend.MatchingPath = "/admin";
+        frontend.CdnIndexHtmlUrl = new Uri("https://cdn.example.com/admin/index.html");
+
+        frontend.ConfigureOpenIdConnect(options =>
+        {
+            options.Authority = "https://idp.example.com";
+            options.ClientId = "admin-client";
+            options.ClientSecret = "secret";
+        });
+
+        frontend.AddRemoteApi("api", remote =>
+        {
+            remote.PathMatch = "/api/admin";
+            remote.TargetUri = new Uri("https://admin-api.example.com");
+            remote.RequiredTokenType = RequiredTokenType.User;
+        });
+    });
+```
+
+### IIndexHtmlTransformer
+
+Implement `IIndexHtmlTransformer` to inject frontend-specific configuration into the `index.html` before serving:
+
+```csharp
+public class FrontendConfigTransformer : IIndexHtmlTransformer
+{
+    public Task<string> TransformAsync(string indexHtml, HttpContext context)
+    {
+        // Inject runtime configuration into the SPA's index.html
+        var config = $"<script>window.__CONFIG__ = {{ api: '/api' }};</script>";
+        return Task.FromResult(indexHtml.Replace("</head>", $"{config}</head>"));
+    }
+}
+```
+
+### IndexHtmlDefaultCacheDuration
+
+Control CDN index.html cache duration (default 5 minutes):
+
+```csharp
+builder.Services.AddBff(options =>
+{
+    options.IndexHtmlDefaultCacheDuration = TimeSpan.FromMinutes(10);
+});
+```
+
+---
+
+## Pattern 11: Blazor Integration
 
 ### Blazor Server
 
@@ -727,15 +874,71 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 
 ## BffOptions Reference
 
-| Option                             | Default     | Purpose                                         |
-| ---------------------------------- | ----------- | ----------------------------------------------- |
-| `AntiForgeryHeaderName`            | `"X-CSRF"`  | Name of the anti-forgery header                 |
-| `AntiForgeryHeaderValue`           | `"1"`       | Expected value of the anti-forgery header       |
-| `ManagementBasePath`               | `"/bff"`    | Base path for management endpoints              |
-| `RevokeRefreshTokenOnLogout`       | `true`      | Revoke refresh tokens on logout                 |
-| `AnonymousSessionResponse`         | (null)      | Response for `/bff/user` when anonymous         |
-| `BackchannelLogoutAllUserSessions` | `false`     | Logout all sessions on backchannel notification |
-| `SessionCleanupInterval`           | 10 minutes  | Interval for expired session cleanup            |
+| Option                              | Default     | Purpose                                              |
+| ----------------------------------- | ----------- | ---------------------------------------------------- |
+| `AntiForgeryHeaderName`             | `"X-CSRF"`  | Name of the anti-forgery header                      |
+| `AntiForgeryHeaderValue`            | `"1"`       | Expected value of the anti-forgery header            |
+| `ManagementBasePath`                | `"/bff"`    | Base path for management endpoints                   |
+| `RevokeRefreshTokenOnLogout`        | `true`      | Revoke refresh tokens on logout                      |
+| `AnonymousSessionResponse`          | (null)      | Response for `/bff/user` when anonymous              |
+| `BackchannelLogoutAllUserSessions`  | `false`     | Logout all sessions on backchannel notification      |
+| `SessionCleanupInterval`            | 10 minutes  | Interval for expired session cleanup                 |
+| `AutomaticallyRegisterBffMiddleware`| `true`      | V4: Auto-register BFF middleware; set `false` for multi-frontend manual control |
+| `DisableAntiForgeryCheck`           | (null)      | V4: Delegate to conditionally skip anti-forgery per-request |
+| `IndexHtmlDefaultCacheDuration`     | 5 minutes   | V4: CDN index.html cache duration                    |
+| `Diagnostics.LogFrequency`          | (default)   | V4: How often BFF logs diagnostic information        |
+| `Diagnostics.ChunkSize`             | (default)   | V4: Size of diagnostic log chunks                    |
+
+> **V4 Breaking Change:** `EnableSessionCleanup` has been removed. Use `.AddSessionCleanupBackgroundProcess()` on the BFF builder instead.
+
+---
+
+## Extensibility: Logout Endpoint (V4)
+
+Customize the logout endpoint by implementing `ILogoutEndpoint`:
+
+```csharp
+public class CustomLogoutEndpoint : ILogoutEndpoint
+{
+    private readonly ILogoutEndpoint _inner;
+
+    public CustomLogoutEndpoint(ILogoutEndpoint inner) => _inner = inner;
+
+    public async Task<IResult> ProcessRequestAsync(HttpContext context)
+    {
+        // Pre-processing: audit log, cleanup, etc.
+        var result = await _inner.ProcessRequestAsync(context);
+        // Post-processing
+        return result;
+    }
+}
+```
+
+Validate return URLs with `IReturnUrlValidator` to prevent open redirector attacks.
+
+---
+
+## Extensibility: Session Store (V4)
+
+V4 uses `UserSessionKey` and `PartitionKey` types instead of raw strings. The `IUserSessionStore` interface:
+
+```csharp
+public interface IUserSessionStore
+{
+    Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CancellationToken ct);
+    Task CreateUserSessionAsync(UserSession session, CancellationToken ct);
+    Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CancellationToken ct);
+    Task DeleteUserSessionAsync(UserSessionKey key, CancellationToken ct);
+    Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(
+        PartitionKey partitionKey, UserSessionsFilter filter, CancellationToken ct);
+    Task DeleteUserSessionsAsync(
+        PartitionKey partitionKey, UserSessionsFilter filter, CancellationToken ct);
+}
+```
+
+Register a custom store: `.AddServerSideSessions<YourCustomStore>()`
+
+Session cleanup is a separate concern — implement `IUserSessionStoreCleanup` and register with `.AddSessionCleanupBackgroundProcess()`.
 
 ---
 
@@ -773,9 +976,14 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 - [Getting Started: Single Frontend](https://docs.duendesoftware.com/bff/getting-started/single-frontend/)
 - [Embedded (Local) APIs](https://docs.duendesoftware.com/bff/fundamentals/apis/local/)
 - [Proxying Remote APIs](https://docs.duendesoftware.com/bff/fundamentals/apis/remote/)
+- [Multi-Frontend](https://docs.duendesoftware.com/bff/fundamentals/multi-frontend/)
 - [Server-Side Sessions](https://docs.duendesoftware.com/bff/fundamentals/session/server-side-sessions/)
 - [Token Management](https://docs.duendesoftware.com/bff/fundamentals/tokens/)
+- [Extensibility: Tokens](https://docs.duendesoftware.com/bff/extensibility/tokens/)
+- [Extensibility: HTTP Forwarder](https://docs.duendesoftware.com/bff/extensibility/http-forwarder/)
 - [Session Management Endpoints](https://docs.duendesoftware.com/bff/fundamentals/session/management/)
+- [BFF Options Reference](https://docs.duendesoftware.com/bff/fundamentals/options/)
+- [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/)
 - [BFF v3 → v4 Upgrade Guide](https://docs.duendesoftware.com/bff/upgrading/bff-v3-to-v4/)
 - [NuGet: Duende.BFF](https://www.nuget.org/packages/Duende.BFF)
 - [NuGet: Duende.BFF.Yarp](https://www.nuget.org/packages/Duende.BFF.Yarp)
