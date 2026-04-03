@@ -128,7 +128,7 @@
     {
       "id": 9,
       "prompt": "I have an existing V3 BFF setup that manually configures authentication with AddCookie and AddOpenIdConnect, and calls MapBffManagementEndpoints(). Migrate it to V4 conventions. Also update the remote API endpoint from .RequireAccessToken(TokenType.User) to the V4 syntax. Here is my current code:\n\n```csharp\nbuilder.Services.AddAuthentication(options =>\n{\n    options.DefaultScheme = \"cookie\";\n    options.DefaultChallengeScheme = \"oidc\";\n    options.DefaultSignOutScheme = \"oidc\";\n})\n.AddCookie(\"cookie\", options =>\n{\n    options.Cookie.Name = \"__Host-bff\";\n    options.Cookie.SameSite = SameSiteMode.Strict;\n})\n.AddOpenIdConnect(\"oidc\", options =>\n{\n    options.Authority = \"https://identity.example.com\";\n    options.ClientId = \"spa\";\n    options.ClientSecret = \"secret\";\n    options.ResponseType = \"code\";\n    options.Scope.Add(\"api1\");\n    options.SaveTokens = true;\n});\n\nbuilder.Services.AddBff();\n\nvar app = builder.Build();\napp.UseAuthentication();\napp.UseBff();\napp.UseAuthorization();\n\napp.MapBffManagementEndpoints();\napp.MapRemoteBffApiEndpoint(\"/api/data\", new Uri(\"https://api.example.com\"))\n    .RequireAccessToken(TokenType.User);\napp.Run();\n```",
-      "expected_output": "Migrated code uses AddBff().ConfigureOpenIdConnect().ConfigureCookies() instead of manual auth setup, removes MapBffManagementEndpoints(), and updates .RequireAccessToken(TokenType.User) to .WithAccessToken(RequiredTokenType.User).",
+      "expected_output": "Migrated code uses AddBff().ConfigureOpenIdConnect().ConfigureCookies() instead of manual auth setup, removes MapBffManagementEndpoints(), and updates .RequireAccessToken(TokenType.User) to .WithAccessToken(RequiredTokenType.User). Also registers .AddRemoteApis() and uses .AddSessionCleanupBackgroundProcess() instead of EnableSessionCleanup if session cleanup was configured.",
       "files": [],
       "assertions": [
         "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
@@ -169,6 +169,47 @@
         "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
         "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
         "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I need to set up a BFF v4 multi-frontend scenario. I have two SPAs: an 'admin' app at /admin served from a CDN at https://cdn.example.com/admin/index.html, and a 'portal' app at /portal served from https://cdn.example.com/portal/index.html. Each has its own OIDC client. The admin app proxies to https://admin-api.example.com and the portal to https://portal-api.example.com. Show me how to configure this.",
+      "expected_output": "Code using AddBff() with AddFrontend() for each frontend, each with MatchingPath, CdnIndexHtmlUrl, ConfigureOpenIdConnect, and AddRemoteApi. Optionally shows AutomaticallyRegisterBffMiddleware set to false for manual middleware control.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+        "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+        "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+        "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+        "Uses AddBff() as the base builder"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "I need a custom token retriever for my BFF v4 endpoint that selects a different token based on a custom header. In v3 I was inheriting from DefaultAccessTokenRetriever, but that doesn't work anymore. What changed and how do I implement this in v4?",
+      "expected_output": "Explanation that DefaultAccessTokenRetriever was made internal in v4 — must implement IAccessTokenRetriever directly. Show implementation of the interface with GetAccessToken method and registration via WithAccessTokenRetriever<T>() on the endpoint.",
+      "files": [],
+      "assertions": [
+        "Explains that DefaultAccessTokenRetriever is internal in v4 and cannot be inherited",
+        "Shows implementing IAccessTokenRetriever interface directly",
+        "Shows registration via WithAccessTokenRetriever<T>() on the remote API endpoint",
+        "Mentions AccessTokenResult and its implementations (BearerTokenResult, DPoPTokenResult, NoAccessTokenResult, or AccessTokenRetrievalError)"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "I have a local BFF API endpoint where I want to bypass BFF's automatic 401/403 response conversion and instead trigger a real OIDC redirect. How do I do this in BFF v4?",
+      "expected_output": "Use .SkipResponseHandling() extension method on the endpoint to bypass BFF's automatic response conversion, allowing normal ASP.NET Core authentication redirects to occur.",
+      "files": [],
+      "assertions": [
+        "Uses .SkipResponseHandling() on the endpoint",
+        "Explains that by default BFF converts 401/403 to JSON-friendly responses instead of redirects",
+        "Endpoint still uses .AsBffApiEndpoint() for CSRF protection",
+        "Endpoint uses .RequireAuthorization() to trigger the challenge"
       ]
     }
   ]
