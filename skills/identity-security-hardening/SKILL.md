@@ -177,7 +177,7 @@ builder.Services.AddIdentityServer(options =>
 
 ### Key Storage — ASP.NET Data Protection
 
-Automatic key management encrypts signing keys at rest using ASP.NET Data Protection. Configure Data Protection to use durable, shared storage:
+Automatic key management encrypts signing keys at rest using ASP.NET Data Protection. Configure Data Protection to use durable, shared storage. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for complete configuration guidance.
 
 ```csharp
 // ✅ Data Protection for load-balanced IdentityServer
