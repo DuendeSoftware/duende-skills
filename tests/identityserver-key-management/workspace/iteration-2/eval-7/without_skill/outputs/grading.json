@@ -1,0 +1,11 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    { "assertion": "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances", "pass": true, "rationale": "Explains the error is because 'data protection keys aren't shared between your server instances.'" },
+    { "assertion": "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)", "pass": true, "rationale": "Lines 20-21 call AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(\"/shared/dataprotection-keys\"))." },
+    { "assertion": "Program.cs includes SetApplicationName() to ensure a consistent application name across instances", "pass": true, "rationale": "Line 22 calls .SetApplicationName(\"MyIdentityServer\")." },
+    { "assertion": "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation", "pass": false, "rationale": "The response mentions 'consider pointing the signing key storage to a shared location or database' in prose but does not actually add AddOperationalStore or a shared key path in the code. The code still uses the default file-based signing key store." }
+  ],
+  "pass_count": 3, "total_count": 4, "score": 0.75
+}

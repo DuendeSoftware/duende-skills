@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
+      "pass": true,
+      "rationale": "Response uses AddBff().ConfigureOpenIdConnect().ConfigureCookies()."
+    },
+    {
+      "assertion": "Output does NOT contain 'MapBffManagementEndpoints'",
+      "pass": false,
+      "rationale": "Response still contains `app.MapBffManagementEndpoints();` which should be removed in v4."
+    },
+    {
+      "assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+      "pass": false,
+      "rationale": "Response still uses `.RequireAccessToken(TokenType.User)` \u2014 the old v3 syntax."
+    },
+    {
+      "assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
+      "pass": false,
+      "rationale": "Response does not call .AddRemoteApis()."
+    },
+    {
+      "assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)",
+      "pass": true,
+      "rationale": "All original OIDC settings are preserved in the migrated code."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

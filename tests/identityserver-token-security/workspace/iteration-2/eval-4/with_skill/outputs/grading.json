@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Sets options.PushedAuthorization.Required = true in AddIdentityServer options", "pass": true, "rationale": "Line 15 sets options.PushedAuthorization.Required = true."},
+    {"assertion": "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)", "pass": true, "rationale": "Line 19 sets options.PushedAuthorization.Lifetime = 300 as an int, and line 18 comments confirm 300 seconds."},
+    {"assertion": "Sets RequirePushedAuthorization = true on the banking_app client", "pass": true, "rationale": "Line 44 sets RequirePushedAuthorization = true on the banking_app client."},
+    {"assertion": "Sets PushedAuthorizationLifetime = 900 on the banking_app client to override global lifetime", "pass": true, "rationale": "Line 47 sets PushedAuthorizationLifetime = 900 on the banking_app client."},
+    {"assertion": "Mentions PAR requires Business or Enterprise edition (version >= 7.0)", "pass": true, "rationale": "Line 5 states 'PAR requires Business or Enterprise edition, version >= 7.0.'"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

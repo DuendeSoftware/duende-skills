@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)", "pass": true, "rationale": "Code has `options.KeyManagement.RotationInterval = TimeSpan.FromDays(60)`."},
+    {"assertion": "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)", "pass": true, "rationale": "Code has `options.KeyManagement.PropagationTime = TimeSpan.FromDays(7)`."},
+    {"assertion": "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)", "pass": true, "rationale": "Code has `options.KeyManagement.RetentionDuration = TimeSpan.FromDays(21)`."},
+    {"assertion": "Output sets options.KeyManagement.DataProtectKeys to true", "pass": true, "rationale": "Code has `options.KeyManagement.DataProtectKeys = true`."},
+    {"assertion": "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'", "pass": true, "rationale": "Code has `options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\"`."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

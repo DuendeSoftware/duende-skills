@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "An endpoint is mapped to '/internal-token' or similar path", "pass": true, "rationale": "app.MapGet(\"/internal-token\", ...) is defined in both code examples."},
+    {"assertion": "IIdentityServerTools is injected and IssueClientJwtAsync is called", "pass": false, "rationale": "The response does NOT use IIdentityServerTools or IssueClientJwtAsync. It attempts to use ITokenService and a fabricated ITokenIssuanceService which don't exist in the Duende API for this purpose."},
+    {"assertion": "The lifetime parameter is set to 600 (10 minutes)", "pass": false, "rationale": "While the alternative approach mentions lifetime: 600, the primary code doesn't use IssueClientJwtAsync and the alternative uses a non-existent API."},
+    {"assertion": "The audiences parameter includes 'backend.api'", "pass": false, "rationale": "The primary code does not set audiences. The alternative mentions audience: \"backend.api\" but on a non-existent API."},
+    {"assertion": "The endpoint has authorization required via RequireAuthorization() or [Authorize]", "pass": true, "rationale": ".RequireAuthorization() is chained on both endpoint examples."}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

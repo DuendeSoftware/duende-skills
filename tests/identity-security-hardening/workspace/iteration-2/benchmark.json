@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "skill_name": "identity-security-hardening",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "total_evals": 8,
+    "with_skill_pass_rate": 100,
+    "without_skill_pass_rate": 78,
+    "delta_pass_rate": 22
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 3, "total_count": 5, "pass_rate": 0.6 },
+      "delta_pass_rate": 40
+    },
+    {
+      "eval_id": 2,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 5, "pass_rate": 0.8 },
+      "delta_pass_rate": 20
+    },
+    {
+      "eval_id": 3,
+      "with_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "delta_pass_rate": 0
+    },
+    {
+      "eval_id": 4,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "delta_pass_rate": 0
+    },
+    {
+      "eval_id": 5,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 3, "total_count": 5, "pass_rate": 0.6 },
+      "delta_pass_rate": 40
+    },
+    {
+      "eval_id": 6,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 2, "total_count": 5, "pass_rate": 0.4 },
+      "delta_pass_rate": 60
+    },
+    {
+      "eval_id": 7,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 5, "pass_rate": 0.8 },
+      "delta_pass_rate": 20
+    },
+    {
+      "eval_id": 8,
+      "with_skill": { "pass_count": 3, "total_count": 3, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 3, "total_count": 3, "pass_rate": 1.0 },
+      "delta_pass_rate": 0
+    }
+  ]
+}

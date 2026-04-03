@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Configures AddJwtBearer with an Authority and Audience for the DCR scheme", "pass": false, "rationale": "Configures AddJwtBearer with Authority but uses 'api1' as the Audience instead of a DCR-specific audience, and uses scheme name 'Bearer' not 'dcr'. No DCR-specific scheme."},
+    {"assertion": "Creates an authorization policy that requires an authenticated user and a specific scope claim", "pass": true, "rationale": "Creates a 'DcrPolicy' with RequireAuthenticatedUser() and RequireClaim('scope', 'dcr:manage'). The scope name differs but the pattern is correct."},
+    {"assertion": "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()", "pass": false, "rationale": "Does not use MapDynamicClientRegistration() at all. Uses a custom MapPost endpoint with RequireAuthorization('DcrPolicy')."},
+    {"assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy configuration", "pass": true, "rationale": "Uses AddAuthentication().AddJwtBearer() and AddAuthorization() with a named policy, though scheme naming and audience differ from Duende patterns."},
+    {"assertion": "Does NOT expose MapDynamicClientRegistration() without authorization", "pass": true, "rationale": "Does not use MapDynamicClientRegistration() at all, so it cannot be exposed without authorization. The custom endpoint does have RequireAuthorization."}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

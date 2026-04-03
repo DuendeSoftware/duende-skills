@@ -1,0 +1,29 @@
+{
+  "eval_id": 13,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that DefaultAccessTokenRetriever is internal in v4 and cannot be inherited",
+      "pass": false,
+      "rationale": "Response says 'If that's no longer working, you'll need to implement the token retriever interface directly' but does not explicitly state DefaultAccessTokenRetriever is internal in v4."
+    },
+    {
+      "assertion": "Shows implementing IAccessTokenRetriever interface directly",
+      "pass": true,
+      "rationale": "Code implements IAccessTokenRetriever with GetAccessToken method."
+    },
+    {
+      "assertion": "Shows registration via WithAccessTokenRetriever<T>() on the remote API endpoint",
+      "pass": true,
+      "rationale": "Code shows .WithAccessTokenRetriever<CustomTokenRetriever>()."
+    },
+    {
+      "assertion": "Mentions AccessTokenResult and its implementations (BearerTokenResult, DPoPTokenResult, NoAccessTokenResult, or AccessTokenRetrievalError)",
+      "pass": false,
+      "rationale": "Response only shows BearerTokenResult but does not mention DPoPTokenResult, NoAccessTokenResult, or AccessTokenRetrievalError."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

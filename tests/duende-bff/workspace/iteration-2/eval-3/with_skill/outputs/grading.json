@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+      "pass": true,
+      "rationale": "Response calls `.AddEntityFrameworkServerSideSessions()` and explicitly warns against using `AddServerSideSessions()` alone in production."
+    },
+    {
+      "assertion": "Configures UseSqlServer with the connection string from configuration",
+      "pass": true,
+      "rationale": "Code shows `options.UseSqlServer(builder.Configuration.GetConnectionString(\"BffSessions\"))` inside AddEntityFrameworkServerSideSessions."
+    },
+    {
+      "assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+      "pass": true,
+      "rationale": "Code shows `options.SessionCleanupInterval = TimeSpan.FromMinutes(10)` in the AddBff options."
+    },
+    {
+      "assertion": "Calls AddSessionCleanupBackgroundProcess()",
+      "pass": true,
+      "rationale": "Code chains `.AddSessionCleanupBackgroundProcess()` on the BFF builder."
+    },
+    {
+      "assertion": "Warns against or does NOT use in-memory sessions for production",
+      "pass": true,
+      "rationale": "Response explicitly warns: 'Do NOT use AddServerSideSessions() alone in production' and explains why."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

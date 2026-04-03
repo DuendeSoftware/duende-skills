@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "skill_name": "identity-testing-patterns",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 47,
+      "passed": 47,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 47,
+      "passed": 38,
+      "failed": 9,
+      "pass_rate": 80.85
+    },
+    "delta": {
+      "assertions_improved": 9,
+      "delta_pass_rate": 19.15
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The factory disables automatic key management via options.KeyManagement.Enabled = false",
+        "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+        "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Uses CookieContainer and HttpClientHandler with AllowAutoRedirect = false for cookie-based session simulation",
+        "Test asserts /bff/user returns HttpStatusCode.Unauthorized (401) without a prior login"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+        "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key"
+      ]
+    }
+  ]
+}

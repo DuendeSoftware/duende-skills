@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Output calls .AddServerSideSessions() on the IdentityServer builder (not as an option property)", "pass": false, "rationale": "Does NOT call `.AddServerSideSessions()`. The response only sets options but vaguely says 'You may also need to enable server-side sessions in the server options or through some additional configuration method.' This misses the key Duende-specific builder method."},
+    {"assertion": "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)", "pass": true, "rationale": "Sets `options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5)`."},
+    {"assertion": "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true", "pass": true, "rationale": "Sets `options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true`."},
+    {"assertion": "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true", "pass": true, "rationale": "Sets `options.Authentication.CoordinateClientLifetimesWithUserSession = true`."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "States in-memory stores shouldn't be used in production."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore interface",
+      "pass": true,
+      "rationale": "DbSamlStore implements ISamlServiceProviderStore."
+    },
+    {
+      "assertion": "The store class has a FindByEntityIdAsync method that accepts a string entityId and CancellationToken",
+      "pass": false,
+      "rationale": "FindByEntityIdAsync only takes string entityId \u2014 no CancellationToken parameter."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": false,
+      "rationale": "Uses generic AddScoped<> DI registration instead of AddSamlServiceProviderStore<T>()."
+    },
+    {
+      "assertion": "Uses EF Core (DbContext) for data access",
+      "pass": true,
+      "rationale": "Uses AppDbContext with EF Core."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

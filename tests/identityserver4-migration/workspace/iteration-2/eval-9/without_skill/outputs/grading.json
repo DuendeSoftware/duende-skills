@@ -1,0 +1,13 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Response shows configuring the license key via options.LicenseKey inside AddIdentityServer", "pass": true, "rationale": "Shows options.LicenseKey = builder.Configuration[\"IdentityServer:LicenseKey\"] inside AddIdentityServer."},
+    {"assertion": "Response recommends loading the key from configuration, environment variables, or a secret manager rather than hardcoding", "pass": true, "rationale": "Mentions environment variables, Azure Key Vault, and user secrets."},
+    {"assertion": "Response warns against storing the license key in source-controlled files like appsettings.json", "pass": true, "rationale": "States 'Store the license key securely — don't check it into source control.'"},
+    {"assertion": "Response explains that without a license key, IdentityServer runs in community or trial mode and logs a warning on startup", "pass": false, "rationale": "Only says 'may have limitations or show warnings' — does not specifically mention community/trial mode. Too vague to pass."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

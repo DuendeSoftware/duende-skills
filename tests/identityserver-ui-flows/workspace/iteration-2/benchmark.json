@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-ui-flows",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03",
+    "total_evals": 7
+  },
+  "summary": {
+    "with_skill_pass_rate": 100.0,
+    "without_skill_pass_rate": 53.33,
+    "delta_pass_rate": 46.67
+  },
+  "evals": [
+    {
+      "id": 1,
+      "with_skill": {"pass_count": 4, "total_count": 4, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 1, "total_count": 4, "pass_rate": 0.25},
+      "delta_pass_rate": 75.0
+    },
+    {
+      "id": 2,
+      "with_skill": {"pass_count": 5, "total_count": 5, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 1, "total_count": 5, "pass_rate": 0.2},
+      "delta_pass_rate": 80.0
+    },
+    {
+      "id": 3,
+      "with_skill": {"pass_count": 4, "total_count": 4, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "pass_rate": 0.5},
+      "delta_pass_rate": 50.0
+    },
+    {
+      "id": 4,
+      "with_skill": {"pass_count": 5, "total_count": 5, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 5, "total_count": 5, "pass_rate": 1.0},
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 5,
+      "with_skill": {"pass_count": 4, "total_count": 4, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "pass_rate": 0.5},
+      "delta_pass_rate": 50.0
+    },
+    {
+      "id": 6,
+      "with_skill": {"pass_count": 4, "total_count": 4, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "pass_rate": 0.75},
+      "delta_pass_rate": 25.0
+    },
+    {
+      "id": 7,
+      "with_skill": {"pass_count": 4, "total_count": 4, "pass_rate": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "pass_rate": 0.5},
+      "delta_pass_rate": 50.0
+    }
+  ]
+}

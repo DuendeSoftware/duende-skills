@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API",
+      "pass": true,
+      "rationale": "Opens with 'Recommendation: Use a separate, dedicated host for IdentityServer rather than co-hosting with your API.'"
+    },
+    {
+      "assertion": "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs",
+      "pass": true,
+      "rationale": "Explicitly lists 'Increases the attack surface' and 'Creates conflicting middleware needs' as cons of co-hosting."
+    },
+    {
+      "assertion": "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default",
+      "pass": true,
+      "rationale": "States 'Do NOT explicitly set IssuerUri. Let IdentityServer infer it from the request URL by default.'"
+    },
+    {
+      "assertion": "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)",
+      "pass": true,
+      "rationale": "Explains 'Only set IssuerUri when IdentityServer is accessed on a different address than the expected issuer' and gives Kubernetes as an example."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

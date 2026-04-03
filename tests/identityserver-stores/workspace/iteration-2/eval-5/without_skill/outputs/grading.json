@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddStackExchangeRedisCache with the Redis connection string from configuration",
+      "pass": true,
+      "rationale": "AddStackExchangeRedisCache is called with Redis connection string."
+    },
+    {
+      "assertion": "ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration",
+      "pass": false,
+      "rationale": "ICache<> is not replaced with a distributed implementation."
+    },
+    {
+      "assertion": "AddConfigurationStoreCache() is called after the configuration store registration",
+      "pass": false,
+      "rationale": "AddConfigurationStoreCache() is not called \u2014 only mentioned in a comment."
+    },
+    {
+      "assertion": "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": false,
+      "rationale": "No cache expiration is configured."
+    },
+    {
+      "assertion": "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": false,
+      "rationale": "No resource cache expiration configured."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

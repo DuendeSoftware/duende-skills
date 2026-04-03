@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Configures AddJwtBearer with an Authority and Audience for the DCR scheme", "pass": true, "rationale": "Code shows `.AddJwtBearer(\"dcr\", options => { options.Authority = \"https://identity.example.com\"; options.Audience = \"IdentityServer.Configuration\"; })`."},
+    {"assertion": "Creates an authorization policy that requires an authenticated user and a specific scope claim", "pass": true, "rationale": "Code creates a 'dcr' policy with `policy.RequireAuthenticatedUser()` and `policy.RequireClaim(\"scope\", \"IdentityServer.Configuration\")`."},
+    {"assertion": "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()", "pass": true, "rationale": "Code shows `app.MapDynamicClientRegistration().RequireAuthorization(\"dcr\");` applying the named policy."},
+    {"assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy configuration", "pass": true, "rationale": "Code uses `builder.Services.AddAuthentication().AddJwtBearer(...)` and `builder.Services.AddAuthorization(options => ...)` with full policy configuration."},
+    {"assertion": "Does NOT expose MapDynamicClientRegistration() without authorization", "pass": true, "rationale": "MapDynamicClientRegistration() is chained with .RequireAuthorization(\"dcr\"), never exposed without authorization."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

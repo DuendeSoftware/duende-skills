@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A class implementing IClientStore is created with constructor parameters for a DbContext and ITenantContext (or equivalent tenant resolver)",
+      "pass": true,
+      "rationale": "TenantAwareClientStore takes AppDbContext and ITenantContext."
+    },
+    {
+      "assertion": "FindClientByIdAsync applies a Where filter that includes both the clientId parameter AND the tenant identifier from ITenantContext",
+      "pass": true,
+      "rationale": "Where clause filters by both TenantId and clientId."
+    },
+    {
+      "assertion": "The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient",
+      "pass": true,
+      "rationale": "AddClientStore<TenantAwareClientStore>() is used."
+    },
+    {
+      "assertion": "An ITenantContext interface (or equivalent) is defined or referenced that exposes the current tenant identifier",
+      "pass": true,
+      "rationale": "ITenantContext interface is defined with TenantId property and HttpTenantContext implementation."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

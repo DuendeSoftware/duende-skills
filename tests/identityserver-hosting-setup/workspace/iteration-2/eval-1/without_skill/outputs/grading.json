@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI",
+      "pass": true,
+      "rationale": "Line 8 calls builder.Services.AddIdentityServer()."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'",
+      "pass": true,
+      "rationale": "Lines 9-12 call AddInMemoryApiScopes with ApiScope(\"api1\", \"My API\")."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials",
+      "pass": true,
+      "rationale": "Lines 13-22 define a client with ClientId = \"m2m.client\" and AllowedGrantTypes = GrantTypes.ClientCredentials."
+    },
+    {
+      "assertion": "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()",
+      "pass": true,
+      "rationale": "Line 27 UseIdentityServer() appears before line 28 UseAuthorization()."
+    },
+    {
+      "assertion": "Program.cs calls app.UseRouting() before app.UseIdentityServer()",
+      "pass": true,
+      "rationale": "Line 26 UseRouting() appears before line 27 UseIdentityServer()."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

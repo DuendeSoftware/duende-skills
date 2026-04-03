@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-token-lifecycle",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 36,
+      "passed": 36,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 36,
+      "passed": 20,
+      "failed": 16,
+      "pass_rate": 55.56
+    },
+    "delta": {
+      "assertions_improved": 16,
+      "delta_pass_rate": 44.44
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)",
+        "RefreshTokenExpiration is set to TokenExpiration.Sliding"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "The validator creates an 'act' claim using JwtClaimTypes.Actor containing the calling client's client_id for delegation"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims",
+        "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 5, "total": 5, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "A class extending DefaultRefreshTokenService is defined",
+        "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime",
+        "The service is registered as IRefreshTokenService in the DI container",
+        "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly",
+        "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 2, "total": 3, "pass_rate": 0.33 },
+      "delta": 0.67,
+      "without_skill_failures": [
+        "The m2m_client has a Claims collection with a ClientClaim for 'tenant_id' with value '42'",
+        "The m2m_client has a Claims collection with a ClientClaim for 'department' with value 'billing'"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "IIdentityServerTools is injected and IssueClientJwtAsync is called",
+        "The lifetime parameter is set to 600 (10 minutes)",
+        "The audiences parameter includes 'backend.api'"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "RemoveConsumedTokens is set to true and ConsumedTokenCleanupDelay is set to 300"
+      ]
+    }
+  ]
+}

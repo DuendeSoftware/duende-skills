@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures opt.UserInteraction.ErrorUrl to a specific error page path", "pass": true, "rationale": "Program.cs sets options.UserInteraction.ErrorUrl = \"/Error\" and options.UserInteraction.ErrorId = \"errorId\"."},
+    {"assertion": "An error page calls GetErrorContextAsync(errorId) to retrieve error details from IIdentityServerInteractionService", "pass": true, "rationale": "ErrorPageModel.OnGet calls _interaction.GetErrorContextAsync(errorId)."},
+    {"assertion": "The error page displays the Error code and RequestId to the user but does not render ErrorDescription directly in the view", "pass": true, "rationale": "The Razor view displays Model.ErrorMessage.Error and Model.ErrorMessage.RequestId but does NOT render ErrorDescription."},
+    {"assertion": "The error page logs the full error details including ErrorDescription using ILogger at Debug level", "pass": true, "rationale": "OnGet calls _logger.LogDebug with Error, ErrorDescription, RequestId, and ClientId."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers AddStackExchangeRedisCache with a Redis connection string for the distributed L2 cache tier",
+      "pass": true,
+      "rationale": "Code calls `builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = ...; });` on lines 14-17."
+    },
+    {
+      "assertion": "Output sets CacheLifetimeBuffer to 120 in the AddClientCredentialsTokenManagement options",
+      "pass": true,
+      "rationale": "Code sets `options.CacheLifetimeBuffer = 120;` inside `AddClientCredentialsTokenManagement(options => {...})` on line 25."
+    },
+    {
+      "assertion": "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+      "pass": false,
+      "rationale": "No IHybridCacheSerializer implementation is provided. The notes mention needing a custom IDistributedCache decorator, but no actual implementation code is present."
+    },
+    {
+      "assertion": "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()",
+      "pass": false,
+      "rationale": "No AddHybridCache() or AddSerializer call is present in the code."
+    },
+    {
+      "assertion": "Output calls AddDataProtection() to enable the data protection provider",
+      "pass": true,
+      "rationale": "Code calls `builder.Services.AddDataProtection();` on line 20."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

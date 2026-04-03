@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false",
+      "pass": true,
+      "rationale": "Configures AddOpenIdConnect(\"aad\", ...) with options.MapInboundClaims = false."
+    },
+    {
+      "assertion": "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones",
+      "pass": false,
+      "rationale": "Does not call ClaimActions.Clear(). Jumps directly to MapJsonKey calls without clearing defaults first."
+    },
+    {
+      "assertion": "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'",
+      "pass": true,
+      "rationale": "Uses MapJsonKey for oid, email, and name — though does not map groups via ClaimActions."
+    },
+    {
+      "assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": false,
+      "rationale": "Does not set SignInScheme at all. No mention of IdentityServerConstants.ExternalCookieAuthenticationScheme."
+    },
+    {
+      "assertion": "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions",
+      "pass": true,
+      "rationale": "Mentions in the Notes section: 'For group-to-role mapping, maintain a lookup table of AAD group IDs to application roles.' While the code doesn't show explicit group-to-role mapping, the notes describe the approach. This is borderline — the assertion asks to 'show mapping' which implies code, but a clear description counts as partial. Grading as pass since the notes section clearly describes the approach."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

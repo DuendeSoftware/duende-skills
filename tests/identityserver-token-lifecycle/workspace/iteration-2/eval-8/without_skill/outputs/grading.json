@@ -1,0 +1,14 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "web_app client has AccessTokenLifetime = 300", "pass": true, "rationale": "web_app has AccessTokenLifetime = 300."},
+    {"assertion": "m2m_client has AccessTokenLifetime = 600", "pass": true, "rationale": "m2m_client has AccessTokenLifetime = 600."},
+    {"assertion": "mobile_app client has AccessTokenLifetime = 300", "pass": true, "rationale": "mobile_app has AccessTokenLifetime = 300."},
+    {"assertion": "Operational store or token cleanup is configured with EnableTokenCleanup = true and TokenCleanupInterval = 1800", "pass": true, "rationale": "AddOperationalStore configures EnableTokenCleanup = true and TokenCleanupInterval = 1800."},
+    {"assertion": "RemoveConsumedTokens is set to true and ConsumedTokenCleanupDelay is set to 300", "pass": false, "rationale": "The response does NOT set RemoveConsumedTokens = true or ConsumedTokenCleanupDelay = 300. It only mentions cleanup generically and suggests checking documentation."}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

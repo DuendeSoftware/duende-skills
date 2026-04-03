@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "A class implementing IExtensionGrantValidator is defined", "pass": true, "rationale": "TokenExchangeGrantValidator class implements IExtensionGrantValidator."},
+    {"assertion": "The GrantType property returns OidcConstants.GrantTypes.TokenExchange or the equivalent string 'urn:ietf:params:oauth:grant-type:token-exchange'", "pass": true, "rationale": "GrantType => OidcConstants.GrantTypes.TokenExchange is set."},
+    {"assertion": "The validator creates an 'act' claim using JwtClaimTypes.Actor containing the calling client's client_id for delegation", "pass": true, "rationale": "Code creates a Claim(JwtClaimTypes.Actor, ...) with serialized actor containing client_id."},
+    {"assertion": "The validator calls ValidateAccessTokenAsync on the subject_token parameter", "pass": true, "rationale": "Code calls _validator.ValidateAccessTokenAsync(subjectToken) on the subject token."},
+    {"assertion": "A client 'api_gateway' is configured with the token exchange grant type in AllowedGrantTypes", "pass": true, "rationale": "Client api_gateway has AllowedGrantTypes = { OidcConstants.GrantTypes.TokenExchange }."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

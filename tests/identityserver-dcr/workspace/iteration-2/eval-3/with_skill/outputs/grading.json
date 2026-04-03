@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Creates a class that extends DynamicClientRegistrationValidator", "pass": true, "rationale": "Code shows `public class CustomDcrValidator : DynamicClientRegistrationValidator` extending the base class."},
+    {"assertion": "Overrides ValidateGrantTypesAsync to reject grant types other than authorization_code", "pass": true, "rationale": "Overrides ValidateGrantTypesAsync and checks `if (grantTypes.Any(gt => gt != \"authorization_code\"))` calling context.SetError to reject."},
+    {"assertion": "Overrides ValidateRedirectUrisAsync to enforce HTTPS on all redirect URIs", "pass": true, "rationale": "Overrides ValidateRedirectUrisAsync and checks `if (uris.Any(u => !u.StartsWith(\"https://\", ...)))` calling context.SetError to reject non-HTTPS URIs."},
+    {"assertion": "Sets RequirePkce = true in SetClientDefaultsAsync or equivalent override", "pass": true, "rationale": "Overrides SetClientDefaultsAsync and sets `client.RequirePkce = true`."},
+    {"assertion": "Registers the validator using AddDynamicClientRegistrationValidator<T>() on the configuration builder", "pass": true, "rationale": "Shows `builder.Services.AddIdentityServerConfiguration().AddDynamicClientRegistrationValidator<CustomDcrValidator>();`."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

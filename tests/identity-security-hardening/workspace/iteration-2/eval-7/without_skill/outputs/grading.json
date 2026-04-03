@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+      "pass": true,
+      "rationale": "All clients use GrantTypes.Code or GrantTypes.ClientCredentials. spa.legacy was migrated to Code with RequirePkce = true. No client has RequirePkce = false."
+    },
+    {
+      "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
+      "pass": true,
+      "rationale": "All redirect URIs are exact-match: https://app.example.com/signin-oidc, https://spa.example.com/callback, com.example.app:/callback, https://app.example.com/callback. No wildcards present."
+    },
+    {
+      "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential() is removed. Replaced with AddSigningCredential() using an X509Certificate2. While this is not automatic key management, it is a proper signing credential, which satisfies the 'or proper signing credentials' alternative."
+    },
+    {
+      "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
+      "pass": false,
+      "rationale": "The web.app client (an interactive web application) has AccessTokenLifetime = 3600 (1 hour), which exceeds the 900-second maximum for interactive clients. The assertion requires all interactive client access token lifetimes to be 900 seconds or less."
+    },
+    {
+      "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
+      "pass": true,
+      "rationale": "The response includes a 'Remediation Summary' section with 7 numbered items, each describing the security issue found and how it was fixed."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

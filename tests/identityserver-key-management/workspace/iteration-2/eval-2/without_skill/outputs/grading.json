@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    { "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'", "pass": true, "rationale": "Line 15 sets options.KeyManagement.Enabled = false." },
+    { "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2", "pass": true, "rationale": "Line 47 uses new X509Certificate2(\"/certs/signing.pfx\", password) which is an accepted alternative." },
+    { "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')", "pass": true, "rationale": "Line 48 calls AddSigningCredential(cert, \"RS256\") which satisfies the 'or RS256' clause." },
+    { "assertion": "Program.cs does not remove the existing client and scope configuration", "pass": true, "rationale": "All existing clients, API scopes, and identity resources are preserved." }
+  ],
+  "pass_count": 4, "total_count": 4, "score": 1.0
+}

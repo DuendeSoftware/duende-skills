@@ -1,0 +1,34 @@
+{
+  "eval_id": 102,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses GrantTypes.Code (not Implicit) as the grant type",
+      "pass": true,
+      "rationale": "Line 23 sets AllowedGrantTypes = GrantTypes.Code."
+    },
+    {
+      "assertion": "Sets RequireClientSecret = false since it is a public SPA client",
+      "pass": true,
+      "rationale": "Line 24 sets RequireClientSecret = false."
+    },
+    {
+      "assertion": "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+      "pass": false,
+      "rationale": "The without_skill response does not include AllowedCorsOrigins anywhere in the client configuration. This is a Duende-specific detail that a generic developer would miss."
+    },
+    {
+      "assertion": "Sets AllowOfflineAccess = true to enable refresh tokens",
+      "pass": true,
+      "rationale": "Line 28 sets AllowOfflineAccess = true."
+    },
+    {
+      "assertion": "AllowedScopes includes 'openid', 'profile', and 'orders.read'",
+      "pass": true,
+      "rationale": "Line 27 includes \"openid\", \"profile\", and \"orders.read\" in AllowedScopes."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Creates a class that extends DynamicClientRegistrationValidator", "pass": false, "rationale": "Creates a standalone `CustomDcrValidator` class that does NOT extend DynamicClientRegistrationValidator. It's a custom class with no base class."},
+    {"assertion": "Overrides ValidateGrantTypesAsync to reject grant types other than authorization_code", "pass": false, "rationale": "Does not override ValidateGrantTypesAsync. Has a custom Validate() method that checks grant types but not via the Duende validator pattern."},
+    {"assertion": "Overrides ValidateRedirectUrisAsync to enforce HTTPS on all redirect URIs", "pass": false, "rationale": "Does not override ValidateRedirectUrisAsync. Checks HTTPS in a custom Validate() method, not via the Duende override pattern."},
+    {"assertion": "Sets RequirePkce = true in SetClientDefaultsAsync or equivalent override", "pass": false, "rationale": "Does not override SetClientDefaultsAsync. Sets RequirePkce = true in a custom CreateClient() method, not via the Duende validator pattern."},
+    {"assertion": "Registers the validator using AddDynamicClientRegistrationValidator<T>() on the configuration builder", "pass": false, "rationale": "Registers via `builder.Services.AddSingleton<CustomDcrValidator>()`, not via AddDynamicClientRegistrationValidator<T>()."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

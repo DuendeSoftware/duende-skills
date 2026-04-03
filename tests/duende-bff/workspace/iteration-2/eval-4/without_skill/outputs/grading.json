@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "Response identifies the X-CSRF header as the likely cause and shows how to add it."
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "A fetchApi wrapper is provided that adds the X-CSRF: 1 header."
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "The wrapper checks for 401 and redirects to /bff/login."
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": true,
+      "rationale": "Response mentions 'login/logout flows use full page navigation rather than AJAX calls.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Sets options.MutualTls.Enabled = true in AddIdentityServer options", "pass": false, "rationale": "AddIdentityServer is called without any options lambda; MutualTls.Enabled is never set."},
+    {"assertion": "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain", "pass": false, "rationale": "No MutualTls.DomainName configuration at all. The response vaguely suggests configuring a reverse proxy for the subdomain."},
+    {"assertion": "Calls AddMutualTlsSecretValidators() on the IdentityServer builder", "pass": false, "rationale": "AddMutualTlsSecretValidators() is never called."},
+    {"assertion": "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)", "pass": false, "rationale": "The client secret is a plain string 'ABC123DEF456' without any Type set. No SecretTypes.X509CertificateThumbprint."},
+    {"assertion": "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme", "pass": false, "rationale": "AddCertificate(\"Certificate\") is present but MutualTls.ClientCertificateAuthenticationScheme is never set, so the link between them is missing. Fails the combined assertion."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

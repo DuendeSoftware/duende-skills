@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+      "pass": true,
+      "rationale": "Explains that Blazor Server runs in a SignalR circuit and HttpContext becomes unavailable after the initial HTTP request."
+    },
+    {
+      "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+      "pass": false,
+      "rationale": "No mention of AddBlazorServerAccessTokenManagement<T>(). The response suggests generic approaches — a scoped TokenProvider service or a custom DatabaseTokenStore — without using the Duende-specific API."
+    },
+    {
+      "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+      "pass": false,
+      "rationale": "The DatabaseTokenStore is a custom class but does not implement IUserTokenStore. It has different method signatures (GetAccessTokenAsync, StoreTokensAsync) and is missing ClearTokenAsync."
+    },
+    {
+      "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store",
+      "pass": false,
+      "rationale": "No OnTokenValidated event handler is shown. Option 1 captures tokens in _Host.cshtml during page load, not during the OIDC event."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

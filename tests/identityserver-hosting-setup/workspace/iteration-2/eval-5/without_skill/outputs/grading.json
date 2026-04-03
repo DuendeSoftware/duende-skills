@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.IssuerUri = 'https://identity.mycompany.com' inside the AddIdentityServer options lambda",
+      "pass": true,
+      "rationale": "Line 8 sets options.IssuerUri = \"https://identity.mycompany.com\" inside the AddIdentityServer lambda."
+    },
+    {
+      "assertion": "Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it",
+      "pass": true,
+      "rationale": "Line 9 sets options.LicenseKey = builder.Configuration[\"IdentityServer:LicenseKey\"]."
+    },
+    {
+      "assertion": "Program.cs sets options.EmitScopesAsSpaceDelimitedStringInJwt = true",
+      "pass": true,
+      "rationale": "Line 10 sets options.EmitScopesAsSpaceDelimitedStringInJwt = true."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage",
+      "pass": true,
+      "rationale": "Lines 13-14 call AddDataProtection().PersistKeysToFileSystem() which is persistent storage, though file-based rather than DB-based."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances",
+      "pass": false,
+      "rationale": "The data protection configuration only calls PersistKeysToFileSystem — SetApplicationName is not called."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

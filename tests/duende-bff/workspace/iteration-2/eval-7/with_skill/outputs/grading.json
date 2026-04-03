@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "Response explicitly states: 'Each BFF instance has its own isolated Data Protection key ring' and explains the cookie encryption mismatch."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Response shows PersistKeysToDbContext, PersistKeysToAzureBlobStorage, and PersistKeysToStackExchangeRedis options."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "Response explicitly recommends AddEntityFrameworkServerSideSessions with SQL Server and explains in-memory sessions are node-local."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "Multiple code examples showing AddDataProtection() with PersistKeysToDbContext, Redis, and Azure Blob."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

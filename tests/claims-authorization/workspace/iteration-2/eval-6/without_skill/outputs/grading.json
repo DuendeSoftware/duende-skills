@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'",
+      "pass": true,
+      "rationale": "Implements IExtensionGrantValidator with GrantType => \"urn:ietf:params:oauth:grant-type:token-exchange\"."
+    },
+    {
+      "assertion": "Extracts and validates the subject_token from the request",
+      "pass": true,
+      "rationale": "Extracts subject_token from context.Request.Raw.Get(\"subject_token\"). Validation is done via JwtSecurityTokenHandler.ReadJwtToken (not the IS token validator, but it does extract and validate)."
+    },
+    {
+      "assertion": "Returns a GrantValidationResult with a subject ID and custom claims array",
+      "pass": true,
+      "rationale": "Returns new GrantValidationResult(subject: subject, authenticationMethod: \"token_exchange\", claims: claims)."
+    },
+    {
+      "assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "Shows .AddExtensionGrantValidator<TokenExchangeValidator>() in the registration."
+    },
+    {
+      "assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further",
+      "pass": false,
+      "rationale": "Does not mention IProfileService at all. Only mentions the grant validator and client configuration."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Test with role=admin claims asserts HttpStatusCode.NoContent (204)",
+      "pass": true,
+      "rationale": "Admin_CanDeleteProduct test sets role=admin claims and asserts Assert.Equal(HttpStatusCode.NoContent, response.StatusCode)."
+    },
+    {
+      "assertion": "Test with role=viewer claims asserts HttpStatusCode.Forbidden (403)",
+      "pass": true,
+      "rationale": "Viewer_GetsForbidden test sets role=viewer claims and asserts Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode)."
+    },
+    {
+      "assertion": "Test with no claims (unauthenticated) asserts HttpStatusCode.Unauthorized (401)",
+      "pass": true,
+      "rationale": "Anonymous_GetsUnauthorized test sets CurrentUser = null and asserts Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode)."
+    },
+    {
+      "assertion": "Each test sets distinct claims via the TestClaimsProvider before making the request",
+      "pass": true,
+      "rationale": "Each test sets TestIdentity.CurrentUser to a distinct ClaimsPrincipal (admin claims, viewer claims, or null) before making the HTTP request."
+    },
+    {
+      "assertion": "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests",
+      "pass": true,
+      "rationale": "AdminPolicyTests implements IClassFixture<TestApiFactory> to share the factory across tests."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddJwtBearer with Authority set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "Authority is set to 'https://identity.example.com'."
+    },
+    {
+      "assertion": "Sets Audience to 'api1'",
+      "pass": true,
+      "rationale": "Audience is set to 'api1'."
+    },
+    {
+      "assertion": "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks",
+      "pass": false,
+      "rationale": "ValidTypes is not set at all. This is a Duende-specific security best practice that a generic dev would likely miss."
+    },
+    {
+      "assertion": "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "UseAuthentication() is called before UseAuthorization()."
+    },
+    {
+      "assertion": "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "Package is mentioned via dotnet add command."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

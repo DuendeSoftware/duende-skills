@@ -1,0 +1,11 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    { "assertion": "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'", "pass": true, "rationale": "Line 15 sets options.KeyManagement.KeyPath = \"/mnt/shared/identity-keys\"." },
+    { "assertion": "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)", "pass": true, "rationale": "Line 18 sets options.KeyManagement.KeyCacheDuration = TimeSpan.FromHours(1)." },
+    { "assertion": "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'", "pass": true, "rationale": "Line 21 sets options.KeyManagement.RsaKeySize = 4096." },
+    { "assertion": "Program.cs does not disable automatic key management", "pass": true, "rationale": "No KeyManagement.Enabled = false is present." }
+  ],
+  "pass_count": 4, "total_count": 4, "score": 1.0
+}

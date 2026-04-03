@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "AddConfigurationStore sets options.DefaultSchema to \"idscfg\"",
+      "pass": true,
+      "rationale": "DefaultSchema = \"idscfg\" is set."
+    },
+    {
+      "assertion": "AddOperationalStore sets options.DefaultSchema to \"idsop\"",
+      "pass": true,
+      "rationale": "DefaultSchema = \"idsop\" is set."
+    },
+    {
+      "assertion": "Configuration store calls MigrationsHistoryTable with the schema parameter set to \"idscfg\"",
+      "pass": false,
+      "rationale": "MigrationsHistoryTable is not called; only mentioned as a possibility."
+    },
+    {
+      "assertion": "Operational store calls MigrationsHistoryTable with the schema parameter set to \"idsop\"",
+      "pass": false,
+      "rationale": "MigrationsHistoryTable is not called."
+    },
+    {
+      "assertion": "Both store registrations include MigrationsAssembly pointing to the host project",
+      "pass": false,
+      "rationale": "MigrationsAssembly is not set in either store."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

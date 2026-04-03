@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda", "pass": false, "rationale": "Does not call ConfigureDPoPTokensForScheme at all. Suggests custom middleware or handler implementation instead."},
+    {"assertion": "Registers a distributed cache (e.g., AddDistributedMemoryCache for dev, mentions Redis or similar for production)", "pass": true, "rationale": "Line 46 calls AddDistributedMemoryCache and comments mention Redis for production."},
+    {"assertion": "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'", "pass": true, "rationale": "Lines 11-18 configure AddJwtBearer with Authority and ValidTypes = new[] { \"at+jwt\" }."},
+    {"assertion": "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package", "pass": false, "rationale": "No mention of the Duende.AspNetCore.Authentication.JwtBearer package. Suggests checking for 'official Microsoft or community package' generically."}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

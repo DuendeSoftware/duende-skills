@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies that SaveTokens = true is missing on the OIDC handler and explains it's required for user token management",
+      "pass": true,
+      "rationale": "Issue 1 explicitly identifies missing SaveTokens = true and explains it's required for user token management, causing InvalidOperationException at runtime."
+    },
+    {
+      "assertion": "Output identifies that offline_access scope is missing so no refresh tokens will be issued",
+      "pass": true,
+      "rationale": "Issue 2 explicitly identifies missing offline_access scope and explains that without it, no refresh token will be issued."
+    },
+    {
+      "assertion": "Output identifies the manual _cachedToken field as incorrect double-caching that won't stay in sync with the library's cache",
+      "pass": true,
+      "rationale": "Issue 4 explicitly identifies the `_cachedToken` field as incorrect double-caching that will serve stale/expired tokens."
+    },
+    {
+      "assertion": "Output identifies that .GetToken() is called without first checking .Succeeded, which will throw InvalidOperationException on failure",
+      "pass": true,
+      "rationale": "Issue 5 explicitly identifies this: `.GetToken()` throws `InvalidOperationException` when `Succeeded` is `false`."
+    },
+    {
+      "assertion": "Output identifies that AddClientCredentialsTokenHandler is used without AddDefaultAccessTokenResiliency(), meaning 401 responses won't be retried",
+      "pass": true,
+      "rationale": "Issue 6 explicitly identifies missing `AddDefaultAccessTokenResiliency()` before `AddClientCredentialsTokenHandler` and explains that 401 responses won't trigger a retry."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response mentions updating @using IdentityServer4 directives in .cshtml files or _ViewImports.cshtml to @using Duende.IdentityServer", "pass": true, "rationale": "Shows exact code example of @using IdentityServer4 → @using Duende.IdentityServer with mention of _ViewImports.cshtml."},
+    {"assertion": "Response mentions that Duende templates use Razor Pages instead of MVC controllers, or that the UI layout has changed significantly", "pass": true, "rationale": "States 'Duende IdentityServer templates use Razor Pages (Pages/) instead of the MVC controller pattern (Controllers/ + Views/)'."},
+    {"assertion": "Response recommends scaffolding fresh Duende UI templates (e.g., dotnet new duende-is-ui) as one approach for the UI migration", "pass": true, "rationale": "Shows dotnet new install Duende.Templates && dotnet new duende-is-ui commands."},
+    {"assertion": "Response mentions that the existing MVC-based UI will still work after namespace updates but will miss newer UI flows like device flow, CIBA, or dynamic providers", "pass": true, "rationale": "Lists device flow, CIBA, dynamic identity provider, and server-side session pages as newer flows missed by existing MVC UI."},
+    {"assertion": "Response mentions fixing API changes in controller or page model code (e.g., request.Client.ClientId instead of request.ClientId, or ScopesValuesConsented instead of ScopesConsented)", "pass": true, "rationale": "Shows specific code examples: request.ClientId → request.Client.ClientId, ScopesConsented → ScopesValuesConsented."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

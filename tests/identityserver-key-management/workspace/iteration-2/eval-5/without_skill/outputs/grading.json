@@ -1,0 +1,11 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    { "assertion": "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)", "pass": true, "rationale": "KeyManagement.Enabled is not set at all, so it defaults to true. The assertion allows this." },
+    { "assertion": "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)", "pass": true, "rationale": "Lines 42-43 call AddSigningCredential(signingKey, \"RS256\") where signingKey = GetSigningKeyFromVault()." },
+    { "assertion": "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)", "pass": true, "rationale": "No AddValidationKey call is present." },
+    { "assertion": "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management", "pass": true, "rationale": "The title says 'Phase 1' and the code comment says 'Keep existing static key for signing during transition'." }
+  ],
+  "pass_count": 4, "total_count": 4, "score": 1.0
+}

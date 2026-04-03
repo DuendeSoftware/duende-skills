@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'", "pass": true, "rationale": "Code shows `builder.Services.AddIdentityServerConfiguration(options => { options.IdentityServerBaseUrl = \"https://identity.example.com\"; });`."},
+    {"assertion": "Sets up JWT bearer authentication pointing to the main IdentityServer as Authority", "pass": true, "rationale": "Configures `.AddJwtBearer(\"dcr\", options => { options.Authority = \"https://identity.example.com\"; })`."},
+    {"assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()", "pass": true, "rationale": "Code shows `app.MapDynamicClientRegistration().RequireAuthorization(\"dcr\");`."},
+    {"assertion": "Does NOT call AddIdentityServer() — this is a separate host, not an IdentityServer instance", "pass": true, "rationale": "No call to AddIdentityServer() anywhere. Explicitly notes 'this application does NOT run IdentityServer' and warns against adding AddIdentityServer()."},
+    {"assertion": "Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from", "pass": true, "rationale": "States 'The separate DCR host writes clients to a database, and IdentityServer must read from the same database' and code comments note 'This MUST use the same database that IdentityServer reads from'."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

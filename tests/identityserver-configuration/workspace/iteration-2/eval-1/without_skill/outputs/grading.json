@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Output contains a call to builder.Services.AddIdentityServer with an options lambda", "pass": true, "rationale": "Code contains `builder.Services.AddIdentityServer(options => { ... })` with an options lambda."},
+    {"assertion": "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true", "pass": true, "rationale": "All four event types are explicitly set to true."},
+    {"assertion": "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()", "pass": true, "rationale": "Calls `.AddInMemoryIdentityResources` with both `IdentityResources.OpenId()` and `IdentityResources.Profile()`."},
+    {"assertion": "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'", "pass": true, "rationale": "Calls `.AddInMemoryApiScopes` with `new ApiScope(\"weatherapi\")`."},
+    {"assertion": "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()", "pass": false, "rationale": "Uses `app.UseAuthentication()` instead of `app.UseIdentityServer()`. This is the Duende-specific middleware call that the without_skill variant misses."}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

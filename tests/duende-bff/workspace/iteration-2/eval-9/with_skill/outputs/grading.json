@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
+      "pass": true,
+      "rationale": "Response uses `AddBff().ConfigureOpenIdConnect().ConfigureCookies()` and removes the manual auth setup."
+    },
+    {
+      "assertion": "Output does NOT contain 'MapBffManagementEndpoints'",
+      "pass": true,
+      "rationale": "Response removes MapBffManagementEndpoints and comments that v4 auto-registers management endpoints."
+    },
+    {
+      "assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+      "pass": true,
+      "rationale": "Code uses `.WithAccessToken(RequiredTokenType.User)` with a comment explaining the v4 syntax change."
+    },
+    {
+      "assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
+      "pass": true,
+      "rationale": "Code chains `.AddRemoteApis()` on the BFF builder with a comment that it's required in v4."
+    },
+    {
+      "assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)",
+      "pass": true,
+      "rationale": "All original settings are preserved: Authority, ClientId, ClientSecret, ResponseType, api1 scope, SaveTokens."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

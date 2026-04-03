@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+      "pass": true,
+      "rationale": "Response shows `builder.Services.AddUserAccessTokenHttpClient(\"remoteApi\", ...)` with automatic token attachment."
+    },
+    {
+      "assertion": "Shows GetUserAccessTokenAsync for the manual pattern",
+      "pass": true,
+      "rationale": "Response shows `var token = await ctx.GetUserAccessTokenAsync();` in the manual pattern."
+    },
+    {
+      "assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+      "pass": true,
+      "rationale": "Both endpoints chain `.AsBffApiEndpoint()` with explicit comments about CSRF protection."
+    },
+    {
+      "assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)",
+      "pass": true,
+      "rationale": "Response explicitly warns: 'Never return the raw access token to the browser' and shows only proxied API responses."
+    },
+    {
+      "assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement",
+      "pass": true,
+      "rationale": "Response states: 'Token refresh is handled automatically by AccessTokenManagement in both cases.'"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

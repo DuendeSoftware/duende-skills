@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Response includes checking that the discovery document at /.well-known/openid-configuration is reachable and returns valid JSON", "pass": true, "rationale": "Step 1 checks discovery document with curl command and mentions valid JSON."},
+    {"assertion": "Response includes verifying the client ID in the request exactly matches the server registration", "pass": true, "rationale": "Step 2 covers client ID verification including case sensitivity."},
+    {"assertion": "Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)", "pass": true, "rationale": "Step 3 mentions 'The secret might need to be hashed (some servers store SHA256 hashes)'."},
+    {"assertion": "Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes", "pass": true, "rationale": "Steps 4 and 5 cover grant type allowance and scope registration."},
+    {"assertion": "Response covers checking redirect URI for exact string match including scheme, host, port, path, and trailing slash", "pass": true, "rationale": "Step 6 lists scheme, host, port, path, and trailing slash for exact match."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ITokenRequestCustomizer interface with a Customize method",
+      "pass": false,
+      "rationale": "No ITokenRequestCustomizer implementation. The response creates a custom DelegatingHandler (TenantTokenHandler) instead."
+    },
+    {
+      "assertion": "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+      "pass": false,
+      "rationale": "No Customize method exists. The custom handler uses SendAsync with HttpRequestMessage and CancellationToken but doesn't use TokenRequestParameters."
+    },
+    {
+      "assertion": "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+      "pass": false,
+      "rationale": "No 'with' expression or TokenRequestParameters modification. The approach registers separate clients per tenant instead."
+    },
+    {
+      "assertion": "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler",
+      "pass": false,
+      "rationale": "No customizer is passed. The handler is registered via AddHttpMessageHandler<TenantTokenHandler>(), not through the token management handler APIs."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

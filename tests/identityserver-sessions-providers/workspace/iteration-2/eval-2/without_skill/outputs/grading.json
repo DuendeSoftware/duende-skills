@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code uses ISessionManagementService with QuerySessionsAsync and CountRequested = 10 for the first page",
+      "pass": true,
+      "rationale": "Lines 26-29 show `QuerySessionsAsync(new SessionQuery { CountRequested = 10 })` on the injected service."
+    },
+    {
+      "assertion": "Code uses ResultsToken from the first query result to fetch the next page",
+      "pass": true,
+      "rationale": "Lines 42-46 show the second query using `ResultsToken = continuationToken` to fetch the next page."
+    },
+    {
+      "assertion": "Code uses RemoveSessionsAsync with RevokeConsents = false to preserve consent grants",
+      "pass": true,
+      "rationale": "Line 67 shows `RevokeConsents = false` in the RemoveSessionsContext."
+    },
+    {
+      "assertion": "Code sets SendBackchannelLogoutNotification = true (explicitly or by relying on the default) in RemoveSessionsContext",
+      "pass": true,
+      "rationale": "Line 66 explicitly sets `SendBackchannelLogoutNotification = true` in the detailed RevoveSessionsAsync call."
+    },
+    {
+      "assertion": "Response mentions preferring GetSessionsAsync over QuerySessionsAsync for simple session listing",
+      "pass": false,
+      "rationale": "The response does not mention GetSessionsAsync at all. There is no recommendation to prefer it over QuerySessionsAsync for simple listing."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

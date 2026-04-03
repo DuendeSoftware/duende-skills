@@ -1,0 +1,13 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Output replaces 'using IdentityServer4.Models' with 'using Duende.IdentityServer.Models'", "pass": true, "rationale": "Code shows 'using Duende.IdentityServer.Models' and explanation confirms replacement."},
+    {"assertion": "Output preserves the Client definitions with ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes intact", "pass": true, "rationale": "Both Client definitions preserved with exact same properties."},
+    {"assertion": "Output preserves the ApiScope, ApiResource, and IdentityResource definitions", "pass": true, "rationale": "All three definition types preserved unchanged in the output code."},
+    {"assertion": "Output maintains the Secret and GrantTypes usage (these types exist in Duende with the same API surface)", "pass": true, "rationale": "Secret with .Sha256() and GrantTypes.ClientCredentials/GrantTypes.Code all preserved, with explanation they live under Duende.IdentityServer.Models."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

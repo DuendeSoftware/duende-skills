@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Overrides ValidateSoftwareStatementAsync in a DynamicClientRegistrationValidator subclass", "pass": false, "rationale": "Does not extend DynamicClientRegistrationValidator or override ValidateSoftwareStatementAsync. Creates a standalone SoftwareStatementValidator class."},
+    {"assertion": "Calls context.SetError when the software statement is missing or invalid", "pass": false, "rationale": "Does not use context.SetError(). Returns a custom SoftwareStatementResult.Failed() object instead of using the Duende context pattern."},
+    {"assertion": "Validates the JWT software statement using JsonWebTokenHandler or equivalent with ValidIssuer set to the trusted issuer URL", "pass": true, "rationale": "Uses JsonWebTokenHandler with ValidIssuer = 'https://trusted-issuer.example.com' in TokenValidationParameters."},
+    {"assertion": "Maps claims from the software statement (e.g. software_name) to context.Client properties", "pass": false, "rationale": "Maps software_name to a Client object, but not through context.Client. Uses a standalone pattern outside of the Duende DCR context."},
+    {"assertion": "Calls base.ValidateSoftwareStatementAsync at the end of successful validation", "pass": false, "rationale": "Does not call base.ValidateSoftwareStatementAsync(). Not extending the DynamicClientRegistrationValidator so no base call exists."}
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 103,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Defines separate ApiScope instances for service-specific scopes (e.g. invoice.read, customer.read) and shared scopes (manage, enumerate)",
+      "pass": true,
+      "rationale": "Lines 27-36 define invoice.read, invoice.pay, customer.read, customer.contact as service-specific and manage, enumerate as shared scopes."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'invoice' with a Scopes collection referencing invoice-specific and shared scopes",
+      "pass": true,
+      "rationale": "Lines 40-43 define ApiResource(\"invoice\") with Scopes = { \"invoice.read\", \"invoice.pay\", \"manage\", \"enumerate\" }."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'customer' with a Scopes collection referencing customer-specific and shared scopes",
+      "pass": true,
+      "rationale": "Lines 44-47 define ApiResource(\"customer\") with Scopes = { \"customer.read\", \"customer.contact\", \"manage\", \"enumerate\" }."
+    },
+    {
+      "assertion": "Explains that the aud claim in the token is derived from the ApiResource Name property",
+      "pass": true,
+      "rationale": "Line 3 explicitly states 'The aud claim in the token is derived from the ApiResource Name property' and lines 8-9 elaborate further."
+    },
+    {
+      "assertion": "Registers both API Resources and API Scopes with AddInMemoryApiResources and AddInMemoryApiScopes",
+      "pass": true,
+      "rationale": "Line 24 calls AddInMemoryApiScopes and line 38 calls AddInMemoryApiResources."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

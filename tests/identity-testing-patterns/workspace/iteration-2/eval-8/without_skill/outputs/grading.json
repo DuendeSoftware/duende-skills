@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": false,
+      "rationale": "Does not mention options.KeyManagement.Enabled = false. Only recommends AddDeveloperSigningCredential() as the fix for key management disk writes, without explicitly disabling automatic key management."
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": false,
+      "rationale": "Recommends AddDeveloperSigningCredential() but without the persistKey: false parameter. The code sample shows AddDeveloperSigningCredential() with no arguments."
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "Explicitly warns against hard-coding localhost:5001 and shows using factory.CreateClient() with client.BaseAddress instead."
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": true,
+      "rationale": "The 'Shared State Between Tests' section warns about static properties and shared HttpClient instances leaking state across parallel tests."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

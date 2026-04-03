@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a static RsaSecurityKey using RSA.Create(2048) or similar",
+      "pass": true,
+      "rationale": "Uses RSA.Create(2048) and creates a static RsaSecurityKey with KeyId = \"test-key\"."
+    },
+    {
+      "assertion": "The CreateAccessToken method accepts subject, audience, and claims parameters",
+      "pass": true,
+      "rationale": "CreateToken method accepts string subject, string audience, IEnumerable<Claim> claims, and optional expiresInMinutes."
+    },
+    {
+      "assertion": "Uses SecurityTokenDescriptor and JsonWebTokenHandler (or JwtSecurityTokenHandler) to create the token",
+      "pass": true,
+      "rationale": "Uses SecurityTokenDescriptor with JwtSecurityTokenHandler to create and write the token."
+    },
+    {
+      "assertion": "The WebApplicationFactory replaces JWT Bearer options with TokenValidationParameters that set IssuerSigningKey to the test key",
+      "pass": true,
+      "rationale": "TestApiFactory uses PostConfigure<JwtBearerOptions> to set TokenValidationParameters with IssuerSigningKey = TestJwtGenerator.SigningKey."
+    },
+    {
+      "assertion": "Sets ValidAudience to 'my-api' in the token validation parameters",
+      "pass": true,
+      "rationale": "TokenValidationParameters includes ValidAudience = \"my-api\"."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

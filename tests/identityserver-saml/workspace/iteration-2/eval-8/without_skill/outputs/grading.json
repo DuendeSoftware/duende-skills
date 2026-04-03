@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses ISamlInteractionService injected via dependency injection",
+      "pass": false,
+      "rationale": "ISamlInteractionService is not used; uses URL string matching instead."
+    },
+    {
+      "assertion": "Calls GetRequestContextAsync with the returnUrl parameter",
+      "pass": false,
+      "rationale": "GetRequestContextAsync is not called."
+    },
+    {
+      "assertion": "Checks if the returned context is non-null to determine if it's a SAML request",
+      "pass": false,
+      "rationale": "Uses string contains check instead of context null check."
+    },
+    {
+      "assertion": "Accesses context.ServiceProvider or context.RequestedNameIdFormat for SP details",
+      "pass": false,
+      "rationale": "No access to ServiceProvider or RequestedNameIdFormat."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

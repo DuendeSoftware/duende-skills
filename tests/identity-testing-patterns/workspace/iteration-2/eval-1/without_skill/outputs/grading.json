@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "FakeAuthHandler extends AuthenticationHandler<AuthenticationSchemeOptions> with a proper HandleAuthenticateAsync implementation."
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": false,
+      "rationale": "Uses a static property FakeAuthHandler.TestUser instead of an ITestClaimsProvider interface. A static property is not an interface — it lacks the abstraction and testability contract that an interface provides."
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "TestApiFactory calls services.AddAuthentication(\"FakeScheme\").AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>(\"FakeScheme\", _ => { })."
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "The Unauthenticated_Returns401 test sets FakeAuthHandler.TestUser = null (equivalent of clearing claims) and asserts HttpStatusCode.Unauthorized."
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely — authorization policies remain active",
+      "pass": true,
+      "rationale": "The factory only replaces the authentication scheme. No authorization policies are removed or bypassed."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

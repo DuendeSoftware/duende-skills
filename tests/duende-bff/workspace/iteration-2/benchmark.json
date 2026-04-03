@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "skill_name": "duende-bff",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 63,
+      "passed": 63,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 63,
+      "passed": 25,
+      "failed": 38,
+      "pass_rate": 39.68
+    },
+    "delta": {
+      "assertions_improved": 38,
+      "delta_pass_rate": 60.32
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Calls AddBff().ConfigureOpenIdConnect() (BFF v4 fluent API)",
+        "Calls AddBff().ConfigureCookies() or equivalent to configure cookie options through the BFF builder"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Configures the remote API proxy using builder.Services.AddRemoteApis(options => { ... }) to register the remote API base address",
+        "Maps the remote API endpoint using app.MapRemoteBffApiEndpoint(\"/api/todos\", \"https://api.example.com/todos\") with .WithAccessToken(RequiredTokenType.User)",
+        "Uses RequiredTokenType enum (not TokenType) for the access token requirement"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Calls AddEntityFrameworkServerSideSessions with a lambda configuring UseSqlServer",
+        "Calls AddSessionCleanupBackgroundProcess() on the BFF builder to enable automatic session cleanup",
+        "Uses AddBff() fluent API (not a separate AddServerSideSessions call)",
+        "The code compiles without mixing up BFF session store APIs with IdentityServer session store APIs"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75 },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions configuring the BFF proxy to forward the access token via .WithAccessToken(RequiredTokenType.User) or .WithAccessToken(RequiredTokenType.UserOrClient)"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25 },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Uses AddBffBlazorClient() for client-side Blazor BFF integration",
+        "Uses AddFrontend() to configure the Blazor frontend",
+        "Mentions or configures the BFF management endpoints accessible from the Blazor client"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75 },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "References specific IAccessTokenRetriever interface from Duende.Bff and shows how to register the custom retriever"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Configures YARP through BFF using AddBffExtensions() on the YARP reverse proxy builder",
+        "Maps YARP routes through BFF using MapBffReverseProxy()",
+        "Uses RequiredTokenType (not TokenType) in YARP route metadata for access token type",
+        "Shows YARP route metadata configuration with Duende.Bff.Yarp.TokenType key and RequiredTokenType value"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Configures the remote API using AddRemoteApis() to register the base address",
+        "Maps the endpoint using MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrClient)",
+        "Uses RequiredTokenType.UserOrClient (not .User) to support both interactive and machine-to-machine tokens"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Uses .SkipResponseHandling() on the BFF remote API endpoint configuration",
+        "Implements a custom IAccessTokenRetriever to add custom logic for token retrieval",
+        "Configures both AddRemoteApis and MapRemoteBffApiEndpoint correctly",
+        "Uses RequiredTokenType enum values (not TokenType)"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 4, "total": 4, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "References the Duende.Bff.Yarp package for YARP BFF integration",
+        "Uses AddBffExtensions() on the YARP reverse proxy builder",
+        "Configures YARP route metadata with Duende.Bff.Yarp.TokenType key",
+        "Uses MapBffReverseProxy() to map YARP routes through BFF"
+      ]
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Mentions /bff/login, /bff/logout, /bff/user as the BFF management endpoints",
+        "Mentions the anti-forgery header requirement (X-CSRF: 1) for BFF endpoints",
+        "Shows how to configure BFF management endpoints using MapBffManagementEndpoints()"
+      ]
+    },
+    {
+      "eval_id": 13,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "References AddEntityFrameworkServerSideSessions for BFF session storage",
+        "Mentions AddSessionCleanupBackgroundProcess() for automatic cleanup of expired sessions"
+      ]
+    },
+    {
+      "eval_id": 14,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Uses RequiredTokenType (not TokenType) for token requirements",
+        "Shows specific BFF v4 API methods like MapRemoteBffApiEndpoint or YARP metadata"
+      ]
+    }
+  ]
+}

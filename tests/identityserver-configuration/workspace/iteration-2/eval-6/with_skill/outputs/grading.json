@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection", "pass": true, "rationale": "Contains `new IdentityResources.OpenId()`."},
+    {"assertion": "Output includes new IdentityResources.Profile() in the identity resources collection", "pass": true, "rationale": "Contains `new IdentityResources.Profile()`."},
+    {"assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'", "pass": true, "rationale": "Defines `new IdentityResource(name: \"organization\", ..., userClaims: new[] { \"org_id\", \"org_name\", \"org_role\" })`."},
+    {"assertion": "The custom 'organization' identity resource has Required set to true", "pass": true, "rationale": "Sets `Required = true` in the object initializer."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

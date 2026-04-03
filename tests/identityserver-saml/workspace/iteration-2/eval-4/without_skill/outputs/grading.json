@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions DefaultClockSkew as the relevant setting",
+      "pass": false,
+      "rationale": "Does not mention DefaultClockSkew by name; refers to a generic 'clock skew setting'."
+    },
+    {
+      "assertion": "Shows configuration via options.Saml.DefaultClockSkew",
+      "pass": false,
+      "rationale": "Does not show options.Saml.DefaultClockSkew. Shows JWT bearer ClockSkew instead."
+    },
+    {
+      "assertion": "Suggests increasing the value beyond the default 5 minutes",
+      "pass": true,
+      "rationale": "Suggests increasing to 10-15 minutes."
+    },
+    {
+      "assertion": "Does NOT suggest changes to the OIDC/OAuth configuration \u2014 this is SAML-specific",
+      "pass": false,
+      "rationale": "Suggests JWT bearer TokenValidationParameters.ClockSkew which is OIDC/OAuth, not SAML."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint", "pass": false, "rationale": "Uses a hardcoded string 'https://localhost:5001' instead of identityServer.GetEndpoint('https')."},
+    {"assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value", "pass": true, "rationale": "Code shows `.WithEnvironment(\"Authentication__ClientId\", \"web-app\")`."},
+    {"assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention", "pass": false, "rationale": "Uses `.WithEnvironment(\"Authentication__Scopes\", \"openid profile weather.read\")` as a single string, not the double-underscore array indexing convention."},
+    {"assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL", "pass": false, "rationale": "Uses hardcoded 'https://localhost:5001' instead of GetEndpoint."},
+    {"assertion": "The code does NOT set IssuerUri unless explicitly needed", "pass": false, "rationale": "Suggests setting IssuerUri: `.WithEnvironment(\"IdentityServer__IssuerUri\", \"https://localhost:5001\")` without any explicit need."}
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

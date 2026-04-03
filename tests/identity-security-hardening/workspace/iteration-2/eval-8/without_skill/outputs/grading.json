@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Section 1 identifies PKCE as the first hardening step. Shows RequirePkce = true in code and states 'Setting RequirePkce = false removes this protection and should not be done in production.'"
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Section 2 states 'Redirect URIs should be exact-match, fully-qualified HTTPS URIs' and warns that 'Wildcards in redirect URIs can be exploited to redirect authorization codes to attacker-controlled endpoints.' Shows good vs bad examples."
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "Section 3 titled 'Use the Minimum Required Grant Types' states 'Each client should only have the grant types it actually needs' and lists correct per-client-type assignments. Explicitly states 'The implicit flow should be avoided entirely in favor of authorization code flow with PKCE.'"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

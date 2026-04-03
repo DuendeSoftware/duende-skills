@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses context.Caller to differentiate between token types",
+      "pass": true,
+      "rationale": "Uses context.Caller directly in the if statement to check the token type."
+    },
+    {
+      "assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+      "pass": true,
+      "rationale": "Checks context.Caller == IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken."
+    },
+    {
+      "assertion": "Emits a minimal claim set (e.g. just name) for identity tokens",
+      "pass": true,
+      "rationale": "For identity tokens, only emits a single Name claim and returns early."
+    },
+    {
+      "assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering",
+      "pass": true,
+      "rationale": "For access tokens, builds a full claims list and uses context.AddRequestedClaims(claims) for scope filtering."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

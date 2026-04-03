@@ -1,0 +1,34 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs uses different connection strings for configuration store and operational store",
+      "pass": true,
+      "rationale": "ConfigDb and OpsDb are used separately."
+    },
+    {
+      "assertion": "Program.cs sets DefaultSchema = 'config' or similar on the configuration store options",
+      "pass": false,
+      "rationale": "No DefaultSchema is set on either store."
+    },
+    {
+      "assertion": "Program.cs sets DefaultSchema = 'ops' or similar on the operational store options",
+      "pass": false,
+      "rationale": "No DefaultSchema is set."
+    },
+    {
+      "assertion": "Program.cs calls MigrationsHistoryTable for at least one of the stores with a custom table name and schema",
+      "pass": false,
+      "rationale": "MigrationsHistoryTable is not called."
+    },
+    {
+      "assertion": "appsettings.json contains both ConfigDb and OpsDb connection strings under ConnectionStrings",
+      "pass": true,
+      "rationale": "Both connection strings are in appsettings.json."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

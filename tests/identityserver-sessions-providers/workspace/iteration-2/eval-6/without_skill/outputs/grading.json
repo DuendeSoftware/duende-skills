@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The kiosk.app client AllowedGrantTypes includes Ciba or 'urn:openid:params:grant-type:ciba'",
+      "pass": true,
+      "rationale": "Line 13 shows `AllowedGrantTypes = { GrantType.Ciba }` on the kiosk.app client."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserValidator that processes login_hint",
+      "pass": true,
+      "rationale": "Lines 33-59 show `CibaUserValidator : IBackchannelAuthenticationUserValidator` with ValidateRequestAsync that checks `context.LoginHint`."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserNotificationService",
+      "pass": true,
+      "rationale": "Lines 70-83 show `CibaNotificationService : IBackchannelAuthenticationUserNotificationService` implementing SendLoginRequestAsync."
+    },
+    {
+      "assertion": "Both CIBA interfaces are registered in the DI container",
+      "pass": true,
+      "rationale": "Lines 90-91 show both AddTransient registrations for IBackchannelAuthenticationUserValidator and IBackchannelAuthenticationUserNotificationService."
+    },
+    {
+      "assertion": "Response mentions that CIBA requires the Enterprise Edition",
+      "pass": false,
+      "rationale": "The response does not mention the Enterprise Edition requirement anywhere. No edition or licensing information is included."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

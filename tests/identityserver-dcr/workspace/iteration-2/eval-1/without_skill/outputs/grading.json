@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Adds or references the Duende.IdentityServer.Configuration NuGet package", "pass": false, "rationale": "Does not mention or reference the Duende.IdentityServer.Configuration NuGet package. Creates a custom endpoint from scratch instead."},
+    {"assertion": "Calls AddIdentityServerConfiguration() on the service collection", "pass": false, "rationale": "Does not call AddIdentityServerConfiguration(). Builds a manual DCR endpoint without the Duende configuration API."},
+    {"assertion": "Calls MapDynamicClientRegistration() to map the DCR endpoint", "pass": false, "rationale": "Does not call MapDynamicClientRegistration(). Uses app.MapPost('/connect/register', ...) as a custom endpoint."},
+    {"assertion": "Mentions that DCR requires Business Edition or higher license", "pass": false, "rationale": "Does not mention the Business Edition license requirement. Only vaguely suggests checking Duende docs for built-in DCR support."},
+    {"assertion": "The MapDynamicClientRegistration() call includes RequireAuthorization() or the response warns about securing the endpoint", "pass": true, "rationale": "While not using MapDynamicClientRegistration(), the response does show RequireAuthorization('dcr') on the custom endpoint and mentions securing it."}
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}
