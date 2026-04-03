@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "Response explicitly states 'The root cause is almost certainly the missing X-CSRF: 1 header in your fetch() calls.'"
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "A complete `bffFetch` wrapper function is provided that automatically adds the X-CSRF: 1 header."
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "The wrapper checks `response.status === 401` and redirects to `/bff/login?returnUrl=...`."
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": true,
+      "rationale": "Response explicitly states: '/bff/login and /bff/logout must be browser navigations (window.location.href), not fetch() calls.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

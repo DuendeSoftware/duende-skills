@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme",
+      "pass": true,
+      "rationale": "Lines 23-29 configure ForwardedHeadersOptions with ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto."
+    },
+    {
+      "assertion": "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()",
+      "pass": true,
+      "rationale": "Line 36 calls UseForwardedHeaders() before line 40 UseIdentityServer()."
+    },
+    {
+      "assertion": "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes",
+      "pass": true,
+      "rationale": "Explicitly describes 'ASPNETCORE_FORWARDEDHEADERS_ENABLED=true' as a simpler alternative and mentions cloud/Kubernetes."
+    },
+    {
+      "assertion": "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery",
+      "pass": true,
+      "rationale": "Explains 'The reverse proxy terminates TLS and forwards requests as HTTP internally. Without ForwardedHeaders, IdentityServer sees HTTP and generates HTTP URLs in the discovery document.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

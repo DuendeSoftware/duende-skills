@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "skill_name": "oauth-oidc-protocols",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 37,
+      "passed": 37,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 37,
+      "passed": 35,
+      "failed": 2,
+      "pass_rate": 94.59
+    },
+    "delta": {
+      "assertions_improved": 2,
+      "delta_pass_rate": 5.41
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Mentions Duende IdentityServer's RequirePkce=true default and how .NET 7+ clients automatically use PKCE"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Explains the v7.0 default change from OneTimeOnly to ReUse for refresh tokens"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    }
+  ]
+}

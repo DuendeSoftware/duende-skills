@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'", "pass": false, "rationale": "Does not call AddIdentityServerConfiguration() at all. Does not set IdentityServerBaseUrl. Builds a fully custom solution."},
+    {"assertion": "Sets up JWT bearer authentication pointing to the main IdentityServer as Authority", "pass": true, "rationale": "Configures `.AddJwtBearer(\"Bearer\", options => { options.Authority = \"https://identity.example.com\"; })`."},
+    {"assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()", "pass": false, "rationale": "Does not call MapDynamicClientRegistration(). Uses a custom MapPost('/connect/register', ...) endpoint instead."},
+    {"assertion": "Does NOT call AddIdentityServer() — this is a separate host, not an IdentityServer instance", "pass": true, "rationale": "Does not call AddIdentityServer(). The separate service does not set up a full IdentityServer instance."},
+    {"assertion": "Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from", "pass": true, "rationale": "States 'The DCR service must share the same database as IdentityServer so that registered clients are visible to both'."}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-dcr",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 39,
+      "passed": 39,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 39,
+      "passed": 18,
+      "failed": 21,
+      "pass_rate": 46.15
+    },
+    "delta": {
+      "assertions_improved": 21,
+      "delta_pass_rate": 53.85
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Adds or references the Duende.IdentityServer.Configuration NuGet package",
+        "Calls AddIdentityServerConfiguration() on the service collection",
+        "Calls MapDynamicClientRegistration() to map the DCR endpoint",
+        "Mentions that DCR requires Business Edition or higher license"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Configures AddJwtBearer with an Authority and Audience for the DCR scheme",
+        "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 5, "total": 5, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "Creates a class that extends DynamicClientRegistrationValidator",
+        "Overrides ValidateGrantTypesAsync to reject grant types other than authorization_code",
+        "Overrides ValidateRedirectUrisAsync to enforce HTTPS on all redirect URIs",
+        "Sets RequirePkce = true in SetClientDefaultsAsync or equivalent override",
+        "Registers the validator using AddDynamicClientRegistrationValidator<T>() on the configuration builder"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Overrides ValidateSoftwareStatementAsync in a DynamicClientRegistrationValidator subclass",
+        "Calls context.SetError when the software statement is missing or invalid",
+        "Maps claims from the software statement (e.g. software_name) to context.Client properties",
+        "Calls base.ValidateSoftwareStatementAsync at the end of successful validation"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25 },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Adds or references the Duende.IdentityServer.Configuration.EntityFramework NuGet package",
+        "Calls AddClientConfigurationStore() on the IdentityServer configuration builder",
+        "Does NOT suggest implementing IClientConfigurationStore from scratch when the EF package is available"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "Implements the IClientConfigurationStore interface"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'",
+        "Calls MapDynamicClientRegistration() with RequireAuthorization()"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    }
+  ]
+}

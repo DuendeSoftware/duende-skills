@@ -1,0 +1,13 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response clearly states that IdentityServer3 is NOT covered by this migration path", "pass": true, "rationale": "Bold statement: 'No — this migration guide does not cover IdentityServer3. It covers IdentityServer4 only.'"},
+    {"assertion": "Response explains that IdentityServer3 is a different product based on OWIN/Katana and .NET Framework, not ASP.NET Core", "pass": true, "rationale": "Detailed table comparing IS3 (OWIN/Katana, .NET Framework) vs IS4 (ASP.NET Core middleware, .NET Core)."},
+    {"assertion": "Response advises migrating from IdentityServer3 to IdentityServer4 on ASP.NET Core first before upgrading to Duende IdentityServer", "pass": true, "rationale": "Explicitly states: 'You must first port from IdentityServer3 to IdentityServer4 on ASP.NET Core' with 4 steps."},
+    {"assertion": "Response does not confuse IdentityServer3 with IdentityServer4 v3.x (they are different products)", "pass": true, "rationale": "Dedicated section 'Don't Confuse IdentityServer3 with IdentityServer4 v3.x' clearly distinguishes the two."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

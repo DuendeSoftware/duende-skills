@@ -487,7 +487,7 @@ dotnet ef database update -c ConfigurationDbContext
 
 ### Step 2.9: Configure Data Protection
 
-Set an explicit application name to prevent data protection key invalidation when paths change between .NET versions:
+Set an explicit application name to prevent data protection key invalidation when paths change between .NET versions. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive guidance — this is a cross-cutting concern for all Duende SDKs.
 
 ```csharp
 builder.Services.AddDataProtection()

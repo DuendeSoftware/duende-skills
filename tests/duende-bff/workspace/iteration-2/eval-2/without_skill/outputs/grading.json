@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection", "pass": false, "rationale": "The local endpoint only uses .RequireAuthorization() and does not call .AsBffApiEndpoint()."},
+    {"assertion": "Local endpoint uses .RequireAuthorization()", "pass": true, "rationale": "The local endpoint uses .RequireAuthorization()."},
+    {"assertion": "Calls AddRemoteApis() on the BFF builder", "pass": false, "rationale": "The code does not call .AddRemoteApis() on the BFF builder, which is required in v4."},
+    {"assertion": "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api", "pass": true, "rationale": "Code contains MapRemoteBffApiEndpoint with the correct path and URI."},
+    {"assertion": "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)", "pass": false, "rationale": "Code uses `.RequireAccessToken(TokenType.User)` which is the v3 syntax, not v4's `.WithAccessToken(RequiredTokenType.User)`."}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

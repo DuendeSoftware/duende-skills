@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-stores",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 56,
+      "passed": 56,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 56,
+      "passed": 33,
+      "failed": 23,
+      "pass_rate": 58.93
+    },
+    "delta": {
+      "assertions_improved": 23,
+      "delta_pass_rate": 41.07
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": ["Both store registrations include MigrationsAssembly set to the host project assembly name"]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)",
+        "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching",
+        "ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Configuration store calls MigrationsHistoryTable with the schema parameter set to \"idscfg\"",
+        "Operational store calls MigrationsHistoryTable with the schema parameter set to \"idsop\"",
+        "Both store registrations include MigrationsAssembly pointing to the host project"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+        "AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "ICache<> is replaced with a distributed cache implementation via AddSingleton or similar registration",
+        "AddConfigurationStoreCache() is called after the configuration store registration",
+        "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+        "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75 },
+      "delta": 0.25,
+      "without_skill_failures": ["Client entities are added using the .ToEntity() extension method"]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework",
+        "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "The store is registered using AddClientStore<T>() on the IdentityServer builder, not directly via AddTransient",
+        "An ITenantContext interface (or equivalent) is defined or referenced that exposes the current tenant identifier"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75 },
+      "delta": 0.25,
+      "without_skill_failures": ["Program.cs does not call AddOperationalStore for EF Core since custom stores replace it"]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": ["Program.cs sets FuzzTokenCleanupStart = true on the operational store options"]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Program.cs sets DefaultSchema = 'config' or similar on the configuration store options",
+        "Program.cs sets DefaultSchema = 'ops' or similar on the operational store options",
+        "Program.cs calls MigrationsHistoryTable for at least one of the stores with a custom table name and schema"
+      ]
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    { "assertion": "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string", "pass": true, "rationale": "Lines 24-28 call AddOperationalStore with ConfigureDbContext using b.UseSqlServer(connectionString)." },
+    { "assertion": "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem", "pass": true, "rationale": "Lines 19-20 call AddDataProtection().PersistKeysToDbContext<PersistedGrantDbContext>()." },
+    { "assertion": "Program.cs calls SetApplicationName with an explicit application name string", "pass": true, "rationale": "Line 21 calls .SetApplicationName(\"MyIdentityServer\")." },
+    { "assertion": "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)", "pass": true, "rationale": "No KeyManagement.Enabled = false is present; automatic key management remains enabled." }
+  ],
+  "pass_count": 4, "total_count": 4, "score": 1.0
+}

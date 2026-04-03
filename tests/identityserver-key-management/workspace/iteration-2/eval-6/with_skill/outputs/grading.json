@@ -1,0 +1,11 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    { "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'", "pass": true, "rationale": "Line 17 sets options.KeyManagement.Enabled = false." },
+    { "assertion": "Program.cs calls AddSigningCredential with the new key (from LoadNewKey()) and SecurityAlgorithms.RsaSha256", "pass": true, "rationale": "Lines 48-49 call AddSigningCredential(newKey, SecurityAlgorithms.RsaSha256) where newKey = LoadNewKey()." },
+    { "assertion": "Program.cs calls AddValidationKey with the old key (from LoadOldKey()) and SecurityAlgorithms.RsaSha256", "pass": true, "rationale": "Lines 52-53 call AddValidationKey(oldKey, SecurityAlgorithms.RsaSha256) where oldKey = LoadOldKey()." },
+    { "assertion": "AddSigningCredential is called with the NEW key (not the old key), and AddValidationKey is called with the OLD key (not the new key)", "pass": true, "rationale": "AddSigningCredential uses LoadNewKey() and AddValidationKey uses LoadOldKey(), which is the correct assignment." }
+  ],
+  "pass_count": 4, "total_count": 4, "score": 1.0
+}

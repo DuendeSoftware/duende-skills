@@ -1,0 +1,29 @@
+{
+  "eval_id": 107,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Client has multiple Secret entries in the ClientSecrets collection (both old and new)",
+      "pass": true,
+      "rationale": "Lines 38-48 define two Secret entries in ClientSecrets — one labeled 'Original secret' and one 'New secret'."
+    },
+    {
+      "assertion": "Uses GrantTypes.ClientCredentials for the client",
+      "pass": true,
+      "rationale": "Line 32 sets AllowedGrantTypes = GrantTypes.ClientCredentials."
+    },
+    {
+      "assertion": "Explains that IdentityServer validates against all configured secrets so both old and new work during rollover",
+      "pass": true,
+      "rationale": "Line 62 states 'IdentityServer validates against all configured secrets in the ClientSecrets collection. Any matching secret will successfully authenticate the client.'"
+    },
+    {
+      "assertion": "Recommends removing the old secret after clients have migrated to the new one",
+      "pass": true,
+      "rationale": "Line 72 states 'Remove the old secret from the ClientSecrets collection' as step 4 of the rollover process."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

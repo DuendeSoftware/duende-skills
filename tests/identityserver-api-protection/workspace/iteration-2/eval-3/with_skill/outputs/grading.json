@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Configures both AddJwtBearer and AddOAuth2Introspection handlers",
+      "pass": true,
+      "rationale": "Both AddJwtBearer('token') and AddOAuth2Introspection('introspection') are configured."
+    },
+    {
+      "assertion": "Uses ForwardReferenceToken (via Selector.ForwardReferenceToken) to route reference tokens to the introspection handler",
+      "pass": true,
+      "rationale": "Selector.ForwardReferenceToken('introspection') is used with ForwardDefaultSelector."
+    },
+    {
+      "assertion": "The scheme name passed to ForwardReferenceToken matches the scheme name used in AddOAuth2Introspection",
+      "pass": true,
+      "rationale": "Both use 'introspection' as the scheme name."
+    },
+    {
+      "assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+      "pass": true,
+      "rationale": "ValidTypes = [\"at+jwt\"] is set on the JWT bearer handler."
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "Package is explicitly mentioned with dotnet add command and using directive."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

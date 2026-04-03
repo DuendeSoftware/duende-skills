@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The web_app client has AllowOfflineAccess = true", "pass": true, "rationale": "The code sets AllowOfflineAccess = true on the web_app client."},
+    {"assertion": "The web_app client AllowedScopes includes 'offline_access'", "pass": true, "rationale": "The AllowedScopes includes \"offline_access\"."},
+    {"assertion": "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)", "pass": false, "rationale": "The response uses 'RefreshTokenLifetime = 2592000' which is not the correct Duende property name. The correct property is AbsoluteRefreshTokenLifetime."},
+    {"assertion": "SlidingRefreshTokenLifetime is set to 86400 (1 day)", "pass": true, "rationale": "SlidingRefreshTokenLifetime = 86400 is set, matching the required value."},
+    {"assertion": "RefreshTokenExpiration is set to TokenExpiration.Sliding", "pass": false, "rationale": "The response uses 'UseSlidingExpiration = true' which is not the correct Duende API. The correct property is RefreshTokenExpiration = TokenExpiration.Sliding."}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

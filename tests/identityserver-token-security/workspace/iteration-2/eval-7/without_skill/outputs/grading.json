@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options", "pass": false, "rationale": "Only sets options.MutualTls.Enabled = true. AlwaysEmitConfirmationClaim is never configured, which is the critical setting for token binding without certificate auth."},
+    {"assertion": "Client uses standard shared secret authentication (not certificate-based authentication)", "pass": true, "rationale": "Line 20 uses new Secret(\"secret\".Sha256()) — standard shared secret."},
+    {"assertion": "Explains that the cnf claim with x5t#S256 will be embedded in the access token", "pass": false, "rationale": "Mentions 'cnf claim with the certificate's thumbprint' generically but does not specifically reference x5t#S256."},
+    {"assertion": "Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)", "pass": false, "rationale": "Mentions 'presents a certificate during the TLS handshake' generically but does not clarify this is required even when the certificate is not used for authentication."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

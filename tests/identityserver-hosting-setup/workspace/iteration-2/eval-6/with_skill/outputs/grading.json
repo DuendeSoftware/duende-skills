@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> BEFORE calling AddAspNetIdentity",
+      "pass": true,
+      "rationale": "Line 18 registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> before lines 20-21 which call AddAspNetIdentity."
+    },
+    {
+      "assertion": "Program.cs calls AddAspNetIdentity<ApplicationUser>() which will wrap and call through to the custom factory",
+      "pass": true,
+      "rationale": "Line 21 calls .AddAspNetIdentity<ApplicationUser>()."
+    },
+    {
+      "assertion": "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync",
+      "pass": true,
+      "rationale": "Lines 42-55 define CustomProfileService : ProfileService<ApplicationUser> with an override of IsUserActiveAsync."
+    },
+    {
+      "assertion": "The IsUserActiveAsync override checks a property on the user (e.g., user.IsEnabled or user.IsActive) to determine if the user is active",
+      "pass": true,
+      "rationale": "Line 53 returns Task.FromResult(user.IsActive), checking the IsActive property."
+    },
+    {
+      "assertion": "The CustomProfileService is registered in DI as the IProfileService implementation",
+      "pass": true,
+      "rationale": "Line 24 registers CustomProfileService as IProfileService via AddTransient."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

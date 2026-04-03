@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddJwtBearer with Authority set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "Authority is set to 'https://identity.example.com' in the AddJwtBearer options."
+    },
+    {
+      "assertion": "Sets Audience to 'api1'",
+      "pass": true,
+      "rationale": "Audience is set to 'api1' in the AddJwtBearer options."
+    },
+    {
+      "assertion": "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks",
+      "pass": true,
+      "rationale": "ValidTypes = [\"at+jwt\"] is set with explanation about JWT confusion attack prevention."
+    },
+    {
+      "assertion": "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "UseAuthentication() is called before UseAuthorization() with a comment explaining the ordering."
+    },
+    {
+      "assertion": "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "Package is added via dotnet add and shown in the .csproj file."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

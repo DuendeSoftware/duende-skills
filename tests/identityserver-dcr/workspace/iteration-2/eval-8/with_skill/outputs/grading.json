@@ -1,0 +1,14 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Warns against exposing the DCR endpoint without authentication or authorization", "pass": true, "rationale": "Section 1 explicitly warns 'anyone on the internet can register clients' and shows RequireAuthorization fix."},
+    {"assertion": "Warns against allowing dynamically registered clients to use any grant type — should restrict and enforce PKCE", "pass": true, "rationale": "Section 2 warns about unrestricted grant types and shows DynamicClientRegistrationValidator code with ValidateGrantTypesAsync restricting to authorization_code and RequirePkce = true."},
+    {"assertion": "Warns against using in-memory stores for DCR clients in production", "pass": true, "rationale": "Section 3 explicitly warns about in-memory stores losing data on restart and shows AddClientConfigurationStore() fix."},
+    {"assertion": "Mentions that client secrets must be stored securely (hashed, not plaintext)", "pass": true, "rationale": "Section 4 warns about plaintext secret storage and states 'Ensure your store hashes client secrets (SHA-256 or better)'."},
+    {"assertion": "Mentions that software statements must be validated against trusted signing keys — never accept unknown issuers", "pass": true, "rationale": "Section 5 warns about forged software statements, shows ValidateSoftwareStatementAsync code with ValidIssuer, and states 'Never accept software statements signed by unknown or unvalidated issuers'."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

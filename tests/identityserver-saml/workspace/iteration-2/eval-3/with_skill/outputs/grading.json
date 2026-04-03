@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ISamlClaimsMapper interface",
+      "pass": true,
+      "rationale": "CustomSamlClaimsMapper implements ISamlClaimsMapper."
+    },
+    {
+      "assertion": "The mapper returns SamlAttribute objects with custom Name values",
+      "pass": true,
+      "rationale": "SamlAttribute objects are created with custom urn:custom:* names."
+    },
+    {
+      "assertion": "Warns that ISamlClaimsMapper completely replaces default claim mapping \u2014 DefaultClaimMappings are not applied",
+      "pass": true,
+      "rationale": "Explicit warning section states ISamlClaimsMapper replaces default mapping."
+    },
+    {
+      "assertion": "Registers the custom mapper with dependency injection (e.g., AddTransient)",
+      "pass": true,
+      "rationale": "AddTransient<ISamlClaimsMapper, CustomSamlClaimsMapper>() is called."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

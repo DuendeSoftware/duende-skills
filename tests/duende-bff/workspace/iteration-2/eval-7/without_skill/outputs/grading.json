@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "Response correctly identifies the Data Protection key ring as the root cause."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Shows PersistKeysToDbContext and PersistKeysToStackExchangeRedis examples."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": false,
+      "rationale": "Response mentions 'a shared session store (like a database or Redis)' generically, but does not specifically recommend AddEntityFrameworkServerSideSessions from Duende BFF."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "Code shows AddDataProtection() with PersistKeysToDbContext and PersistKeysToStackExchangeRedis."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The factory disables automatic key management via options.KeyManagement.Enabled = false",
+      "pass": false,
+      "rationale": "The factory does not set options.KeyManagement.Enabled = false anywhere. It only calls AddDeveloperSigningCredential() without disabling key management."
+    },
+    {
+      "assertion": "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key",
+      "pass": false,
+      "rationale": "Calls AddDeveloperSigningCredential() without the persistKey: false parameter. The default may persist the key to disk, which is the exact CI issue the assertion targets."
+    },
+    {
+      "assertion": "Registers test clients via AddInMemoryClients with at least one client credentials client",
+      "pass": true,
+      "rationale": "Registers AddInMemoryClients(TestClients.Clients) with a client using GrantTypes.ClientCredentials."
+    },
+    {
+      "assertion": "The test calls RequestClientCredentialsTokenAsync (from IdentityModel) against the in-process server",
+      "pass": true,
+      "rationale": "The test calls _client.RequestClientCredentialsTokenAsync with a ClientCredentialsTokenRequest."
+    },
+    {
+      "assertion": "Asserts that the token response is not an error and contains a non-empty AccessToken",
+      "pass": true,
+      "rationale": "Asserts Assert.False(response.IsError, response.Error) and Assert.NotEmpty(response.AccessToken)."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

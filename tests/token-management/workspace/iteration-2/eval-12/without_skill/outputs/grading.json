@@ -1,0 +1,29 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+      "pass": true,
+      "rationale": "Code calls `builder.Services.AddClientCredentialsTokenManagement()` on line 11."
+    },
+    {
+      "assertion": "Output calls .AddClient() with at least TokenEndpoint, ClientId, and Scope configured",
+      "pass": true,
+      "rationale": "`.AddClient(\"my-client\", client => {...})` configures TokenEndpoint, ClientId, ClientSecret, and Scope."
+    },
+    {
+      "assertion": "Output registers an HTTP client with AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler",
+      "pass": true,
+      "rationale": "Code uses `.AddClientCredentialsTokenHandler(\"my-client\")` on line 23."
+    },
+    {
+      "assertion": "Output does NOT require any sub-documents to answer correctly (core SKILL.md is sufficient)",
+      "pass": true,
+      "rationale": "This is a meta-assertion about the eval design — the without_skill response also uses only core patterns."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

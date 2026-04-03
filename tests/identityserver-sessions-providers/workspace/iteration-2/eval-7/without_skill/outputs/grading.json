@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsFrequency to 5 minutes (TimeSpan.FromMinutes(5))",
+      "pass": true,
+      "rationale": "Line 23 shows `options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5)`."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsBatchSize to 200",
+      "pass": true,
+      "rationale": "Line 24 shows `options.ServerSideSessions.RemoveExpiredSessionsBatchSize = 200`."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false",
+      "pass": true,
+      "rationale": "Line 27 shows `options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false`."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)",
+      "pass": true,
+      "rationale": "The assertion allows 'relying on the default'. The response mentions in the text section (line 129) that 'the cleanup start time should be randomized' and 'IdentityServer handles this by default'. Since the default value of FuzzExpiredSessionRemovalStart is true and the response acknowledges this behavior, it passes by relying on the default."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

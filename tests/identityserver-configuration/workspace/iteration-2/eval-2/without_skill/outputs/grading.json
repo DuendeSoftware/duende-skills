@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials with AllowedScopes containing 'orders.read' and 'inventory.write'", "pass": true, "rationale": "Client 'batch-processor' uses `GrantTypes.ClientCredentials` with both scopes."},
+    {"assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true (explicit or by noting default)", "pass": true, "rationale": "Client 'admin-portal' uses `GrantTypes.Code`. RequirePkce is not explicitly set but the prose notes 'which should be enabled by default', which counts as noting the default."},
+    {"assertion": "The admin-portal client has AllowOfflineAccess set to true to enable refresh tokens", "pass": true, "rationale": "`AllowOfflineAccess = true` is present."},
+    {"assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId (or 'openid') in its AllowedScopes", "pass": true, "rationale": "AllowedScopes contains 'openid' as a string literal."},
+    {"assertion": "The admin-portal client has RedirectUris containing 'https://admin.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://admin.example.com/signout-callback-oidc'", "pass": true, "rationale": "Both URIs are present."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ISamlClaimsMapper interface",
+      "pass": false,
+      "rationale": "The class does not implement ISamlClaimsMapper \u2014 it's a standalone class with no interface."
+    },
+    {
+      "assertion": "The mapper returns SamlAttribute objects with custom Name values",
+      "pass": true,
+      "rationale": "SamlAttribute objects with custom names are created."
+    },
+    {
+      "assertion": "Warns that ISamlClaimsMapper completely replaces default claim mapping \u2014 DefaultClaimMappings are not applied",
+      "pass": false,
+      "rationale": "No warning about replacing default mappings."
+    },
+    {
+      "assertion": "Registers the custom mapper with dependency injection (e.g., AddTransient)",
+      "pass": false,
+      "rationale": "No DI registration shown; response says to 'register it' but doesn't show the ISamlClaimsMapper registration."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

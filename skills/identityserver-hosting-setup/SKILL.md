@@ -302,14 +302,14 @@ Add `UseForwardedHeaders()` early in the pipeline, before `UseIdentityServer()`.
 
 ## Production Deployment: Data Protection
 
-Data protection is critical for IdentityServer. It protects signing keys at rest, persisted grants, server-side sessions, and authentication cookies.
+Data protection is critical for IdentityServer. It protects signing keys at rest, persisted grants, server-side sessions, and authentication cookies. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive guidance covering all Duende SDKs.
 
 ```csharp
 // Program.cs
 builder.Services.AddDataProtection()
     .PersistKeysToFoo()       // Choose persistence (FileSystem, DbContext, Azure, Redis, etc.)
     .ProtectKeysWithBar()     // Choose key protection (Certificate, Azure Key Vault, etc.)
-    .SetApplicationName("IdentityServer"); // Prevent key isolation issues
+    .SetApplicationName("My.IdentityServer"); // Prevent key isolation issues
 ```
 
 ### Data Protection Checklist

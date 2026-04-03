@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "The m2m_client has a Claims collection with a ClientClaim for 'tenant_id' with value '42'", "pass": true, "rationale": "Claims collection includes new ClientClaim(\"tenant_id\", \"42\")."},
+    {"assertion": "The m2m_client has a Claims collection with a ClientClaim for 'department' with value 'billing'", "pass": true, "rationale": "Claims collection includes new ClientClaim(\"department\", \"billing\")."},
+    {"assertion": "The m2m_client has ClientClaimsPrefix set to an empty string", "pass": true, "rationale": "ClientClaimsPrefix = \"\" is set on the client."}
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

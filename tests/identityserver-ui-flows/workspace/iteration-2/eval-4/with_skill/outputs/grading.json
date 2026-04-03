@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures opt.UserInteraction.LogoutUrl to a specific logout path", "pass": true, "rationale": "Program.cs sets options.UserInteraction.LogoutUrl = \"/Logout\"."},
+    {"assertion": "A logout page calls GetLogoutContextAsync(logoutId) to retrieve the logout context", "pass": true, "rationale": "LogoutModel.OnPost calls _interaction.GetLogoutContextAsync(LogoutId)."},
+    {"assertion": "The logout page calls HttpContext.SignOutAsync to end the authentication session", "pass": true, "rationale": "LogoutModel.OnPost calls HttpContext.SignOutAsync()."},
+    {"assertion": "The logout page uses context.SignOutIFrameUrl for front-channel logout iframe rendering", "pass": true, "rationale": "The page sets SignOutIFrameUrl = context.SignOutIFrameUrl and renders it in an <iframe>."},
+    {"assertion": "The web.app client has BackChannelLogoutUri set to 'https://app.example.com/bff/backchannel'", "pass": true, "rationale": "The web.app client has BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\"."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

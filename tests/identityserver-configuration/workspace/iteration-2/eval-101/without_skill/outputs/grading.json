@@ -1,0 +1,29 @@
+{
+  "eval_id": 101,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client uses GrantTypes.ClientCredentials as the allowed grant type",
+      "pass": true,
+      "rationale": "Line 19 sets AllowedGrantTypes = GrantTypes.ClientCredentials."
+    },
+    {
+      "assertion": "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "Line 21 sets AllowedScopes = { \"invoices.read\", \"invoices.pay\" }."
+    },
+    {
+      "assertion": "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "Lines 9-12 define both ApiScope(\"invoices.read\") and ApiScope(\"invoices.pay\")."
+    },
+    {
+      "assertion": "Secret is loaded from Configuration or an external source — not a hardcoded string with Sha256()",
+      "pass": false,
+      "rationale": "Line 20 uses a hardcoded string: new Secret(\"billing-secret\".Sha256()). The secret is not loaded from configuration or any external source."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

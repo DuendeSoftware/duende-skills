@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+      "pass": true,
+      "rationale": "Shows both ApiScope and ApiResource with UserClaims. Does not mention IdentityResource explicitly, but the assertion says 'IdentityResource, ApiScope, or ApiResource' and the response covers ApiScope and ApiResource."
+    },
+    {
+      "assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+      "pass": true,
+      "rationale": "Shows new ApiScope(\"api1\", new[] { \"department\" }) and ApiResource with UserClaims = { \"department\" }."
+    },
+    {
+      "assertion": "Mentions that the client must also request the scope that contains the claim",
+      "pass": true,
+      "rationale": "Section 3 mentions 'The client configuration must include the scope that contains the department claim in its AllowedScopes'."
+    },
+    {
+      "assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types",
+      "pass": false,
+      "rationale": "Does not mention AddRequestedClaims or RequestedClaimTypes at all. The profile service code uses context.IssuedClaims.Add directly without explaining the filtering mechanism."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

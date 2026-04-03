@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details", "pass": true, "rationale": "ConsentModel injects IIdentityServerInteractionService and OnGet calls GetAuthorizationContextAsync(returnUrl) to get client and scope information."},
+    {"assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true", "pass": true, "rationale": "OnPost calls GrantConsentAsync with new ConsentResponse { ScopesValuesConsented = ConsentedScopes, RememberConsent = RememberConsent } where RememberConsent defaults to true."},
+    {"assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent", "pass": true, "rationale": "When action == \"deny\", OnPost calls _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied)."},
+    {"assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting", "pass": true, "rationale": "OnPost calls _interaction.IsValidReturnUrl(ReturnUrl) before redirecting, and checks GetAuthorizationContextAsync returns non-null."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

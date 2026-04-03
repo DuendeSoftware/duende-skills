@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": false,
+      "rationale": "Code does not use AddFrontend at all. It manually configures separate auth schemes."
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": false,
+      "rationale": "Code does not use AddFrontend."
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": false,
+      "rationale": "Uses manual AddOpenIdConnect, not the v4 ConfigureOpenIdConnect within AddFrontend."
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": true,
+      "rationale": "Code maps two remote BFF API endpoints for admin and portal APIs."
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "Code calls AddBff()."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

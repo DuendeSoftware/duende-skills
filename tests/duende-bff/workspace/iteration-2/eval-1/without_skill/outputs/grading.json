@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls AddBff() on builder.Services", "pass": true, "rationale": "Response contains `builder.Services.AddBff();` in the service configuration."},
+    {"assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true", "pass": false, "rationale": "Response manually calls AddAuthentication().AddCookie().AddOpenIdConnect() instead of using the v4 fluent ConfigureOpenIdConnect API."},
+    {"assertion": "Adds 'offline_access' to the OIDC scopes", "pass": true, "rationale": "Response includes `options.Scope.Add(\"offline_access\");`."},
+    {"assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization", "pass": true, "rationale": "The middleware pipeline shows UseRouting, UseAuthentication, UseBff, UseAuthorization in the correct order."},
+    {"assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead", "pass": false, "rationale": "Response manually calls AddAuthentication, AddCookie, and AddOpenIdConnect — this is the v3 pattern, not the v4 fluent API."}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

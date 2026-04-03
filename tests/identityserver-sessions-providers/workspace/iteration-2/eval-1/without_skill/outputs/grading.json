@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder chain",
+      "pass": false,
+      "rationale": "The response uses `options.ServerSideSessions.Enabled = true` (line 24) which is not the correct Duende API. The correct approach is calling `.AddServerSideSessions()` as a builder method. No such builder call appears in the code."
+    },
+    {
+      "assertion": "Program.cs configures AddOperationalStore with UseSqlServer using the connection string from configuration",
+      "pass": true,
+      "rationale": "Lines 29-33 show `.AddOperationalStore(options => { options.ConfigureDbContext = b => b.UseSqlServer(connectionString); })` using the connection string variable."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.UserDisplayNameClaimType to 'name'",
+      "pass": true,
+      "rationale": "Line 27 shows `options.ServerSideSessions.UserDisplayNameClaimType = \"name\";`."
+    },
+    {
+      "assertion": "Program.cs does not rely on the default in-memory session store for production use",
+      "pass": true,
+      "rationale": "The response configures AddOperationalStore with SQL Server, providing a durable store."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

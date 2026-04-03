@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "Lines 11-15 call AddInMemoryIdentityResources with IdentityResources.OpenId() and IdentityResources.Profile()."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "Lines 16-19 call AddInMemoryApiScopes with ApiScope(\"weatherapi\", \"Weather API\")."
+    },
+    {
+      "assertion": "Program.cs defines a client with AllowedGrantTypes set to Code (authorization code with PKCE)",
+      "pass": true,
+      "rationale": "Line 26 sets AllowedGrantTypes = GrantTypes.Code, and line 27 sets RequirePkce = true."
+    },
+    {
+      "assertion": "The client configuration includes RedirectUris containing 'https://webapp.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://webapp.example.com/signout-callback-oidc'",
+      "pass": true,
+      "rationale": "Line 31 sets RedirectUris to the correct value and line 32 sets PostLogoutRedirectUris correctly."
+    },
+    {
+      "assertion": "Program.cs has the correct middleware pipeline ordering: UseIdentityServer after UseRouting and before UseAuthorization",
+      "pass": true,
+      "rationale": "Lines 42-44 show UseRouting → UseIdentityServer → UseAuthorization in the correct order."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

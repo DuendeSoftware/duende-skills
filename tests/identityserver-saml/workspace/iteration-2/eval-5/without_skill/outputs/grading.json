@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets EncryptAssertions = true on the SamlServiceProvider",
+      "pass": true,
+      "rationale": "EncryptAssertions = true is set."
+    },
+    {
+      "assertion": "Populates EncryptionCertificates with a certificate loaded from certs/sp-encryption.cer",
+      "pass": false,
+      "rationale": "No encryption certificate is loaded or configured."
+    },
+    {
+      "assertion": "Sets AllowIdpInitiated = true on the SamlServiceProvider",
+      "pass": false,
+      "rationale": "AllowIdpInitiated is not set on the SamlServiceProvider."
+    },
+    {
+      "assertion": "Mentions that the IdP-initiated SSO endpoint must be enabled via options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true",
+      "pass": false,
+      "rationale": "The specific endpoint setting is not mentioned."
+    },
+    {
+      "assertion": "Does NOT set EncryptAssertions = true without providing EncryptionCertificates",
+      "pass": false,
+      "rationale": "EncryptAssertions = true is set but EncryptionCertificates is not populated."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

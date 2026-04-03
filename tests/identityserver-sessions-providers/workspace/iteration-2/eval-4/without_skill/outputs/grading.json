@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs removes or replaces at least one static AddOpenIdConnect registration with dynamic provider configuration",
+      "pass": true,
+      "rationale": "Line 90 comments that static AddGoogle and AddOpenIdConnect have been removed. The AddConfigurationStore is used for dynamic provider loading."
+    },
+    {
+      "assertion": "Program.cs or a seed file creates an OidcProvider with Scheme set to 'demoidsrv' and Authority set to 'https://demo.duendesoftware.com'",
+      "pass": true,
+      "rationale": "Lines 122-129 show `new OidcProvider { Scheme = \"demoidsrv\", Authority = \"https://demo.duendesoftware.com\", ClientId = \"login\" }` in the seed data."
+    },
+    {
+      "assertion": "Program.cs calls AddConfigurationStoreCache() for caching dynamic provider lookups",
+      "pass": false,
+      "rationale": "The response does NOT call `.AddConfigurationStoreCache()` anywhere. Only `.AddConfigurationStore()` is present on line 22, but no caching is configured."
+    },
+    {
+      "assertion": "Response mentions or acknowledges that dynamic identity providers require the Enterprise Edition",
+      "pass": false,
+      "rationale": "The response does not mention the Enterprise Edition requirement anywhere. No edition or licensing information is included."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

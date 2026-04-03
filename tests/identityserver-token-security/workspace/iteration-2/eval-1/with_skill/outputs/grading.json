@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Sets RequireDPoP = true on the client configuration", "pass": true, "rationale": "Line 32 sets RequireDPoP = true on the dpop_client."},
+    {"assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client", "pass": true, "rationale": "Line 35 sets DPoPClockSkew = TimeSpan.FromMinutes(2)."},
+    {"assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value", "pass": true, "rationale": "Lines 5-15 explain the cnf claim with jkt thumbprint and lines 15-16 describe the signed DPoP proof JWT."},
+    {"assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3", "pass": true, "rationale": "Line 17 explicitly states 'DPoP requires Enterprise Edition and Duende IdentityServer version >= 6.3.'"},
+    {"assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication", "pass": true, "rationale": "Lines 27-28 show ClientCredentials with shared secret, and line 43 explicitly explains DPoP is separate from client authentication."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

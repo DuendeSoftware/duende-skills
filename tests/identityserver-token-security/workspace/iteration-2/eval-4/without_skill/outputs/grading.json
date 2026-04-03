@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Sets options.PushedAuthorization.Required = true in AddIdentityServer options", "pass": true, "rationale": "Line 13 sets options.PushedAuthorization.Required = true."},
+    {"assertion": "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)", "pass": false, "rationale": "Line 16 sets options.PushedAuthorization.Lifetime = TimeSpan.FromMinutes(5), which is a TimeSpan not an int. The Duende API expects an int (seconds)."},
+    {"assertion": "Sets RequirePushedAuthorization = true on the banking_app client", "pass": true, "rationale": "Line 30 sets RequirePushedAuthorization = true on the banking_app client."},
+    {"assertion": "Sets PushedAuthorizationLifetime = 900 on the banking_app client to override global lifetime", "pass": false, "rationale": "PushedAuthorizationLifetime is never set on the banking_app client. The per-client override is missing."},
+    {"assertion": "Mentions PAR requires Business or Enterprise edition (version >= 7.0)", "pass": false, "rationale": "No mention of edition requirements or version constraints for PAR."}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

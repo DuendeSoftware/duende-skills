@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint", "pass": true, "rationale": "Code shows `.WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))` on the web app."},
+    {"assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value", "pass": true, "rationale": "Code shows `.WithEnvironment(\"Authentication__ClientId\", \"web-app\")`."},
+    {"assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention", "pass": true, "rationale": "Code shows three scopes: `Authentication__Scopes__0` (openid), `Authentication__Scopes__1` (profile), `Authentication__Scopes__2` (weather.read)."},
+    {"assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL", "pass": true, "rationale": "Code shows `.WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))` on the API."},
+    {"assertion": "The code does NOT set IssuerUri unless explicitly needed", "pass": true, "rationale": "No IssuerUri is set. The response explicitly warns: 'Do NOT set IssuerUri unless the internal Aspire URL differs from what clients see.'"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

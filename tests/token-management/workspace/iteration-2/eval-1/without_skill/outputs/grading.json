@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+      "pass": true,
+      "rationale": "Code calls `builder.Services.AddClientCredentialsTokenManagement()` on line 14."
+    },
+    {
+      "assertion": "Output calls AddClient() with configuration including TokenEndpoint, ClientId, ClientSecret, and Scope",
+      "pass": true,
+      "rationale": "`.AddClient(\"catalog-worker\", client => {...})` sets all four properties."
+    },
+    {
+      "assertion": "Output registers an HTTP client using AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler with the client name",
+      "pass": true,
+      "rationale": "Code uses `.AddClientCredentialsTokenHandler(\"catalog-worker\")` on line 27."
+    },
+    {
+      "assertion": "Output shows a BackgroundService or worker class that uses IHttpClientFactory.CreateClient to make API calls without manual token code",
+      "pass": true,
+      "rationale": "CatalogWorker extends BackgroundService and uses `_factory.CreateClient(\"catalog-api\")` with no manual token code."
+    },
+    {
+      "assertion": "Output uses v4 strongly-typed ClientCredentialsClientName.Parse() for the client name (not a raw string)",
+      "pass": false,
+      "rationale": "Code passes a raw string `\"catalog-worker\"` to AddClientCredentialsTokenHandler, not ClientCredentialsClientName.Parse()."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

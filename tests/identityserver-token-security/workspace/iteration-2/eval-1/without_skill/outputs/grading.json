@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Sets RequireDPoP = true on the client configuration", "pass": false, "rationale": "Uses Properties dictionary with 'require_dpop' string instead of the actual RequireDPoP = true property on the Client object."},
+    {"assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client", "pass": false, "rationale": "Suggests TokenValidationParameters.ClockSkew on the API side, not the Duende-specific DPoPClockSkew property on the client configuration."},
+    {"assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value", "pass": false, "rationale": "Mentions the cnf claim with 'key fingerprint' but does not specifically mention jkt (JWK Thumbprint) as the confirmation method."},
+    {"assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3", "pass": false, "rationale": "No mention of Enterprise Edition or version requirements."},
+    {"assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication", "pass": true, "rationale": "Line 41 states 'The client authenticates normally with its secret, and DPoP adds an additional layer of token binding.'"}
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

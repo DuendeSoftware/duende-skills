@@ -1,0 +1,29 @@
+{
+  "eval_id": 14,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses .SkipResponseHandling() on the endpoint",
+      "pass": true,
+      "rationale": "Code shows `.SkipResponseHandling()` chained on the endpoint."
+    },
+    {
+      "assertion": "Explains that by default BFF converts 401/403 to JSON-friendly responses instead of redirects",
+      "pass": true,
+      "rationale": "Response explains: 'By default, BFF converts 401 and 403 responses from local API endpoints into JSON-friendly responses.'"
+    },
+    {
+      "assertion": "Endpoint still uses .AsBffApiEndpoint() for CSRF protection",
+      "pass": true,
+      "rationale": "Code chains `.AsBffApiEndpoint()` and response explains it still enforces CSRF protection."
+    },
+    {
+      "assertion": "Endpoint uses .RequireAuthorization() to trigger the challenge",
+      "pass": true,
+      "rationale": "Code includes `.RequireAuthorization()` with explanation that it triggers the authentication challenge."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddLocalApiAuthentication() to set up local API authentication",
+      "pass": false,
+      "rationale": "Uses AddJwtBearer pointing to localhost instead of AddLocalApiAuthentication()."
+    },
+    {
+      "assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+      "pass": false,
+      "rationale": "Uses generic RequireAuthorization() without the specific local API policy."
+    },
+    {
+      "assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+      "pass": false,
+      "rationale": "No mention of the IdentityServerApi scope requirement."
+    },
+    {
+      "assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts",
+      "pass": false,
+      "rationale": "No warning about co-hosting requirement. The response acknowledges there's 'built-in local API support' but doesn't explain the constraint."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

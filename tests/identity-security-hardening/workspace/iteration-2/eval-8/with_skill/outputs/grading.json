@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Section 1 is dedicated to PKCE. States RequirePkce = true 'must be set on every client' and 'must never be set to false'. Explicitly warns that setting RequirePkce = false makes authorization code interception 'trivially exploitable' and references Common Pitfall #1."
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Section 2 is dedicated to redirect URIs. States 'Every production redirect URI must be fully qualified and must match exactly' and that 'Wildcards in redirect URIs are a critical attack surface.' Provides correct and incorrect examples."
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "Section 3 is titled 'Restrict Grant Types to Only What Each Client Needs (Principle of Least Grant)'. Explicitly states 'Implicit flow (GrantTypes.Implicit) must be removed from all clients' and lists correct grant type per client type."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

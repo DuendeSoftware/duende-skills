@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens", "pass": true, "rationale": "Core Rule section explicitly states clients should never parse access tokens, only the resource server should."},
+    {"assertion": "Response recommends using the ID token for user identity claims (name, email) in the client application", "pass": true, "rationale": "Option 1 recommends using the ID token with code examples showing User.FindFirst claims."},
+    {"assertion": "Response mentions the userinfo endpoint as an alternative for retrieving user claims", "pass": true, "rationale": "Option 2 shows calling the userinfo endpoint with IdentityModel code example."},
+    {"assertion": "Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)", "pass": true, "rationale": "Table clearly shows ID Token purpose is 'Proves user identity' consumed by 'Client application', Access Token purpose is 'Authorizes API calls' consumed by 'Resource server (API)'."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses context.Caller to differentiate between token types",
+      "pass": false,
+      "rationale": "Does not use context.Caller at all. Instead uses context.RequestedClaimTypes to infer token type indirectly."
+    },
+    {
+      "assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+      "pass": false,
+      "rationale": "Does not reference IdentityServerConstants.ProfileDataCallers or ClaimsProviderIdentityToken anywhere."
+    },
+    {
+      "assertion": "Emits a minimal claim set (e.g. just name) for identity tokens",
+      "pass": false,
+      "rationale": "Does not differentiate by token type — emits claims based on RequestedClaimTypes, not by checking if it's an identity token."
+    },
+    {
+      "assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering",
+      "pass": false,
+      "rationale": "Does not use AddRequestedClaims. Uses IssuedClaims.Add directly and does not distinguish access tokens from identity tokens."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

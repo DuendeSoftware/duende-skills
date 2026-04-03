@@ -1,0 +1,34 @@
+{
+  "eval_id": 103,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Defines separate ApiScope instances for service-specific scopes (e.g. invoice.read, customer.read) and shared scopes (manage, enumerate)",
+      "pass": false,
+      "rationale": "The response defines scopes as invoice.manage, invoice.enumerate, customer.manage, customer.enumerate — prefixed per-service rather than shared. It does not define shared 'manage' and 'enumerate' scopes."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'invoice' with a Scopes collection referencing invoice-specific and shared scopes",
+      "pass": false,
+      "rationale": "No ApiResource is defined anywhere. The response only uses ApiScopes and relies on scope naming conventions instead of ApiResources for isolation."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'customer' with a Scopes collection referencing customer-specific and shared scopes",
+      "pass": false,
+      "rationale": "No ApiResource named 'customer' is defined. The response does not use ApiResources at all."
+    },
+    {
+      "assertion": "Explains that the aud claim in the token is derived from the ApiResource Name property",
+      "pass": false,
+      "rationale": "The response does not mention ApiResource or the aud claim derivation. It suggests scope-based authorization policies and even sets ValidateAudience = false."
+    },
+    {
+      "assertion": "Registers both API Resources and API Scopes with AddInMemoryApiResources and AddInMemoryApiScopes",
+      "pass": false,
+      "rationale": "Only AddInMemoryApiScopes is called. AddInMemoryApiResources is never used because no ApiResources are defined."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-saml",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 35,
+      "passed": 35,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 35,
+      "passed": 8,
+      "failed": 27,
+      "pass_rate": 22.86
+    },
+    "delta": {
+      "assertions_improved": 27,
+      "delta_pass_rate": 77.14
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 5, "total": 5, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "The code calls .AddSaml() on the IdentityServer builder chain",
+        "No separate NuGet package is added — SAML is built into Duende.IdentityServer",
+        "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+        "AssertionConsumerServiceUrls contains 'https://crm.contoso.com/saml/acs'",
+        "The code mentions or uses AddInMemorySamlServiceProviders to register the SP"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The store class has a FindByEntityIdAsync method that accepts a string entityId and CancellationToken",
+        "Uses AddSamlServiceProviderStore<T>() for registration"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25 },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Implements ISamlClaimsMapper interface",
+        "Warns that ISamlClaimsMapper completely replaces default claim mapping — DefaultClaimMappings are not applied",
+        "Registers the custom mapper with dependency injection (e.g., AddTransient)"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 3, "total": 4, "pass_rate": 0.25 },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Mentions DefaultClockSkew as the relevant setting",
+        "Shows configuration via options.Saml.DefaultClockSkew",
+        "Does NOT suggest changes to the OIDC/OAuth configuration — this is SAML-specific"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 1, "failed": 4, "total": 5, "pass_rate": 0.2 },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Populates EncryptionCertificates with a certificate loaded from certs/sp-encryption.cer",
+        "Sets AllowIdpInitiated = true on the SamlServiceProvider",
+        "Mentions that the IdP-initiated SSO endpoint must be enabled via options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = true",
+        "Does NOT set EncryptAssertions = true without providing EncryptionCertificates"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Lists all four signing behaviors: SignAssertion, SignResponse, SignBoth, DoNotSign",
+        "Warns that DoNotSign should only be used for testing, never in production",
+        "Shows how to set SigningBehavior on the SamlServiceProvider or as a default via options.Saml.DefaultSigningBehavior"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 3, "total": 3, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "States that no separate NuGet package is needed — SAML is built into Duende.IdentityServer",
+        "States that Enterprise Edition license is required",
+        "Mentions SAML support was introduced in version 8.0"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 0, "failed": 4, "total": 4, "pass_rate": 0.0 },
+      "delta": 1.0,
+      "without_skill_failures": [
+        "Uses ISamlInteractionService injected via dependency injection",
+        "Calls GetRequestContextAsync with the returnUrl parameter",
+        "Checks if the returned context is non-null to determine if it's a SAML request",
+        "Accesses context.ServiceProvider or context.RequestedNameIdFormat for SP details"
+      ]
+    }
+  ]
+}

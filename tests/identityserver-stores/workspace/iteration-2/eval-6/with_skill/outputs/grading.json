@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The method creates a scoped service provider via IServiceScopeFactory.CreateScope() or app.ApplicationServices equivalent",
+      "pass": true,
+      "rationale": "Uses app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope()."
+    },
+    {
+      "assertion": "Database.Migrate() is called on both PersistedGrantDbContext and ConfigurationDbContext",
+      "pass": true,
+      "rationale": "Database.Migrate() is called on both contexts."
+    },
+    {
+      "assertion": "Before seeding clients, a check is performed (e.g. !configContext.Clients.Any()) to avoid duplicate data",
+      "pass": true,
+      "rationale": "!configContext.Clients.Any() check is performed before seeding."
+    },
+    {
+      "assertion": "Client entities are added using the .ToEntity() extension method to convert from the IdentityServer model to the EF entity",
+      "pass": true,
+      "rationale": "client.ToEntity() is used for the conversion."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

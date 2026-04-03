@@ -74,6 +74,8 @@ By default, `KnownNetworks` and `KnownProxies` support localhost (`127.0.0.1/8` 
 
 ## ASP.NET Core Data Protection
 
+> **Cross-cutting concern:** Data protection is critical for all Duende products — both IdentityServer and BFF. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive guidance covering all Duende SDKs.
+
 ### Why It Matters
 
 Data Protection is critical for IdentityServer. It encrypts and signs sensitive data including:
@@ -98,7 +100,7 @@ builder.Services.AddDataProtection()
     // Choose a key protection method
     .ProtectKeysWithBar()     // ProtectKeysWithCertificate, ProtectKeysWithAzureKeyVault
     // Set explicit application name
-    .SetApplicationName("IdentityServer");
+    .SetApplicationName("My.IdentityServer");
 ```
 
 ### Critical Rules
@@ -107,6 +109,7 @@ builder.Services.AddDataProtection()
 2. **Ensure the storage itself is durable** — e.g., if using Redis, configure Redis persistence (RDB/AOF)
 3. **Always set an explicit application name** with `.SetApplicationName()` to prevent key isolation issues
 4. **Share keys across all load-balanced instances**
+5. **Consider a key escrow sink** — for backup/restore of corrupted data protection keys, configure an `IXmlEncryptor`-based escrow
 
 ### Data Protection Keys vs Signing Keys
 
@@ -128,7 +131,7 @@ Both are critical secrets. Losing either causes failures.
 | Keys generated in dev included in build     | Keys from wrong environment can't be read in production | Exclude `~/keys` directory from source control and builds |
 | Application name mismatch                   | Keys from one deployment can't be read by another       | Set explicit `SetApplicationName()` consistently          |
 | IIS lacking permissions                     | Ephemeral keys generated every restart                  | Follow Microsoft's IIS Data Protection configuration      |
-| .NET 6 path normalization change            | Keys break between .NET versions                        | Always set explicit application name                      |
+| .NET 6 path normalization change            | Keys break between .NET versions                        | Always set explicit application name (reverted in .NET 7+) |
 
 ### Symptoms of Data Protection Failure
 
@@ -476,7 +479,7 @@ Events work well with structured logging stores like ELK, Seq, or Splunk.
 | ----------------------------------------------------- | -------------------------------------- | --------------------------------------- |
 | Data Protection keys persisted to durable storage     | Required                               | `.PersistKeysTo...()`                   |
 | Data Protection keys shared across instances          | Required for multi-instance            | Same storage for all instances          |
-| Explicit application name set                         | Required                               | `.SetApplicationName("IdentityServer")` |
+| Explicit application name set                         | Required                               | `.SetApplicationName("My.IdentityServer")` |
 | ForwardedHeaders configured (if behind proxy)         | Required                               | Match your proxy's headers              |
 | Operational store configured with durable persistence | Required                               | EF Core or custom store                 |
 | Token cleanup enabled                                 | Recommended                            | `EnableTokenCleanup = true`             |

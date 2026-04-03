@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": true,
+      "rationale": "Code shows `AddFrontend(\"admin\", frontend => { frontend.MatchingPath = \"/admin\"; frontend.CdnIndexHtmlUrl = new Uri(\"https://cdn.example.com/admin/index.html\"); ... })`."
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": true,
+      "rationale": "Code shows `AddFrontend(\"portal\", frontend => { frontend.MatchingPath = \"/portal\"; frontend.CdnIndexHtmlUrl = new Uri(\"https://cdn.example.com/portal/index.html\"); ... })`."
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": true,
+      "rationale": "Admin has ClientId 'admin-client' and portal has ClientId 'portal-client', each with their own ConfigureOpenIdConnect."
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": true,
+      "rationale": "Each frontend calls `frontend.AddRemoteApi(...)` with distinct API targets."
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "Code starts with `builder.Services.AddBff()` and chains AddFrontend calls from it."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

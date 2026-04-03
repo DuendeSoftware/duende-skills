@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-sessions-providers",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03",
+    "total_evals": 8,
+    "total_assertions": 37
+  },
+  "summary": {
+    "with_skill_pass_rate": 100.0,
+    "without_skill_pass_rate": 64.86,
+    "delta_pass_rate": 35.14
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 3, "total_count": 4, "pass_rate": 0.75 },
+      "delta_pass_rate": 25.0
+    },
+    {
+      "eval_id": 2,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 5, "pass_rate": 0.8 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "eval_id": 3,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 5, "pass_rate": 0.8 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "eval_id": 4,
+      "with_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 2, "total_count": 4, "pass_rate": 0.5 },
+      "delta_pass_rate": 50.0
+    },
+    {
+      "eval_id": 5,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 2, "total_count": 5, "pass_rate": 0.4 },
+      "delta_pass_rate": 60.0
+    },
+    {
+      "eval_id": 6,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 5, "pass_rate": 0.8 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "eval_id": 7,
+      "with_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 4, "total_count": 4, "pass_rate": 1.0 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "eval_id": 8,
+      "with_skill": { "pass_count": 5, "total_count": 5, "pass_rate": 1.0 },
+      "without_skill": { "pass_count": 1, "total_count": 5, "pass_rate": 0.2 },
+      "delta_pass_rate": 80.0
+    }
+  ]
+}

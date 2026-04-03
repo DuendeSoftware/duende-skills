@@ -1,0 +1,29 @@
+{
+  "eval_id": 104,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a new IdentityResource with name 'employee_info'",
+      "pass": true,
+      "rationale": "Lines 35-38 create a new IdentityResource with name: \"employee_info\"."
+    },
+    {
+      "assertion": "The IdentityResource's UserClaims includes 'employee_id', 'department', and 'hire_date'",
+      "pass": true,
+      "rationale": "Line 38 specifies userClaims: new[] { \"employee_id\", \"department\", \"hire_date\" }."
+    },
+    {
+      "assertion": "An interactive client includes 'employee_info' in its AllowedScopes along with 'openid'",
+      "pass": true,
+      "rationale": "Lines 60-66 show an interactive client with AllowedScopes including IdentityServerConstants.StandardScopes.OpenId and \"employee_info\"."
+    },
+    {
+      "assertion": "The IdentityResources.OpenId() is still present (required by OIDC spec)",
+      "pass": true,
+      "rationale": "Line 29 includes new IdentityResources.OpenId() in the identity resources collection."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

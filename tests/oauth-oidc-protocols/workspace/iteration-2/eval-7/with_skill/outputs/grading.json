@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response configures RefreshTokenUsage = TokenUsage.OneTimeOnly on the client to enable refresh token rotation", "pass": true, "rationale": "Client configuration explicitly sets RefreshTokenUsage = TokenUsage.OneTimeOnly."},
+    {"assertion": "Response sets AllowOfflineAccess = true on the client so that the offline_access scope can be requested", "pass": true, "rationale": "Client configuration sets AllowOfflineAccess = true with explanatory comment."},
+    {"assertion": "Response explains that with OneTimeOnly, each refresh token exchange returns a new refresh token and invalidates the old one", "pass": true, "rationale": "Opening section explains the step-by-step rotation mechanism including invalidation."},
+    {"assertion": "Response mentions that the default changed to ReUse in IdentityServer v7.0, so OneTimeOnly must be set explicitly for rotation", "pass": true, "rationale": "Dedicated section 'Important Note on v7.0 Default Change' explains this explicitly."},
+    {"assertion": "Response includes offline_access in the client's AllowedScopes", "pass": true, "rationale": "AllowedScopes includes \"offline_access\" in the client configuration."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

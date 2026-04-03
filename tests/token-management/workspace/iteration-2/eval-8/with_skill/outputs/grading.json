@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output uses AddGrpcClient<T>() to register the typed gRPC client with the downstream endpoint address",
+      "pass": true,
+      "rationale": "Code calls `AddGrpcClient<Greeter.GreeterClient>(o => { o.Address = new Uri(\"https://grpc.example.com\"); })` on lines 42-45."
+    },
+    {
+      "assertion": "Output chains .AddUserAccessTokenHandler() on the gRPC client registration to attach user tokens automatically",
+      "pass": true,
+      "rationale": "Code chains `.AddUserAccessTokenHandler()` on line 46 after AddGrpcClient."
+    },
+    {
+      "assertion": "Output includes or references AddOpenIdConnectAccessTokenManagement() as prerequisite for user token management",
+      "pass": true,
+      "rationale": "Code calls `builder.Services.AddOpenIdConnectAccessTokenManagement();` on line 39 with a comment noting it's a prerequisite."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

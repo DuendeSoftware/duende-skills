@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "skill_name": "aspnetcore-authentication",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 32,
+      "passed": 32,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 32,
+      "passed": 22,
+      "failed": 10,
+      "pass_rate": 68.75
+    },
+    "delta": {
+      "assertions_improved": 10,
+      "delta_pass_rate": 31.25
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Program.cs configures SaveTokens = true on the OIDC handler",
+        "Program.cs sets the Cookie authentication scheme as the default sign-in scheme"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The OIDC handler's Authority is configured from appsettings.json using builder.Configuration",
+        "CallbackPath and SignedOutCallbackPath are configured on the OIDC handler"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "The MapInboundClaims property is set to false on the OIDC handler",
+        "The response explains that disabling claim mapping preserves the original JWT claim names (e.g., 'sub' instead of ClaimTypes.NameIdentifier)"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75 },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "The JWT Bearer handler sets MapInboundClaims = false"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0 },
+      "without_skill": { "passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 3, "failed": 0, "total": 3, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 1, "total": 3, "pass_rate": 0.67 },
+      "delta": 0.33,
+      "without_skill_failures": [
+        "The response mentions that Microsoft's default claim mapping renames standard JWT claims (e.g., 'sub' becomes ClaimTypes.NameIdentifier)"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 2, "failed": 2, "total": 4, "pass_rate": 0.5 },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "The response configures a named OIDC scheme (not just the default) with AddOpenIdConnect(\"SchemeName\", ...)",
+        "The response uses ForwardDefault or ForwardChallenge to route authentication to the correct scheme"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "A login page model file exists that injects IIdentityServerInteractionService via constructor", "pass": true, "rationale": "LoginModel constructor injects IIdentityServerInteractionService as _interaction."},
+    {"assertion": "The login page calls GetAuthorizationContextAsync(returnUrl) to retrieve the authorization context rather than parsing returnUrl manually", "pass": false, "rationale": "OnGet does not call GetAuthorizationContextAsync. It simply assigns ReturnUrl without retrieving context."},
+    {"assertion": "The login page creates an IdentityServerUser with the subject ID and calls HttpContext.SignInAsync to establish the session", "pass": false, "rationale": "The response uses ClaimsIdentity/ClaimsPrincipal directly instead of IdentityServerUser. While it calls SignInAsync, it doesn't use the Duende-specific IdentityServerUser class."},
+    {"assertion": "The login page validates returnUrl using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting", "pass": false, "rationale": "The response only checks if ReturnUrl is non-empty before redirecting. No Url.IsLocalUrl or IsValidReturnUrl validation."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that IProfileService.GetProfileDataAsync receives ProfileDataRequestContext with RequestedClaimTypes",
+      "pass": true,
+      "rationale": "Clearly explains that GetProfileDataAsync receives ProfileDataRequestContext containing RequestedClaimTypes."
+    },
+    {
+      "assertion": "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes",
+      "pass": true,
+      "rationale": "Explicitly explains: 'AddRequestedClaims filters: only claims whose Type is in context.RequestedClaimTypes will be added to IssuedClaims'."
+    },
+    {
+      "assertion": "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types",
+      "pass": true,
+      "rationale": "Shows UserClaims declarations on ApiScope, ApiResource, and IdentityResource with code examples."
+    },
+    {
+      "assertion": "Does NOT require sub-documents — this is answered entirely from the core SKILL.md",
+      "pass": true,
+      "rationale": "The response is self-contained and does not reference any sub-documents."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

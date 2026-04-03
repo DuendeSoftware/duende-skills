@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-configuration",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03",
+    "total_evals": 16
+  },
+  "summary": {
+    "with_skill": {
+      "pass_rate": 100.0,
+      "total_assertions": 71,
+      "passed_assertions": 71
+    },
+    "without_skill": {
+      "pass_rate": 78.13,
+      "total_assertions": 71,
+      "passed_assertions": 56
+    },
+    "delta_pass_rate": 21.87
+  },
+  "evals": [
+    {
+      "id": 1,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 0.8, "passed": 4, "total": 5 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "id": 2,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 3,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 4,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 5,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 0.75, "passed": 3, "total": 4 },
+      "delta_pass_rate": 25.0
+    },
+    {
+      "id": 6,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 0.75, "passed": 3, "total": 4 },
+      "delta_pass_rate": 25.0
+    },
+    {
+      "id": 7,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 0.75, "passed": 3, "total": 4 },
+      "delta_pass_rate": 25.0
+    },
+    {
+      "id": 8,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 0.8, "passed": 4, "total": 5 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "id": 101,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 0.75, "passed": 3, "total": 4 },
+      "delta_pass_rate": 25.0
+    },
+    {
+      "id": 102,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 0.8, "passed": 4, "total": 5 },
+      "delta_pass_rate": 20.0
+    },
+    {
+      "id": 103,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 0.0, "passed": 0, "total": 5 },
+      "delta_pass_rate": 100.0
+    },
+    {
+      "id": 104,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 105,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 0.6, "passed": 3, "total": 5 },
+      "delta_pass_rate": 40.0
+    },
+    {
+      "id": 106,
+      "with_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "without_skill": { "pass_rate": 1.0, "passed": 5, "total": 5 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 107,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "delta_pass_rate": 0.0
+    },
+    {
+      "id": 108,
+      "with_skill": { "pass_rate": 1.0, "passed": 4, "total": 4 },
+      "without_skill": { "pass_rate": 0.5, "passed": 2, "total": 4 },
+      "delta_pass_rate": 50.0
+    }
+  ]
+}

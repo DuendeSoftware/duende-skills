@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "A class extending DefaultRefreshTokenService is defined", "pass": false, "rationale": "The response shows a generic GracePeriodRefreshTokenService class that does NOT extend DefaultRefreshTokenService. It's a standalone class with a helper method."},
+    {"assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime", "pass": false, "rationale": "There is no AcceptConsumedTokenAsync override. The response has a custom ShouldAcceptConsumedToken method that is not the correct Duende API."},
+    {"assertion": "The service is registered as IRefreshTokenService in the DI container", "pass": false, "rationale": "The response mentions registering in DI generically but does not show registration as IRefreshTokenService specifically."},
+    {"assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly", "pass": false, "rationale": "The response uses 'RefreshTokenRotation = TokenRotation.OneTime' which is not the correct Duende API. The correct property is RefreshTokenUsage = TokenUsage.OneTimeOnly."},
+    {"assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options", "pass": false, "rationale": "The response mentions keeping consumed tokens generically but does not use the specific DeleteOneTimeOnlyRefreshTokensOnUse = false setting."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

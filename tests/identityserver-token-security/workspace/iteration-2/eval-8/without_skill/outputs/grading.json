@@ -1,0 +1,13 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls AddClientCredentialsTokenManagement and AddClient with DPoPJsonWebKey set on the client options", "pass": false, "rationale": "Does not use AddClientCredentialsTokenManagement at all. Manually constructs HttpClient and FormUrlEncodedContent instead."},
+    {"assertion": "Sets the TokenEndpoint to 'https://identity.example.com/connect/token'", "pass": true, "rationale": "Line 28 uses the URL https://identity.example.com/connect/token in the request."},
+    {"assertion": "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256", "pass": false, "rationale": "Uses RSA.Create(2048) and JsonWebKeyConverter but sets Alg to RS256 instead of PS256."},
+    {"assertion": "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security", "pass": false, "rationale": "Mentions losing the key makes tokens unusable (line 55) but does not warn about the leaking risk that nullifies DPoP security."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

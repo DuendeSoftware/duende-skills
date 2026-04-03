@@ -1,0 +1,15 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Response includes updating the .NET target framework as one of the first steps", "pass": true, "rationale": "First step: 'Update target framework — Move from .NET Core 3.1 to .NET 8 or later'."},
+    {"assertion": "Response includes replacing IdentityServer4 NuGet packages with Duende equivalents", "pass": true, "rationale": "Step 2: 'Replace NuGet packages — Swap IdentityServer4 packages for Duende.IdentityServer equivalents'."},
+    {"assertion": "Response includes updating namespaces from IdentityServer4 to Duende.IdentityServer", "pass": true, "rationale": "Step 3: 'Update namespaces — Change IdentityServer4.* to Duende.IdentityServer.*'."},
+    {"assertion": "Response includes creating and applying EF Core database migrations for both ConfigurationDbContext and PersistedGrantDbContext", "pass": false, "rationale": "Only mentions 'Create EF Core migrations for schema changes' generically — does not mention both ConfigurationDbContext and PersistedGrantDbContext by name."},
+    {"assertion": "Response includes configuring a license key for Duende IdentityServer", "pass": false, "rationale": "No mention of configuring a license key anywhere in the checklist."},
+    {"assertion": "Response includes verifying the deployment (e.g., checking discovery document, testing token issuance)", "pass": true, "rationale": "Mentions checking discovery document and testing token issuance in the additional considerations section."}
+  ],
+  "pass_count": 4,
+  "total_count": 6,
+  "score": 0.67
+}

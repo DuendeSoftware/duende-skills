@@ -1,0 +1,29 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs includes MigrationsAssembly set to the current project assembly in both store configurations",
+      "pass": true,
+      "rationale": "Both stores use sql.MigrationsAssembly(migrationsAssembly) where migrationsAssembly = typeof(Program).Assembly.GetName().Name."
+    },
+    {
+      "assertion": "The response includes a dotnet ef migrations add command with -c ConfigurationDbContext",
+      "pass": true,
+      "rationale": "dotnet ef migrations add InitialConfigurationDb -c ConfigurationDbContext is provided."
+    },
+    {
+      "assertion": "The response includes a dotnet ef migrations add command with -c PersistedGrantDbContext",
+      "pass": true,
+      "rationale": "dotnet ef migrations add InitialPersistedGrantDb -c PersistedGrantDbContext is provided."
+    },
+    {
+      "assertion": "The response includes dotnet ef database update commands for both contexts",
+      "pass": true,
+      "rationale": "dotnet ef database update -c ConfigurationDbContext and -c PersistedGrantDbContext are both provided."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

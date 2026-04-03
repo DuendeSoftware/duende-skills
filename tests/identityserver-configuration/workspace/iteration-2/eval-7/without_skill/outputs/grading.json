@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Output sets options.IssuerUri to 'https://id.mycompany.com'", "pass": true, "rationale": "Sets `options.IssuerUri = \"https://id.mycompany.com\"`."},
+    {"assertion": "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false", "pass": true, "rationale": "Sets both `CookieLifetime = TimeSpan.FromHours(8)` and `CookieSlidingExpiration = false`."},
+    {"assertion": "Output sets options.PushedAuthorization.Required to true", "pass": false, "rationale": "Does NOT set `options.PushedAuthorization.Required = true`. Instead says 'For PAR... you would need to check the specific configuration options available in your version of IdentityServer.' This misses the Duende-specific PAR configuration."},
+    {"assertion": "Output sets options.Caching.ClientStoreExpiration and options.Caching.ResourceStoreExpiration to TimeSpan.FromMinutes(10)", "pass": true, "rationale": "Sets both caching expirations to `TimeSpan.FromMinutes(10)`."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

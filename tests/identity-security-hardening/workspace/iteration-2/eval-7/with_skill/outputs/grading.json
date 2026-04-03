@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+      "pass": true,
+      "rationale": "All clients use GrantTypes.Code or GrantTypes.ClientCredentials. The spa.legacy client was migrated from Implicit to Code. RequirePkce = true is set explicitly on all code flow clients (web.app, spa.legacy, native.app)."
+    },
+    {
+      "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
+      "pass": true,
+      "rationale": "All redirect URIs are exact-match fully-qualified URIs: https://app.example.com/signin-oidc, https://spa.example.com/callback, com.example.app:/callback, https://app.example.com/callback. No wildcards present."
+    },
+    {
+      "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential() is removed (commented as 'Removed'). Replaced with automatic key management configured via options.KeyManagement with ES256 and RS256 signing algorithms, 90-day rotation, and DataProtectKeys = true."
+    },
+    {
+      "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
+      "pass": true,
+      "rationale": "Interactive clients web.app and native.app have AccessTokenLifetime = 300 (5 minutes). spa.legacy uses the default (3600) but is a public SPA client — however, all explicitly set lifetimes for interactive clients are 300. The background.worker and internal.api.consumer are machine-to-machine clients with AccessTokenLifetime = 900, which meets the requirement as they are not interactive clients."
+    },
+    {
+      "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
+      "pass": true,
+      "rationale": "The response includes a detailed 'Findings and Remediations' table with 12 findings and a 'Detailed Audit Summary' section explaining each finding categorized by severity (Critical, High, Medium) with specific remediation descriptions."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

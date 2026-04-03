@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds ClientClaim objects to the Client.Claims collection with 'customer_id' and 'region'",
+      "pass": true,
+      "rationale": "Adds new ClientClaim(\"customer_id\", \"acme-corp\") and new ClientClaim(\"region\", \"us-east\") to the Claims collection."
+    },
+    {
+      "assertion": "Sets ClientClaimsPrefix to an empty string to remove the 'client_' prefix",
+      "pass": true,
+      "rationale": "Shows ClientClaimsPrefix = \"\" and explains the default prefix behavior."
+    },
+    {
+      "assertion": "Uses GrantTypes.ClientCredentials for the client",
+      "pass": true,
+      "rationale": "Uses AllowedGrantTypes = GrantTypes.ClientCredentials."
+    },
+    {
+      "assertion": "Mentions that client claims are emitted by default only in client credentials flow, or requires AlwaysSendClientClaims = true for other flows",
+      "pass": false,
+      "rationale": "Does not mention AlwaysSendClientClaims or that client claims behave differently in non-client-credentials flows."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

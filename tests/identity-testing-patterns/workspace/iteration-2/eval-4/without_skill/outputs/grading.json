@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+      "pass": true,
+      "rationale": "Both tests create a ClaimsPrincipal with a ClaimsIdentity containing a \"birthdate\" claim."
+    },
+    {
+      "assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+      "pass": true,
+      "rationale": "Both tests construct an AuthorizationHandlerContext with the requirement array, user principal, and null resource."
+    },
+    {
+      "assertion": "Calls HandleAsync on the handler directly",
+      "pass": true,
+      "rationale": "Both tests call await _handler.HandleAsync(context) directly on the MinimumAgeHandler instance."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+      "pass": true,
+      "rationale": "UserMeetsAge_Succeeds test uses Assert.True(context.HasSucceeded) for a user born in 1990."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement",
+      "pass": true,
+      "rationale": "UserTooYoung_DoesNotSucceed test uses Assert.False(context.HasSucceeded) for a user born 10 years ago."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

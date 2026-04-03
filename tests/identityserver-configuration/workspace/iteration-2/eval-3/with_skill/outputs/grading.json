@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Output defines ApiScope entries for at least 'read' and 'write'", "pass": true, "rationale": "Defines `new ApiScope(\"read\", ...)` and `new ApiScope(\"write\", ...)`."},
+    {"assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes collection", "pass": true, "rationale": "`new ApiResource(\"catalog-api\", ...)` with `Scopes = { \"read\", \"write\" }`."},
+    {"assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' in its Scopes collection but not 'write'", "pass": true, "rationale": "`new ApiResource(\"orders-api\", ...)` with `Scopes = { \"read\" }` only."},
+    {"assertion": "Output calls AddInMemoryApiResources to register the API resources with IdentityServer", "pass": true, "rationale": "Calls `.AddInMemoryApiResources(...)` with both API resources."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

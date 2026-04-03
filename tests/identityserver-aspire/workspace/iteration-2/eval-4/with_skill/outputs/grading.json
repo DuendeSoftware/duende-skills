@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "The code uses .WithReplicas(3) on the IdentityServer project resource", "pass": true, "rationale": "Code shows `.WithReplicas(3)` on the IdentityServer project."},
+    {"assertion": "The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement", "pass": true, "rationale": "Dedicated section explains shared ISigningKeyStore requirement and warns against file-based signing keys."},
+    {"assertion": "The response mentions shared ASP.NET Data Protection keys as a requirement", "pass": true, "rationale": "Dedicated section explains shared Data Protection keys with specific storage options (Redis, DB, Azure Blob)."},
+    {"assertion": "The response mentions shared operational store (persisted grants, device codes, or server-side sessions) as a requirement", "pass": true, "rationale": "Dedicated section covers shared operational store for persisted grants, device codes, and server-side sessions."},
+    {"assertion": "The response warns against using file-based signing keys or in-memory stores with multiple replicas", "pass": true, "rationale": "Explicitly warns: 'Do NOT use file-based signing keys' and 'If using in-memory stores, grants created on one replica won't be visible to another'."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

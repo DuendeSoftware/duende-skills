@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs calls AddOidcStateDataFormatterCache with the 'corporate-idp' scheme to use server-side state storage", "pass": false, "rationale": "Program.cs does NOT call AddOidcStateDataFormatterCache. Instead it uses AddDistributedMemoryCache and SaveTokens = false, which don't solve the state length problem. The response mentions needing a custom ISecureDataFormat but doesn't know the Duende-specific API."},
+    {"assertion": "The external login trigger stores returnUrl in AuthenticationProperties.Items before calling Challenge", "pass": true, "rationale": "ExternalLoginModel stores { \"returnUrl\", returnUrl } in AuthenticationProperties.Items before Challenge."},
+    {"assertion": "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme", "pass": true, "rationale": "Callback reads result.Properties.Items[\"returnUrl\"] after AuthenticateAsync."},
+    {"assertion": "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback", "pass": false, "rationale": "Callback calls Redirect(returnUrl) without any Url.IsLocalUrl or IsValidReturnUrl validation."}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

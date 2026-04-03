@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response identifies ASP.NET Core Data Protection as the root cause of the decryption failure", "pass": true, "rationale": "Clearly identifies 'ASP.NET Core Data Protection' as the root cause in the first paragraph."},
+    {"assertion": "Response explains that the default application name (content root path discriminator) changed between .NET versions", "pass": true, "rationale": "Detailed explanation of how the default application name is derived from content root path and how it changed between .NET versions."},
+    {"assertion": "Response recommends calling SetApplicationName() on AddDataProtection() with an explicit application name", "pass": true, "rationale": "Shows exact code: builder.Services.AddDataProtection().SetApplicationName(\"YourIdentityServer\")."},
+    {"assertion": "Response mentions ensuring old Data Protection keys are still accessible (not deleted or rotated away)", "pass": true, "rationale": "Dedicated section 'Ensure Old Keys Are Still Accessible' with three specific scenarios."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

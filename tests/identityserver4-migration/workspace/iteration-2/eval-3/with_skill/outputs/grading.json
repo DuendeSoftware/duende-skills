@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response maps IdentityServer4 to Duende.IdentityServer", "pass": true, "rationale": "Table explicitly maps IdentityServer4 → Duende.IdentityServer."},
+    {"assertion": "Response maps IdentityServer4.Models to Duende.IdentityServer.Models", "pass": true, "rationale": "Table maps IdentityServer4.Models → Duende.IdentityServer.Models with code examples."},
+    {"assertion": "Response maps IdentityServer4.EntityFramework.DbContexts to Duende.IdentityServer.EntityFramework.DbContexts", "pass": true, "rationale": "Table explicitly includes this mapping."},
+    {"assertion": "Response maps IdentityServer4.EntityFramework.Mappers to Duende.IdentityServer.EntityFramework.Mappers", "pass": true, "rationale": "Table explicitly includes this mapping with code example."},
+    {"assertion": "Response maps IdentityModel to Duende.IdentityModel", "pass": true, "rationale": "Table maps IdentityModel → Duende.IdentityModel and includes it in the search-and-replace section."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

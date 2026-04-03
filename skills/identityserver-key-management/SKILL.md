@@ -188,14 +188,14 @@ options.KeyManagement.DataProtectKeys = false; // OK if using Azure Key Vault vi
 
 ### Data Protection Configuration for Production
 
-Data protection must be properly configured for key encryption to work across instances:
+Data protection must be properly configured for key encryption to work across instances. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for foundational concepts and troubleshooting.
 
 ```csharp
 // Program.cs
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<MyDbContext>()        // or PersistKeysToAzureBlobStorage, etc.
     .ProtectKeysWithCertificate(certificate)      // or ProtectKeysWithAzureKeyVault
-    .SetApplicationName("IdentityServer");
+    .SetApplicationName("My.IdentityServer");
 ```
 
 ### Common Data Protection Problems

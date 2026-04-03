@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "skill_name": "aspnetcore-authorization",
+    "iteration": 2,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-04-03"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 31,
+      "passed": 31,
+      "failed": 0,
+      "pass_rate": 100.0
+    },
+    "without_skill": {
+      "total_assertions": 31,
+      "passed": 30,
+      "failed": 1,
+      "pass_rate": 96.77
+    },
+    "delta": {
+      "assertions_improved": 1,
+      "delta_pass_rate": 3.23
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+      "delta": 0.2,
+      "without_skill_failures": [
+        "The handler must NOT call context.Fail() when the required scope is missing — it should simply not call context.Succeed(), allowing other handlers or the fallback policy to deny access"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "without_skill": { "passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "without_skill": { "passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0 },
+      "delta": 0.0,
+      "without_skill_failures": []
+    }
+  ]
+}

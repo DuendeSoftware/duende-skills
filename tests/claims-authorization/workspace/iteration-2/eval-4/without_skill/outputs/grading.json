@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IClaimsTransformation with a TransformAsync method",
+      "pass": true,
+      "rationale": "Implements IClaimsTransformation with a TransformAsync method."
+    },
+    {
+      "assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place",
+      "pass": false,
+      "rationale": "Mutates the existing identity in-place with ((ClaimsIdentity)principal.Identity!).AddClaim(...). Does NOT create a new ClaimsIdentity or use AddIdentity."
+    },
+    {
+      "assertion": "Loads roles from a local repository or database based on the user's subject claim",
+      "pass": true,
+      "rationale": "Injects IApplicationRoleRepository and calls _roles.GetRolesForUserAsync(userId) based on the subject claim."
+    },
+    {
+      "assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)",
+      "pass": true,
+      "rationale": "Shows builder.Services.AddTransient<IClaimsTransformation, ApplicationRolesTransformation>()."
+    },
+    {
+      "assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims",
+      "pass": false,
+      "rationale": "No warning about avoiding IClaimsTransformation on the IdentityServer host. Only mentions general usage notes."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

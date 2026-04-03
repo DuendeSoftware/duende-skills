@@ -1,0 +1,14 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Warns against exposing the DCR endpoint without authentication or authorization", "pass": true, "rationale": "Section 1 warns 'anyone can register new OAuth clients' if the endpoint lacks authentication and advises requiring authentication/authorization."},
+    {"assertion": "Warns against allowing dynamically registered clients to use any grant type — should restrict and enforce PKCE", "pass": true, "rationale": "Section 2 warns about allowing any grant type and advises restricting to safe types like authorization_code. Does not specifically mention PKCE enforcement but does mention restricting grant types."},
+    {"assertion": "Warns against using in-memory stores for DCR clients in production", "pass": true, "rationale": "Section 3 warns about in-memory storage losing clients on restart and advises using a database-backed store."},
+    {"assertion": "Mentions that client secrets must be stored securely (hashed, not plaintext)", "pass": true, "rationale": "Section 4 warns about storing secrets in plaintext and advises hashing secrets before storing."},
+    {"assertion": "Mentions that software statements must be validated against trusted signing keys — never accept unknown issuers", "pass": true, "rationale": "Section 6 states 'verify the JWT signature against trusted keys' and 'Don't accept statements from unknown issuers'."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

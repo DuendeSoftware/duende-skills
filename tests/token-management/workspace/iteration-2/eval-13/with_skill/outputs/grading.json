@@ -1,0 +1,29 @@
+{
+  "eval_id": 13,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that v4 uses HybridCache for token caching (not the old IDistributedCache directly)",
+      "pass": true,
+      "rationale": "Explicitly states: \"Duende.AccessTokenManagement v4 uses HybridCache (introduced in ASP.NET Core 9) for token caching.\""
+    },
+    {
+      "assertion": "Explains the two-tier L1 (in-memory) + L2 (distributed) cache architecture",
+      "pass": true,
+      "rationale": "Explains L1 (in-memory) as fast process-local cache and L2 (distributed) as optional remote cache, with detailed flow."
+    },
+    {
+      "assertion": "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4",
+      "pass": true,
+      "rationale": "States: \"There is no need to call AddDistributedMemoryCache() — this was required in v3 but is no longer necessary in v4.\""
+    },
+    {
+      "assertion": "Mentions CacheLifetimeBuffer as a configuration option for controlling token refresh timing",
+      "pass": true,
+      "rationale": "Dedicates a section to CacheLifetimeBuffer with code example showing `options.CacheLifetimeBuffer = 120;`."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

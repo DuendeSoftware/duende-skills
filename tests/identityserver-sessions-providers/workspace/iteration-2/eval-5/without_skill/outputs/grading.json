@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code defines a GoogleIdentityProvider class that extends IdentityProvider with a 'google' provider type constant",
+      "pass": true,
+      "rationale": "Lines 11-13 show `public class GoogleIdentityProvider : IdentityProvider` with `public const string ProviderType = \"google\"` and constructor calling `base(ProviderType)`."
+    },
+    {
+      "assertion": "GoogleIdentityProvider uses the indexer pattern (this[\"ClientId\"]) for property storage",
+      "pass": false,
+      "rationale": "Lines 17-18 show `public string? ClientId { get; set; }` and `public string? ClientSecret { get; set; }` — standard auto-properties, NOT the indexer pattern `this[\"ClientId\"]`. The indexer pattern is required for persistence to the database."
+    },
+    {
+      "assertion": "Program.cs calls AddProviderType with GoogleHandler, GoogleOptions, and GoogleIdentityProvider type parameters",
+      "pass": true,
+      "rationale": "Lines 32-34 show `options.DynamicProviders.AddProviderType<GoogleHandler, GoogleOptions, GoogleIdentityProvider>(GoogleIdentityProvider.ProviderType)`."
+    },
+    {
+      "assertion": "Code includes a ConfigureAuthenticationOptions-derived class that maps GoogleIdentityProvider properties to GoogleOptions",
+      "pass": false,
+      "rationale": "Line 45 shows `public class GoogleDynamicConfigureOptions : IConfigureNamedOptions<GoogleOptions>` — this implements the generic `IConfigureNamedOptions` interface, NOT the Duende-specific `ConfigureAuthenticationOptions<GoogleOptions, GoogleIdentityProvider>` base class."
+    },
+    {
+      "assertion": "The configure class sets SignInScheme and CallbackPath on the GoogleOptions",
+      "pass": false,
+      "rationale": "The Configure method (lines 54-62) only sets ClientId and ClientSecret from IConfiguration. It does NOT set SignInScheme or CallbackPath on the GoogleOptions."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

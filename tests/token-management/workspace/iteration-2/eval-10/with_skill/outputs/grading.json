@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IClientAssertionService with a GetClientAssertionAsync method",
+      "pass": true,
+      "rationale": "JwtClientAssertionService implements IClientAssertionService with a GetClientAssertionAsync method on line 24."
+    },
+    {
+      "assertion": "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
+      "pass": true,
+      "rationale": "Audience is set to `\"https://identity.example.com\"` (issuer URL) on line 43, with explicit comments showing the wrong vs correct values."
+    },
+    {
+      "assertion": "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
+      "pass": true,
+      "rationale": "Comments on lines 40-42 reference both CVE-2025-27370 and CVE-2025-27371, explaining the token endpoint confusion attack."
+    },
+    {
+      "assertion": "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
+      "pass": true,
+      "rationale": "Code sets `Type = OidcConstants.ClientAssertionTypes.JwtBearer` on line 61."
+    },
+    {
+      "assertion": "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)",
+      "pass": true,
+      "rationale": "Code registers via `builder.Services.AddSingleton<IClientAssertionService>(new JwtClientAssertionService(signingCredentials));` on line 83."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

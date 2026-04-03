@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "The response identifies the root cause as the API starting before IdentityServer is ready", "pass": false, "rationale": "Lists multiple possible causes (incorrect URL, SSL issues, etc.) but does not clearly identify the Aspire-specific root cause of startup ordering."},
+    {"assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost", "pass": false, "rationale": "Does not mention .WaitFor() at all. Only suggests .WithReference(identityServer)."},
+    {"assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available", "pass": true, "rationale": "Shows `.WithReference(identityServer)` as a fix under 'Startup Order in Aspire'."},
+    {"assertion": "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work", "pass": false, "rationale": "Does not mention health checks or /health endpoint in the context of Aspire startup ordering."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

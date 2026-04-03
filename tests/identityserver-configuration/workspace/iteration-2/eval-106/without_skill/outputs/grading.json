@@ -1,0 +1,34 @@
+{
+  "eval_id": 106,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets AllowOfflineAccess = true to enable refresh tokens",
+      "pass": true,
+      "rationale": "Line 32 sets AllowOfflineAccess = true."
+    },
+    {
+      "assertion": "Sets RefreshTokenUsage to TokenUsage.OneTimeOnly for rotation on each use",
+      "pass": true,
+      "rationale": "Line 35 sets RefreshTokenUsage = TokenUsage.OneTimeOnly."
+    },
+    {
+      "assertion": "Sets AbsoluteRefreshTokenLifetime to 604800 (7 days in seconds)",
+      "pass": true,
+      "rationale": "Line 38 sets AbsoluteRefreshTokenLifetime = 604800."
+    },
+    {
+      "assertion": "Sets SlidingRefreshTokenLifetime to 86400 (1 day in seconds) and RefreshTokenExpiration to TokenExpiration.Sliding",
+      "pass": true,
+      "rationale": "Line 41 sets SlidingRefreshTokenLifetime = 86400 and line 42 sets RefreshTokenExpiration = TokenExpiration.Sliding."
+    },
+    {
+      "assertion": "Sets UpdateAccessTokenClaimsOnRefresh = true",
+      "pass": true,
+      "rationale": "Line 45 sets UpdateAccessTokenClaimsOnRefresh = true."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

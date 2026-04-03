@@ -1,0 +1,24 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that no separate NuGet package is needed \u2014 SAML is built into Duende.IdentityServer",
+      "pass": true,
+      "rationale": "Explicitly states SAML is built into Duende.IdentityServer with no separate package."
+    },
+    {
+      "assertion": "States that Enterprise Edition license is required",
+      "pass": true,
+      "rationale": "Enterprise Edition license requirement is explicitly stated."
+    },
+    {
+      "assertion": "Mentions SAML support was introduced in version 8.0",
+      "pass": true,
+      "rationale": "States SAML was introduced in v8.0."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

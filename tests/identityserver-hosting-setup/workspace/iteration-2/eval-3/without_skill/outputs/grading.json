@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddIdentity<ApplicationUser, IdentityRole>() with AddEntityFrameworkStores<ApplicationDbContext>() to register ASP.NET Identity",
+      "pass": true,
+      "rationale": "Lines 12-13 call AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()."
+    },
+    {
+      "assertion": "Program.cs calls AddIdentityServer() followed by .AddAspNetIdentity<ApplicationUser>() to bridge ASP.NET Identity to IdentityServer",
+      "pass": true,
+      "rationale": "Lines 15-16 call AddIdentityServer().AddAspNetIdentity<ApplicationUser>()."
+    },
+    {
+      "assertion": "Response explains that AddAspNetIdentity registers IProfileService for adding claims to tokens",
+      "pass": false,
+      "rationale": "The response only says AddAspNetIdentity 'connects IdentityServer to the ASP.NET Identity user store so it can authenticate users and include their claims in tokens.' It does not specifically mention IProfileService."
+    },
+    {
+      "assertion": "Program.cs includes AddDefaultTokenProviders() on the ASP.NET Identity registration",
+      "pass": false,
+      "rationale": "The AddIdentity chain only includes AddEntityFrameworkStores<ApplicationDbContext>() — AddDefaultTokenProviders() is missing."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

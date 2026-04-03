@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs registers RedisPersistedGrantStore as IPersistedGrantStore using AddTransient or AddScoped",
+      "pass": true,
+      "rationale": "AddTransient<IPersistedGrantStore, RedisPersistedGrantStore>() is used."
+    },
+    {
+      "assertion": "Program.cs registers RedisDeviceFlowStore as IDeviceFlowStore using AddTransient or AddScoped",
+      "pass": true,
+      "rationale": "AddTransient<IDeviceFlowStore, RedisDeviceFlowStore>() is used."
+    },
+    {
+      "assertion": "Program.cs does not call AddOperationalStore for EF Core since custom stores replace it",
+      "pass": true,
+      "rationale": "AddOperationalStore is not called; explanation states it should not be used with custom stores."
+    },
+    {
+      "assertion": "Program.cs still calls AddIdentityServer() for the core IdentityServer registration",
+      "pass": true,
+      "rationale": "AddIdentityServer() is called."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

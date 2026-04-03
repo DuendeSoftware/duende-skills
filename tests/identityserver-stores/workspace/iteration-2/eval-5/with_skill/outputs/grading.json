@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddStackExchangeRedisCache with the Redis connection string from configuration",
+      "pass": true,
+      "rationale": "AddStackExchangeRedisCache is called with Redis:ConnectionString from configuration."
+    },
+    {
+      "assertion": "ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration",
+      "pass": true,
+      "rationale": "AddSingleton(typeof(ICache<>), typeof(DistributedCache<>)) is called."
+    },
+    {
+      "assertion": "AddConfigurationStoreCache() is called after the configuration store registration",
+      "pass": true,
+      "rationale": "AddConfigurationStoreCache() is called after AddConfigurationStore()."
+    },
+    {
+      "assertion": "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": true,
+      "rationale": "options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(10) is set."
+    },
+    {
+      "assertion": "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": true,
+      "rationale": "options.Caching.ResourceStoreExpiration = TimeSpan.FromMinutes(10) is set."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}
