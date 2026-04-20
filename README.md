@@ -226,7 +226,7 @@ before deploying to staging or production.
 
 ## Skills Index
 
-The following is metadata about the skills that can be used and parsed by various AI agents/tools. This section is maintaiend by the `./scripts/generate-skills-index.sh` script.
+The following is metadata about the skills that can be used and parsed by various AI agents/tools. This section is maintained by the `./scripts/generate-skills-index.sh` script.
 
 <!-- BEGIN DUENDE-SKILLS COMPRESSED INDEX -->
 ```markdown
