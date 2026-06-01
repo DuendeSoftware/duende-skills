@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping", "pass": true, "rationale": "Shows ClaimMappings = new Dictionary<string, string> on the SamlServiceProvider."},
+    {"assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings", "pass": true, "rationale": "Explicitly explains that AllowedScopes must include a resource containing the claim type for it to reach ClaimMappings."},
+    {"assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults", "pass": true, "rationale": "Shows options.Saml.DefaultClaimMappings with example mappings."},
+    {"assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)", "pass": true, "rationale": "Correctly maps 'email' (key) to the SAML URI (value) and explains the key/value semantics."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

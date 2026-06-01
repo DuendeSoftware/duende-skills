@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-upgrade-v7-to-v8",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-01"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 29,
+      "passed": 29,
+      "failed": 0,
+      "pass_rate": 1.0
+    },
+    "without_skill": {
+      "total_assertions": 29,
+      "passed": 14,
+      "failed": 15,
+      "pass_rate": 0.483
+    },
+    "delta": {
+      "assertions_improved": 15,
+      "delta_pass_rate": 51.7
+    }
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt_summary": "Custom IClientStore upgrade to v8",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "score": 0.5}
+    },
+    {
+      "id": 2,
+      "prompt_summary": "ICache<Client> migration to HybridCache",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 0, "total_count": 4, "score": 0.0}
+    },
+    {
+      "id": 3,
+      "prompt_summary": "IClock to TimeProvider migration",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "id": 4,
+      "prompt_summary": "EF migrations requirement without SAML",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}
+    },
+    {
+      "id": 5,
+      "prompt_summary": "IAuthorizationParametersMessageStore replacement",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "score": 0.5}
+    },
+    {
+      "id": 6,
+      "prompt_summary": "IEnumerable to IReadOnlyCollection fix",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "id": 7,
+      "prompt_summary": "Complete upgrade checklist",
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    }
+  ]
+}

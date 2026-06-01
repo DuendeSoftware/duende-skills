@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Includes updating TargetFramework to net10.0 as a first step", "pass": true, "rationale": "Step 1 is 'Update Target Framework to .NET 10' with net10.0."},
+    {"assertion": "Includes replacing IClock with TimeProvider", "pass": true, "rationale": "Step 4 covers replacing IClock with TimeProvider and shows GetUtcNow()."},
+    {"assertion": "Includes adding CancellationToken to all async store/service methods", "pass": true, "rationale": "Step 7 explicitly covers adding CancellationToken to all async store/service methods."},
+    {"assertion": "Includes running EF database migration", "pass": true, "rationale": "Step 3 shows the full EF migration commands."},
+    {"assertion": "Lists at least 8 distinct migration steps", "pass": true, "rationale": "Response lists 16 distinct steps across 5 phases."}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

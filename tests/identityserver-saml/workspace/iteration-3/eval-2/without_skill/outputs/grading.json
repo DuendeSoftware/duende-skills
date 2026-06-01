@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Warns against using in-memory stores in production", "pass": true, "rationale": "States in-memory stores are 'not suitable for production'."},
+    {"assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)", "pass": false, "rationale": "FindByEntityIdAsync is shown but without the CancellationToken parameter."},
+    {"assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>", "pass": false, "rationale": "Uses GetAllAsync returning IEnumerable<ServiceProvider>, not GetAllSamlServiceProvidersAsync with IAsyncEnumerable."},
+    {"assertion": "Uses AddSamlServiceProviderStore<T>() for registration", "pass": false, "rationale": "Uses services.AddSingleton<ISamlServiceProviderStore, ...>() instead of the builder extension method."},
+    {"assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer", "pass": false, "rationale": "Uses a generic decorator pattern with IMemoryCache, not AddSamlServiceProviderStoreCache<T>()."}
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

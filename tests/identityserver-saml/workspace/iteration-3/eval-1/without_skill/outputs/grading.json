@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Calls .AddSaml() on the IdentityServer builder chain", "pass": false, "rationale": "Uses .AddSaml2p() instead of the correct .AddSaml() method name."},
+    {"assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer", "pass": false, "rationale": "Incorrectly suggests adding a separate Duende.IdentityServer.Saml2p NuGet package."},
+    {"assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'", "pass": false, "rationale": "Uses 'ServiceProvider' class instead of 'SamlServiceProvider'. EntityId is set correctly but wrong type."},
+    {"assertion": "AssertionConsumerServiceUrls uses IndexedEndpoint with Location 'https://crm.contoso.com/saml/acs' and Binding = SamlBinding.HttpPost", "pass": false, "rationale": "Uses AssertionConsumerServices with AssertionConsumerService type instead of AssertionConsumerServiceUrls with IndexedEndpoint and SamlBinding.HttpPost."},
+    {"assertion": "AllowedScopes is configured on the SamlServiceProvider (not empty)", "pass": false, "rationale": "No AllowedScopes property is configured on the service provider."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

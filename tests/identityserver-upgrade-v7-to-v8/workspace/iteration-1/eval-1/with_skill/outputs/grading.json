@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Adds CancellationToken parameter to FindClientByIdAsync method signature", "pass": true, "rationale": "Response shows `FindClientByIdAsync(string clientId, CancellationToken ct)` in the code example."},
+    {"assertion": "Adds GetAllClientsAsync(CancellationToken ct) method returning IReadOnlyCollection<Client> or Task<IReadOnlyCollection<Client>>", "pass": true, "rationale": "Response includes `Task<IReadOnlyCollection<Client>> GetAllClientsAsync(CancellationToken ct)` implementation."},
+    {"assertion": "Updates TargetFramework to net10.0", "pass": true, "rationale": "Response explicitly shows `<TargetFramework>net10.0</TargetFramework>`."},
+    {"assertion": "Updates Duende.IdentityServer package version to 8.0.0", "pass": true, "rationale": "Response shows both Duende packages updated to Version=\"8.0.0\"."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

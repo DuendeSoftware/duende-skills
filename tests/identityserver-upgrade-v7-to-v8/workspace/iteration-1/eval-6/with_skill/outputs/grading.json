@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Changes return types from IEnumerable<T> to IReadOnlyCollection<T>", "pass": true, "rationale": "Response shows the before/after with IEnumerable → IReadOnlyCollection change."},
+    {"assertion": "Shows using .ToList() or .ToArray() to convert query results", "pass": true, "rationale": "Response uses .ToListAsync() and mentions both .ToList() and .ToArray()."},
+    {"assertion": "Adds CancellationToken parameter to the affected methods", "pass": true, "rationale": "All method signatures include `CancellationToken ct` parameter."},
+    {"assertion": "Mentions this applies to multiple interfaces (IResourceStore, etc.)", "pass": true, "rationale": "Response states it applies to IResourceStore, IClientStore, IPersistedGrantStore, IDeviceFlowStore, and others."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

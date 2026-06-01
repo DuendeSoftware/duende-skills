@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses AddPostgreSqlStore() with a connection string inside AddUserManagement options", "pass": false, "rationale": "Uses Npgsql EF Core provider with AddDbContext, not AddPostgreSqlStore()."},
+    {"assertion": "Adds Duende.Storage.PostgreSQL package (or references it)", "pass": false, "rationale": "Uses Npgsql.EntityFrameworkCore.PostgreSQL instead."},
+    {"assertion": "Explains that no EF Core migrations are needed (document-based storage)", "pass": false, "rationale": "Explicitly states EF Core migrations ARE required."},
+    {"assertion": "Shows IDatabaseSchema.CreateIfNotExistsAsync() for automatic schema creation", "pass": false, "rationale": "Uses `dotnet ef database update` instead."}
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

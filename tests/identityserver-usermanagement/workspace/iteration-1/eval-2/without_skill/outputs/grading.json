@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda", "pass": false, "rationale": "Response implements a custom SmtpEmailSender class with IEmailSender, not UseSmtpOtpDispatcher()."},
+    {"assertion": "Configures SMTP host and port", "pass": true, "rationale": "Shows Host and Port configuration in SmtpSettings."},
+    {"assertion": "Configures from address for outgoing emails", "pass": true, "rationale": "Shows FromAddress in SmtpSettings."},
+    {"assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)", "pass": true, "rationale": "Does not mention ConsoleOtpDispatcher at all; presents production-appropriate solution."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

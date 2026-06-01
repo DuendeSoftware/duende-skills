@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Lists passkeys/WebAuthn/FIDO2 as a supported authentication method", "pass": true, "rationale": "Lists 'FIDO2/WebAuthn — Passkey support' as an option."},
+    {"assertion": "Lists TOTP (authenticator apps) as a supported method", "pass": true, "rationale": "Mentions 'TOTP-based 2FA with authenticator apps' and shows configuration."},
+    {"assertion": "Mentions that multiple authentication methods can coexist for the same user", "pass": true, "rationale": "States 'You can offer multiple methods' and shows combining them."},
+    {"assertion": "Notes that OTP (email/SMS) is the default passwordless flow", "pass": false, "rationale": "Does not mention OTP email/SMS as the default flow; presents username/password as the traditional default."}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

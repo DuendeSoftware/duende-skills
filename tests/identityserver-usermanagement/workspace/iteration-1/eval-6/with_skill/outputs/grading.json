@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Lists passkeys/WebAuthn/FIDO2 as a supported authentication method", "pass": true, "rationale": "Lists 'Passkeys — WebAuthn/FIDO2 phishing-resistant credentials' in the table."},
+    {"assertion": "Lists TOTP (authenticator apps) as a supported method", "pass": true, "rationale": "Lists 'TOTP — Time-based one-time passwords (RFC 6238)' with authenticator app description."},
+    {"assertion": "Mentions that multiple authentication methods can coexist for the same user", "pass": true, "rationale": "States 'supports multiple authentication methods that can coexist for the same user' and 'Both methods can be registered simultaneously'."},
+    {"assertion": "Notes that OTP (email/SMS) is the default passwordless flow", "pass": true, "rationale": "States 'OTP via email/SMS is the default passwordless flow'."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

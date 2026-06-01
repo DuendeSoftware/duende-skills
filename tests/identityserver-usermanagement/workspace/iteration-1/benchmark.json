@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-usermanagement",
+    "iteration": 1,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-01"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 29,
+      "passed": 29,
+      "failed": 0,
+      "pass_rate": 1.0
+    },
+    "without_skill": {
+      "total_assertions": 29,
+      "passed": 9,
+      "failed": 20,
+      "pass_rate": 0.31
+    },
+    "delta": {
+      "assertions_improved": 20,
+      "delta_pass_rate": 69.0
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": "Full setup with User Management, SQLite, email OTP",
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 0, "total_count": 5, "score": 0.0}
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": "SMTP OTP dispatcher for production",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": "PostgreSQL storage and migrations explanation",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 0, "total_count": 4, "score": 0.0}
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": "Migration from ASP.NET Identity",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": "Claims integration with IdentityServer tokens",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 2, "total_count": 4, "score": 0.5}
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": "Authentication methods (passkeys + TOTP)",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": "Troubleshooting storage config location",
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 0, "total_count": 4, "score": 0.0}
+    }
+  ]
+}

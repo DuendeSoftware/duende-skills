@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping", "pass": false, "rationale": "Uses 'ClaimMapping' (singular) instead of the correct 'ClaimMappings' property name, and on 'ServiceProvider' not 'SamlServiceProvider'."},
+    {"assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings", "pass": false, "rationale": "No mention of AllowedScopes as a prerequisite for claims being available."},
+    {"assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults", "pass": false, "rationale": "Uses 'DefaultAttributeMapping' instead of the correct 'DefaultClaimMappings' property name."},
+    {"assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)", "pass": true, "rationale": "The direction is correct — internal claim names as keys, SAML URIs as values."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Includes updating TargetFramework to net10.0 as a first step", "pass": false, "rationale": "Response suggests net9.0, not net10.0."},
+    {"assertion": "Includes replacing IClock with TimeProvider", "pass": true, "rationale": "Step 5 mentions migrating to TimeProvider."},
+    {"assertion": "Includes adding CancellationToken to all async store/service methods", "pass": true, "rationale": "Step 4 mentions 'likely CancellationToken additions'."},
+    {"assertion": "Includes running EF database migration", "pass": true, "rationale": "Step 3 shows EF migration commands."},
+    {"assertion": "Lists at least 8 distinct migration steps", "pass": false, "rationale": "Response only lists 8 steps but several are generic ('Build and fix', 'Test') rather than distinct migration steps. Only 6 are concrete migration actions."}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}
