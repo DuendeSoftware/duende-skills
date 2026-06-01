@@ -17,6 +17,8 @@ invocable: false
 - Configuring data protection for production deployments
 - Understanding the IdentityServer middleware pipeline ordering
 
+Docs: https://docs.duendesoftware.com/identityserver/fundamentals
+
 ## Core Concepts
 
 Duende IdentityServer is middleware that adds OpenID Connect and OAuth 2.0 endpoints to an ASP.NET Core host. It requires two setup steps: registering services in DI and adding middleware to the request pipeline.

@@ -37,6 +37,8 @@ Use this skill when:
 - `aspnetcore-authentication` — Applying OIDC authentication hardening in client applications
 - `aspnetcore-authorization` — Enforcing authorization policies that consume the hardened tokens produced here
 
+Docs: https://docs.duendesoftware.com/identityserver/configuration/security
+
 ---
 
 ## Sub-Documents

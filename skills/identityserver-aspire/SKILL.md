@@ -31,6 +31,8 @@ Use this skill when:
 - `identityserver-deployment` — production deployment, data protection, health check implementations
 - `identityserver-data-storage` — EF Core stores for configuration and operational data
 
+Docs: https://docs.duendesoftware.com/identityserver/aspire
+
 ---
 
 ## Pattern 1: AppHost Orchestration Basics

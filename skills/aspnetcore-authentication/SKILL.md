@@ -33,6 +33,8 @@ Use this skill when:
 - `oauth-oidc-protocols` — Protocol fundamentals underlying these handlers
 - `token-management` — Automatic token refresh with Duende.AccessTokenManagement
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/authentication
+
 ---
 
 ## Pattern 1: OIDC Authentication for Web Applications

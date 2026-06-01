@@ -27,6 +27,8 @@
     "./skills/identityserver-token-lifecycle",
     "./skills/identityserver-token-security",
     "./skills/identityserver-ui-flows",
+    "./skills/identityserver-upgrade-v7-to-v8",
+    "./skills/identityserver-usermanagement",
     "./skills/identityserver4-migration",
     "./skills/oauth-oidc-protocols",
     "./skills/token-management"

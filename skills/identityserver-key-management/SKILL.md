@@ -17,6 +17,8 @@ invocable: false
 - Configuring per-algorithm or per-resource signing
 - Troubleshooting key-related errors (CryptographicException, unprotecting key failures)
 
+Docs: https://docs.duendesoftware.com/identityserver/fundamentals/keys
+
 ## Core Concepts
 
 IdentityServer issues cryptographically signed tokens: identity tokens, JWT access tokens, and logout tokens. These signatures require key material that can be managed automatically or manually (statically).

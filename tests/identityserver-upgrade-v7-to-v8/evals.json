@@ -1,0 +1,105 @@
+{
+  "skill_name": "identityserver-upgrade-v7-to-v8",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm upgrading my IdentityServer project from v7.4 to v8.0. I have a custom IClientStore implementation. What do I need to change to make it compile with v8?",
+      "expected_output": "Add CancellationToken parameter to FindClientByIdAsync, add new GetAllClientsAsync method returning IReadOnlyCollection<Client>, and update TFM to net10.0.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Adds CancellationToken parameter to FindClientByIdAsync method signature",
+        "Adds GetAllClientsAsync(CancellationToken ct) method returning IReadOnlyCollection<Client> or Task<IReadOnlyCollection<Client>>",
+        "Updates TargetFramework to net10.0",
+        "Updates Duende.IdentityServer package version to 8.0.0"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My v7 project uses ICache<Client> for custom caching. How do I migrate this to v8? The cache was registered as a transient service.",
+      "expected_output": "Replace ICache<Client> with Microsoft HybridCache using keyed service injection with FromKeyedServices(\"ConfigurationStoreCache\"), and use GetOrCreateAsync with HybridCacheEntryOptions.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Replaces ICache<T> with HybridCache from Microsoft.Extensions.Caching.Hybrid",
+        "Uses [FromKeyedServices(\"ConfigurationStoreCache\")] or ServiceProviderKeys.ConfigurationStoreCache for keyed injection",
+        "Uses GetOrCreateAsync (not GetOrAddAsync) for the cache retrieval pattern",
+        "Mentions that CachingOptions.CacheLockTimeout is obsolete"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My IdentityServer v7 project uses IClock for time management in custom token validation. How do I update this for v8?",
+      "expected_output": "Replace IClock with System.TimeProvider, inject TimeProvider, and use GetUtcNow() method instead of UtcNow property.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Replaces Duende.IdentityServer.IClock with System.TimeProvider",
+        "Uses GetUtcNow() method instead of UtcNow property",
+        "TimeProvider is injected via constructor (standard DI)",
+        "Does NOT reference Duende.IdentityServer.IClock or ICancellationTokenProvider"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I've updated my packages to v8 but I'm getting runtime errors about missing database tables. I don't use SAML. Do I still need to run migrations?",
+      "expected_output": "Yes, EF migrations are required even without SAML. Run 'dotnet ef migrations add Update_DuendeIdentityServer_v8_0' to add the 5 SAML tables that the schema expects.",
+      "files": [
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "States that EF migrations are required even if not using SAML",
+        "Shows the migration command: dotnet ef migrations add Update_DuendeIdentityServer_v8_0",
+        "Mentions that v8 adds SAML-related tables to the schema",
+        "Includes dotnet ef database update or equivalent to apply the migration"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "In my v7 project I use IAuthorizationParametersMessageStore to handle large authorization requests. This interface is gone in v8. What's the replacement?",
+      "expected_output": "IAuthorizationParametersMessageStore was removed in v8. The replacement is PAR (Pushed Authorization Requests) where clients push authorization parameters to a dedicated endpoint before redirecting.",
+      "files": [],
+      "assertions": [
+        "States that IAuthorizationParametersMessageStore is removed in v8",
+        "Identifies PAR (Pushed Authorization Requests) as the replacement",
+        "Mentions configuring clients to use require_pushed_authorization_requests or the PAR endpoint",
+        "Does NOT suggest reimplementing IAuthorizationParametersMessageStore"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "After upgrading to v8, I'm seeing build errors about IEnumerable<T> vs IReadOnlyCollection<T> in my custom IResourceStore. How do I fix this?",
+      "expected_output": "Change return types from IEnumerable<T> to IReadOnlyCollection<T> on affected methods. Use .ToList() or .ToArray() on LINQ results to satisfy the interface.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Changes return types from IEnumerable<T> to IReadOnlyCollection<T>",
+        "Shows using .ToList() or .ToArray() to convert query results",
+        "Adds CancellationToken parameter to the affected methods",
+        "Mentions this applies to multiple interfaces (IResourceStore, etc.)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Give me a complete checklist of everything I need to do to upgrade from IdentityServer v7.4 to v8.0. I have custom stores, use EF Core, and have a custom IClock implementation.",
+      "expected_output": "Ordered checklist covering: TFM update, package updates, EF migration, ICache→HybridCache, IClock→TimeProvider, CancellationToken additions, GetAllClientsAsync, return type changes, DPoP fixes, licensing updates, NRT warnings.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Includes updating TargetFramework to net10.0 as a first step",
+        "Includes replacing IClock with TimeProvider",
+        "Includes adding CancellationToken to all async store/service methods",
+        "Includes running EF database migration",
+        "Lists at least 8 distinct migration steps"
+      ]
+    }
+  ]
+}

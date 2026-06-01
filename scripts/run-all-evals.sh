@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# In run-evals.sh, I have code to evaluate the skills in this repo. However, the evals are too much for GitHub Models quota and rate limits. Can you run these evals through one of your subagents, bypassing GitHub Models and using your own? Make sure to write all output files as expected. Next, update the README with a summary.
+# In run-evals.sh, I have code to evaluate the skills in this repo. However, the evals are too much for GitHub Models quota and rate limits. Can you run these evals through one of your subagents, bypassing GitHub Models and using your own? Make sure to write all output files as expected. Next, update the README with a summary. Make sure the summary (table) shows current evaluation + previous evaluation results.
 
 for dir in tests/*/workspace/iteration-1; do [ -d "$dir" ] && echo "Removing: $dir" && rm -rf "$dir"; done && echo "Done"
 
@@ -24,5 +24,7 @@ for dir in tests/*/workspace/iteration-1; do [ -d "$dir" ] && echo "Removing: $d
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-token-lifecycle"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-token-security"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-ui-flows"
+./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-upgrade-v7-to-v8"
+./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "identityserver-usermanagement"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "oauth-oidc-protocols"
 ./scripts/run-evals.sh --iteration 1 --model "openai/gpt-4.1" --verbose --skill "token-management"

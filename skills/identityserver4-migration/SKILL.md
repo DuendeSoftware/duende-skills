@@ -1,6 +1,6 @@
 ---
 name: identityserver4-migration
-description: Migrating from IdentityServer4 to Duende IdentityServer v7. Covers NuGet package replacement, namespace changes, API surface changes, EF Core database schema migrations, .NET target framework upgrade, license configuration, signing key migration, data protection, and UI template updates.
+description: Migrating from IdentityServer4 to Duende IdentityServer v8. Covers NuGet package replacement, namespace changes, API surface changes, EF Core database schema migrations, .NET target framework upgrade, license configuration, signing key migration, data protection, and UI template updates.
 invocable: false
 ---
 
@@ -11,7 +11,7 @@ invocable: false
 ## When to Use This Skill
 
 - Planning a migration from IdentityServer4 to Duende IdentityServer — running the migration analysis tool
-- Upgrading a project from IdentityServer4 (v3.x or v4.x) to Duende IdentityServer v7
+- Upgrading a project from IdentityServer4 (v3.x or v4.x) to Duende IdentityServer v8
 - Replacing IdentityServer4 NuGet packages with Duende equivalents
 - Updating `IdentityServer4.*` namespaces to `Duende.IdentityServer.*`
 - Migrating EF Core database schemas from IdentityServer4 to Duende IdentityServer
@@ -31,11 +31,13 @@ invocable: false
 
 **Duende IdentityServer is the direct successor to IdentityServer4.** The API surface is intentionally similar — most code changes are namespace and package renames. Behavioral changes are minimal, but the database schema has new tables and columns for features like automatic key management, server-side sessions, DPoP, and PAR.
 
-**The .NET target framework must be upgraded alongside the IdentityServer migration.** IdentityServer4 ran on `netcoreapp3.1` or `net5.0`. Duende IdentityServer v7 requires at least `net8.0` (LTS) or `net10.0` (LTS). You must follow Microsoft's ASP.NET Core migration guides for each major version jump.
+**The .NET target framework must be upgraded alongside the IdentityServer migration.** IdentityServer4 ran on `netcoreapp3.1` or `net5.0`. Duende IdentityServer v8 requires `net10.0`. You must follow Microsoft's ASP.NET Core migration guides for each major version jump.
 
 **Database migrations require careful handling to avoid data loss.** The v3 → v4 schema change renames tables and restructures relationships. A naive EF Core migration will drop and recreate tables, losing data. Use the provided delta SQL scripts or manually craft migrations that preserve data.
 
 **Licensing is required for production use.** Duende IdentityServer requires a valid license key for production. Without one, it runs in community/trial mode and logs a warning on startup.
+
+Docs: https://docs.duendesoftware.com/identityserver/upgrades
 
 ---
 
@@ -50,7 +52,7 @@ IdentityServer4 v3.x or v4.x
 IdentityServer4 v4.x
     │
     ▼ (Stage 2: packages + namespaces + .NET upgrade + DB migration)
-Duende IdentityServer v7.x
+Duende IdentityServer v8.x
 ```
 
 If already on IdentityServer4 v4.x, skip directly to Stage 2.
@@ -67,7 +69,7 @@ The tool is a single file, [`MigrationAnalysisController.cs`](https://docs.duend
 
 | Data Point | Why It Matters |
 |------------|---------------|
-| **.NET runtime version** | Flags if you need to upgrade to a current LTS (.NET 8 or .NET 10) |
+| **.NET runtime version** | Flags if you need to upgrade to .NET 10 |
 | **IdentityServer4 version** | Determines if Stage 1 (v3 → v4) is needed before proceeding |
 | **Client inventory** | Counts interactive (authorization code) vs. non-interactive (client credentials) clients — this determines which [Duende license edition](https://duendesoftware.com/products/identityserver) you need |
 | **Issuer URI** | Reports the configured `IssuerUri` — must be preserved in Duende to avoid breaking existing tokens and client trust relationships |
@@ -272,17 +274,17 @@ Reference implementation: [UpgradeSample-IdentityServer4-v3](https://github.com/
 
 ---
 
-## Stage 2: IdentityServer4 v4.x → Duende IdentityServer v7.x
+## Stage 2: IdentityServer4 v4.x → Duende IdentityServer v8.x
 
 ### Step 2.1: Update .NET Target Framework
 
-Update from `netcoreapp3.1` or `net5.0` to a current LTS version (`net8.0` or `net10.0`):
+Update from `netcoreapp3.1` or `net5.0` to `net10.0` (required by Duende IdentityServer v8):
 
 ```xml
 <!-- Old -->
 <TargetFramework>netcoreapp3.1</TargetFramework>
 
-<!-- New (pick a current LTS version) -->
+<!-- New -->
 <TargetFramework>net10.0</TargetFramework>
 ```
 
@@ -302,22 +304,17 @@ Follow the Microsoft ASP.NET Core migration guides for each major version jump. 
 <PackageReference Include="IdentityModel" Version="5.2.0" />
 
 <!-- New (Duende) -->
-<PackageReference Include="Duende.IdentityServer" Version="7.4.7" />
-<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.4.7" />
-<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.4.7" />
+<PackageReference Include="Duende.IdentityServer" Version="8.0.0" />
+<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="8.0.0" />
+<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="8.0.0" />
 <PackageReference Include="Duende.IdentityModel" Version="8.0.0" />
 ```
 
 Also update EF Core and other ASP.NET Core packages to match the new target framework:
 
 ```xml
-<!-- For net10.0 -->
 <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
-
-<!-- For net8.0 -->
-<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
 ```
 
 ### Step 2.3: Update Namespaces
@@ -448,15 +445,15 @@ builder.Services.AddIdentityServer()
     .AddSigningCredential(new X509Certificate2("signing.pfx", "password"));
 ```
 
-### Step 2.8: Migrate the Database Schema (v4 → Duende v7)
+### Step 2.8: Migrate the Database Schema (v4 → Duende v8)
 
 Create EF Core migrations for both contexts:
 
 ```bash
-dotnet ef migrations add UpdateToDuende_v7 -c PersistedGrantDbContext \
+dotnet ef migrations add UpdateToDuende_v8 -c PersistedGrantDbContext \
     -o Data/Migrations/IdentityServer/PersistedGrantDb
 
-dotnet ef migrations add UpdateToDuende_v7 -c ConfigurationDbContext \
+dotnet ef migrations add UpdateToDuende_v8 -c ConfigurationDbContext \
     -o Data/Migrations/IdentityServer/ConfigurationDb
 ```
 
@@ -467,15 +464,18 @@ dotnet ef database update -c PersistedGrantDbContext
 dotnet ef database update -c ConfigurationDbContext
 ```
 
-**New tables and columns in Duende IdentityServer v7:**
+**New tables and columns in Duende IdentityServer v8:**
 
 | Context | Change | Purpose |
 |---------|--------|---------|
 | Operational | `Keys` table (new) | Automatic key management storage |
 | Operational | `ServerSideSessions` table (new) | Server-side session management |
 | Operational | `PushedAuthorizationRequests` table (new) | PAR support |
+| Operational | `SamlSignInStates` table (new) | SAML SSO state |
+| Operational | `SamlLogoutSessions` table (new) | SAML SLO session tracking |
 | Operational | `ConsumedTime` index on `PersistedGrants` | Performance optimization |
 | Configuration | `IdentityProviders` table (new) | Dynamic OIDC provider configuration |
+| Configuration | `SamlServiceProviders` table (new) | SAML SP registration |
 | Configuration | `RequireResourceIndicator` column on `ApiResources` | Resource indicator support |
 | Configuration | Timestamp columns on entities | Created, updated, last accessed tracking |
 | Configuration | Unique constraints on child tables | Prevent duplicate entries |
@@ -528,7 +528,7 @@ Third-party authentication handlers registered in your IdentityServer4 project m
 | Old Handler | Action |
 |-------------|--------|
 | WS-Federation (`Microsoft.AspNetCore.Authentication.WsFederation`) | Update NuGet package to match target .NET version |
-| SAML2P (e.g., Sustainsys.Saml2, ITfoxtec.Identity.Saml2) | Update to a version compatible with .NET 8+; check for breaking API changes |
+| SAML2P (e.g., Sustainsys.Saml2, ITfoxtec.Identity.Saml2) | Update to a version compatible with .NET 10; note that Duende v8 has built-in SAML 2.0 IdP support (see `identityserver-saml` skill) |
 | Social providers (Google, Facebook, Twitter, etc.) | Update `Microsoft.AspNetCore.Authentication.*` packages to match target framework |
 | Custom `IAuthenticationHandler` implementations | Verify interface compatibility — `AuthenticateAsync`, `ChallengeAsync`, `ForbidAsync` signatures are stable, but constructor-injected types may have changed |
 
@@ -570,7 +570,7 @@ Use this checklist to track your migration progress:
 - [ ] **Run the Migration Analysis Tool** (Step 0) to get a baseline report of your current configuration
 - [ ] **Determine starting version** — v3.x requires Stage 1 first; v4.x goes directly to Stage 2
 - [ ] **Inventory clients** — count interactive vs. non-interactive for license edition selection
-- [ ] **Update .NET target framework** to `net8.0` or `net10.0` (LTS)
+- [ ] **Update .NET target framework** to `net10.0`
 - [ ] **Replace NuGet packages** — `IdentityServer4.*` → `Duende.IdentityServer.*`
 - [ ] **Update all namespaces** — `IdentityServer4` → `Duende.IdentityServer`; `IdentityModel` → `Duende.IdentityModel`
 - [ ] **Fix breaking API changes** (v3 → v4 if applicable)
@@ -625,14 +625,15 @@ Use this checklist to track your migration progress:
 | IdentityServer4 v4.x | .NET Core 3.1 / .NET 5 | EF Core 3.1 / 5.0 |
 | Duende IdentityServer v5.x | .NET 5 / .NET 6 | EF Core 5.0 / 6.0 |
 | Duende IdentityServer v6.x | .NET 6 / .NET 7 | EF Core 6.0 / 7.0 |
-| Duende IdentityServer v7.x | .NET 8 / .NET 10 | EF Core 8.0 / 10.0 |
+| Duende IdentityServer v7.x | .NET 8 | EF Core 8.0 |
+| Duende IdentityServer v8.x | .NET 10 | EF Core 10.0 |
 
 ---
 
 ## Resources
 
 - [Migration Analysis Tool](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-upgrade-analysis/) — pre-migration configuration inspector
-- [Official Duende Migration Guide: IdentityServer4 to Duende v7](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-to-duende-identityserver-v7/)
+- [Official Duende Migration Guide: IdentityServer4 to Duende v8](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-to-duende-identityserver/)
 - [UpgradeSample-IdentityServer4-v3 (reference project)](https://github.com/DuendeSoftware/UpgradeSample-IdentityServer4-v3)
 - [Duende IdentityServer Upgrade Overview](https://docs.duendesoftware.com/identityserver/upgrades/)
 - [Microsoft ASP.NET Core Migration Guides](https://learn.microsoft.com/en-us/aspnet/core/migration/)
@@ -641,3 +642,4 @@ Use this checklist to track your migration progress:
 - Related skill: `identityserver-stores` — EF Core store configuration and migrations
 - Related skill: `identityserver-configuration` — client and resource configuration
 - Related skill: `identityserver-key-management` — signing key management and rotation
+- Related skill: `identityserver-upgrade-v7-to-v8` — additional v8 breaking changes (HybridCache, TimeProvider, CancellationToken on all interfaces)

@@ -17,6 +17,8 @@ invocable: false
 - Using `IIdentityServerInteractionService` to interact with the protocol engine
 - Redirecting users back to clients after login/logout
 
+Docs: https://docs.duendesoftware.com/identityserver/ui
+
 ## Architecture Overview
 
 IdentityServer separates the protocol engine from the user interface. The engine handles OAuth/OIDC endpoints and redirects to your UI pages as needed. Your UI code handles all user interaction and then communicates results back to the engine.

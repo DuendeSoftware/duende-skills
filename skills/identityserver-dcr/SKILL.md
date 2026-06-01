@@ -23,6 +23,8 @@ invocable: false
 - Enforce PKCE and restrict allowed grant types in the DCR validator
 - Use persistent stores (database) for dynamically registered clients in production
 
+Docs: https://docs.duendesoftware.com/identityserver/configuration/dcr
+
 ## Overview
 
 Dynamic Client Registration allows clients to register themselves at the `/connect/dcr` endpoint per RFC 7591. This feature requires the **Business Edition** or higher and has been available since version 6.3.

@@ -24,6 +24,8 @@ invocable: false
 4. **Server-Side Sessions for Production** — The default in-memory cookie session is unsuitable for production; persist sessions with `Duende.BFF.EntityFramework`
 5. **Token Management Is Automatic** — BFF integrates with `Duende.AccessTokenManagement`; never manually refresh tokens or pass raw access tokens to the frontend
 
+Docs: https://docs.duendesoftware.com/identityserver/bff
+
 ---
 
 ## Pattern 1: Setup and Registration (BFF v4)

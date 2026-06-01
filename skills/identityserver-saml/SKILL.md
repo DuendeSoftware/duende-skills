@@ -1,6 +1,6 @@
 ---
 name: identityserver-saml
-description: "Configuring Duende IdentityServer as a SAML 2.0 Identity Provider (IdP): service provider setup, endpoint configuration, attribute mapping, signing behavior, extensibility, and common pitfalls."
+description: "Configuring Duende IdentityServer as a SAML 2.0 Identity Provider (IdP): service provider registration, SSO and SLO flows, claim mappings, extensibility interfaces, and production deployment patterns."
 invocable: false
 ---
 
@@ -9,346 +9,295 @@ invocable: false
 ## When to Use This Skill
 
 - Setting up IdentityServer as a SAML 2.0 Identity Provider (IdP)
-- Configuring SAML service providers with `SamlServiceProvider` model
-- Understanding SAML metadata, endpoints, and bindings
-- Customizing SAML attribute mapping with `ISamlClaimsMapper`
-- Configuring SAML options via `IdentityServerOptions.Saml` (signing behavior, clock skew, name ID formats)
-- Implementing custom `ISamlServiceProviderStore` for production
-- Enabling or disabling individual SAML endpoints
+- Registering SAML Service Providers with the `SamlServiceProvider` model
+- Configuring SP-initiated SSO and Single Logout (SLO) flows
+- Customizing claim-to-attribute mappings via `ClaimMappings` or extensibility interfaces
+- Implementing production SP stores (EF Core, custom `ISamlServiceProviderStore`)
+- Extending SAML behavior (custom NameID generation, signing, metadata, multi-tenant issuer)
+- Linking an external SAML IdP as a federated authentication source (SP mode)
 
 ## Core Principles
 
-- SAML 2.0 IdP support is **built into Duende.IdentityServer** (v8.0+) — no separate NuGet package required
-- Requires **Enterprise Edition** license
-- SP-initiated SSO is the default and recommended flow; IdP-initiated SSO is opt-in per service provider
-- `SignAssertion` is the most interoperable default signing behavior
-- Use persistent stores (database) for service providers in production
+- SAML 2.0 IdP support is **built into Duende.IdentityServer** (v8.0+) — no separate NuGet package
+- Requires **Advanced or Custom Edition** license
+- SP-initiated SSO is the default; IdP-initiated SSO is opt-in per service provider
+- `SignAssertion` is the default and most interoperable signing behavior
+- Use EF Core stores for service providers in production; in-memory is for development only
+- Front-channel SLO uses iframes (not redirect chains); partial logout is expected behavior
+- The claim pipeline flows: AllowedScopes → RequestedClaimTypes → ClaimMappings
 
-## Overview
+Docs: https://docs.duendesoftware.com/identityserver/saml
 
-IdentityServer can act as a SAML 2.0 Identity Provider, allowing SAML Service Providers (SPs) to authenticate users through IdentityServer. This feature requires the **Enterprise Edition** license and was introduced in version 8.0.
-
-### Setup
-
-SAML 2.0 is built into `Duende.IdentityServer` — no additional NuGet package is needed. Just call `.AddSaml()`:
+## Setup
 
 ```csharp
-// Program.cs
 builder.Services.AddIdentityServer()
     .AddInMemoryClients(Config.Clients)
     .AddInMemoryIdentityResources(Config.IdentityResources)
-    .AddInMemoryApiScopes(Config.ApiScopes)
     .AddSaml()
     .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-### SAML Endpoints
+Update the login page to call `DenyAuthenticationAsync` for SAML cancellation support (when user cancels login during a SAML flow).
 
-IdentityServer exposes six SAML endpoints under the `/saml` prefix:
+## Endpoints
 
-| Endpoint          | Path                      | Purpose                                           |
-| ----------------- | ------------------------- | ------------------------------------------------- |
-| Metadata          | `/saml/metadata`          | SAML 2.0 IdP metadata document                    |
-| Sign-in           | `/saml/signin`            | Receives `AuthnRequest` from SPs                  |
-| Sign-in Callback  | `/saml/signin_callback`   | Internal callback after user authentication       |
-| IdP-Initiated SSO | `/saml/idp-initiated`     | Starts authentication without SP request (opt-in) |
-| Logout            | `/saml/logout`            | Receives `LogoutRequest` from SPs                 |
-| Logout Callback   | `/saml/logout_callback`   | Internal callback after logout processing         |
+| Endpoint | Path | Purpose |
+|----------|------|---------|
+| Metadata | `/Saml2` | IdP metadata (certificates, endpoints, NameID formats) |
+| Sign-in | `/Saml2/SSO` | Receives AuthnRequest (GET/POST) |
+| Sign-in Callback | `/Saml2/SSO/Callback` | Builds SAML Response after authentication |
+| Logout | `/Saml2/SLO` | Handles LogoutRequest/LogoutResponse |
+| Logout Callback | `/Saml2/SLO/Callback` | Completes SLO round-trip |
 
-These paths can be customized via `IdentityServerOptions.Saml.UserInteraction` (a `SamlUserInteractionOptions` instance with `SignInPath`, `LogoutPath`, etc.).
+Paths are customizable via `SamlOptions.Endpoints`.
 
-#### Enabling/Disabling Endpoints
-
-Individual SAML endpoints can be toggled via `IdentityServerOptions.Endpoints`:
+## SamlServiceProvider Model
 
 ```csharp
-builder.Services.AddIdentityServer(options =>
-{
-    options.Endpoints.EnableSamlSignInEndpoint = true;            // default: true
-    options.Endpoints.EnableSamlLogoutEndpoint = true;            // default: true
-    options.Endpoints.EnableSamlMetadataEndpoint = true;          // default: true
-    options.Endpoints.EnableSamlIdpInitiatedSsoEndpoint = false;  // default: false
-});
-```
-
-### SamlServiceProvider Model
-
-Each SAML Service Provider is registered with the following configuration:
-
-```csharp
-var sp = new SamlServiceProvider
+new SamlServiceProvider
 {
     // Required
     EntityId = "https://sp.example.com",
-    DisplayName = "Example Service Provider",
+    DisplayName = "Example SP",
 
-    // Assertion Consumer Service (where to send SAML responses)
+    // ACS endpoints (HTTP-POST only, indexed)
     AssertionConsumerServiceUrls =
     [
-        new Uri("https://sp.example.com/saml/acs")
+        new IndexedEndpoint
+        {
+            Location = "https://sp.example.com/acs",
+            Binding = SamlBinding.HttpPost,
+            Index = 0,
+            IsDefault = true
+        }
     ],
 
-    // Single Logout
-    SingleLogoutServiceUrl = new SamlEndpointType
-    {
-        Location = new Uri("https://sp.example.com/saml/slo"),
-        Binding = SamlBinding.HttpPost
-    },
+    // Single Logout (HTTP-Redirect only)
+    SingleLogoutServiceUrls =
+    [
+        new SamlEndpointType
+        {
+            Location = "https://sp.example.com/saml/slo",
+            Binding = SamlBinding.HttpRedirect
+        }
+    ],
 
     // Security
+    SigningBehavior = SamlSigningBehavior.SignAssertion,
     RequireSignedAuthnRequests = true,
-    SigningCertificates =
+    Certificates =
     [
-        new X509Certificate2("sp-signing.cer")
+        new ServiceProviderCertificate
+        {
+            Certificate = spCert,
+            Use = KeyUse.Signing
+        }
     ],
-    EncryptAssertions = false,
-    EncryptionCertificates = [], // required if EncryptAssertions = true
 
-    // Claims and NameID
-    DefaultNameIdFormat = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+    // Claims (identity resources the SP can access)
+    AllowedScopes = ["openid", "profile", "email"],
+    RequestedClaimTypes = ["email", "name"],  // optional narrowing
     ClaimMappings = new Dictionary<string, string>
     {
-        ["email"] = ClaimTypes.Email,
-        ["name"] = ClaimTypes.Name
+        ["email"] = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+        ["name"] = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
     },
 
-    // Consent
-    RequireConsent = false,
+    // NameID
+    DefaultNameIdFormat = SamlNameIdFormat.EmailAddress,
 
-    // IdP-Initiated SSO
-    AllowIdpInitiated = false, // opt-in only
-
-    // Signing behavior (per-SP override)
-    SigningBehavior = SamlSigningBehavior.SignAssertion
-};
+    // IdP-Initiated SSO (opt-in)
+    AllowIdpInitiated = false
+}
 ```
 
-### Name ID Formats
+### Claim Pipeline
 
-| Format         | Value                                                    | Description                         |
-| -------------- | -------------------------------------------------------- | ----------------------------------- |
-| `Unspecified`  | `urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified`  | No specific format required         |
-| `EmailAddress` | `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress` | Email-based identifier              |
-| `Persistent`   | `urn:oasis:names:tc:SAML:2.0:nameid-format:persistent`   | Opaque persistent identifier        |
-| `Transient`    | `urn:oasis:names:tc:SAML:2.0:nameid-format:transient`    | One-time-use identifier per session |
+```
+AllowedScopes (identity resources) → filters available claim types
+    ↓
+RequestedClaimTypes (optional narrowing) → selects specific claims
+    ↓
+ClaimMappings (OIDC claim name → SAML attribute URI) → output as <saml:Attribute>
+```
 
-### SAML Options
+Use `SamlOptions.DefaultClaimMappings` for global defaults; per-SP `ClaimMappings` override them.
 
-SAML options are configured via the `IdentityServerOptions.Saml` property — not via an `AddSaml()` lambda:
+## Configuration (SamlOptions)
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
 {
-    // Signing behavior for SAML responses
-    // SignAssertion is recommended (signs only the assertion)
+    options.Saml.EntityId = "https://idp.example.com/Saml2"; // default: {host}/Saml2
+    options.Saml.WantAuthnRequestsSigned = true;             // default: true
+    options.Saml.RequireSignedLogoutResponses = true;        // default: true
     options.Saml.DefaultSigningBehavior = SamlSigningBehavior.SignAssertion;
+    options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(5);
+    options.Saml.DefaultRequestMaxAge = TimeSpan.FromMinutes(5);
+    options.Saml.DefaultAssertionLifetime = TimeSpan.FromMinutes(5);
+    options.Saml.SupportedNameIdFormats = [SamlNameIdFormat.EmailAddress, SamlNameIdFormat.Unspecified];
+    options.Saml.MaxRelayStateLength = 80; // SAML spec requirement
 
-    // Require signed AuthnRequests from SPs
-    options.Saml.WantAuthnRequestsSigned = false; // default
-
-    // Clock skew tolerance
-    options.Saml.DefaultClockSkew = TimeSpan.FromMinutes(5); // default
-
-    // Maximum age of authentication requests
-    options.Saml.DefaultRequestMaxAge = TimeSpan.FromMinutes(10);
-
-    // Attribute name format in SAML assertions
-    options.Saml.DefaultAttributeNameFormat = SamlAttributeNameFormat.Uri;
-
-    // Metadata validity duration
-    options.Saml.MetadataValidityDuration = TimeSpan.FromDays(7); // default
-
-    // Default claim mappings (OIDC claim -> WS claim type)
+    // Global claim mappings
     options.Saml.DefaultClaimMappings = new Dictionary<string, string>
     {
-        ["name"] = ClaimTypes.Name,
-        ["email"] = ClaimTypes.Email,
-        ["role"] = ClaimTypes.Role
+        ["name"] = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+        ["email"] = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+        ["role"] = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     };
 
-    // Customize SAML endpoint paths (optional)
-    options.Saml.UserInteraction.SignInPath = "/saml/signin";
-    options.Saml.UserInteraction.LogoutPath = "/saml/logout";
+    // AuthnContext mappings (acr/amr → SAML AuthnContext URIs)
+    options.Saml.DefaultAuthnContextMappings = new Dictionary<string, string>
+    {
+        ["pwd"] = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
+    };
+});
+```
+
+### Metadata Options
+
+```csharp
+options.Saml.Metadata.CacheDuration = TimeSpan.FromHours(12);
+options.Saml.Metadata.ExpiryDuration = TimeSpan.FromDays(5);
+```
+
+## Service Provider Stores
+
+### In-Memory (Development)
+
+```csharp
+.AddInMemorySamlServiceProviders(new[]
+{
+    new SamlServiceProvider { EntityId = "...", /* ... */ }
+});
+```
+
+### EF Core (Production — Recommended)
+
+```csharp
+.AddConfigurationStore(options =>
+{
+    options.ConfigureDbContext = b =>
+        b.UseSqlServer(connectionString);
 })
-    .AddSaml()
-    .AddInMemorySamlServiceProviders(Config.SamlServiceProviders);
 ```
 
-### Signing Behavior
+Run EF migrations: `dotnet ef migrations add Update_DuendeIdentityServer_v8_0`
 
-| Behavior        | Signs                          | Recommended                          |
-| --------------- | ------------------------------ | ------------------------------------ |
-| `SignAssertion`  | Assertion only                 | Yes (most interoperable)             |
-| `SignResponse`   | Entire SAML response           | Some SPs require this                |
-| `SignBoth`       | Both assertion and response    | Maximum security, less common        |
-| `DoNotSign`      | Nothing                        | **Testing only** — never use in production |
-
-### Service Provider Store
-
-**In-memory (development/static):**
+### Custom Store
 
 ```csharp
-builder.Services.AddIdentityServer()
-    .AddSaml()
-    .AddInMemorySamlServiceProviders(
-    [
-        new SamlServiceProvider
-        {
-            EntityId = "https://sp.example.com",
-            DisplayName = "Example SP",
-            AssertionConsumerServiceUrls =
-            [
-                new Uri("https://sp.example.com/saml/acs")
-            ]
-        }
-    ]);
-```
+.AddSamlServiceProviderStore<MySamlSpStore>()
 
-**Custom store (production):**
-
-> **Version Note:** `CancellationToken` parameters on store interfaces were added in Duende IdentityServer v8. In v7, omit the `CancellationToken` parameter.
-
-```csharp
-builder.Services.AddIdentityServer()
-    .AddSaml()
-    .AddSamlServiceProviderStore<DatabaseServiceProviderStore>();
-
-public class DatabaseServiceProviderStore : ISamlServiceProviderStore
+public class MySamlSpStore : ISamlServiceProviderStore
 {
-    private readonly AppDbContext _db;
+    public Task<SamlServiceProvider?> FindByEntityIdAsync(
+        string entityId, CancellationToken ct)
+    { /* lookup from your backend */ }
 
-    public DatabaseServiceProviderStore(AppDbContext db) => _db = db;
+    public IAsyncEnumerable<SamlServiceProvider> GetAllSamlServiceProvidersAsync(
+        CancellationToken ct)
+    { /* stream all SPs */ }
+}
+```
 
-    public async Task<SamlServiceProvider?> FindByEntityIdAsync(
-        string entityId, CancellationToken cancellationToken)
+### Caching & Validation
+
+```csharp
+// Add HybridCache layer to any custom store
+.AddSamlServiceProviderStoreCache<MySamlSpStore>()
+```
+
+All stores are automatically wrapped with `ValidatingSamlServiceProviderStore<T>` that checks: EntityId required, ≥1 ACS URL (HTTP-POST only), ≥1 AllowedScopes, positive lifetimes. Invalid SPs are treated as non-existent.
+
+## Single Logout (SLO)
+
+SLO uses **front-channel logout via iframes** (not redirect chains):
+
+1. SP sends LogoutRequest to `/Saml2/SLO`
+2. IdentityServer ends local session
+3. Renders iframes sending LogoutRequests to all other active SPs
+4. Collects LogoutResponses from SPs
+5. Sends final LogoutResponse to originating SP
+
+**Key points:**
+- Partial logout is normal (some SPs may not respond)
+- User must stay on logout page for iframes to complete
+- Use `ISamlLogoutSessionStore` for distributed deployments (tracks which SPs have active sessions)
+- Short session lifetimes serve as SLO fallback
+
+## Extensibility
+
+| Interface | Purpose |
+|-----------|---------|
+| `ISamlNameIdGenerator` | Custom NameID value derivation (e.g., from employee_id claim) |
+| `ISamlSigningService` | HSM/Key Vault signing certificate integration |
+| `ISaml2MetadataResponseGenerator` | Custom metadata extensions (org info, federation) |
+| `ISaml2IssuerNameService` | Multi-tenant: dynamic entity ID per tenant |
+| `ISaml2SsoInteractionResponseGenerator` | Custom step-up auth logic during SSO |
+| `ISaml2SsoResponseGenerator` | Custom SAML Response generation |
+| `ISamlLogoutNotificationService` | Selective SLO targeting (choose which SPs get notified) |
+| `ISamlLogoutSessionStore` | Distributed SLO state (Redis, EF Core) |
+| `ISaml2FrontChannelLogoutRequestBuilder` | Custom logout request structure |
+| `ISamlResourceResolver` | Dynamic scope filtering per SP |
+| `IIdpInitiatedSsoService` | Portal "My Apps" dashboard for IdP-initiated flows |
+| `IAuthnRequestValidator` | Custom SP access rules, IP/time-based controls |
+| `ILogoutRequestValidator` | Custom SLO authorization rules |
+| `ISamlSigninStateStore` | Distributed sign-in state (for multi-node deployments) |
+| `ISamlServiceProviderConfigurationValidator` | Custom SP config validation rules |
+
+### Example: Custom NameID Generator
+
+```csharp
+public class EmployeeNameIdGenerator : ISamlNameIdGenerator
+{
+    public Task<NameIdGenerationResult> GenerateAsync(
+        NameIdGenerationContext context, CancellationToken ct)
     {
-        return await _db.SamlServiceProviders
-            .FirstOrDefaultAsync(
-                sp => sp.EntityId == entityId,
-                cancellationToken);
+        var employeeId = context.Subject.FindFirst("employee_id")?.Value;
+        if (employeeId is null)
+            return Task.FromResult(NameIdGenerationResult.Failure(
+                StatusCodes.Responder, StatusCodes.UnknownPrincipal,
+                "Employee ID claim not found."));
+
+        return Task.FromResult(NameIdGenerationResult.Success(
+            new NameId(employeeId, context.ResolvedFormat)));
     }
 }
 ```
 
-### Extensibility
+### SAML Authentication Context in Login UI
 
-#### ISamlClaimsMapper
+Inject `IIdentityServerInteractionService` and call `GetSamlAuthenticationContextAsync(returnUrl)` to access `SamlAuthenticationContext` (requesting SP, required AuthnContext) for customizing login flows per SP.
 
-Completely replaces the default claim-to-attribute mapping:
+## Using IdentityServer as a SAML Service Provider (SP Mode)
 
-```csharp
-public class CustomSamlClaimsMapper : ISamlClaimsMapper
-{
-    public Task<IEnumerable<SamlAttribute>> MapClaimsAsync(
-        IEnumerable<Claim> claims,
-        SamlServiceProvider serviceProvider)
-    {
-        var attributes = new List<SamlAttribute>();
-
-        foreach (var claim in claims)
-        {
-            // Custom mapping logic per SP
-            if (serviceProvider.EntityId == "https://legacy-sp.example.com")
-            {
-                // Legacy SP expects different attribute names
-                attributes.Add(new SamlAttribute
-                {
-                    Name = $"urn:custom:{claim.Type}",
-                    Values = [claim.Value]
-                });
-            }
-            else
-            {
-                attributes.Add(new SamlAttribute
-                {
-                    Name = claim.Type,
-                    Values = [claim.Value]
-                });
-            }
-        }
-
-        return Task.FromResult<IEnumerable<SamlAttribute>>(attributes);
-    }
-}
-```
-
-Register:
-
-```csharp
-builder.Services.AddTransient<ISamlClaimsMapper, CustomSamlClaimsMapper>();
-```
-
-#### ISamlInteractionService
-
-Use in the login UI to get SAML-specific authentication context:
-
-```csharp
-public class AccountController : Controller
-{
-    private readonly ISamlInteractionService _samlInteraction;
-
-    public AccountController(ISamlInteractionService samlInteraction)
-    {
-        _samlInteraction = samlInteraction;
-    }
-
-    public async Task<IActionResult> Login(string returnUrl)
-    {
-        var context = await _samlInteraction.GetRequestContextAsync(returnUrl);
-        if (context != null)
-        {
-            // This is a SAML AuthnRequest
-            // context.ServiceProvider — the requesting SP
-            // context.RequestedNameIdFormat — what Name ID format the SP wants
-        }
-        return View();
-    }
-}
-```
-
-#### Other Extensibility Points
-
-| Interface                                 | Purpose                                         |
-| ----------------------------------------- | ----------------------------------------------- |
-| `ISamlSigninInteractionResponseGenerator` | Customize the interaction flow for SAML sign-in |
-| `ISamlLogoutNotificationService`          | Custom logout notification handling             |
-
-## When to Use SAML vs OIDC
-
-| Consideration        | SAML 2.0 IdP                          | OpenID Connect                           |
-| -------------------- | ------------------------------------- | ---------------------------------------- |
-| Edition required     | Enterprise                            | All editions                             |
-| Protocol             | SAML 2.0                              | OAuth 2.0 / OpenID Connect               |
-| Use case             | Federate with legacy SAML SPs         | Modern web/mobile/API authentication      |
-| NuGet package        | `Duende.IdentityServer` (built-in)    | `Duende.IdentityServer` (built-in)       |
-| Can host separately  | No (part of IdentityServer)           | No (part of IdentityServer)              |
-
-Prefer OpenID Connect for new integrations. Use SAML 2.0 only when required by an SP that does not support OIDC.
+IdentityServer can consume SAML assertions from external IdPs via federation. Add a SAML authentication handler (e.g., `Sustainsys.Saml2` or `ITfoxtec.Identity.Saml2`) and configure it as an external provider in IdentityServer's login UI — same pattern as any external authentication scheme.
 
 ## Common Anti-Patterns
 
-- **Enabling `AllowIdpInitiated` on all SAML service providers** — Only enable IdP-initiated SSO for SPs that explicitly require it. It is less secure than SP-initiated flows.
-
-- **Using `SignResponse` as the default signing behavior without SP requirement** — Use `SignAssertion` (default). It is the most interoperable option.
-
-- **Using in-memory stores for SAML SPs in production** — Use persistent stores (database) for production deployments.
+❌ Enabling `AllowIdpInitiated` on all SPs — only enable where explicitly required (less secure)
+❌ Using `DoNotSign` outside of local testing
+❌ Using in-memory SP stores in production
+❌ Omitting `AllowedScopes` — SP gets no claims in the assertion
+❌ Configuring ACS URLs with HTTP-Redirect binding (only HTTP-POST is supported)
 
 ## Common Pitfalls
 
-1. **Enterprise Edition requirement**: `AddSaml()` requires an Enterprise Edition license. Without it, the SAML endpoints are not available and startup may fail or produce licensing warnings.
-
-2. **Metadata caching**: The `/saml/metadata` endpoint returns metadata with a validity duration (default 7 days via `MetadataValidityDuration`). SPs often cache this. If you rotate signing certificates, SPs may not pick up the new certificate until their cached metadata expires.
-
-3. **Clock skew**: A `DefaultClockSkew` of 5 minutes (default) is typical, but some SPs have poorly synchronized clocks. Increase this if you see "response is not yet valid" or "response has expired" errors.
-
-4. **Assertion encryption**: If `EncryptAssertions = true` is set on a service provider but no encryption certificate is provided, assertion generation will fail. Always provide `EncryptionCertificates` when enabling encryption.
-
-5. **ISamlClaimsMapper replaces defaults**: Implementing `ISamlClaimsMapper` completely replaces the default claim mapping. You must handle all claims in your implementation — the default mappings configured in `IdentityServerOptions.Saml.DefaultClaimMappings` are not applied.
+1. **Edition requirement**: `AddSaml()` requires Advanced or Custom Edition license.
+2. **ACS binding**: Only HTTP-POST is supported for AssertionConsumerServiceUrls. HTTP-Redirect will fail validation.
+3. **Clock skew**: Default 5 minutes. Increase if SPs report "response not yet valid" errors.
+4. **Partial SLO**: Front-channel logout via iframes means some SPs may not respond. This is expected — don't treat it as an error.
+5. **DenyAuthenticationAsync**: Login page must call this for SAML cancellation. Without it, users get stuck if they cancel.
+6. **Operational stores**: For multi-node deployments, configure `ISamlSigninStateStore` and `ISamlLogoutSessionStore` (e.g., EF Core, Redis). Without them, SSO/SLO state is lost across nodes.
+7. **Certificate rotation**: Metadata is cached (default 12h). SPs may not pick up new signing certs until cache expires.
+8. **ClaimMappings vs AllowedScopes**: If `AllowedScopes` doesn't include a resource containing a claim type, that claim won't reach `ClaimMappings`.
 
 ## Related Skills
 
-- `identityserver-configuration` — IdentityServer host configuration including `IdentityServerOptions`
-- `identityserver-dcr` — Dynamic Client Registration (DCR) for automated client onboarding
-- `identity-security-hardening` — Security hardening including key rotation and HTTPS enforcement
-- `identityserver-stores` — Persistent store patterns (useful for custom `ISamlServiceProviderStore`)
-- `identityserver-ui-flows` — Login/logout UI flows that SAML authentication integrates with
+- `identityserver-configuration` — IdentityServer host configuration and options
+- `identityserver-stores` — Persistent store patterns (EF Core, custom stores)
+- `identity-security-hardening` — Key rotation, HTTPS enforcement
+- `identityserver-ui-flows` — Login/logout UI flows that SAML integrates with
+- `identityserver-upgrade-v7-to-v8` — Migration guide including SAML EF migrations
