@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Adds Duende.UserManagement.IdentityServer8 NuGet package", "pass": false, "rationale": "Response uses Microsoft.AspNetCore.Identity.EntityFrameworkCore instead of Duende.UserManagement.IdentityServer8."},
+    {"assertion": "Adds Duende.Storage.Sqlite NuGet package (or references it)", "pass": false, "rationale": "Response uses Microsoft.EntityFrameworkCore.Sqlite, not the Duende.Storage.Sqlite package."},
+    {"assertion": "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda", "pass": false, "rationale": "Response uses AddAspNetIdentity<IdentityUser>() instead of AddUserManagement()."},
+    {"assertion": "Calls AddSqliteStore() inside the AddUserManagement options lambda (not at top level)", "pass": false, "rationale": "No AddSqliteStore() call anywhere; uses EF Core DbContext pattern instead."},
+    {"assertion": "Calls IDatabaseSchema.CreateIfNotExistsAsync() to ensure database schema exists", "pass": false, "rationale": "Uses EF Core migrations instead of IDatabaseSchema.CreateIfNotExistsAsync()."}
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

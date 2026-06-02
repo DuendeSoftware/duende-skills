@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "States that no separate NuGet package is needed — SAML is built into Duende.IdentityServer", "pass": true, "rationale": "Explicitly states 'No separate NuGet package is needed. SAML 2.0 IdP support is built directly into the Duende.IdentityServer package.'"},
+    {"assertion": "States that Advanced or Custom Edition license is required", "pass": true, "rationale": "States 'requires an Advanced or Custom Edition license'."},
+    {"assertion": "Mentions SAML support was introduced in version 8.0", "pass": true, "rationale": "States 'introduced in Duende IdentityServer v8.0'."},
+    {"assertion": "Mentions .NET 10 as the required framework version", "pass": true, "rationale": "States 'targets .NET 10 (net10.0)'."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

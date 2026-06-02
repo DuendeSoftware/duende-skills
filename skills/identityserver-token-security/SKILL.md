@@ -16,6 +16,8 @@ invocable: false
 - Configuring APIs to validate proof-of-possession tokens
 - Meeting regulatory or industry security requirements (open banking, e-health, e-government)
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/security
+
 ## Proof-of-Possession Tokens: Why They Matter
 
 Default OAuth access tokens are **bearer tokens** -- anyone who possesses the token can use it. If a token leaks, a malicious third party can impersonate the client/user.

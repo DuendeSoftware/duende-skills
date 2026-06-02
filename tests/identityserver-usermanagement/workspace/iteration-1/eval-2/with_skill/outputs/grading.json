@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda", "pass": true, "rationale": "Code shows `options.UseSmtpOtpDispatcher(smtp => { ... })` inside AddUserManagement."},
+    {"assertion": "Configures SMTP host and port", "pass": true, "rationale": "Shows `smtp.Host = \"smtp.example.com\"` and `smtp.Port = 587`."},
+    {"assertion": "Configures from address for outgoing emails", "pass": true, "rationale": "Shows `smtp.FromAddress = \"noreply@example.com\"`."},
+    {"assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)", "pass": true, "rationale": "Explicitly states 'Do NOT use ConsoleOtpDispatcher in production' with explanation."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

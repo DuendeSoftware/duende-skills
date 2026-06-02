@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Replaces ICache<T> with HybridCache from Microsoft.Extensions.Caching.Hybrid", "pass": false, "rationale": "Response suggests IDistributedCache or IMemoryCache, not HybridCache."},
+    {"assertion": "Uses [FromKeyedServices(\"ConfigurationStoreCache\")] or ServiceProviderKeys.ConfigurationStoreCache for keyed injection", "pass": false, "rationale": "No mention of keyed services or ConfigurationStoreCache."},
+    {"assertion": "Uses GetOrCreateAsync (not GetOrAddAsync) for the cache retrieval pattern", "pass": false, "rationale": "Response uses IMemoryCache's GetOrCreateAsync but not in the HybridCache context as required."},
+    {"assertion": "Mentions that CachingOptions.CacheLockTimeout is obsolete", "pass": false, "rationale": "No mention of CachingOptions.CacheLockTimeout."}
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

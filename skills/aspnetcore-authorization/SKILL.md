@@ -31,6 +31,8 @@ Use this skill when:
 - `identityserver-configuration` — Server-side scope and resource configuration
 - `oauth-oidc-protocols` — Understanding scopes, claims, and token contents
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/authorization
+
 ---
 
 ## Pattern 1: Basic Policy-Based Authorization

@@ -33,6 +33,8 @@ Use this skill when:
 - `claims-authorization` — `IProfileService` and claim pipeline internals
 - `duende-bff` — BFF session and proxy architecture being tested
 
+Docs: https://docs.duendesoftware.com/identityserver/fundamentals
+
 ---
 
 ## Sub-Documents

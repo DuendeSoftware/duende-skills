@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database", "pass": false, "rationale": "No mention of AddAspNetIdentityMigration(); suggests writing a custom migration script."},
+    {"assertion": "States that existing password hashes are preserved (users can log in with current passwords)", "pass": true, "rationale": "Mentions 'ASP.NET Identity uses PBKDF2... If your new system supports the same hashing format, users won't need to reset passwords'."},
+    {"assertion": "Mentions that migration is idempotent (subsequent runs skip already-imported users)", "pass": false, "rationale": "Mentions making migration idempotent as a suggestion but doesn't state this is built-in behavior."},
+    {"assertion": "Mentions that after migration users can enroll in passwordless methods", "pass": false, "rationale": "Vaguely mentions 'set up new authentication flow for modern methods like passkeys' but not in the context of Duende User Management enrollment."}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

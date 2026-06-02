@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Identifies that storage configuration must be inside the AddUserManagement() options lambda", "pass": true, "rationale": "States 'must be called inside the AddUserManagement() options lambda, not at the top level'."},
+    {"assertion": "Shows the correct pattern: AddUserManagement(options => { options.AddSqliteStore(...); })", "pass": true, "rationale": "Shows correct code with `options.AddSqliteStore(\"Data Source=users.db\")` inside the lambda."},
+    {"assertion": "Explains that configuring storage outside the lambda is the cause of the error", "pass": true, "rationale": "Shows incorrect pattern and explains 'Configuring storage outside the lambda means User Management has no storage provider registered, which causes runtime errors'."},
+    {"assertion": "Does NOT suggest using EF Core migrations as a fix", "pass": true, "rationale": "Explicitly states 'you do NOT need EF Core migrations' and mentions document-based storage."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

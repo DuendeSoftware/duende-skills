@@ -16,6 +16,8 @@ invocable: false
 - Protecting APIs hosted in the same application as IdentityServer (local API authentication)
 - Securing multi-audience API deployments
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/api-protection
+
 ## Core Concepts
 
 APIs are the resources that IdentityServer protects. Clients obtain access tokens from IdentityServer, then present those tokens to APIs. The API must validate the token and enforce authorization based on the token's claims (scopes, audience, subject, etc.).

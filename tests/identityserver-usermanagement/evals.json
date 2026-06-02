@@ -1,0 +1,102 @@
+{
+  "skill_name": "identityserver-usermanagement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to add Duende User Management to my existing IdentityServer project. I'd like passwordless login via email OTP, using SQLite for storage. Show me the full setup including packages needed and Program.cs changes.",
+      "expected_output": "Complete setup with NuGet packages (Duende.UserManagement.IdentityServer8, Duende.Storage.Sqlite), AddUserManagement() with AddSqliteStore() inside the options lambda, IOtpDispatcher registration, and IDatabaseSchema.CreateIfNotExistsAsync() call.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+        "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+        "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+        "Calls AddSqliteStore() inside the AddUserManagement options lambda (not at top level)",
+        "Calls IDatabaseSchema.CreateIfNotExistsAsync() to ensure database schema exists"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to configure an OTP email dispatcher for production using SMTP. Show me how to set it up with Duende User Management.",
+      "expected_output": "Configuration using UseSmtpOtpDispatcher inside AddUserManagement options with SMTP settings (host, port, username, password, from address).",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda",
+        "Configures SMTP host and port",
+        "Configures from address for outgoing emails",
+        "Does NOT use ConsoleOtpDispatcher for production (or warns against it)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm setting up User Management with PostgreSQL for production. Show me the storage configuration and explain if I need to run database migrations.",
+      "expected_output": "Configuration using AddPostgreSqlStore() inside AddUserManagement, explanation that storage is document-based so no EF migrations are needed, and IDatabaseSchema.CreateIfNotExistsAsync() handles schema creation.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Uses AddPostgreSqlStore() with a connection string inside AddUserManagement options",
+        "Adds Duende.Storage.PostgreSQL package (or references it)",
+        "Explains that no EF Core migrations are needed (document-based storage)",
+        "Shows IDatabaseSchema.CreateIfNotExistsAsync() for automatic schema creation"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We have an existing app using ASP.NET Identity for user management. We want to migrate to Duende User Management. How do we import existing users without them losing access?",
+      "expected_output": "Configuration using AddAspNetIdentityMigration with connection string to existing database, explanation that password hashes are preserved so users can still log in, and that migration is idempotent.",
+      "files": [],
+      "assertions": [
+        "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database",
+        "States that existing password hashes are preserved (users can log in with current passwords)",
+        "Mentions that migration is idempotent (subsequent runs skip already-imported users)",
+        "Mentions that after migration users can enroll in passwordless methods"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "How do I integrate Duende User Management with IdentityServer so that user claims are available in tokens? I need the user's email and custom profile attributes to appear in ID tokens.",
+      "expected_output": "Explanation that AddUserManagement() automatically registers IProfileService, claims are mapped from user profile attributes based on requested scopes (openid, profile, email), and custom attributes can be exposed through custom identity resources.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains that AddUserManagement() automatically registers IProfileService",
+        "Mentions that claims mapping is based on requested scopes (openid → sub, email → email)",
+        "Notes that custom user attributes can be exposed via custom identity resources",
+        "Sets LoginUrl and LogoutUrl in IdentityServer options to point to account pages"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What authentication methods does Duende User Management support? I want to offer passkeys as the primary method with TOTP as fallback.",
+      "expected_output": "List of supported methods (OTP, TOTP, passkeys/WebAuthn, passwords, external, recovery codes), explanation that passkeys use WebAuthn/FIDO2, TOTP uses RFC 6238 authenticator apps, and both can coexist.",
+      "files": [],
+      "assertions": [
+        "Lists passkeys/WebAuthn/FIDO2 as a supported authentication method",
+        "Lists TOTP (authenticator apps) as a supported method",
+        "Mentions that multiple authentication methods can coexist for the same user",
+        "Notes that OTP (email/SMS) is the default passwordless flow"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I'm getting errors when setting up User Management. My storage configuration is at the top level of Program.cs, outside of AddUserManagement. What's wrong?",
+      "expected_output": "Explanation that storage configuration (AddSqliteStore, AddPostgreSqlStore, etc.) must be called inside the AddUserManagement options lambda, not on the top-level service collection or IdentityServer builder.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Identifies that storage configuration must be inside the AddUserManagement() options lambda",
+        "Shows the correct pattern: AddUserManagement(options => { options.AddSqliteStore(...); })",
+        "Explains that configuring storage outside the lambda is the cause of the error",
+        "Does NOT suggest using EF Core migrations as a fix"
+      ]
+    }
+  ]
+}

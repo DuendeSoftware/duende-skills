@@ -33,6 +33,8 @@ Use this skill when:
 - `oauth-oidc-protocols` — protocol fundamentals underlying client credentials and refresh token flows
 - `duende-bff` — BFF pattern integrates this library automatically for proxied API calls
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/management
+
 ---
 
 ## Pattern 1: Machine-to-Machine (Client Credentials) — Worker Services

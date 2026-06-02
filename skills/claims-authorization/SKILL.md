@@ -25,6 +25,8 @@ invocable: false
 - **Claim serialization is type-aware.** Set `ClaimValueType` correctly (e.g. `ClaimValueTypes.Integer64`, `IdentityServerConstants.ClaimValueTypes.Json`) so numeric and structured values arrive in tokens as the right JSON type rather than strings.
 - **`MapInboundClaims = false` is required** in consuming APIs and web apps. Without it, the JWT bearer handler silently renames standard OIDC claims (e.g. `sub` → `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`), breaking `User.FindFirst(JwtClaimTypes.Subject)` lookups.
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens/authorization
+
 ---
 
 ## Sub-Documents

@@ -28,6 +28,8 @@ invocable: false
 
 **EF Core schema changes are your responsibility.** Duende does not ship automatic migration scripts or schema upgrade tooling. You own migration creation, application, and data migration between IdentityServer versions.
 
+Docs: https://docs.duendesoftware.com/identityserver/data
+
 ---
 
 ## NuGet Package
@@ -240,13 +242,13 @@ Configuration data (clients, resources, CORS) is read on every token request. Wi
 ### EF Store Caching (Recommended)
 
 ```csharp
-// ✅ Enable in-memory cache for the EF configuration store
+// ✅ Enable cache for the EF configuration store (v8: uses HybridCache)
 builder.Services.AddIdentityServer()
     .AddConfigurationStore(options => { /* ... */ })
-    .AddConfigurationStoreCache(); // wraps EF stores with ICache<T>
+    .AddConfigurationStoreCache(); // wraps EF stores with HybridCache
 ```
 
-`AddConfigurationStoreCache()` wraps each configuration store with a caching decorator backed by `IMemoryCache`. Cache expiration is controlled through `IdentityServerOptions.Caching`:
+`AddConfigurationStoreCache()` wraps each configuration store with a caching decorator backed by Microsoft `HybridCache`. Cache expiration is controlled through `IdentityServerOptions.Caching`:
 
 ```csharp
 builder.Services.AddIdentityServer(options =>
@@ -269,29 +271,28 @@ When using a custom `IClientStore`, wrap it with the caching decorator explicitl
 builder.Services.AddIdentityServer()
     .AddClientStore<MongoClientStore>()
     .AddResourceStore<MongoResourceStore>()
-    .AddInMemoryCaching()                                  // registers ICache<T>
-    .AddClientStoreCache<MongoClientStore>()               // wraps MongoClientStore
+    .AddClientStoreCache<MongoClientStore>()
     .AddResourceStoreCache<MongoResourceStore>();
 ```
 
 ### Distributed Cache for Multi-Node Deployments
 
-In-memory cache is node-local — a client update only invalidates the cache on the node where the change was made. For multi-node deployments, replace `ICache<T>` with a distributed implementation:
+In-memory cache is node-local — a client update only invalidates the cache on the node where the change was made. For multi-node deployments, configure `HybridCache` with a distributed backend:
 
 ```csharp
-// ✅ Swap in Redis-backed distributed cache for multi-node scenarios
+// ✅ Configure HybridCache with Redis backend for multi-node scenarios
+builder.Services.AddHybridCache();
 builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration["Redis:ConnectionString"]);
-
-// Replace the default ICache<T> with a distributed version
-builder.Services.AddSingleton(typeof(ICache<>), typeof(DistributedCache<>));
 
 builder.Services.AddIdentityServer()
     .AddConfigurationStore(options => { /* ... */ })
     .AddConfigurationStoreCache();
 ```
 
-> **Note:** After a client or resource update, explicitly evict the cache entry or wait for expiration. There is no built-in cache invalidation webhook.
+> **Note:** In v8, `ICache<T>` is replaced by Microsoft `HybridCache`. If you have custom `ICache<T>` implementations, migrate to `HybridCache` with keyed services (`ServiceProviderKeys.ConfigurationStoreCache`). See the `identityserver-upgrade-v7-to-v8` skill for migration patterns.
+> 
+> After a client or resource update, explicitly evict the cache entry or wait for expiration. There is no built-in cache invalidation webhook.
 
 ---
 

@@ -17,6 +17,8 @@ invocable: false
 - Understanding the difference between Data Protection keys and IdentityServer signing keys
 - Setting up logging and events for production monitoring
 
+Docs: https://docs.duendesoftware.com/identityserver/deployment
+
 ## Deployment Architecture
 
 IdentityServer is ASP.NET Core middleware. It can be hosted with the same diversity of technology as any ASP.NET Core application:

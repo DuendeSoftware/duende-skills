@@ -33,6 +33,8 @@ Use this skill when:
 - `token-management` — Client-side token lifecycle with Duende.AccessTokenManagement
 - `aspnetcore-authentication` — Configuring OIDC authentication in client applications
 
+Docs: https://docs.duendesoftware.com/identityserver/configuration
+
 ---
 
 ## Sub-Documents

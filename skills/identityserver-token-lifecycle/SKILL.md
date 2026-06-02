@@ -17,6 +17,8 @@ invocable: false
 - Issuing internal tokens from extensibility code via `IIdentityServerTools`
 - Understanding identity tokens vs access tokens and their intended audiences
 
+Docs: https://docs.duendesoftware.com/identityserver/tokens
+
 ## Token Types Overview
 
 Duende IdentityServer issues three primary token types:

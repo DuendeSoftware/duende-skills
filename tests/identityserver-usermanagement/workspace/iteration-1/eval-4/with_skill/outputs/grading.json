@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database", "pass": true, "rationale": "Code shows `options.AddAspNetIdentityMigration(migrationOptions => { migrationOptions.ConnectionString = \"...\"; })`."},
+    {"assertion": "States that existing password hashes are preserved (users can log in with current passwords)", "pass": true, "rationale": "Explicitly states 'Password hashes are preserved — users can continue to log in with their existing passwords'."},
+    {"assertion": "Mentions that migration is idempotent (subsequent runs skip already-imported users)", "pass": true, "rationale": "States 'Migration is idempotent — subsequent runs skip users that have already been imported'."},
+    {"assertion": "Mentions that after migration users can enroll in passwordless methods", "pass": true, "rationale": "States 'After migration, users can enroll in passwordless methods — once migrated, users can set up OTP, TOTP, or passkeys'."}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

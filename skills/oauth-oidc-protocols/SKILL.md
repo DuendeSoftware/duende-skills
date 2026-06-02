@@ -33,6 +33,8 @@ Use this skill when:
 - `identity-security-hardening` — Security hardening including DPoP, PAR, and FAPI
 - `duende-bff` — Backend-for-Frontend pattern for SPAs
 
+Docs: https://docs.duendesoftware.com/identityserver/fundamentals
+
 ---
 
 ## Concept 1: The OAuth 2.0 / OIDC Mental Model
