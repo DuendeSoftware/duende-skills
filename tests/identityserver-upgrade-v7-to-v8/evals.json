@@ -11,9 +11,9 @@
       ],
       "assertions": [
         "Adds CancellationToken parameter to FindClientByIdAsync method signature",
-        "Adds GetAllClientsAsync(CancellationToken ct) method returning IReadOnlyCollection<Client> or Task<IReadOnlyCollection<Client>>",
+        "Adds GetAllClientsAsync(CancellationToken ct) method returning IAsyncEnumerable<Client>",
         "Updates TargetFramework to net10.0",
-        "Updates Duende.IdentityServer package version to 8.0.0"
+        "Updates Duende.IdentityServer package version to latest stable 8.x (e.g. 8.0.1 or newer)"
       ]
     },
     {
