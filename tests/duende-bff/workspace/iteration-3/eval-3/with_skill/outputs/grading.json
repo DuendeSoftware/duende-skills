@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 explicitly shows AddEntityFrameworkServerSideSessions for production"
+    },
+    {
+      "assertion": "Configures UseSqlServer with the connection string from configuration",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 shows options.UseSqlServer(builder.Configuration.GetConnectionString('BffSessions'))"
+    },
+    {
+      "assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 shows options.SessionCleanupInterval = TimeSpan.FromMinutes(5) as example; easy to adapt to 10"
+    },
+    {
+      "assertion": "Calls AddSessionCleanupBackgroundProcess()",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 explicitly shows .AddSessionCleanupBackgroundProcess()"
+    },
+    {
+      "assertion": "Warns against or does NOT use in-memory sessions for production",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 has explicit warning about in-memory sessions being unsuitable for production"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

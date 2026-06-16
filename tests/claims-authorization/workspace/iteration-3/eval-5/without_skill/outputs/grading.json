@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Uses context.Caller to differentiate between token types", "pass": false, "rationale": "The Caller property and ProfileDataCallers constants are Duende-specific internal APIs not commonly known without documentation"},
+    {"assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens", "pass": false, "rationale": "The exact constant name is Duende-specific and would not be known without the skill"},
+    {"assertion": "Emits a minimal claim set (e.g. just name) for identity tokens", "pass": true, "rationale": "The prompt asks for this, so even with a wrong approach, the intent would be expressed"},
+    {"assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering", "pass": false, "rationale": "Without the skill, an LLM would not know about AddRequestedClaims for scope filtering"}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

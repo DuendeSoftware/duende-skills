@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "Client credentials with scopes is standard knowledge."
+    },
+    {
+      "assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true",
+      "pass": true,
+      "rationale": "Authorization code + PKCE is well-known."
+    },
+    {
+      "assertion": "The admin-portal client has AllowOfflineAccess set to true",
+      "pass": true,
+      "rationale": "AllowOfflineAccess for refresh tokens is reasonably known."
+    },
+    {
+      "assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId in its AllowedScopes",
+      "pass": true,
+      "rationale": "Including openid scope is basic OIDC knowledge."
+    },
+    {
+      "assertion": "The admin-portal client has RedirectUris and PostLogoutRedirectUris configured",
+      "pass": false,
+      "rationale": "PostLogoutRedirectUris might be forgotten without explicit guidance."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

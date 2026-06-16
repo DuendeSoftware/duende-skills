@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping", "pass": true, "rationale": "This is well-known in the ASP.NET Core community; most experienced developers include this"},
+    {"assertion": "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates", "pass": false, "rationale": "Without specialized guidance, most LLMs would just add scopes without clearing first. The Scope.Clear() pattern is a Duende-specific best practice not widely known"},
+    {"assertion": "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme", "pass": true, "rationale": "Standard OIDC setup pattern, well documented in Microsoft docs"},
+    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline", "pass": true, "rationale": "Standard middleware ordering, commonly known"},
+    {"assertion": "Program.cs sets ResponseType to 'code' for authorization code flow", "pass": true, "rationale": "Authorization code flow with ResponseType='code' is standard OIDC knowledge"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

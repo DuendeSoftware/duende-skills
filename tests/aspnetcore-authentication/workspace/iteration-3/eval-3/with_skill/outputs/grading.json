@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection", "pass": true, "rationale": "SKILL.md Pattern 3 explicitly shows `options.ForwardDefaultSelector = Selector.ForwardReferenceToken(\"introspection\");`"},
+    {"assertion": "Program.cs configures AddOAuth2Introspection with ClientId and ClientSecret for the API", "pass": true, "rationale": "SKILL.md Pattern 3 shows `.AddOAuth2Introspection(\"introspection\", options => { options.ClientId = ...; options.ClientSecret = ...; })`"},
+    {"assertion": "Program.cs registers two authentication scheme handlers (JWT Bearer and introspection)", "pass": true, "rationale": "SKILL.md Pattern 3 shows both `.AddJwtBearer(\"Bearer\", ...)` and `.AddOAuth2Introspection(\"introspection\", ...)`"},
+    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": true, "rationale": "SKILL.md Pattern 3 shows `options.MapInboundClaims = false;` in the JWT bearer configuration"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

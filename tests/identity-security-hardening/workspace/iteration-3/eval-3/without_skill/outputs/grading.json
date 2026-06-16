@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit anywhere in the file",
+      "pass": true,
+      "rationale": "Removing implicit flow is well-known OAuth security guidance"
+    },
+    {
+      "assertion": "The spa.legacy client uses GrantTypes.Code with RequirePkce = true",
+      "pass": true,
+      "rationale": "Migrating to Code+PKCE is standard security guidance"
+    },
+    {
+      "assertion": "The spa.legacy client does not have AllowAccessTokensViaBrowser = true",
+      "pass": true,
+      "rationale": "Removing AllowAccessTokensViaBrowser is logical when migrating from implicit"
+    },
+    {
+      "assertion": "Client secrets are loaded from configuration (builder.Configuration, config[], or IConfiguration) rather than hardcoded string literals passed to Sha256()",
+      "pass": false,
+      "rationale": "Without skill, an LLM might simply use new Secret('value'.Sha256()) pattern rather than specifically loading from configuration"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -2,10 +2,26 @@
   "eval_id": 6,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence", "pass": true, "rationale": "Explicitly covers ISamlSigninStateStore with explanation of its purpose."},
-    {"assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking", "pass": true, "rationale": "Explicitly covers ISamlLogoutSessionStore for tracking active SP sessions."},
-    {"assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node", "pass": true, "rationale": "Recommends Redis and EF Core implementations for both stores."},
-    {"assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes", "pass": true, "rationale": "Explicitly states 'SSO/SLO state is lost across nodes, causing intermittent failures'."}
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": true,
+      "rationale": "SKILL.md lists ISamlSigninStateStore in the extensibility table and mentions it in Common Pitfalls #6."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": true,
+      "rationale": "SKILL.md mentions ISamlLogoutSessionStore for distributed deployments in both SLO section and extensibility table."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "SKILL.md recommends 'EF Core, Redis' for ISamlSigninStateStore and ISamlLogoutSessionStore."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "SKILL.md Pitfall #6 states: 'Without them, SSO/SLO state is lost across nodes.'"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'",
+      "pass": true,
+      "rationale": "KeyPath is a reasonably guessable property name."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)",
+      "pass": false,
+      "rationale": "KeyCacheDuration is a specific Duende property name that might be guessed differently (e.g., CacheDuration, CacheExpiry)."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'",
+      "pass": true,
+      "rationale": "RsaKeySize is a fairly intuitive property name."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management",
+      "pass": false,
+      "rationale": "A general LLM might be confused about whether configuring KeyPath requires disabling automatic key management."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -3,74 +3,118 @@
     "skill_name": "identityserver-saml",
     "iteration": 3,
     "model": "claude-opus-4-20250514",
-    "date": "2026-06-01"
+    "timestamp": "2025-06-16T00:00:00Z",
+    "num_evals": 8
   },
   "summary": {
-    "with_skill": {
-      "total_assertions": 35,
-      "passed": 35,
-      "failed": 0,
-      "pass_rate": 1.0
-    },
-    "without_skill": {
-      "total_assertions": 35,
-      "passed": 4,
-      "failed": 31,
-      "pass_rate": 0.114
-    },
-    "delta": {
-      "assertions_improved": 31,
-      "delta_pass_rate": 88.6
-    }
+    "avg_score_with_skill": 0.9688,
+    "avg_score_without_skill": 0.0875,
+    "delta": 0.8813
   },
   "evals": [
     {
       "eval_id": 1,
-      "prompt_summary": "Set up SAML IdP and register a service provider",
-      "with_skill": {"passed": 5, "total": 5, "score": 1.0},
-      "without_skill": {"passed": 0, "total": 5, "score": 0.0}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.0,
+        "pass_count": 0,
+        "total_count": 5
+      }
     },
     {
       "eval_id": 2,
-      "prompt_summary": "Production SP store with custom implementation and caching",
-      "with_skill": {"passed": 5, "total": 5, "score": 1.0},
-      "without_skill": {"passed": 1, "total": 5, "score": 0.2}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.2,
+        "pass_count": 1,
+        "total_count": 5
+      }
     },
     {
       "eval_id": 3,
-      "prompt_summary": "Claim-to-SAML attribute mapping configuration",
-      "with_skill": {"passed": 4, "total": 4, "score": 1.0},
-      "without_skill": {"passed": 1, "total": 4, "score": 0.25}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.0,
+        "pass_count": 0,
+        "total_count": 4
+      }
     },
     {
       "eval_id": 4,
-      "prompt_summary": "Single Logout (SLO) configuration and behavior",
-      "with_skill": {"passed": 4, "total": 4, "score": 1.0},
-      "without_skill": {"passed": 0, "total": 4, "score": 0.0}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.25,
+        "pass_count": 1,
+        "total_count": 4
+      }
     },
     {
       "eval_id": 5,
-      "prompt_summary": "Custom NameID generation from employee_id claim",
-      "with_skill": {"passed": 5, "total": 5, "score": 1.0},
-      "without_skill": {"passed": 0, "total": 5, "score": 0.0}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.0,
+        "pass_count": 0,
+        "total_count": 5
+      }
     },
     {
       "eval_id": 6,
-      "prompt_summary": "Multi-node deployment configuration for SAML",
-      "with_skill": {"passed": 4, "total": 4, "score": 1.0},
-      "without_skill": {"passed": 1, "total": 4, "score": 0.25}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.0,
+        "pass_count": 0,
+        "total_count": 4
+      }
     },
     {
       "eval_id": 7,
-      "prompt_summary": "Package, license, and version requirements",
-      "with_skill": {"passed": 4, "total": 4, "score": 1.0},
-      "without_skill": {"passed": 0, "total": 4, "score": 0.0}
+      "with_skill": {
+        "score": 0.75,
+        "pass_count": 3,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.0,
+        "pass_count": 0,
+        "total_count": 4
+      }
     },
     {
       "eval_id": 8,
-      "prompt_summary": "SP validation requirements and common errors",
-      "with_skill": {"passed": 4, "total": 4, "score": 1.0},
-      "without_skill": {"passed": 1, "total": 4, "score": 0.25}
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.25,
+        "pass_count": 1,
+        "total_count": 4
+      }
     }
   ]
 }

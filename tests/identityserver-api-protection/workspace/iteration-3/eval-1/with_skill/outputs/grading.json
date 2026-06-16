@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddJwtBearer with Authority set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "SKILL.md explicitly shows options.Authority = \"https://identity.example.com\" in the AddJwtBearer setup."
+    },
+    {
+      "assertion": "Sets Audience to 'api1'",
+      "pass": true,
+      "rationale": "SKILL.md shows options.Audience = \"api1\" in the basic JWT bearer setup."
+    },
+    {
+      "assertion": "Sets TokenValidationParameters.ValidTypes to include 'at+jwt' to prevent JWT confusion attacks",
+      "pass": true,
+      "rationale": "SKILL.md shows options.TokenValidationParameters.ValidTypes = [\"at+jwt\"] and explains JWT confusion attack prevention."
+    },
+    {
+      "assertion": "Includes UseAuthentication() before UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "SKILL.md complete example shows app.UseAuthentication(); app.UseAuthorization(); in correct order."
+    },
+    {
+      "assertion": "Mentions or adds the Microsoft.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "SKILL.md explicitly shows 'dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer'."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

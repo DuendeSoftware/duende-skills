@@ -1,0 +1,29 @@
+{
+  "eval_id": 108,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Shows setting options.EmitStaticAudienceClaim = true",
+      "pass": false,
+      "rationale": "Duende-specific option not widely known."
+    },
+    {
+      "assertion": "Explains that this emits a static audience claim of '{issuer}/resources'",
+      "pass": false,
+      "rationale": "Duende implementation detail."
+    },
+    {
+      "assertion": "Mentions the alternative of defining an ApiResource",
+      "pass": true,
+      "rationale": "ApiResource for audience is known."
+    },
+    {
+      "assertion": "Does NOT suggest using the Implicit grant type",
+      "pass": false,
+      "rationale": "Without guidance, older patterns might be referenced."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

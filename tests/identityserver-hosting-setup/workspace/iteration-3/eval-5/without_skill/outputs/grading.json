@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.IssuerUri = 'https://identity.mycompany.com' inside the AddIdentityServer options lambda",
+      "pass": true,
+      "rationale": "IssuerUri is well-known from IdentityServer4 documentation."
+    },
+    {
+      "assertion": "Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it",
+      "pass": false,
+      "rationale": "A general LLM may not know the specific options.LicenseKey property for Duende or the recommended configuration pattern."
+    },
+    {
+      "assertion": "Program.cs sets options.EmitScopesAsSpaceDelimitedStringInJwt = true",
+      "pass": false,
+      "rationale": "EmitScopesAsSpaceDelimitedStringInJwt is a Duende-specific option not commonly known."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage",
+      "pass": true,
+      "rationale": "Data protection configuration is standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances",
+      "pass": true,
+      "rationale": "SetApplicationName is a known best practice for multi-instance data protection."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

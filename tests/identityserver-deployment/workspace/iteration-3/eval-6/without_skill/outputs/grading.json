@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B",
+      "pass": false,
+      "rationale": "A general LLM would not know that Duende specifically uses IDistributedCache for OIDC state data formatting."
+    },
+    {
+      "assertion": "Output configures a distributed cache implementation such as AddStackExchangeRedisCache or AddSqlServerCache",
+      "pass": true,
+      "rationale": "Configuring Redis for distributed cache is standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store",
+      "pass": false,
+      "rationale": "The specific features (JWT replay cache, device flow throttling, PAR) are Duende-specific details not in general knowledge."
+    },
+    {
+      "assertion": "Output does NOT suggest using the default in-memory DistributedCache for multi-instance deployments",
+      "pass": false,
+      "rationale": "A general LLM might not explicitly warn against in-memory cache for multi-instance in the IdentityServer context."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

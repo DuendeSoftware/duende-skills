@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core integration testing pattern"
+    },
+    {
+      "assertion": "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the specific KeyManagement.Enabled = false option"
+    },
+    {
+      "assertion": "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential is known IdentityServer testing guidance"
+    },
+    {
+      "assertion": "Registers clients via AddInMemoryClients -- no sub-documents needed for this core pattern",
+      "pass": true,
+      "rationale": "AddInMemoryClients is standard IdentityServer configuration"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

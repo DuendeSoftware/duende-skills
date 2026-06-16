@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or equivalent using GetEndpoint",
+      "pass": false,
+      "rationale": "GetEndpoint(\"https\") is Aspire-specific."
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "Passing client ID via env var is reasonable."
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using double-underscore array indexing",
+      "pass": false,
+      "rationale": "Double-underscore array indexing is not widely known."
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": true,
+      "rationale": "General concept of passing authority is known."
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": false,
+      "rationale": "Without skill, IssuerUri might be set proactively."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

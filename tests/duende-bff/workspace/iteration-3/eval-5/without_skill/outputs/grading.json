@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures UseForwardedHeaders with ForwardedHeaders.XForwardedFor and ForwardedHeaders.XForwardedProto",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core reverse proxy knowledge"
+    },
+    {
+      "assertion": "Places UseForwardedHeaders before UseAuthentication in the middleware pipeline",
+      "pass": true,
+      "rationale": "Standard middleware ordering knowledge"
+    },
+    {
+      "assertion": "Configures UsePathBase('/app') for the sub-path mount",
+      "pass": true,
+      "rationale": "UsePathBase is standard ASP.NET Core knowledge for sub-path hosting"
+    },
+    {
+      "assertion": "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor",
+      "pass": false,
+      "rationale": "The specific interplay between SameSite and BFF OIDC callbacks is a nuanced issue that general knowledge might not cover"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

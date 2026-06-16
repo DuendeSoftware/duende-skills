@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 and Common Pitfall #4 show proper Sha256() usage."
+    },
+    {
+      "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #2 covers trailing slash mismatch."
+    },
+    {
+      "assertion": "Output identifies the missing 'openid' scope and adds it to AllowedScopes",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #1 covers missing openid scope."
+    },
+    {
+      "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #5 covers AllowOfflineAccess."
+    },
+    {
+      "assertion": "Output warns about hardcoding secrets in source code",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #4 warns about plaintext secrets."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

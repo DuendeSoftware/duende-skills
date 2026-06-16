@@ -1,0 +1,13 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Explains that IProfileService.GetProfileDataAsync receives ProfileDataRequestContext with RequestedClaimTypes", "pass": false, "rationale": "The RequestedClaimTypes property and its role in filtering are Duende-specific internals not commonly known"},
+    {"assertion": "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes", "pass": false, "rationale": "AddRequestedClaims behavior is Duende-specific API knowledge"},
+    {"assertion": "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types", "pass": true, "rationale": "UserClaims on ApiScope/ApiResource is somewhat known from Duende documentation and community content"},
+    {"assertion": "Does NOT require sub-documents — this is answered entirely from the core SKILL.md", "pass": true, "rationale": "This is a meta-assertion about document structure, not about response content. Regardless of quality, an LLM wouldn't reference sub-documents it doesn't have"}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

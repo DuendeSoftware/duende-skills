@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "SKILL.md shows AddInMemoryIdentityResources pattern for identity resources."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "SKILL.md shows AddInMemoryApiScopes pattern."
+    },
+    {
+      "assertion": "Program.cs defines a client with AllowedGrantTypes set to Code (authorization code with PKCE)",
+      "pass": true,
+      "rationale": "SKILL.md covers client configuration with grant types."
+    },
+    {
+      "assertion": "The client configuration includes RedirectUris containing 'https://webapp.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://webapp.example.com/signout-callback-oidc'",
+      "pass": true,
+      "rationale": "With the skill providing patterns, specific URIs would be configured as requested."
+    },
+    {
+      "assertion": "Program.cs has the correct middleware pipeline ordering: UseIdentityServer after UseRouting and before UseAuthorization",
+      "pass": true,
+      "rationale": "SKILL.md Pipeline Ordering Rules clearly define this order."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

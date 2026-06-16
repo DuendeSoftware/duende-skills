@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "A general LLM would know to disable automatic key management for manual rotation."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the new key (from LoadNewKey()) and SecurityAlgorithms.RsaSha256",
+      "pass": true,
+      "rationale": "AddSigningCredential is known from IdentityServer4 documentation."
+    },
+    {
+      "assertion": "Program.cs calls AddValidationKey with the old key (from LoadOldKey()) and SecurityAlgorithms.RsaSha256",
+      "pass": false,
+      "rationale": "AddValidationKey for the old key during rotation is a more specific pattern that a general LLM might not know."
+    },
+    {
+      "assertion": "AddSigningCredential is called with the NEW key (not the old key), and AddValidationKey is called with the OLD key (not the new key)",
+      "pass": false,
+      "rationale": "A general LLM might confuse which key goes where without the specific Phase 2 context."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

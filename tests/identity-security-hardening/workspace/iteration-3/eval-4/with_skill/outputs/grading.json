@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 states 'Use frame-ancestors none and object-src none as the minimum bar'"
+    },
+    {
+      "assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 states 'X-Frame-Options: DENY' on all IdentityServer pages"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 10 states 'sliding window policy (e.g., 20 requests/minute per IP) for /connect/token'"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 10 states 'fixed window policy (e.g., 10 requests/minute) for /connect/authorize'"
+    },
+    {
+      "assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 10 references AddRateLimiter which requires UseRateLimiter() in the pipeline"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls .AddServerSideSessions() on the IdentityServer builder",
+      "pass": false,
+      "rationale": "Builder method vs option property distinction is Duende-specific."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.RemoveExpiredSessionsFrequency to TimeSpan.FromMinutes(5)",
+      "pass": false,
+      "rationale": "Exact property path is Duende-specific."
+    },
+    {
+      "assertion": "Output sets options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout to true",
+      "pass": false,
+      "rationale": "Exact property name is Duende-specific."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CoordinateClientLifetimesWithUserSession to true",
+      "pass": true,
+      "rationale": "CoordinateClientLifetimesWithUserSession is somewhat known."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response explains that SameSite=Strict prevents the cookie from being set during the OIDC callback redirect from IdentityServer", "pass": true, "rationale": "SKILL.md Pitfall #5 explains 'Redirect Loop After Login' caused by SameSite restrictions"},
+    {"assertion": "Response recommends changing SameSiteMode.Strict to SameSiteMode.Lax for the authentication cookie", "pass": true, "rationale": "SKILL.md Pitfall #5 shows `options.Cookie.SameSite = SameSiteMode.Lax; // Not Strict for OIDC callbacks`"},
+    {"assertion": "Response includes code setting options.Cookie.SameSite = SameSiteMode.Lax on the cookie handler", "pass": true, "rationale": "SKILL.md Pitfall #5 shows exact code: `options.Cookie.SameSite = SameSiteMode.Lax;`"},
+    {"assertion": "Response mentions setting Cookie.SecurePolicy to Always for HTTPS", "pass": true, "rationale": "SKILL.md Pitfall #5 shows `options.Cookie.SecurePolicy = CookieSecurePolicy.Always;` in the same code block"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

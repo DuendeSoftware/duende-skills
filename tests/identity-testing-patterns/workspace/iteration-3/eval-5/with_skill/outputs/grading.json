@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Test with role=admin claims asserts HttpStatusCode.NoContent (204)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 Integration Testing shows admin role test asserting NoContent"
+    },
+    {
+      "assertion": "Test with role=viewer claims asserts HttpStatusCode.Forbidden (403)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows viewer role test asserting Forbidden"
+    },
+    {
+      "assertion": "Test with no claims (unauthenticated) asserts HttpStatusCode.Unauthorized (401)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows ClearClaims() with Unauthorized assertion"
+    },
+    {
+      "assertion": "Each test sets distinct claims via the TestClaimsProvider before making the request",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows _factory.ClaimsProvider.SetClaims([...]) before each request"
+    },
+    {
+      "assertion": "Uses IClassFixture<T> or equivalent to share the WebApplicationFactory across tests",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows class implementing IClassFixture<ApiFactory>"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping", "pass": true, "rationale": "SKILL.md Pattern 1 explicitly shows `options.MapInboundClaims = false;` in the OIDC handler configuration"},
+    {"assertion": "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates", "pass": true, "rationale": "SKILL.md Pattern 1 shows `options.Scope.Clear();` before adding scopes, and Pitfall #3 explicitly explains this"},
+    {"assertion": "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme", "pass": true, "rationale": "SKILL.md Pattern 1 shows `options.DefaultScheme = \"Cookies\"; options.DefaultChallengeScheme = \"oidc\";`"},
+    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline", "pass": true, "rationale": "SKILL.md Pattern 1 shows `app.UseAuthentication(); app.UseAuthorization();` in correct order, and Pitfall #2 explicitly warns about this"},
+    {"assertion": "Program.cs sets ResponseType to 'code' for authorization code flow", "pass": true, "rationale": "SKILL.md Pattern 1 shows `options.ResponseType = \"code\"; // Authorization code flow`"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

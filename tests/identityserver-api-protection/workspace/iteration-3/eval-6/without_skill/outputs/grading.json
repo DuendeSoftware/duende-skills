@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddLocalApiAuthentication() to set up local API authentication",
+      "pass": true,
+      "rationale": "AddLocalApiAuthentication is relatively well-known."
+    },
+    {
+      "assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+      "pass": true,
+      "rationale": "PolicyName constant is part of standard docs."
+    },
+    {
+      "assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+      "pass": false,
+      "rationale": "Specific scope name 'IdentityServerApi' is Duende-specific detail."
+    },
+    {
+      "assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts",
+      "pass": false,
+      "rationale": "Subtle best practice often omitted in generic answers."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

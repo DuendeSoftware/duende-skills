@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true",
+      "pass": true,
+      "rationale": "SKILL.md shows exact pattern: new SigningAlgorithmOptions(SecurityAlgorithms.RsaSha256) { UseX509Certificate = true }."
+    },
+    {
+      "assertion": "Program.cs includes a SigningAlgorithmOptions for EcdsaSha256 (ES256) in the SigningAlgorithms array",
+      "pass": true,
+      "rationale": "SKILL.md shows: new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256) in the array."
+    },
+    {
+      "assertion": "Program.cs defines a client with ClientId 'mobile-app' that has AllowedIdentityTokenSigningAlgorithms containing EcdsaSha256 or 'ES256'",
+      "pass": true,
+      "rationale": "SKILL.md shows client-level override: AllowedIdentityTokenSigningAlgorithms = { SecurityAlgorithms.RsaSsaPssSha256 } pattern."
+    },
+    {
+      "assertion": "The RS256 algorithm entry appears before ES256 in the SigningAlgorithms array to be the default",
+      "pass": true,
+      "rationale": "SKILL.md states: 'The first algorithm in the list is the default for signing tokens' and shows RS256 first."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

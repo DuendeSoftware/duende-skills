@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
+      "pass": true,
+      "rationale": "SKILL.md Key Differences table and Pattern 1 show the v4 migration from manual to ConfigureOpenIdConnect"
+    },
+    {
+      "assertion": "Output does NOT contain 'MapBffManagementEndpoints'",
+      "pass": true,
+      "rationale": "SKILL.md Key Differences table states management endpoints are auto-registered in v4"
+    },
+    {
+      "assertion": "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
+      "pass": true,
+      "rationale": "SKILL.md Key Differences table explicitly maps this migration"
+    },
+    {
+      "assertion": "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows AddRemoteApis() as required for remote API proxying"
+    },
+    {
+      "assertion": "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)",
+      "pass": true,
+      "rationale": "SKILL.md shows ConfigureOpenIdConnect accepts the same option properties"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

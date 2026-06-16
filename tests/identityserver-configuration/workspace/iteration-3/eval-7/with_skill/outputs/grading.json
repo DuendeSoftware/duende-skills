@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets options.IssuerUri to 'https://id.mycompany.com'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows IssuerUri."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows these properties."
+    },
+    {
+      "assertion": "Output sets options.PushedAuthorization.Required to true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows PushedAuthorization.Required."
+    },
+    {
+      "assertion": "Output sets options.Caching.ClientStoreExpiration and ResourceStoreExpiration to TimeSpan.FromMinutes(10)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows caching properties."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

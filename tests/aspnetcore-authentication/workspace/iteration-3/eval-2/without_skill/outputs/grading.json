@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures AddJwtBearer with Authority set to the IdentityServer URL", "pass": true, "rationale": "Standard JWT Bearer setup, well documented"},
+    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": true, "rationale": "Reasonably known in the community, most guides mention this"},
+    {"assertion": "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'", "pass": false, "rationale": "Without skill guidance, an LLM might not think to set these explicitly, especially pairing them with MapInboundClaims=false"},
+    {"assertion": "Program.cs sets Audience or ValidAudience to 'catalog-api'", "pass": true, "rationale": "Standard JWT Bearer configuration"},
+    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization()", "pass": true, "rationale": "Standard middleware ordering"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

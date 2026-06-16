@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+      "pass": true,
+      "rationale": "ForwardLimit for multiple proxies is documented in ASP.NET Core docs and general knowledge."
+    },
+    {
+      "assertion": "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+      "pass": true,
+      "rationale": "Adding proxy IPs to KnownProxies is standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+      "pass": false,
+      "rationale": "A general LLM might focus on XForwardedFor and XForwardedProto but miss the XForwardedHost flag specifically for the host name issue."
+    },
+    {
+      "assertion": "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed",
+      "pass": false,
+      "rationale": "A general LLM might not explicitly explain the trust chain requirement for each proxy."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 108,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Shows setting options.EmitStaticAudienceClaim = true",
+      "pass": true,
+      "rationale": "resources-scopes.md mentions this."
+    },
+    {
+      "assertion": "Explains that this emits a static audience claim of '{issuer}/resources'",
+      "pass": true,
+      "rationale": "resources-scopes.md states the value."
+    },
+    {
+      "assertion": "Mentions the alternative of defining an ApiResource",
+      "pass": true,
+      "rationale": "resources-scopes.md mentions both approaches."
+    },
+    {
+      "assertion": "Does NOT suggest using the Implicit grant type",
+      "pass": true,
+      "rationale": "SKILL.md Core Principle #1 forbids implicit."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

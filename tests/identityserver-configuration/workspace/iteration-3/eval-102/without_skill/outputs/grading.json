@@ -1,0 +1,34 @@
+{
+  "eval_id": 102,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses GrantTypes.Code (not Implicit)",
+      "pass": true,
+      "rationale": "Authorization Code for SPAs is modern best practice."
+    },
+    {
+      "assertion": "Sets RequireClientSecret = false for public SPA client",
+      "pass": true,
+      "rationale": "Public clients not having secrets is well-known."
+    },
+    {
+      "assertion": "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+      "pass": false,
+      "rationale": "AllowedCorsOrigins sometimes forgotten."
+    },
+    {
+      "assertion": "Sets AllowOfflineAccess = true for refresh tokens",
+      "pass": true,
+      "rationale": "Prompt asks for refresh tokens."
+    },
+    {
+      "assertion": "AllowedScopes includes 'openid', 'profile', and 'orders.read'",
+      "pass": true,
+      "rationale": "Standard scope assignment."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

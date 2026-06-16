@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets options.KeyManagement.RotationInterval to TimeSpan.FromDays(60)",
+      "pass": true,
+      "rationale": "RotationInterval is reasonably known."
+    },
+    {
+      "assertion": "Output sets options.KeyManagement.PropagationTime to TimeSpan.FromDays(7)",
+      "pass": false,
+      "rationale": "PropagationTime is less commonly known."
+    },
+    {
+      "assertion": "Output sets options.KeyManagement.RetentionDuration to TimeSpan.FromDays(21)",
+      "pass": false,
+      "rationale": "RetentionDuration exact property may not be recalled."
+    },
+    {
+      "assertion": "Output sets options.KeyManagement.DataProtectKeys to true",
+      "pass": true,
+      "rationale": "DataProtectKeys is a reasonable property."
+    },
+    {
+      "assertion": "Output sets options.KeyManagement.KeyPath to '/mnt/shared/identity-keys'",
+      "pass": false,
+      "rationale": "KeyPath is Duende-specific; generic answers use different approaches."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The web.app client has RequirePkce = true and does not set it to false",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 explicitly states RequirePkce = true is non-negotiable and shows it as required"
+    },
+    {
+      "assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows exact-match URIs and marks wildcards as WRONG"
+    },
+    {
+      "assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 explicitly marks CodeAndClientCredentials as WRONG with 'Never combine user + M2M flows'"
+    },
+    {
+      "assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 3 shows AccessTokenLifetime = 300 and Common Pitfall #7 marks 8-hour tokens as wrong"
+    },
+    {
+      "assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 3 shows RefreshTokenUsage = TokenUsage.OneTimeOnly and Production Checklist marks it as Required"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

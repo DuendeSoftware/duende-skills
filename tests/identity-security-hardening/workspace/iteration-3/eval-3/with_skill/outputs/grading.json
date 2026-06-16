@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit anywhere in the file",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 explicitly marks GrantTypes.Implicit as WRONG and shows migration to Code+PKCE"
+    },
+    {
+      "assertion": "The spa.legacy client uses GrantTypes.Code with RequirePkce = true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 shows the correct migration: GrantTypes.Code + RequirePkce = true"
+    },
+    {
+      "assertion": "The spa.legacy client does not have AllowAccessTokensViaBrowser = true",
+      "pass": true,
+      "rationale": "SKILL.md Core Principle 1 states tokens never touch the browser; AllowAccessTokensViaBrowser contradicts this"
+    },
+    {
+      "assertion": "Client secrets are loaded from configuration (builder.Configuration, config[], or IConfiguration) rather than hardcoded string literals passed to Sha256()",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 shows configuration['...'].Sha256() and Common Pitfall #5 marks inline literals as WRONG"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

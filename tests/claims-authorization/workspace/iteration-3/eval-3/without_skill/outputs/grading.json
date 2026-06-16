@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource", "pass": true, "rationale": "This is somewhat known in the Duende community but an LLM may provide it"},
+    {"assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource", "pass": true, "rationale": "Logical conclusion from the above explanation"},
+    {"assertion": "Mentions that the client must also request the scope that contains the claim", "pass": false, "rationale": "Without skill guidance, an LLM might not connect the dots to mention client scope requesting as a separate requirement"},
+    {"assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types", "pass": false, "rationale": "The AddRequestedClaims filtering mechanism is Duende-specific internal API knowledge not available without the skill"}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

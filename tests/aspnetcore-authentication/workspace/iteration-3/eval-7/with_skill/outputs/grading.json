@@ -1,0 +1,12 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Response mentions implementing ITicketStore (backed by IDistributedCache or similar) to move the authentication ticket server-side so the cookie only holds a session key", "pass": true, "rationale": "SKILL.md Pitfall #4 explicitly shows Solution 1 with ITicketStore backed by IDistributedCache/Redis"},
+    {"assertion": "Response mentions using ClaimActions.DeleteClaims to remove unnecessary claims like sid, idp, auth_time, or amr from the cookie", "pass": true, "rationale": "SKILL.md Pitfall #4 shows Solution 2: `options.ClaimActions.DeleteClaims(\"sid\", \"idp\", \"auth_time\", \"amr\")`"},
+    {"assertion": "Response explains that SaveTokens=true stores access, refresh, and ID tokens in the cookie which contributes to the size problem", "pass": true, "rationale": "SKILL.md Critical Settings table explains SaveTokens stores tokens in cookie, and Pitfall #4 title references SaveTokens=true causing the issue"}
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

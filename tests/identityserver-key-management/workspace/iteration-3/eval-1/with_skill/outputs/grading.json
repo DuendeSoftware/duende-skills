@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RotationInterval' set to TimeSpan.FromDays(30)",
+      "pass": true,
+      "rationale": "SKILL.md shows exact code: options.KeyManagement.RotationInterval = TimeSpan.FromDays(30)."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.PropagationTime' set to TimeSpan.FromDays(5)",
+      "pass": true,
+      "rationale": "SKILL.md shows PropagationTime configuration and the pattern is clear."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RetentionDuration' set to TimeSpan.FromDays(7)",
+      "pass": true,
+      "rationale": "SKILL.md shows RetentionDuration configuration pattern."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.DeleteRetiredKeys = false'",
+      "pass": true,
+      "rationale": "SKILL.md shows exactly: options.KeyManagement.DeleteRetiredKeys = false."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

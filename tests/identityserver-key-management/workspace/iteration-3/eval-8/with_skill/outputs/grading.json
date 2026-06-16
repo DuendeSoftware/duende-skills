@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyPath' set to '/mnt/shared/identity-keys'",
+      "pass": true,
+      "rationale": "SKILL.md shows: options.KeyManagement.KeyPath = '/home/shared/keys' pattern, easily adapted to the requested path."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.KeyCacheDuration' set to TimeSpan.FromHours(1)",
+      "pass": true,
+      "rationale": "SKILL.md documents KeyCacheDuration property with default of 24 hours in the options reference table."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'",
+      "pass": true,
+      "rationale": "SKILL.md documents RsaKeySize property with default of 2048 in the options reference table."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management",
+      "pass": true,
+      "rationale": "SKILL.md shows KeyPath configuration alongside automatic key management (not disabling it)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

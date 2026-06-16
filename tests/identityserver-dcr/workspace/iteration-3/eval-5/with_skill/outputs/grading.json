@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration.EntityFramework NuGet package",
+      "pass": true,
+      "rationale": "SKILL.md shows the package."
+    },
+    {
+      "assertion": "Calls AddClientConfigurationStore() on the configuration builder",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Warns against using in-memory stores for DCR clients in production",
+      "pass": true,
+      "rationale": "SKILL.md warns about this."
+    },
+    {
+      "assertion": "Does NOT suggest implementing IClientConfigurationStore from scratch when EF package is available",
+      "pass": true,
+      "rationale": "SKILL.md shows EF as primary approach."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or equivalent using GetEndpoint",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 3 shows this exact pattern."
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "SKILL.md shows Authentication__ClientId."
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using double-underscore array indexing",
+      "pass": true,
+      "rationale": "SKILL.md shows Scopes__0, __1, __2."
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": true,
+      "rationale": "SKILL.md shows API with Authentication__Authority via GetEndpoint."
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": true,
+      "rationale": "SKILL.md warns against setting IssuerUri unnecessarily."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

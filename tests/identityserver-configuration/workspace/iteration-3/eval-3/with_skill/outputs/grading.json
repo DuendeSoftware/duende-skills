@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output defines ApiScope entries for at least 'read' and 'write'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows ApiScope definitions."
+    },
+    {
+      "assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows ApiResource with Scopes collection."
+    },
+    {
+      "assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' but not 'write'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows selective scope assignment."
+    },
+    {
+      "assertion": "Output calls AddInMemoryApiResources to register the API resources",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows AddInMemory* registration."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

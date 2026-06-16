@@ -1,0 +1,29 @@
+{
+  "eval_id": 101,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Client uses GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "SKILL.md shows ClientCredentials for M2M clients."
+    },
+    {
+      "assertion": "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows AllowedScopes configuration."
+    },
+    {
+      "assertion": "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows ApiScope definitions."
+    },
+    {
+      "assertion": "Secret is loaded from Configuration or external source",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #4 shows loading from configuration."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

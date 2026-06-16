@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl",
+      "pass": false,
+      "rationale": "Duende-specific API for separate hosting."
+    },
+    {
+      "assertion": "Sets up JWT bearer auth pointing to main IdentityServer",
+      "pass": false,
+      "rationale": "Without knowing the pattern, setup would be wrong."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()",
+      "pass": false,
+      "rationale": "MapDynamicClientRegistration is Duende-specific."
+    },
+    {
+      "assertion": "Does NOT call AddIdentityServer() - separate host",
+      "pass": false,
+      "rationale": "Might incorrectly add AddIdentityServer."
+    },
+    {
+      "assertion": "Mentions IClientConfigurationStore must use same database",
+      "pass": false,
+      "rationale": "Duende-specific architectural requirement."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

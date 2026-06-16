@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output includes a health check class implementing IHealthCheck that tests the discovery endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Discovery handler",
+      "pass": false,
+      "rationale": "A general LLM would likely suggest HTTP-based health checks hitting /.well-known/openid-configuration, not the internal endpoint handler approach."
+    },
+    {
+      "assertion": "Output includes a health check class implementing IHealthCheck that tests the JWKS endpoint by finding and invoking the IdentityServerConstants.EndpointNames.Jwks handler",
+      "pass": false,
+      "rationale": "Without skill context, an LLM would not know the internal IEndpointHandler approach for JWKS health checks."
+    },
+    {
+      "assertion": "Output registers the health checks using builder.Services.AddHealthChecks() and maps the health endpoint with app.MapHealthChecks()",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core health check registration is general knowledge."
+    },
+    {
+      "assertion": "Output injects IEnumerable<Hosting.Endpoint> and IHttpContextAccessor into the health check classes",
+      "pass": false,
+      "rationale": "The specific Hosting.Endpoint collection injection pattern is Duende-specific and not general knowledge."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

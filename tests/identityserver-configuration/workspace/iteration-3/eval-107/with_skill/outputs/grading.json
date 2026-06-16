@@ -1,0 +1,29 @@
+{
+  "eval_id": 107,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Client has multiple Secret entries (both old and new)",
+      "pass": true,
+      "rationale": "client-types.md shows multi-secret pattern."
+    },
+    {
+      "assertion": "Uses GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "Prompt specifies this."
+    },
+    {
+      "assertion": "Explains that IdentityServer validates against all configured secrets",
+      "pass": true,
+      "rationale": "client-types.md shows this pattern."
+    },
+    {
+      "assertion": "Recommends removing the old secret after migration",
+      "pass": true,
+      "rationale": "Natural conclusion of rollover pattern."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

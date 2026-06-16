@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "Disabling automatic key management is fairly intuitive and known from IdentityServer4."
+    },
+    {
+      "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+      "pass": true,
+      "rationale": "Loading PFX certificates is standard .NET knowledge, though may use new X509Certificate2 instead of Loader."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+      "pass": true,
+      "rationale": "AddSigningCredential is known from IdentityServer4 era."
+    },
+    {
+      "assertion": "Program.cs does not remove the existing client and scope configuration",
+      "pass": false,
+      "rationale": "A general LLM might restructure the entire file or accidentally omit existing configuration."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

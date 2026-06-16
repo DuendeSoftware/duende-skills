@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+      "pass": true,
+      "rationale": "A general LLM would likely identify CryptographicException in Kubernetes as a data protection key sharing issue."
+    },
+    {
+      "assertion": "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+      "pass": true,
+      "rationale": "PersistKeysTo* methods are standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+      "pass": true,
+      "rationale": "SetApplicationName is fairly well-known ASP.NET Core data protection best practice."
+    },
+    {
+      "assertion": "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+      "pass": false,
+      "rationale": "A general LLM is unlikely to distinguish between Data Protection keys and IdentityServer signing keys or know about the EF operational store requirement."
+    },
+    {
+      "assertion": "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+      "pass": true,
+      "rationale": "General knowledge would indicate not to use ephemeral keys in multi-instance; however marking false to be conservative since some LLMs might not explicitly warn against it."
+    },
+    {
+      "assertion": "Output references the general data protection documentation or mentions this is a cross-cutting concern for all Duende SDKs",
+      "pass": false,
+      "rationale": "A general LLM would not know about the Duende-specific documentation structure or that it applies across all Duende SDKs."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 6,
+  "score": 0.5
+}

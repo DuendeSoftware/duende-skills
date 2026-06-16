@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.BirthDate, '1990-01-01')]))"
+    },
+    {
+      "assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows new AuthorizationHandlerContext([requirement], user, resource: null)"
+    },
+    {
+      "assertion": "Calls HandleAsync on the handler directly",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows await _sut.HandleAsync(context)"
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows Assert.True(context.HasSucceeded) for sufficient age"
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows Assert.False(context.HasSucceeded) for insufficient age"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

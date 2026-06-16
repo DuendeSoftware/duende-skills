@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The factory disables automatic key management via options.KeyManagement.Enabled = false",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 explicitly shows options.KeyManagement.Enabled = false"
+    },
+    {
+      "assertion": "Uses AddDeveloperSigningCredential(persistKey: false) or equivalent static signing key",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows .AddDeveloperSigningCredential(persistKey: false)"
+    },
+    {
+      "assertion": "Registers test clients via AddInMemoryClients with at least one client credentials client",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows .AddInMemoryClients(TestConfig.Clients) with Pattern 2 defining ClientCredentials clients"
+    },
+    {
+      "assertion": "The test calls RequestClientCredentialsTokenAsync (from IdentityModel) against the in-process server",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest{...})"
+    },
+    {
+      "assertion": "Asserts that the token response is not an error and contains a non-empty AccessToken",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows Assert.False(response.IsError) and Assert.NotEmpty(response.AccessToken)"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

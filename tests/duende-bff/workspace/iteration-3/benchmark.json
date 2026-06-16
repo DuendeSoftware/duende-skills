@@ -1,0 +1,224 @@
+{
+  "metadata": {
+    "skill_name": "duende-bff",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 63,
+      "passed": 63,
+      "failed": 0,
+      "pass_rate": 1.0
+    },
+    "without_skill": {
+      "total_assertions": 63,
+      "passed": 22,
+      "failed": 41,
+      "pass_rate": 0.3492
+    },
+    "delta": {
+      "assertions_improved": 41,
+      "delta_pass_rate": 0.6508
+    }
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt_summary": "Basic BFF setup with OIDC authentication",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 5,
+        "score": 0.4
+      }
+    },
+    {
+      "id": 2,
+      "prompt_summary": "Local and remote API endpoint configuration",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 5,
+        "score": 0.4
+      }
+    },
+    {
+      "id": 3,
+      "prompt_summary": "Server-side session management with EF Core",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 5,
+        "score": 0.4
+      }
+    },
+    {
+      "id": 4,
+      "prompt_summary": "Debugging SPA 401 errors with CSRF headers",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 4,
+        "score": 0.5
+      }
+    },
+    {
+      "id": 5,
+      "prompt_summary": "Reverse proxy and sub-path deployment configuration",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 4,
+        "score": 0.75
+      }
+    },
+    {
+      "id": 6,
+      "prompt_summary": "Token type selection for mixed auth endpoints",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 1,
+        "total_count": 4,
+        "score": 0.25
+      }
+    },
+    {
+      "id": 7,
+      "prompt_summary": "Multi-instance deployment with shared data protection",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 4,
+        "score": 0.75
+      }
+    },
+    {
+      "id": 8,
+      "prompt_summary": "Access token management patterns for downstream APIs",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 5,
+        "score": 0.4
+      }
+    },
+    {
+      "id": 9,
+      "prompt_summary": "Migration from BFF v3 to v4 API changes",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 1,
+        "total_count": 5,
+        "score": 0.2
+      }
+    },
+    {
+      "id": 10,
+      "prompt_summary": "YARP reverse proxy integration with BFF extensions",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 5,
+        "score": 0.4
+      }
+    },
+    {
+      "id": 11,
+      "prompt_summary": "Blazor WASM integration with BFF security",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 1,
+        "total_count": 4,
+        "score": 0.25
+      }
+    },
+    {
+      "id": 12,
+      "prompt_summary": "Multi-frontend BFF configuration with CDN",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 1,
+        "total_count": 5,
+        "score": 0.2
+      }
+    },
+    {
+      "id": 13,
+      "prompt_summary": "Custom access token retriever implementation",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 0,
+        "total_count": 4,
+        "score": 0.0
+      }
+    },
+    {
+      "id": 14,
+      "prompt_summary": "Skip response handling for redirect-based auth",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 0,
+        "total_count": 4,
+        "score": 0.0
+      }
+    }
+  ]
+}

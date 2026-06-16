@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows complete TestAuthHandler extending AuthenticationHandler<AuthenticationSchemeOptions>"
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows ITestClaimsProvider interface with GetClaims(), SetClaims(), and ClearClaims()"
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 Factory Registration shows services.AddAuthentication(TestAuthHandler.SchemeName).AddScheme<>()"
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows _factory.ClaimsProvider.ClearClaims() with Assert.Equal(HttpStatusCode.Unauthorized)"
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely -- authorization policies remain active",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #2 explicitly warns against disabling authorization and states 'Authorization runs normally; only the authentication source changes'"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

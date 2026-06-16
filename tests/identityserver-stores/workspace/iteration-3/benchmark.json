@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-stores",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "total_evals": 12,
+    "with_skill_avg_score": 1.0,
+    "without_skill_avg_score": 0.73,
+    "score_delta": 0.27
+  },
+  "evals": [
+    {
+      "id": 1,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 4, "total_count": 5, "score": 0.8}
+    },
+    {
+      "id": 2,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    },
+    {
+      "id": 3,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}
+    },
+    {
+      "id": 4,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    },
+    {
+      "id": 5,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    },
+    {
+      "id": 6,
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "id": 7,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    },
+    {
+      "id": 8,
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "id": 9,
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}
+    },
+    {
+      "id": 10,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}
+    },
+    {
+      "id": 11,
+      "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0},
+      "without_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}
+    },
+    {
+      "id": 12,
+      "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0},
+      "without_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}
+    }
+  ]
+}

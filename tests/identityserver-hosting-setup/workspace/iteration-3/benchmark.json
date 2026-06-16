@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-hosting-setup",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "timestamp": "2025-06-16T00:00:00Z",
+    "num_evals": 8
+  },
+  "summary": {
+    "avg_score_with_skill": 1.0,
+    "avg_score_without_skill": 0.6625,
+    "delta": 0.3375
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.8,
+        "pass_count": 4,
+        "total_count": 5
+      }
+    },
+    {
+      "eval_id": 2,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.5,
+        "pass_count": 2,
+        "total_count": 4
+      }
+    },
+    {
+      "eval_id": 3,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.75,
+        "pass_count": 3,
+        "total_count": 4
+      }
+    },
+    {
+      "eval_id": 4,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.75,
+        "pass_count": 3,
+        "total_count": 4
+      }
+    },
+    {
+      "eval_id": 5,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.6,
+        "pass_count": 3,
+        "total_count": 5
+      }
+    },
+    {
+      "eval_id": 6,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 0.4,
+        "pass_count": 2,
+        "total_count": 5
+      }
+    },
+    {
+      "eval_id": 7,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 4,
+        "total_count": 4
+      },
+      "without_skill": {
+        "score": 0.5,
+        "pass_count": 2,
+        "total_count": 4
+      }
+    },
+    {
+      "eval_id": 8,
+      "with_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      },
+      "without_skill": {
+        "score": 1.0,
+        "pass_count": 5,
+        "total_count": 5
+      }
+    }
+  ]
+}

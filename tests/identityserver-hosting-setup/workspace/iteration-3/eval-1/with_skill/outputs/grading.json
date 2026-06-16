@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI",
+      "pass": true,
+      "rationale": "SKILL.md shows AddIdentityServer() as Step 2 with complete code examples."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'",
+      "pass": true,
+      "rationale": "SKILL.md shows AddInMemoryApiScopes(Config.ApiScopes) pattern with in-memory store configuration."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials",
+      "pass": true,
+      "rationale": "SKILL.md shows AddInMemoryClients pattern and client configuration is well-documented in the skill."
+    },
+    {
+      "assertion": "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()",
+      "pass": true,
+      "rationale": "SKILL.md Pipeline Ordering Rules table explicitly shows UseIdentityServer (order 3) before UseAuthorization (order 4)."
+    },
+    {
+      "assertion": "Program.cs calls app.UseRouting() before app.UseIdentityServer()",
+      "pass": true,
+      "rationale": "SKILL.md Pipeline Ordering Rules table shows UseRouting (order 2) before UseIdentityServer (order 3)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

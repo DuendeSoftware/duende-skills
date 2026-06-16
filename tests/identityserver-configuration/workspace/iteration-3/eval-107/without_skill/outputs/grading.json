@@ -1,0 +1,29 @@
+{
+  "eval_id": 107,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client has multiple Secret entries (both old and new)",
+      "pass": true,
+      "rationale": "Multiple secrets for rotation is general best practice."
+    },
+    {
+      "assertion": "Uses GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "Prompt specifies this."
+    },
+    {
+      "assertion": "Explains that IdentityServer validates against all configured secrets",
+      "pass": true,
+      "rationale": "Reasonable inference."
+    },
+    {
+      "assertion": "Recommends removing the old secret after migration",
+      "pass": false,
+      "rationale": "Generic answers might not mention cleanup."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

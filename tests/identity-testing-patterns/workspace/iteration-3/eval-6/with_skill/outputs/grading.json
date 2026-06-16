@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses JsonWebTokenHandler.ReadJsonWebToken (or JwtSecurityTokenHandler) to parse the access token string",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 shows handler.ReadJsonWebToken(tokenResponse.AccessToken)"
+    },
+    {
+      "assertion": "Asserts the client_id claim matches the test client's ID",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 shows Assert.Equal('test.service', jwt.GetClaim(JwtClaimTypes.ClientId).Value)"
+    },
+    {
+      "assertion": "Asserts the scope claim contains the expected scope value",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 shows Assert.Contains('api1', jwt.GetClaim(JwtClaimTypes.Scope).Value.Split(' '))"
+    },
+    {
+      "assertion": "Asserts the issuer (iss) claim matches the expected authority URL",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 shows Assert.Equal('https://localhost', jwt.Issuer)"
+    },
+    {
+      "assertion": "Does NOT make a network call to validate the token -- parses it locally",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 9 explicitly states 'Parse without validation' and uses ReadJsonWebToken locally"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

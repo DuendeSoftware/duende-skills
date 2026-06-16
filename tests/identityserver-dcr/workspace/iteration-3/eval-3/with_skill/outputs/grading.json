@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a class that extends DynamicClientRegistrationValidator",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Overrides ValidateGrantTypesAsync to reject non-authorization_code",
+      "pass": true,
+      "rationale": "SKILL.md shows this override."
+    },
+    {
+      "assertion": "Overrides ValidateRedirectUrisAsync to enforce HTTPS",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Sets RequirePkce = true in SetClientDefaultsAsync",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Registers validator using AddDynamicClientRegistrationValidator<T>()",
+      "pass": true,
+      "rationale": "SKILL.md shows registration."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

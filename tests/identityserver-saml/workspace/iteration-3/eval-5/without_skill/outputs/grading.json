@@ -2,11 +2,31 @@
   "eval_id": 5,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Implements ISamlNameIdGenerator interface", "pass": false, "rationale": "Uses 'INameIdGenerator' instead of the correct 'ISamlNameIdGenerator' interface."},
-    {"assertion": "The GenerateAsync method receives a NameIdGenerationContext with Subject claims", "pass": false, "rationale": "Method signature returns Task<string> instead of Task<NameIdGenerationResult>, and uses context.User instead of context.Subject."},
-    {"assertion": "Extracts the employee_id claim from context.Subject", "pass": false, "rationale": "Uses context.User.Claims instead of context.Subject."},
-    {"assertion": "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value", "pass": false, "rationale": "Returns a plain string, not NameIdGenerationResult.Success with a NameId."},
-    {"assertion": "Handles the missing claim case with NameIdGenerationResult.Failure", "pass": false, "rationale": "Throws an exception instead of returning NameIdGenerationResult.Failure."}
+    {
+      "assertion": "Implements ISamlNameIdGenerator interface",
+      "pass": false,
+      "rationale": "ISamlNameIdGenerator is a Duende-specific interface not in general knowledge."
+    },
+    {
+      "assertion": "The GenerateAsync method receives a NameIdGenerationContext with Subject claims",
+      "pass": false,
+      "rationale": "NameIdGenerationContext is a Duende-specific type."
+    },
+    {
+      "assertion": "Extracts the employee_id claim from context.Subject",
+      "pass": false,
+      "rationale": "Without knowing the context model, this cannot be correctly implemented."
+    },
+    {
+      "assertion": "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value",
+      "pass": false,
+      "rationale": "NameIdGenerationResult is Duende-specific."
+    },
+    {
+      "assertion": "Handles the missing claim case with NameIdGenerationResult.Failure",
+      "pass": false,
+      "rationale": "The failure pattern with StatusCodes is Duende-specific."
+    }
   ],
   "pass_count": 0,
   "total_count": 5,

@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddIdentity<ApplicationUser, IdentityRole>() with AddEntityFrameworkStores<ApplicationDbContext>() to register ASP.NET Identity",
+      "pass": true,
+      "rationale": "Standard ASP.NET Identity registration is general knowledge."
+    },
+    {
+      "assertion": "Program.cs calls AddIdentityServer() followed by .AddAspNetIdentity<ApplicationUser>() to bridge ASP.NET Identity to IdentityServer",
+      "pass": true,
+      "rationale": "AddAspNetIdentity is known from IdentityServer4 documentation and general tutorials."
+    },
+    {
+      "assertion": "Response explains that AddAspNetIdentity registers IProfileService for adding claims to tokens",
+      "pass": false,
+      "rationale": "The specific detail about IProfileService registration is Duende-specific internal knowledge."
+    },
+    {
+      "assertion": "Program.cs includes AddDefaultTokenProviders() on the ASP.NET Identity registration",
+      "pass": true,
+      "rationale": "AddDefaultTokenProviders is standard ASP.NET Identity setup knowledge."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

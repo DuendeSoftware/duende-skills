@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that the CryptographicException occurs because data protection keys are not shared across load-balanced instances",
+      "pass": true,
+      "rationale": "SKILL.md's Common Data Protection Problems table explicitly covers this symptom and cause."
+    },
+    {
+      "assertion": "Program.cs adds AddDataProtection() with a shared persistence mechanism (e.g. PersistKeysToDbContext, PersistKeysToFileSystem with a shared path, or PersistKeysToAzureBlobStorage)",
+      "pass": true,
+      "rationale": "SKILL.md shows AddDataProtection().PersistKeysToDbContext<MyDbContext>() pattern."
+    },
+    {
+      "assertion": "Program.cs includes SetApplicationName() to ensure a consistent application name across instances",
+      "pass": true,
+      "rationale": "SKILL.md shows .SetApplicationName('My.IdentityServer') and lists it as a fix."
+    },
+    {
+      "assertion": "Response mentions switching from default file-based key storage to a shared store (EF operational store or shared file path) as an additional recommendation",
+      "pass": true,
+      "rationale": "SKILL.md section on Multi-Instance/Load-Balanced Deployment recommends EF operational store or shared file system."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

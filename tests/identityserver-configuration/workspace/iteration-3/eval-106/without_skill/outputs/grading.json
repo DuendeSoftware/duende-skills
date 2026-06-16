@@ -1,0 +1,34 @@
+{
+  "eval_id": 106,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets AllowOfflineAccess = true",
+      "pass": true,
+      "rationale": "Well-known for refresh tokens."
+    },
+    {
+      "assertion": "Sets RefreshTokenUsage to TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "OneTimeOnly for rotation is known."
+    },
+    {
+      "assertion": "Sets AbsoluteRefreshTokenLifetime to 604800",
+      "pass": true,
+      "rationale": "Simple calculation."
+    },
+    {
+      "assertion": "Sets SlidingRefreshTokenLifetime to 86400 and RefreshTokenExpiration to Sliding",
+      "pass": false,
+      "rationale": "Combination may not be precisely recalled."
+    },
+    {
+      "assertion": "Sets UpdateAccessTokenClaimsOnRefresh = true",
+      "pass": false,
+      "rationale": "Less commonly known property."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

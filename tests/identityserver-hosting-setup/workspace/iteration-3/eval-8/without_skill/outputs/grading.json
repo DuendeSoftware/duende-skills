@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "Standard IdentityServer configuration knowledge from tutorials."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "Standard API scope configuration from quickstart tutorials."
+    },
+    {
+      "assertion": "Program.cs defines a client with AllowedGrantTypes set to Code (authorization code with PKCE)",
+      "pass": true,
+      "rationale": "Authorization code with PKCE is well-known OAuth 2.0 configuration."
+    },
+    {
+      "assertion": "The client configuration includes RedirectUris containing 'https://webapp.example.com/signin-oidc' and PostLogoutRedirectUris containing 'https://webapp.example.com/signout-callback-oidc'",
+      "pass": true,
+      "rationale": "Redirect URIs are standard client configuration that an LLM would include when specified in the prompt."
+    },
+    {
+      "assertion": "Program.cs has the correct middleware pipeline ordering: UseIdentityServer after UseRouting and before UseAuthorization",
+      "pass": true,
+      "rationale": "Standard middleware ordering from IdentityServer4/Duende quickstart tutorials."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

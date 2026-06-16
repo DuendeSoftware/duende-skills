@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls builder.AddSqlServer() to create a SQL Server resource",
+      "pass": true,
+      "rationale": "Standard Aspire API."
+    },
+    {
+      "assertion": "Program.cs calls .AddDatabase() to create a database resource from the SQL Server",
+      "pass": true,
+      "rationale": "Standard Aspire API."
+    },
+    {
+      "assertion": "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource",
+      "pass": true,
+      "rationale": "Standard Aspire dependency pattern."
+    },
+    {
+      "assertion": "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": false,
+      "rationale": "Without skill, WaitFor on IdentityServer might be omitted."
+    },
+    {
+      "assertion": "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": false,
+      "rationale": "Same issue - WaitFor might be omitted without explicit guidance."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

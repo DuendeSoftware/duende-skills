@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "SKILL.md shows: options.KeyManagement.Enabled = false for disabling automatic key management."
+    },
+    {
+      "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+      "pass": true,
+      "rationale": "SKILL.md shows X509CertificateLoader.LoadPkcs12(bytes, password) pattern for loading PFX."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+      "pass": true,
+      "rationale": "SKILL.md shows: idsvrBuilder.AddSigningCredential(key, SecurityAlgorithms.RsaSha256)."
+    },
+    {
+      "assertion": "Program.cs does not remove the existing client and scope configuration",
+      "pass": true,
+      "rationale": "With skill context, the answer would add signing key configuration without removing existing config."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

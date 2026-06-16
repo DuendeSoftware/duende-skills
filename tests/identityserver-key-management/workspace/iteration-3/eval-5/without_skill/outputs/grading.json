@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.KeyManagement.Enabled = true (or does not set it to false, since true is the default)",
+      "pass": true,
+      "rationale": "A general LLM would likely enable key management when asked to enable it."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the result of GetSigningKeyFromVault() and an algorithm (e.g. RS256)",
+      "pass": false,
+      "rationale": "A general LLM might not know that AddSigningCredential takes precedence over automatic keys when both are configured."
+    },
+    {
+      "assertion": "Program.cs does NOT call AddValidationKey for the static key (that is Phase 2, not Phase 1)",
+      "pass": false,
+      "rationale": "Without knowing the phased migration approach, a general LLM might incorrectly add AddValidationKey."
+    },
+    {
+      "assertion": "The code includes a comment or is structured to indicate this is Phase 1 of migration from static to automatic key management",
+      "pass": false,
+      "rationale": "A general LLM would not know the Duende-specific phased migration strategy."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

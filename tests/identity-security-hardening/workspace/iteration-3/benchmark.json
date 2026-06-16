@@ -1,0 +1,140 @@
+{
+  "metadata": {
+    "skill_name": "identity-security-hardening",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 37,
+      "passed": 37,
+      "failed": 0,
+      "pass_rate": 1.0
+    },
+    "without_skill": {
+      "total_assertions": 37,
+      "passed": 28,
+      "failed": 9,
+      "pass_rate": 0.7568
+    },
+    "delta": {
+      "assertions_improved": 9,
+      "delta_pass_rate": 0.2432
+    }
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt_summary": "Reverse proxy and HTTPS hardening configuration",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 2,
+      "prompt_summary": "Client security configuration audit",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 3,
+      "prompt_summary": "Security review and implicit flow migration",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 4,
+        "score": 0.75
+      }
+    },
+    {
+      "id": 4,
+      "prompt_summary": "CSP headers and rate limiting for endpoints",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 5,
+      "prompt_summary": "Key management and signing credential setup",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 5,
+        "score": 0.6
+      }
+    },
+    {
+      "id": 6,
+      "prompt_summary": "Session management and backchannel logout",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 5,
+        "score": 0.6
+      }
+    },
+    {
+      "id": 7,
+      "prompt_summary": "Production security checklist audit",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 8,
+      "prompt_summary": "OAuth security best practices review",
+      "with_skill": {
+        "pass_count": 3,
+        "total_count": 3,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 3,
+        "score": 1.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it",
+      "pass": true,
+      "rationale": "Sha256() on secrets is well-known."
+    },
+    {
+      "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue",
+      "pass": true,
+      "rationale": "Trailing slash mismatches are commonly known."
+    },
+    {
+      "assertion": "Output identifies the missing 'openid' scope and adds it to AllowedScopes",
+      "pass": true,
+      "rationale": "Missing openid scope is well-known."
+    },
+    {
+      "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+      "pass": false,
+      "rationale": "Connection might not be immediately flagged in review."
+    },
+    {
+      "assertion": "Output warns about hardcoding secrets in source code",
+      "pass": false,
+      "rationale": "Many reviews focus on functional issues not security."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

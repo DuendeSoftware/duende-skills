@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The migration runner project has .WithReference() for the database resource",
+      "pass": true,
+      "rationale": "Standard Aspire pattern."
+    },
+    {
+      "assertion": "The migration runner project has .WaitFor() for the SQL Server or database resource",
+      "pass": true,
+      "rationale": "Standard dependency ordering."
+    },
+    {
+      "assertion": "The IdentityServer project uses .WaitFor() referencing the migration runner project, not directly waiting for SQL Server",
+      "pass": false,
+      "rationale": "Nuanced orchestration pattern."
+    },
+    {
+      "assertion": "The IdentityServer project still has .WithReference() for the database resource so it gets the connection string",
+      "pass": false,
+      "rationale": "Easy to forget WithReference when WaitFor targets different resource."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

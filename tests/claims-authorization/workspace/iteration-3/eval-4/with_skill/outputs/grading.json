@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Implements IClaimsTransformation with a TransformAsync method", "pass": true, "rationale": "SKILL.md 'IClaimsTransformation (API-Side)' section shows `public sealed class TenantClaimsTransformation : IClaimsTransformation` with TransformAsync"},
+    {"assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place", "pass": true, "rationale": "SKILL.md shows `var identity = new ClaimsIdentity(); ... principal.AddIdentity(identity);` and the Common Pitfalls section explicitly warns against mutating existing identity"},
+    {"assertion": "Loads roles from a local repository or database based on the user's subject claim", "pass": true, "rationale": "SKILL.md shows loading from `_tenants.GetByIdAsync(tenantId)` based on claims from the principal"},
+    {"assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)", "pass": true, "rationale": "SKILL.md shows `builder.Services.AddTransient<IClaimsTransformation, TenantClaimsTransformation>();`"},
+    {"assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims", "pass": true, "rationale": "SKILL.md explicitly states 'Do not use IClaimsTransformation on the IdentityServer host to modify token claims — that interface runs during cookie authentication, not token issuance'"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

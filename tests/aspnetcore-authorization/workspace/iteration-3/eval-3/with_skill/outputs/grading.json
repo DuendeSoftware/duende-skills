@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "A ScopeRequirement class is created implementing IAuthorizationRequirement with a Scope property", "pass": true, "rationale": "SKILL.md Pattern 2 'Scope as Space-Delimited String' shows `public class ScopeRequirement : IAuthorizationRequirement { public string Scope { get; } }`"},
+    {"assertion": "A ScopeHandler class is created extending AuthorizationHandler<ScopeRequirement>", "pass": true, "rationale": "SKILL.md Pattern 2 shows `public class ScopeHandler : AuthorizationHandler<ScopeRequirement>`"},
+    {"assertion": "The handler splits the scope claim value using Split(' ') or similar space-delimiter parsing", "pass": true, "rationale": "SKILL.md Pattern 2 shows `scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)`"},
+    {"assertion": "The handler calls context.Succeed(requirement) when the scope matches, and does NOT call context.Fail() on mismatch", "pass": true, "rationale": "SKILL.md Pattern 2 shows only `context.Succeed(requirement)` on match, returns Task.CompletedTask otherwise — no Fail() call"},
+    {"assertion": "The ScopeHandler is registered in DI as IAuthorizationHandler", "pass": true, "rationale": "SKILL.md Pattern 2 shows `builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();`"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

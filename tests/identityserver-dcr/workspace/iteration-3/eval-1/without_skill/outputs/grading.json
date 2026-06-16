@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration NuGet package",
+      "pass": false,
+      "rationale": "Package name not general knowledge."
+    },
+    {
+      "assertion": "Calls AddIdentityServerConfiguration() on the service collection",
+      "pass": false,
+      "rationale": "Duende-specific API."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() to map the DCR endpoint",
+      "pass": false,
+      "rationale": "Duende-specific method."
+    },
+    {
+      "assertion": "Mentions that DCR requires Business Edition or higher license",
+      "pass": false,
+      "rationale": "License details are Duende-specific."
+    },
+    {
+      "assertion": "MapDynamicClientRegistration() includes RequireAuthorization()",
+      "pass": true,
+      "rationale": "Securing endpoints is general security practice."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

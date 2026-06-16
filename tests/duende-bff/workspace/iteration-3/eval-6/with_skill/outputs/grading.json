@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends RequiredTokenType.UserOrNone",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 Token Type Options table explicitly lists UserOrNone for this exact scenario"
+    },
+    {
+      "assertion": "Explains that UserOrNone forwards user token if available, no token if anonymous, without triggering a challenge",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 table states: 'Forwards user token if logged in, no token if anonymous (no challenge)'"
+    },
+    {
+      "assertion": "Does NOT recommend RequiredTokenType.User (which would challenge anonymous users)",
+      "pass": true,
+      "rationale": "SKILL.md clearly differentiates User (challenges if unauthenticated) from UserOrNone"
+    },
+    {
+      "assertion": "Shows MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrNone)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 shows the MapRemoteBffApiEndpoint pattern with various RequiredTokenType values"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

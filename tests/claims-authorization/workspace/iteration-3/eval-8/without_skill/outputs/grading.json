@@ -1,0 +1,14 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false", "pass": true, "rationale": "MapInboundClaims = false is commonly known for OIDC handlers"},
+    {"assertion": "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones", "pass": false, "rationale": "ClaimActions.Clear() before re-mapping is a specific best practice not commonly known without guidance"},
+    {"assertion": "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'", "pass": true, "rationale": "ClaimActions.MapJsonKey is documented in Microsoft docs for external providers"},
+    {"assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme", "pass": false, "rationale": "IdentityServerConstants.ExternalCookieAuthenticationScheme is a Duende-specific constant unlikely to be recalled without the skill"},
+    {"assertion": "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions", "pass": false, "rationale": "While conceptually possible, the specific pattern of mapping AAD groups to role claims in the IdentityServer callback context is Duende-specific"}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

@@ -2,10 +2,26 @@
   "eval_id": 8,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)", "pass": false, "rationale": "Mentions HTTP-POST as a binding but doesn't state that HTTP-Redirect is not supported."},
-    {"assertion": "States that AllowedScopes must contain at least one entry", "pass": false, "rationale": "No mention of AllowedScopes requirement."},
-    {"assertion": "Mentions that EntityId is required", "pass": true, "rationale": "States 'Every service provider must have a unique Entity ID'."},
-    {"assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)", "pass": false, "rationale": "No mention of invalid SPs being treated as non-existent."}
+    {
+      "assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+      "pass": false,
+      "rationale": "This Duende-specific restriction is not general SAML knowledge (SAML spec allows both bindings for ACS)."
+    },
+    {
+      "assertion": "States that AllowedScopes must contain at least one entry",
+      "pass": false,
+      "rationale": "AllowedScopes as a Duende validation requirement is product-specific."
+    },
+    {
+      "assertion": "Mentions that EntityId is required",
+      "pass": true,
+      "rationale": "EntityId being required is general SAML knowledge."
+    },
+    {
+      "assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)",
+      "pass": false,
+      "rationale": "This is Duende-specific validation behavior not in general knowledge."
+    }
   ],
   "pass_count": 1,
   "total_count": 4,

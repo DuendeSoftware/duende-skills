@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web.app client has RequirePkce = true and does not set it to false",
+      "pass": true,
+      "rationale": "PKCE requirement is well-known OAuth security best practice"
+    },
+    {
+      "assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+      "pass": true,
+      "rationale": "Wildcard redirect URI risks are well-documented in OAuth security literature"
+    },
+    {
+      "assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+      "pass": true,
+      "rationale": "Using Code only for interactive clients is well-known best practice"
+    },
+    {
+      "assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+      "pass": true,
+      "rationale": "Short access token lifetimes are recommended in security best practices; 5-15 min is common advice"
+    },
+    {
+      "assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not specifically use the Duende enum TokenUsage.OneTimeOnly or might use a different property name"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

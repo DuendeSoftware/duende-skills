@@ -1,0 +1,13 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Explains that IProfileService.GetProfileDataAsync receives ProfileDataRequestContext with RequestedClaimTypes", "pass": true, "rationale": "SKILL.md 'ProfileDataRequestContext Key Members' table lists `RequestedClaimTypes` — 'Claim types requested by the client via scopes/resources'"},
+    {"assertion": "Explains that AddRequestedClaims filters to only emit claims whose type is in RequestedClaimTypes", "pass": true, "rationale": "SKILL.md states `AddRequestedClaims(IEnumerable<Claim>)` — 'Helper that filters your claims to only those in RequestedClaimTypes'"},
+    {"assertion": "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types", "pass": true, "rationale": "SKILL.md 'Claims Not Appearing in Tokens' pitfall and Resource-Based Claim Filtering section both show UserClaims on ApiScope/ApiResource"},
+    {"assertion": "Does NOT require sub-documents — this is answered entirely from the core SKILL.md", "pass": true, "rationale": "All information needed is in the core SKILL.md — IProfileService section, Common Pitfalls, and Resource-Based Claim Filtering"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

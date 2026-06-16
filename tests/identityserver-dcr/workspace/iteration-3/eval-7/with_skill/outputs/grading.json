@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Sets up JWT bearer auth pointing to main IdentityServer",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Does NOT call AddIdentityServer() - separate host",
+      "pass": true,
+      "rationale": "SKILL.md separate host example omits AddIdentityServer."
+    },
+    {
+      "assertion": "Mentions IClientConfigurationStore must use same database",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfalls #4 states this."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

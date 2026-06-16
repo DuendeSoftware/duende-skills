@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": false,
+      "rationale": "Without skill, an LLM would not know the AddBffBlazorClient() method name"
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": false,
+      "rationale": "Without skill, an LLM would not know the client-side BFF Blazor configuration API"
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": false,
+      "rationale": "AddLocalApiHttpClient<T> is a specific BFF Blazor API not in general knowledge"
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": true,
+      "rationale": "An LLM might guess AddBff() as the entry point but the fluent API is less certain"
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

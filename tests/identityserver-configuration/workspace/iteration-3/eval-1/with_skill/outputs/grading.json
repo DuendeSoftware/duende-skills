@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains a call to builder.Services.AddIdentityServer with an options lambda",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows builder.Services.AddIdentityServer(options => { ... })."
+    },
+    {
+      "assertion": "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 and Pattern 8 show all four events enabled."
+    },
+    {
+      "assertion": "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows .AddInMemoryIdentityResources and Pattern 3 shows OpenId() and Profile()."
+    },
+    {
+      "assertion": "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows .AddInMemoryApiScopes pattern."
+    },
+    {
+      "assertion": "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 1 shows app.UseIdentityServer() and notes it 'Includes UseAuthentication()'."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

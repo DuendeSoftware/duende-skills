@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that UseRouting() must come before UseIdentityServer() in the pipeline",
+      "pass": true,
+      "rationale": "General ASP.NET Core knowledge would indicate routing should come first."
+    },
+    {
+      "assertion": "Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally",
+      "pass": false,
+      "rationale": "This is a Duende-specific detail that UseIdentityServer internally calls UseAuthentication; a general LLM might not know this."
+    },
+    {
+      "assertion": "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization",
+      "pass": true,
+      "rationale": "Standard middleware ordering knowledge would suggest this."
+    },
+    {
+      "assertion": "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template",
+      "pass": false,
+      "rationale": "The specific requirement that UseAuthorization is needed for the Duende UI template is Duende-specific knowledge."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

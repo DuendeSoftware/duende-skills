@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": false,
+      "rationale": "AddFrontend is a v4-specific API not in general knowledge"
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": false,
+      "rationale": "Without skill, this v4 API is unknown"
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": false,
+      "rationale": "Without skill, the per-frontend OIDC configuration pattern is unknown"
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": false,
+      "rationale": "Without skill, per-frontend remote API configuration is unknown"
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "An LLM would likely know AddBff() is the starting point"
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

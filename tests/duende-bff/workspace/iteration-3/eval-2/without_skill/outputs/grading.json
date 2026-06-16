@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the AsBffApiEndpoint() extension method"
+    },
+    {
+      "assertion": "Local endpoint uses .RequireAuthorization()",
+      "pass": true,
+      "rationale": "RequireAuthorization is standard ASP.NET Core knowledge"
+    },
+    {
+      "assertion": "Calls AddRemoteApis() on the BFF builder",
+      "pass": false,
+      "rationale": "AddRemoteApis() is a v4-specific registration step that is not broadly documented"
+    },
+    {
+      "assertion": "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api",
+      "pass": true,
+      "rationale": "MapRemoteBffApiEndpoint is somewhat known from Duende BFF docs, though the exact syntax may vary"
+    },
+    {
+      "assertion": "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)",
+      "pass": false,
+      "rationale": "Without skill, an LLM might use older v3 syntax .RequireAccessToken(TokenType.User) instead of v4's .WithAccessToken(RequiredTokenType.User)"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

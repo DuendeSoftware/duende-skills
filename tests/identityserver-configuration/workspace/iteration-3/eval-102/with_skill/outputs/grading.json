@@ -1,0 +1,34 @@
+{
+  "eval_id": 102,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses GrantTypes.Code (not Implicit)",
+      "pass": true,
+      "rationale": "SKILL.md Core Principle #1 states Authorization Code + PKCE."
+    },
+    {
+      "assertion": "Sets RequireClientSecret = false for public SPA client",
+      "pass": true,
+      "rationale": "client-types.md shows RequireClientSecret = false for SPA."
+    },
+    {
+      "assertion": "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+      "pass": true,
+      "rationale": "client-types.md shows AllowedCorsOrigins."
+    },
+    {
+      "assertion": "Sets AllowOfflineAccess = true for refresh tokens",
+      "pass": true,
+      "rationale": "SKILL.md shows AllowOfflineAccess = true."
+    },
+    {
+      "assertion": "AllowedScopes includes 'openid', 'profile', and 'orders.read'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows proper scope inclusion."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

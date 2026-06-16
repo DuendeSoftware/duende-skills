@@ -1,0 +1,29 @@
+{
+  "eval_id": 104,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a new IdentityResource with name 'employee_info'",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 3 shows custom IdentityResource."
+    },
+    {
+      "assertion": "The IdentityResource's UserClaims includes 'employee_id', 'department', and 'hire_date'",
+      "pass": true,
+      "rationale": "SKILL.md shows userClaims array."
+    },
+    {
+      "assertion": "An interactive client includes 'employee_info' in its AllowedScopes along with 'openid'",
+      "pass": true,
+      "rationale": "SKILL.md shows clients with custom scopes."
+    },
+    {
+      "assertion": "The IdentityResources.OpenId() is still present",
+      "pass": true,
+      "rationale": "SKILL.md notes openid is mandatory."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 103,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Defines separate ApiScope instances for service-specific and shared scopes",
+      "pass": true,
+      "rationale": "ApiScope definitions from prompt."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'invoice' with Scopes referencing invoice-specific and shared scopes",
+      "pass": true,
+      "rationale": "ApiResource with Scopes is known."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'customer' with Scopes referencing customer-specific and shared scopes",
+      "pass": true,
+      "rationale": "Same pattern."
+    },
+    {
+      "assertion": "Explains that the aud claim is derived from the ApiResource Name property",
+      "pass": false,
+      "rationale": "Aud claim derivation is Duende-specific."
+    },
+    {
+      "assertion": "Registers both API Resources and API Scopes with AddInMemory methods",
+      "pass": false,
+      "rationale": "Developers often forget to register both."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

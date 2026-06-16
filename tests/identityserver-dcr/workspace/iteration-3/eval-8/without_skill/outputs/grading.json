@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against exposing DCR endpoint without authentication",
+      "pass": true,
+      "rationale": "General security practice."
+    },
+    {
+      "assertion": "Warns against allowing any grant type - should restrict and enforce PKCE",
+      "pass": true,
+      "rationale": "General OAuth security."
+    },
+    {
+      "assertion": "Warns against using in-memory stores for DCR in production",
+      "pass": true,
+      "rationale": "General best practice."
+    },
+    {
+      "assertion": "Mentions client secrets must be stored securely (hashed)",
+      "pass": false,
+      "rationale": "DCR-specific context of generated secrets needing hashing."
+    },
+    {
+      "assertion": "Mentions software statements must be validated against trusted signing keys",
+      "pass": false,
+      "rationale": "Specialized RFC 7591 knowledge."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The tracing configuration includes .AddSource(\"Duende.IdentityServer\")",
+      "pass": false,
+      "rationale": "Exact telemetry source names are Duende-specific."
+    },
+    {
+      "assertion": "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)",
+      "pass": false,
+      "rationale": "Sub-source names are completely Duende-specific."
+    },
+    {
+      "assertion": "The metrics configuration includes .AddMeter(\"Duende.IdentityServer\")",
+      "pass": false,
+      "rationale": "Meter name is Duende-specific."
+    },
+    {
+      "assertion": "All source and meter names are string literals, not constants from any Duende package",
+      "pass": false,
+      "rationale": "Without knowing source names, this is moot."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

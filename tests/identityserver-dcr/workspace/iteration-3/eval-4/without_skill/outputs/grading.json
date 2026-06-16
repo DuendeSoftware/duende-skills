@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Overrides ValidateSoftwareStatementAsync in a DynamicClientRegistrationValidator subclass",
+      "pass": false,
+      "rationale": "Duende-specific APIs."
+    },
+    {
+      "assertion": "Calls context.SetError when software statement is missing or invalid",
+      "pass": false,
+      "rationale": "DynamicClientRegistrationContext.SetError is Duende-specific."
+    },
+    {
+      "assertion": "Validates JWT software statement with ValidIssuer set to trusted issuer URL",
+      "pass": false,
+      "rationale": "Without knowing Duende context, can't be demonstrated."
+    },
+    {
+      "assertion": "Maps claims from software statement to context.Client properties",
+      "pass": false,
+      "rationale": "context.Client mapping is Duende-specific."
+    },
+    {
+      "assertion": "Calls base.ValidateSoftwareStatementAsync at the end",
+      "pass": false,
+      "rationale": "Base class pattern is Duende-specific."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

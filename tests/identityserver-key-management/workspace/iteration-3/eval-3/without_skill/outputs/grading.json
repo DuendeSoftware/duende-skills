@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string",
+      "pass": false,
+      "rationale": "A general LLM might not know that AddOperationalStore is how you configure shared signing key storage in Duende."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem",
+      "pass": true,
+      "rationale": "Data protection persistence configuration is standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName with an explicit application name string",
+      "pass": true,
+      "rationale": "SetApplicationName is a known data protection best practice."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)",
+      "pass": false,
+      "rationale": "A general LLM might incorrectly disable key management when configuring static-like storage, or not know the relationship."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}
