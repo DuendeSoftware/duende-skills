@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Implements IProfileService or extends DefaultProfileService", "pass": true, "rationale": "IProfileService is the known extension point for Duende IdentityServer"},
+    {"assertion": "Uses context.AddRequestedClaims for scope-filtered claims like 'department'", "pass": false, "rationale": "Without skill guidance, an LLM would likely use context.IssuedClaims.AddRange() for all claims rather than knowing about AddRequestedClaims for scope filtering"},
+    {"assertion": "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering", "pass": false, "rationale": "The distinction between AddRequestedClaims (filtered) and IssuedClaims.Add (unfiltered) is Duende-specific knowledge not commonly available without the skill"},
+    {"assertion": "Implements IsActiveAsync to check whether the user is still active", "pass": true, "rationale": "IsActiveAsync is part of the IProfileService interface, an LLM would include it"},
+    {"assertion": "Registers the profile service with AddProfileService<T>() on the IdentityServer builder", "pass": true, "rationale": "Standard Duende registration pattern, reasonably well-known"}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

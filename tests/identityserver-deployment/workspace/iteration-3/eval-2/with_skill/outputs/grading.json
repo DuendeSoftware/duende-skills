@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+      "pass": true,
+      "rationale": "SKILL.md's Common Data Protection Problems table explicitly lists 'No shared keys in load-balanced environment' causing CryptographicException."
+    },
+    {
+      "assertion": "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+      "pass": true,
+      "rationale": "SKILL.md shows PersistKeysToFoo() pattern and lists PersistKeysToStackExchangeRedis, PersistKeysToDbContext, etc."
+    },
+    {
+      "assertion": "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+      "pass": true,
+      "rationale": "SKILL.md shows .SetApplicationName('My.IdentityServer') and lists it as a Critical Rule."
+    },
+    {
+      "assertion": "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+      "pass": true,
+      "rationale": "SKILL.md section 'IdentityServer Data Stores for Multi-Instance' states signing keys must be shared via ISigningKeyStore (EF operational store or custom)."
+    },
+    {
+      "assertion": "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+      "pass": true,
+      "rationale": "SKILL.md's Common Anti-Patterns explicitly states not to use default ephemeral Data Protection keys in production."
+    },
+    {
+      "assertion": "Output references the general data protection documentation or mentions this is a cross-cutting concern for all Duende SDKs",
+      "pass": true,
+      "rationale": "SKILL.md has a callout: 'Cross-cutting concern: Data protection is critical for all Duende products \u2014 both IdentityServer and BFF. See ASP.NET Core Data Protection...'"
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

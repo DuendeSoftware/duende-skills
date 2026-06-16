@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The response identifies the root cause as the API starting before IdentityServer is ready",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 describes this."
+    },
+    {
+      "assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+      "pass": true,
+      "rationale": "SKILL.md shows .WaitFor(identityServer)."
+    },
+    {
+      "assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+      "pass": true,
+      "rationale": "SKILL.md explains both are needed."
+    },
+    {
+      "assertion": "The response mentions that IdentityServer needs health checks for WaitFor to work",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 covers health checks."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

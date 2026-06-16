@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause -- each instance generates its own keys",
+      "pass": true,
+      "rationale": "This is well-known ASP.NET Core deployment knowledge"
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core Data Protection guidance"
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not specifically recommend AddEntityFrameworkServerSideSessions; might suggest distributed cache instead"
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core Data Protection code patterns are well-known"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

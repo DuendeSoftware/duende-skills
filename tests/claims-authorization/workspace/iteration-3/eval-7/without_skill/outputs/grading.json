@@ -1,0 +1,13 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Adds ClientClaim objects to the Client.Claims collection with 'customer_id' and 'region'", "pass": true, "rationale": "ClientClaim on Client.Claims is a reasonably known pattern"},
+    {"assertion": "Sets ClientClaimsPrefix to an empty string to remove the 'client_' prefix", "pass": false, "rationale": "ClientClaimsPrefix is a Duende-specific property that most LLMs would not know about without documentation"},
+    {"assertion": "Uses GrantTypes.ClientCredentials for the client", "pass": true, "rationale": "The prompt specifies client credentials flow"},
+    {"assertion": "Mentions that client claims are emitted by default only in client credentials flow, or requires AlwaysSendClientClaims = true for other flows", "pass": false, "rationale": "This behavioral detail about when client claims are emitted is Duende-specific and not commonly known"}
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

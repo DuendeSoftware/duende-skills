@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "A Document class/record is defined with at least Department and OwnerId properties", "pass": true, "rationale": "SKILL.md Pattern 4 shows usage of `resource.Department` and `resource.OwnerId` implying a Document with these properties"},
+    {"assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit", "pass": true, "rationale": "SKILL.md Pattern 4 shows `public static class Operations { public static readonly OperationAuthorizationRequirement Read = ...; Edit = ...; }`"},
+    {"assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>", "pass": true, "rationale": "SKILL.md Pattern 4 shows `public class DocumentAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Document>`"},
+    {"assertion": "The Read operation checks the user's 'department' claim against the resource's Department property", "pass": true, "rationale": "SKILL.md Pattern 4 shows `context.User.HasClaim(\"department\", resource.Department)` for Read"},
+    {"assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property", "pass": true, "rationale": "SKILL.md Pattern 4 shows `resource.OwnerId == userId` where userId comes from `context.User.FindFirst(\"sub\")?.Value`"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

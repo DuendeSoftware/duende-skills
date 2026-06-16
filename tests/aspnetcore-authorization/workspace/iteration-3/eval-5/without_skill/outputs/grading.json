@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "A Document class/record is defined with at least Department and OwnerId properties", "pass": true, "rationale": "The prompt specifies these requirements, any LLM would include them"},
+    {"assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit", "pass": true, "rationale": "OperationAuthorizationRequirement is documented in Microsoft docs for resource-based auth"},
+    {"assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>", "pass": true, "rationale": "Resource-based authorization handler pattern is in Microsoft docs"},
+    {"assertion": "The Read operation checks the user's 'department' claim against the resource's Department property", "pass": true, "rationale": "The prompt explicitly requests this, so an LLM would implement it"},
+    {"assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property", "pass": false, "rationale": "Without skill guidance, an LLM might use ClaimTypes.NameIdentifier or User.Identity.Name instead of the short 'sub' claim, especially without knowing MapInboundClaims context"}
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "A policy is defined that includes RequireClaim(\"scope\", \"catalog.write\") for client-level authorization", "pass": true, "rationale": "SKILL.md Pattern 6 and Pitfall #4 show combining scope and role checks: `p.RequireClaim(\"scope\", \"catalog.write\")`"},
+    {"assertion": "The same policy includes RequireRole(\"admin\") or equivalent user-level claim check", "pass": true, "rationale": "SKILL.md Pitfall #4 shows `p.RequireRole(\"editor\")` combined with scope check; Pattern 5 shows inline policies with `.RequireRole(\"admin\")`"},
+    {"assertion": "The policy is applied to the DELETE /products/{id} endpoint", "pass": true, "rationale": "SKILL.md Pattern 5 shows `.RequireAuthorization(...)` on MapDelete endpoints"},
+    {"assertion": "The response explains that scopes represent client permissions and roles/claims represent user permissions, and both should be checked", "pass": true, "rationale": "SKILL.md Core Principle #2 states 'OAuth scopes represent what the *client* is allowed to do. User claims represent what the *user* is allowed to do.' Pattern 6 explains 'Why both?'"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

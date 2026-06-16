@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration NuGet package",
+      "pass": true,
+      "rationale": "SKILL.md shows the package."
+    },
+    {
+      "assertion": "Calls AddIdentityServerConfiguration() on the service collection",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() to map the DCR endpoint",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Mentions that DCR requires Business Edition or higher license",
+      "pass": true,
+      "rationale": "SKILL.md mentions this requirement."
+    },
+    {
+      "assertion": "MapDynamicClientRegistration() includes RequireAuthorization()",
+      "pass": true,
+      "rationale": "SKILL.md shows .RequireAuthorization()."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

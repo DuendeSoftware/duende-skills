@@ -2,12 +2,28 @@
   "eval_id": 3,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping", "pass": false, "rationale": "Uses 'ClaimMapping' (singular) instead of the correct 'ClaimMappings' property name, and on 'ServiceProvider' not 'SamlServiceProvider'."},
-    {"assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings", "pass": false, "rationale": "No mention of AllowedScopes as a prerequisite for claims being available."},
-    {"assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults", "pass": false, "rationale": "Uses 'DefaultAttributeMapping' instead of the correct 'DefaultClaimMappings' property name."},
-    {"assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)", "pass": true, "rationale": "The direction is correct — internal claim names as keys, SAML URIs as values."}
+    {
+      "assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping",
+      "pass": false,
+      "rationale": "ClaimMappings on SamlServiceProvider is Duende-specific and not general knowledge."
+    },
+    {
+      "assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings",
+      "pass": false,
+      "rationale": "The claim pipeline (AllowedScopes\u2192ClaimMappings) is Duende-specific architecture."
+    },
+    {
+      "assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults",
+      "pass": false,
+      "rationale": "SamlOptions.DefaultClaimMappings is Duende-specific configuration."
+    },
+    {
+      "assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)",
+      "pass": false,
+      "rationale": "Without knowing the Duende model, a general LLM cannot show the correct mapping direction."
+    }
   ],
-  "pass_count": 1,
+  "pass_count": 0,
   "total_count": 4,
-  "score": 0.25
+  "score": 0.0
 }

@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "An authorization policy named 'admin' is defined using RequireRole(\"admin\")", "pass": true, "rationale": "RequireRole is standard ASP.NET Core authorization"},
+    {"assertion": "app.MapGroup(\"/admin\") is used to group the admin endpoints", "pass": true, "rationale": "MapGroup is a well-known minimal API pattern"},
+    {"assertion": ".RequireAuthorization(\"admin\") or equivalent is applied to the group", "pass": true, "rationale": "Applying authorization to groups is documented"},
+    {"assertion": "The individual admin endpoints are registered on the group rather than on app directly", "pass": true, "rationale": "Standard MapGroup usage pattern"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

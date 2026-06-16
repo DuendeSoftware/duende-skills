@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-token-security",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "total_evals": 8,
+    "with_skill": {
+      "total_pass": 36,
+      "total_assertions": 36,
+      "average_score": 1.0
+    },
+    "without_skill": {
+      "total_pass": 14,
+      "total_assertions": 36,
+      "average_score": 0.39
+    },
+    "skill_advantage": 0.61
+  },
+  "evals": [
+    {"id": 1, "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 5, "score": 0.6}},
+    {"id": 2, "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}},
+    {"id": 3, "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 2, "total_count": 5, "score": 0.4}},
+    {"id": 4, "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 2, "total_count": 5, "score": 0.4}},
+    {"id": 5, "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 2, "total_count": 4, "score": 0.5}},
+    {"id": 6, "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 2, "total_count": 5, "score": 0.4}},
+    {"id": 7, "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}},
+    {"id": 8, "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}}
+  ]
+}

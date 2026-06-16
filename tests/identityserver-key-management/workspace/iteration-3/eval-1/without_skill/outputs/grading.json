@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RotationInterval' set to TimeSpan.FromDays(30)",
+      "pass": true,
+      "rationale": "RotationInterval is a reasonably guessable property name for IdentityServer key management."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.PropagationTime' set to TimeSpan.FromDays(5)",
+      "pass": false,
+      "rationale": "PropagationTime is a Duende-specific property name that a general LLM might not know exactly."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.RetentionDuration' set to TimeSpan.FromDays(7)",
+      "pass": false,
+      "rationale": "RetentionDuration is a Duende-specific property name that might be guessed as RetentionPeriod or KeyRetention."
+    },
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.DeleteRetiredKeys = false'",
+      "pass": true,
+      "rationale": "DeleteRetiredKeys is a reasonably intuitive property name."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

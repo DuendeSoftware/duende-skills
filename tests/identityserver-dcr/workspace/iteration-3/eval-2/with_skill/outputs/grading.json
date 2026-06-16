@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Configures AddJwtBearer with Authority and Audience for DCR scheme",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Creates an authorization policy with specific scope claim",
+      "pass": true,
+      "rationale": "SKILL.md shows policy with scope."
+    },
+    {
+      "assertion": "Applies RequireAuthorization with named policy to MapDynamicClientRegistration()",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy",
+      "pass": true,
+      "rationale": "SKILL.md shows both."
+    },
+    {
+      "assertion": "Does NOT expose MapDynamicClientRegistration() without authorization",
+      "pass": true,
+      "rationale": "SKILL.md always shows authorization."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

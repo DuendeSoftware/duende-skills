@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "General BFF knowledge includes anti-forgery headers, though the specific header name might vary"
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "General web knowledge would suggest creating a fetch wrapper for common headers"
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the specific /bff/login endpoint path or the redirect pattern"
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": false,
+      "rationale": "This is a specific BFF gotcha that general knowledge would likely not cover explicitly"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

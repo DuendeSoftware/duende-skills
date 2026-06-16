@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets options.IssuerUri to 'https://id.mycompany.com'",
+      "pass": true,
+      "rationale": "IssuerUri is well-known."
+    },
+    {
+      "assertion": "Output sets options.Authentication.CookieLifetime to TimeSpan.FromHours(8) and CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "Cookie settings are somewhat known."
+    },
+    {
+      "assertion": "Output sets options.PushedAuthorization.Required to true",
+      "pass": false,
+      "rationale": "PAR configuration is newer Duende feature."
+    },
+    {
+      "assertion": "Output sets options.Caching.ClientStoreExpiration and ResourceStoreExpiration to TimeSpan.FromMinutes(10)",
+      "pass": false,
+      "rationale": "Exact caching property paths are Duende-specific."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs maps a /logout endpoint (via MapGet, controller action, or Razor page)", "pass": true, "rationale": "Mapping endpoints is standard ASP.NET Core knowledge"},
+    {"assertion": "The logout handler calls SignOutAsync for the cookie authentication scheme to clear the local session", "pass": true, "rationale": "SignOutAsync for cookies is well-documented standard behavior"},
+    {"assertion": "The logout handler calls SignOutAsync for the OIDC scheme to trigger redirect to IdentityServer's end session endpoint", "pass": true, "rationale": "The dual sign-out pattern is well-known for OIDC scenarios"}
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

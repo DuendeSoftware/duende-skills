@@ -2,10 +2,26 @@
   "eval_id": 4,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Explains that SLO uses front-channel logout via iframes (not redirect chains)", "pass": true, "rationale": "Explicitly states 'front-channel logout via iframes (not redirect chains)'."},
-    {"assertion": "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect", "pass": true, "rationale": "Shows SingleLogoutServiceUrls with SamlEndpointType and Binding = SamlBinding.HttpRedirect."},
-    {"assertion": "Mentions that partial logout is normal/expected when some SPs don't respond", "pass": true, "rationale": "Explicitly states 'Partial logout is normal' and explains why."},
-    {"assertion": "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments", "pass": true, "rationale": "Mentions ISamlLogoutSessionStore for multi-node deployments."}
+    {
+      "assertion": "Explains that SLO uses front-channel logout via iframes (not redirect chains)",
+      "pass": true,
+      "rationale": "SKILL.md states: 'SLO uses front-channel logout via iframes (not redirect chains).'"
+    },
+    {
+      "assertion": "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect",
+      "pass": true,
+      "rationale": "SKILL.md shows SingleLogoutServiceUrls with SamlEndpointType and Binding = SamlBinding.HttpRedirect."
+    },
+    {
+      "assertion": "Mentions that partial logout is normal/expected when some SPs don't respond",
+      "pass": true,
+      "rationale": "SKILL.md states: 'Partial logout is normal (some SPs may not respond)' in the SLO section."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments",
+      "pass": true,
+      "rationale": "SKILL.md mentions: 'Use ISamlLogoutSessionStore for distributed deployments.'"
+    }
   ],
   "pass_count": 4,
   "total_count": 4,

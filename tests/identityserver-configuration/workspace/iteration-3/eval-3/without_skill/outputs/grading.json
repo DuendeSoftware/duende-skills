@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output defines ApiScope entries for at least 'read' and 'write'",
+      "pass": true,
+      "rationale": "ApiScope definition is standard knowledge."
+    },
+    {
+      "assertion": "Output defines an ApiResource with name 'catalog-api' that includes both 'read' and 'write' in its Scopes",
+      "pass": true,
+      "rationale": "ApiResource with Scopes is known from IdentityServer docs."
+    },
+    {
+      "assertion": "Output defines an ApiResource with name 'orders-api' that includes 'read' but not 'write'",
+      "pass": true,
+      "rationale": "The prompt clearly specifies this."
+    },
+    {
+      "assertion": "Output calls AddInMemoryApiResources to register the API resources",
+      "pass": false,
+      "rationale": "Some developers forget to register ApiResources separately from ApiScopes."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs maps a /logout endpoint (via MapGet, controller action, or Razor page)", "pass": true, "rationale": "SKILL.md Pattern 7 shows `app.MapGet(\"/logout\", async (HttpContext ctx) => { ... })`"},
+    {"assertion": "The logout handler calls SignOutAsync for the cookie authentication scheme to clear the local session", "pass": true, "rationale": "SKILL.md Pattern 7 shows `await ctx.SignOutAsync(\"Cookies\");`"},
+    {"assertion": "The logout handler calls SignOutAsync for the OIDC scheme to trigger redirect to IdentityServer's end session endpoint", "pass": true, "rationale": "SKILL.md Pattern 7 shows `await ctx.SignOutAsync(\"oidc\");` and explains the full sign-out flow"}
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

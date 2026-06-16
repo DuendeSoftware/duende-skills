@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the AddBffExtensions() method on YARP builder"
+    },
+    {
+      "assertion": "Program.cs contains 'LoadFromMemory' with RouteConfig and ClusterConfig",
+      "pass": true,
+      "rationale": "LoadFromMemory is standard YARP configuration knowledge"
+    },
+    {
+      "assertion": "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+      "pass": false,
+      "rationale": "Without skill, an LLM would not know the distinction between TokenType and RequiredTokenType for YARP"
+    },
+    {
+      "assertion": "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
+      "pass": false,
+      "rationale": "Without skill, an LLM would not know the WithAntiforgeryCheck extension on RouteConfig"
+    },
+    {
+      "assertion": "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'",
+      "pass": true,
+      "rationale": "MapReverseProxy with pipeline is standard YARP; UseAntiforgeryCheck might be guessed"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

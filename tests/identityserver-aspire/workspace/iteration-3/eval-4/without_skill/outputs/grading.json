@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The code uses .WithReplicas(3) on the IdentityServer project resource",
+      "pass": true,
+      "rationale": "Standard Aspire API."
+    },
+    {
+      "assertion": "The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement",
+      "pass": true,
+      "rationale": "General distributed systems knowledge."
+    },
+    {
+      "assertion": "The response mentions shared ASP.NET Data Protection keys as a requirement",
+      "pass": true,
+      "rationale": "Well-known multi-instance requirement."
+    },
+    {
+      "assertion": "The response mentions shared operational store (persisted grants, device codes, or server-side sessions) as a requirement",
+      "pass": false,
+      "rationale": "IdentityServer-specific operational store details."
+    },
+    {
+      "assertion": "The response warns against using file-based signing keys or in-memory stores with multiple replicas",
+      "pass": false,
+      "rationale": "Duende-specific guidance."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

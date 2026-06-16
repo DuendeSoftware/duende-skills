@@ -2,11 +2,31 @@
   "eval_id": 1,
   "variant": "with_skill",
   "assertions": [
-    {"assertion": "Calls .AddSaml() on the IdentityServer builder chain", "pass": true, "rationale": "The code clearly shows .AddSaml() chained on the IdentityServer builder."},
-    {"assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer", "pass": true, "rationale": "Explicitly states no additional NuGet package is needed and SAML is built into Duende.IdentityServer."},
-    {"assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'", "pass": true, "rationale": "The SamlServiceProvider has EntityId = \"https://crm.contoso.com\"."},
-    {"assertion": "AssertionConsumerServiceUrls uses IndexedEndpoint with Location 'https://crm.contoso.com/saml/acs' and Binding = SamlBinding.HttpPost", "pass": true, "rationale": "Code shows IndexedEndpoint with correct Location and SamlBinding.HttpPost."},
-    {"assertion": "AllowedScopes is configured on the SamlServiceProvider (not empty)", "pass": true, "rationale": "AllowedScopes = [\"openid\", \"profile\", \"email\"] is set on the SP."}
+    {
+      "assertion": "Calls .AddSaml() on the IdentityServer builder chain",
+      "pass": true,
+      "rationale": "SKILL.md shows: .AddSaml() on the builder chain in the Setup section."
+    },
+    {
+      "assertion": "No separate NuGet package is added \u2014 SAML is built into Duende.IdentityServer",
+      "pass": true,
+      "rationale": "SKILL.md states: 'SAML 2.0 IdP support is built into Duende.IdentityServer (v8.0+) \u2014 no separate NuGet package.'"
+    },
+    {
+      "assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+      "pass": true,
+      "rationale": "SKILL.md shows SamlServiceProvider model with EntityId field."
+    },
+    {
+      "assertion": "AssertionConsumerServiceUrls uses IndexedEndpoint with Location 'https://crm.contoso.com/saml/acs' and Binding = SamlBinding.HttpPost",
+      "pass": true,
+      "rationale": "SKILL.md shows IndexedEndpoint with Location, Binding = SamlBinding.HttpPost pattern."
+    },
+    {
+      "assertion": "AllowedScopes is configured on the SamlServiceProvider (not empty)",
+      "pass": true,
+      "rationale": "SKILL.md shows AllowedScopes configuration and states it's required for claims to flow."
+    }
   ],
   "pass_count": 5,
   "total_count": 5,

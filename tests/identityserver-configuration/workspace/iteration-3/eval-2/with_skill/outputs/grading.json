@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output defines a client with ClientId 'batch-processor' using GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows M2M client with ClientCredentials."
+    },
+    {
+      "assertion": "Output defines a client with ClientId 'admin-portal' using GrantTypes.Code with RequirePkce true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows interactive client with GrantTypes.Code and RequirePkce = true."
+    },
+    {
+      "assertion": "The admin-portal client has AllowOfflineAccess set to true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows AllowOfflineAccess = true."
+    },
+    {
+      "assertion": "The admin-portal client includes IdentityServerConstants.StandardScopes.OpenId in its AllowedScopes",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows OpenId in AllowedScopes."
+    },
+    {
+      "assertion": "The admin-portal client has RedirectUris and PostLogoutRedirectUris configured",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows both URI collections."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

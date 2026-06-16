@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements the IClientConfigurationStore interface",
+      "pass": true,
+      "rationale": "SKILL.md shows this."
+    },
+    {
+      "assertion": "Includes an AddAsync method for persisting new clients",
+      "pass": true,
+      "rationale": "SKILL.md shows AddAsync."
+    },
+    {
+      "assertion": "Includes a FindByClientIdAsync method that returns Client or null",
+      "pass": true,
+      "rationale": "SKILL.md shows FindByClientIdAsync."
+    },
+    {
+      "assertion": "Includes UpdateAsync and DeleteAsync methods",
+      "pass": true,
+      "rationale": "SKILL.md shows both."
+    },
+    {
+      "assertion": "Mentions that client secrets should be stored securely (hashed)",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfalls #2 mentions this."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

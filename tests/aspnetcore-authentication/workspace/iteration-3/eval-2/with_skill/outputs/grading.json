@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures AddJwtBearer with Authority set to the IdentityServer URL", "pass": true, "rationale": "SKILL.md Pattern 2 shows `options.Authority = \"https://identity.example.com\";`"},
+    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": true, "rationale": "SKILL.md Pattern 2 shows `options.MapInboundClaims = false; // Must be included`"},
+    {"assertion": "Program.cs sets TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role'", "pass": true, "rationale": "SKILL.md Pattern 2 shows `NameClaimType = \"name\", RoleClaimType = \"role\"` in TokenValidationParameters"},
+    {"assertion": "Program.cs sets Audience or ValidAudience to 'catalog-api'", "pass": true, "rationale": "SKILL.md Pattern 2 shows both `options.Audience = \"catalog-api\"` and `ValidAudience = \"catalog-api\"`"},
+    {"assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization()", "pass": true, "rationale": "SKILL.md Pattern 2 shows correct middleware ordering"}
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

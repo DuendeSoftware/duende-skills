@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The response identifies the root cause as the API starting before IdentityServer is ready",
+      "pass": true,
+      "rationale": "IDX20803 error is well-known."
+    },
+    {
+      "assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+      "pass": true,
+      "rationale": "Standard Aspire pattern."
+    },
+    {
+      "assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+      "pass": false,
+      "rationale": "WithReference might not be emphasized."
+    },
+    {
+      "assertion": "The response mentions that IdentityServer needs health checks for WaitFor to work",
+      "pass": false,
+      "rationale": "Connection between WaitFor and health checks often missed."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

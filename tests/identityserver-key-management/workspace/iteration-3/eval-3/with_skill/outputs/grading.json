@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddOperationalStore with ConfigureDbContext using UseSqlServer and a connection string",
+      "pass": true,
+      "rationale": "SKILL.md shows exact pattern: .AddOperationalStore(options => { options.ConfigureDbContext = b => b.UseSqlServer(connectionString); })."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with a persistence method such as PersistKeysToDbContext or PersistKeysToFileSystem",
+      "pass": true,
+      "rationale": "SKILL.md shows AddDataProtection().PersistKeysToDbContext<MyDbContext>() pattern."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName with an explicit application name string",
+      "pass": true,
+      "rationale": "SKILL.md shows .SetApplicationName('My.IdentityServer') in the data protection configuration."
+    },
+    {
+      "assertion": "Program.cs does not disable automatic key management (KeyManagement.Enabled should remain true or not be set to false)",
+      "pass": true,
+      "rationale": "SKILL.md's operational store section does not disable key management; it's used alongside automatic key management."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

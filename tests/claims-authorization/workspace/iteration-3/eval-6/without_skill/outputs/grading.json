@@ -1,0 +1,14 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'", "pass": true, "rationale": "The grant type URI is from the RFC and IExtensionGrantValidator is the known Duende interface"},
+    {"assertion": "Extracts and validates the subject_token from the request", "pass": true, "rationale": "Token exchange RFC defines subject_token parameter, an LLM would likely include this"},
+    {"assertion": "Returns a GrantValidationResult with a subject ID and custom claims array", "pass": false, "rationale": "The exact GrantValidationResult constructor signature with custom claims array is Duende-specific and unlikely to be recalled precisely"},
+    {"assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder", "pass": false, "rationale": "The exact registration method name might not be precisely recalled without documentation"},
+    {"assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further", "pass": false, "rationale": "The pipeline detail that IProfileService runs after grant validation is Duende-specific knowledge"}
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

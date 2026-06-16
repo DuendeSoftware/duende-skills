@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures AddJwtBearer with ForwardDefaultSelector using Selector.ForwardReferenceToken to forward reference tokens to introspection", "pass": false, "rationale": "Selector.ForwardReferenceToken is a Duende-specific helper class. Without the skill, an LLM would not know this exact API exists or its usage pattern"},
+    {"assertion": "Program.cs configures AddOAuth2Introspection with ClientId and ClientSecret for the API", "pass": true, "rationale": "OAuth2 introspection is a known concept, though the exact Duende package API might not be perfectly recalled"},
+    {"assertion": "Program.cs registers two authentication scheme handlers (JWT Bearer and introspection)", "pass": false, "rationale": "Without skill guidance, an LLM might suggest a single handler or a different approach rather than the dual-handler pattern"},
+    {"assertion": "Program.cs sets MapInboundClaims = false on the JWT Bearer handler", "pass": false, "rationale": "While generally known, in the context of a combined JWT+reference token setup, it might be overlooked without explicit guidance"}
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

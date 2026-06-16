@@ -1,0 +1,29 @@
+{
+  "eval_id": 101,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client uses GrantTypes.ClientCredentials",
+      "pass": true,
+      "rationale": "ClientCredentials for M2M is standard."
+    },
+    {
+      "assertion": "Client AllowedScopes contains both 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "Scope assignment from prompt."
+    },
+    {
+      "assertion": "ApiScope definitions include 'invoices.read' and 'invoices.pay'",
+      "pass": true,
+      "rationale": "ApiScope definition is well-known."
+    },
+    {
+      "assertion": "Secret is loaded from Configuration or external source",
+      "pass": false,
+      "rationale": "Generic answers still show hardcoded secrets."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

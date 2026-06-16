@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+      "pass": true,
+      "rationale": "Removing dev signing credential for production is well-known"
+    },
+    {
+      "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the exact SigningAlgorithms array configuration or the property name"
+    },
+    {
+      "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+      "pass": true,
+      "rationale": "An LLM familiar with IdentityServer might know KeyManagement options exist"
+    },
+    {
+      "assertion": "Program.cs configures DataProtectKeys = true for key management",
+      "pass": false,
+      "rationale": "DataProtectKeys is a specific IdentityServer option that may not be in general knowledge"
+    },
+    {
+      "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core Data Protection configuration"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

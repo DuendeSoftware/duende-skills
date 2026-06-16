@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API",
+      "pass": true,
+      "rationale": "SKILL.md states: 'IdentityServer should be in its own dedicated application to minimize the attack surface.'"
+    },
+    {
+      "assertion": "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs",
+      "pass": true,
+      "rationale": "SKILL.md's hosting table shows 'Shared with API' has cons: 'Security risk, conflicting middleware needs.'"
+    },
+    {
+      "assertion": "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default",
+      "pass": true,
+      "rationale": "SKILL.md states: 'IssuerUri: Not recommended to set; inferred from request URL by default.'"
+    },
+    {
+      "assertion": "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)",
+      "pass": true,
+      "rationale": "SKILL.md states: 'Set only when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address).'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

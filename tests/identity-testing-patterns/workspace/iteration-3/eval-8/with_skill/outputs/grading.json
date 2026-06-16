@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #1 explicitly shows options.KeyManagement.Enabled = false"
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #1 shows .AddDeveloperSigningCredential(persistKey: false)"
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports -- use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #3 explicitly warns against hard-coding localhost ports"
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": true,
+      "rationale": "SKILL.md Common Pitfall #5 warns about identity set in one test bleeding into the next"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

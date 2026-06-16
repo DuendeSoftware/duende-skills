@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 4 and Core Principle 3 explicitly state 'PKCE is Non-Negotiable' and 'never disable it'"
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "SKILL.md Core Principle 5 states 'Wildcards in redirect URIs are a critical attack surface. Every production URI must be fully qualified and must match exactly'"
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "SKILL.md Core Principle 6 states 'Restrict Grant Types Per Client' and Pattern 7 explicitly deprecates implicit flow"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

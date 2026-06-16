@@ -1,0 +1,34 @@
+{
+  "eval_id": 106,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Sets AllowOfflineAccess = true",
+      "pass": true,
+      "rationale": "SKILL.md shows AllowOfflineAccess = true."
+    },
+    {
+      "assertion": "Sets RefreshTokenUsage to TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "client-types.md shows this."
+    },
+    {
+      "assertion": "Sets AbsoluteRefreshTokenLifetime to 604800",
+      "pass": true,
+      "rationale": "client-types.md shows this property."
+    },
+    {
+      "assertion": "Sets SlidingRefreshTokenLifetime to 86400 and RefreshTokenExpiration to Sliding",
+      "pass": true,
+      "rationale": "client-types.md shows these properties."
+    },
+    {
+      "assertion": "Sets UpdateAccessTokenClaimsOnRefresh = true",
+      "pass": true,
+      "rationale": "client-types.md shows this property."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Identifies MapInboundClaims as the root cause — the JWT bearer handler renames 'sub' to the long Microsoft XML namespace URI", "pass": true, "rationale": "This is a well-known issue in the ASP.NET Core community"},
+    {"assertion": "Shows setting options.MapInboundClaims = false on the JWT bearer handler", "pass": true, "rationale": "Standard fix, widely documented"},
+    {"assertion": "Mentions JwtClaimTypes.Subject or the short name 'sub' vs the long http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier URI", "pass": true, "rationale": "The long URI is commonly referenced in community discussions"},
+    {"assertion": "Does NOT suggest the claim is missing from the token itself", "pass": true, "rationale": "The prompt says 'I can see the claim in the token when I decode it at jwt.io' — any reasonable LLM would not suggest it's missing"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

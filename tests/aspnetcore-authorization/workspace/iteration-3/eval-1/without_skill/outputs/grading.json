@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs calls builder.Services.AddAuthorization with options that set FallbackPolicy", "pass": true, "rationale": "FallbackPolicy is well-documented in Microsoft docs"},
+    {"assertion": "FallbackPolicy uses RequireAuthenticatedUser()", "pass": true, "rationale": "Standard pattern from Microsoft documentation"},
+    {"assertion": "The /health endpoint has .AllowAnonymous() applied", "pass": true, "rationale": "AllowAnonymous is standard ASP.NET Core knowledge"},
+    {"assertion": "app.UseAuthorization() is called after app.UseAuthentication()", "pass": true, "rationale": "Standard middleware ordering"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

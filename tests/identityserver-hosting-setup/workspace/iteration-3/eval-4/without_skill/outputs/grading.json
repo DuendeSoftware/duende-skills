@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme",
+      "pass": true,
+      "rationale": "ForwardedHeaders configuration is standard ASP.NET Core knowledge."
+    },
+    {
+      "assertion": "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()",
+      "pass": true,
+      "rationale": "General knowledge that forwarded headers middleware should run early."
+    },
+    {
+      "assertion": "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes",
+      "pass": false,
+      "rationale": "The environment variable approach is less commonly known; many LLMs would only show the explicit configuration."
+    },
+    {
+      "assertion": "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery",
+      "pass": true,
+      "rationale": "This is a well-understood concept in reverse proxy configurations."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls builder.Services.AddIdentityServer() to register IdentityServer services in DI",
+      "pass": true,
+      "rationale": "AddIdentityServer is well-known from IdentityServer4 and general Duende documentation."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryApiScopes with a scope named 'api1'",
+      "pass": true,
+      "rationale": "In-memory stores are common knowledge from quickstart tutorials."
+    },
+    {
+      "assertion": "Program.cs calls AddInMemoryClients with a client having ClientId 'm2m.client' and AllowedGrantTypes set to ClientCredentials",
+      "pass": true,
+      "rationale": "Client credentials grant type configuration is well-documented across many sources."
+    },
+    {
+      "assertion": "Program.cs calls app.UseIdentityServer() in the middleware pipeline before app.UseAuthorization()",
+      "pass": true,
+      "rationale": "General ASP.NET Core middleware ordering knowledge would suggest this."
+    },
+    {
+      "assertion": "Program.cs calls app.UseRouting() before app.UseIdentityServer()",
+      "pass": false,
+      "rationale": "A general LLM might not emphasize UseRouting before UseIdentityServer since in .NET 6+ UseRouting is often implicit."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

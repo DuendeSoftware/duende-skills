@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls ConfigureDPoPTokensForScheme on IServiceCollection (builder.Services), NOT inside the AddJwtBearer options lambda",
+      "pass": true,
+      "rationale": "SKILL.md shows builder.Services.ConfigureDPoPTokensForScheme with wrong/correct examples."
+    },
+    {
+      "assertion": "Registers a distributed cache implementation (e.g., AddDistributedMemoryCache or Redis) for DPoP replay detection",
+      "pass": true,
+      "rationale": "SKILL.md shows AddDistributedMemoryCache for replay detection."
+    },
+    {
+      "assertion": "Sets ValidTypes to include 'at+jwt' on the JWT bearer handler",
+      "pass": true,
+      "rationale": "SKILL.md includes ValidTypes in DPoP example."
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.JwtBearer package",
+      "pass": true,
+      "rationale": "SKILL.md shows the package for DPoP."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

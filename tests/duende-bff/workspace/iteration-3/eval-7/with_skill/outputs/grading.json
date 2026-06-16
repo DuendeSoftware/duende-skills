@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause -- each instance generates its own keys",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 'Data Protection in Clustered Deployments' explicitly identifies this"
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows PersistKeysToAzureBlobStorage and PersistKeysToDbContext"
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 5 explicitly recommends EF-backed sessions for production/multi-instance"
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 8 shows builder.Services.AddDataProtection().PersistKeysToAzureBlobStorage()..."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

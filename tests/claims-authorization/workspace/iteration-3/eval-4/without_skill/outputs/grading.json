@@ -1,0 +1,14 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Implements IClaimsTransformation with a TransformAsync method", "pass": true, "rationale": "IClaimsTransformation is documented in Microsoft docs"},
+    {"assertion": "Creates a new ClaimsIdentity and adds it to the principal via principal.AddIdentity() — does NOT mutate the existing identity in-place", "pass": false, "rationale": "Without skill guidance, an LLM might cast to ClaimsIdentity and call AddClaim directly on the existing identity, missing the 'add new identity' best practice"},
+    {"assertion": "Loads roles from a local repository or database based on the user's subject claim", "pass": true, "rationale": "The prompt explicitly asks for this, so any LLM would include it"},
+    {"assertion": "Registers the implementation with DI (e.g. AddTransient<IClaimsTransformation, ...>)", "pass": true, "rationale": "Standard DI registration pattern"},
+    {"assertion": "Warns against using IClaimsTransformation on the IdentityServer host for modifying token claims", "pass": false, "rationale": "This is Duende-specific guidance that an LLM without the skill would not know to warn about"}
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

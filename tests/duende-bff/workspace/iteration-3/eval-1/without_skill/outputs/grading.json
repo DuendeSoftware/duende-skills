@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddBff() on builder.Services",
+      "pass": true,
+      "rationale": "General knowledge of Duende BFF would include AddBff()"
+    },
+    {
+      "assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+      "pass": false,
+      "rationale": "Without skill, an LLM would likely use the older manual AddAuthentication().AddCookie().AddOpenIdConnect() pattern rather than the v4 ConfigureOpenIdConnect fluent API"
+    },
+    {
+      "assertion": "Adds 'offline_access' to the OIDC scopes",
+      "pass": true,
+      "rationale": "Standard OIDC knowledge includes offline_access for refresh tokens"
+    },
+    {
+      "assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the exact placement of UseBff() between UseAuthentication and UseAuthorization"
+    },
+    {
+      "assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() \u2014 uses the v4 fluent API instead",
+      "pass": false,
+      "rationale": "Without skill, an LLM would very likely use the older v3-style manual registration which is the pattern found in most online examples"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

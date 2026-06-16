@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "skill_name": "aspnetcore-authorization",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "with_skill": {"total_assertions": 31, "passed": 31, "failed": 0, "pass_rate": 1.0},
+    "without_skill": {"total_assertions": 31, "passed": 27, "failed": 4, "pass_rate": 0.87},
+    "delta": {"assertions_improved": 4, "delta_pass_rate": 0.13}
+  },
+  "evals": [
+    {"id": 1, "prompt_summary": "FallbackPolicy with anonymous health endpoint", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}},
+    {"id": 2, "prompt_summary": "Scope-based policies for API endpoints", "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}},
+    {"id": 3, "prompt_summary": "Custom scope handler space-delimited parsing", "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 5, "score": 0.8}},
+    {"id": 4, "prompt_summary": "Admin role policy with MapGroup", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}},
+    {"id": 5, "prompt_summary": "Resource-based authorization with operations handler", "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 5, "score": 0.8}},
+    {"id": 6, "prompt_summary": "Combined scope and role policy enforcement", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}},
+    {"id": 7, "prompt_summary": "Debug context.Fail() hard veto bug", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}}
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a class that extends DynamicClientRegistrationValidator",
+      "pass": false,
+      "rationale": "Duende-specific base class."
+    },
+    {
+      "assertion": "Overrides ValidateGrantTypesAsync to reject non-authorization_code",
+      "pass": false,
+      "rationale": "Duende API-specific method."
+    },
+    {
+      "assertion": "Overrides ValidateRedirectUrisAsync to enforce HTTPS",
+      "pass": false,
+      "rationale": "Duende-specific extensibility point."
+    },
+    {
+      "assertion": "Sets RequirePkce = true in SetClientDefaultsAsync",
+      "pass": false,
+      "rationale": "Duende-specific."
+    },
+    {
+      "assertion": "Registers validator using AddDynamicClientRegistrationValidator<T>()",
+      "pass": false,
+      "rationale": "Duende-specific registration."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

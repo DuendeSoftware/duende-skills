@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures OpenIdConnectEvents on the OIDC handler", "pass": true, "rationale": "SKILL.md Pattern 6 shows `options.Events = new OpenIdConnectEvents { ... }`"},
+    {"assertion": "Program.cs sets OnRedirectToIdentityProvider to add AcrValues = 'tenant:myorg' to the ProtocolMessage", "pass": true, "rationale": "SKILL.md Pattern 6 shows `context.ProtocolMessage.AcrValues = \"tenant:myorg\";` in OnRedirectToIdentityProvider"},
+    {"assertion": "Program.cs sets OnRemoteFailure to call context.HandleResponse() and redirect to /auth-error", "pass": true, "rationale": "SKILL.md Pattern 6 shows OnRemoteFailure with `context.HandleResponse()` and `context.Response.Redirect(...)`"},
+    {"assertion": "Program.cs passes login_hint via context.ProtocolMessage.LoginHint or SetParameter in the OnRedirectToIdentityProvider event", "pass": true, "rationale": "SKILL.md Pattern 6 table lists `OnRedirectToIdentityProvider` for adding `login_hint` parameters; the code pattern shows how to set ProtocolMessage properties"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

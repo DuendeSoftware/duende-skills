@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+      "pass": true,
+      "rationale": "SKILL.md's Common Pitfalls #6 states: 'If you have more than one proxy, set ForwardLimit to match the number of proxies.'"
+    },
+    {
+      "assertion": "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+      "pass": true,
+      "rationale": "SKILL.md states: 'add all proxy addresses to KnownProxies or KnownNetworks.'"
+    },
+    {
+      "assertion": "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+      "pass": true,
+      "rationale": "SKILL.md code sample shows ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto."
+    },
+    {
+      "assertion": "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed",
+      "pass": true,
+      "rationale": "SKILL.md explicitly covers this in the pitfalls and configuration sections."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

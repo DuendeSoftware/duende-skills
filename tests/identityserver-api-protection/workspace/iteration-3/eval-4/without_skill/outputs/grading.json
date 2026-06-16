@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core authorization patterns."
+    },
+    {
+      "assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core endpoint authorization."
+    },
+    {
+      "assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims",
+      "pass": false,
+      "rationale": "Space-delimited scope splitting is IdentityServer-specific workaround."
+    },
+    {
+      "assertion": "Registers the IClaimsTransformation implementation in the DI container",
+      "pass": false,
+      "rationale": "Without knowing the problem, registration wouldn't be included."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

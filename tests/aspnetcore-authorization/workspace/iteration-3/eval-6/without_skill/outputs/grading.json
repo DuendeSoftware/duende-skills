@@ -1,0 +1,13 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "A policy is defined that includes RequireClaim(\"scope\", \"catalog.write\") for client-level authorization", "pass": true, "rationale": "Scope-based claims are common knowledge for API authorization"},
+    {"assertion": "The same policy includes RequireRole(\"admin\") or equivalent user-level claim check", "pass": true, "rationale": "RequireRole is standard ASP.NET Core"},
+    {"assertion": "The policy is applied to the DELETE /products/{id} endpoint", "pass": true, "rationale": "Applying policies to endpoints is standard"},
+    {"assertion": "The response explains that scopes represent client permissions and roles/claims represent user permissions, and both should be checked", "pass": false, "rationale": "Without the skill's explicit guidance on client vs user permissions, an LLM might not clearly articulate the distinction between scopes (client) and roles (user) and why both matter"}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

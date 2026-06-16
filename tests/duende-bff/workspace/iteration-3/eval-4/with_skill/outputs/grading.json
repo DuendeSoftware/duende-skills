@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 explicitly states 'Missing X-CSRF: 1 header in SPA fetch calls -- BFF returns 401'"
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 provides a complete bffFetch wrapper that adds X-CSRF: 1"
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 shows centralized 401 handling with window.location.href = '/bff/login?returnUrl=...'"
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 7 explicitly states 'Login and logout are browser navigations, not fetch calls'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

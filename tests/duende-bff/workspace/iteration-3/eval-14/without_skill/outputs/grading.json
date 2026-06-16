@@ -1,0 +1,29 @@
+{
+  "eval_id": 14,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses .SkipResponseHandling() on the endpoint",
+      "pass": false,
+      "rationale": "Without skill, an LLM would not know about .SkipResponseHandling()"
+    },
+    {
+      "assertion": "Explains that by default BFF converts 401/403 to JSON-friendly responses instead of redirects",
+      "pass": false,
+      "rationale": "Without skill, this BFF-specific behavior would not be known"
+    },
+    {
+      "assertion": "Endpoint still uses .AsBffApiEndpoint() for CSRF protection",
+      "pass": false,
+      "rationale": "Without skill, the combination of these extensions is not known"
+    },
+    {
+      "assertion": "Endpoint uses .RequireAuthorization() to trigger the challenge",
+      "pass": false,
+      "rationale": "Without knowing the skip pattern, the full solution cannot be assembled"
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

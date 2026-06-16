@@ -1,0 +1,34 @@
+{
+  "eval_id": 105,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Client secret uses Type = IdentityServerConstants.SecretTypes.X509CertificateBase64 or JsonWebKey",
+      "pass": true,
+      "rationale": "client-types.md shows both types."
+    },
+    {
+      "assertion": "Uses GrantTypes.Code as the grant type",
+      "pass": true,
+      "rationale": "SKILL.md shows GrantTypes.Code for web apps."
+    },
+    {
+      "assertion": "Calls AddJwtBearerClientAuthentication() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "client-types.md shows this registration."
+    },
+    {
+      "assertion": "Includes RedirectUris pointing to the web application",
+      "pass": true,
+      "rationale": "SKILL.md shows RedirectUris."
+    },
+    {
+      "assertion": "Does NOT use a shared secret (no Sha256() call)",
+      "pass": true,
+      "rationale": "client-types.md shows certificate-based auth."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

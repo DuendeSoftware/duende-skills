@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "An authorization policy named 'admin' is defined using RequireRole(\"admin\")", "pass": true, "rationale": "SKILL.md Pattern 1 shows `options.AddPolicy(\"admin\", policy => policy.RequireRole(\"admin\"));`"},
+    {"assertion": "app.MapGroup(\"/admin\") is used to group the admin endpoints", "pass": true, "rationale": "SKILL.md Pattern 5 shows `var adminGroup = app.MapGroup(\"/admin\")`"},
+    {"assertion": ".RequireAuthorization(\"admin\") or equivalent is applied to the group", "pass": true, "rationale": "SKILL.md Pattern 5 shows `.RequireAuthorization(\"admin\")` on the group"},
+    {"assertion": "The individual admin endpoints are registered on the group rather than on app directly", "pass": true, "rationale": "SKILL.md Pattern 5 shows `adminGroup.MapGet(\"/users\", GetUsers); adminGroup.MapPost(\"/users\", CreateUser);`"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

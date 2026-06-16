@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.IssuerUri = 'https://identity.mycompany.com' inside the AddIdentityServer options lambda",
+      "pass": true,
+      "rationale": "SKILL.md shows options.IssuerUri configuration inside the AddIdentityServer lambda."
+    },
+    {
+      "assertion": "Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it",
+      "pass": true,
+      "rationale": "SKILL.md shows: options.LicenseKey = builder.Configuration[\"IdentityServer:LicenseKey\"] as the recommended approach."
+    },
+    {
+      "assertion": "Program.cs sets options.EmitScopesAsSpaceDelimitedStringInJwt = true",
+      "pass": true,
+      "rationale": "SKILL.md documents EmitScopesAsSpaceDelimitedStringInJwt property in the options reference table."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage",
+      "pass": true,
+      "rationale": "SKILL.md shows AddDataProtection().PersistKeysToFoo() pattern with various persistence options."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances",
+      "pass": true,
+      "rationale": "SKILL.md shows .SetApplicationName('My.IdentityServer') and explains it prevents key isolation."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

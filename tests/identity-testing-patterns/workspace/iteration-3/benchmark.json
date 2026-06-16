@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "skill_name": "identity-testing-patterns",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 47,
+      "passed": 47,
+      "failed": 0,
+      "pass_rate": 1.0
+    },
+    "without_skill": {
+      "total_assertions": 47,
+      "passed": 33,
+      "failed": 14,
+      "pass_rate": 0.7021
+    },
+    "delta": {
+      "assertions_improved": 14,
+      "delta_pass_rate": 0.2979
+    }
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt_summary": "Test authentication handler with claims provider",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 5,
+        "score": 0.6
+      }
+    },
+    {
+      "id": 2,
+      "prompt_summary": "JWT token factory for API testing",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 3,
+      "prompt_summary": "IdentityServer integration test factory setup",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 5,
+        "score": 0.6
+      }
+    },
+    {
+      "id": 4,
+      "prompt_summary": "Authorization handler unit testing",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      }
+    },
+    {
+      "id": 5,
+      "prompt_summary": "Role-based authorization integration tests",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 6,
+      "prompt_summary": "Token claim inspection and assertion",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 4,
+        "total_count": 5,
+        "score": 0.8
+      }
+    },
+    {
+      "id": 7,
+      "prompt_summary": "IProfileService unit testing patterns",
+      "with_skill": {
+        "pass_count": 5,
+        "total_count": 5,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 5,
+        "score": 0.6
+      }
+    },
+    {
+      "id": 8,
+      "prompt_summary": "Common testing pitfalls and configuration",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 4,
+        "score": 0.5
+      }
+    },
+    {
+      "id": 9,
+      "prompt_summary": "BFF endpoint testing with CSRF validation",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 2,
+        "total_count": 4,
+        "score": 0.5
+      }
+    },
+    {
+      "id": 10,
+      "prompt_summary": "WebApplicationFactory setup for IdentityServer",
+      "with_skill": {
+        "pass_count": 4,
+        "total_count": 4,
+        "score": 1.0
+      },
+      "without_skill": {
+        "pass_count": 3,
+        "total_count": 4,
+        "score": 0.75
+      }
+    }
+  ]
+}

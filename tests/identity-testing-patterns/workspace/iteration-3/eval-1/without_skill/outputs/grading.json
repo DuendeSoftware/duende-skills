@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "TestAuthHandler is a well-known pattern in ASP.NET Core testing"
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": false,
+      "rationale": "Without skill, an LLM might use a simpler static field approach rather than a proper ITestClaimsProvider interface"
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "This is standard WebApplicationFactory test auth pattern"
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "Testing 401 for unauthenticated is a standard test pattern"
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely -- authorization policies remain active",
+      "pass": false,
+      "rationale": "Without skill, an LLM might suggest a pattern that bypasses authorization or not explicitly preserve it"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

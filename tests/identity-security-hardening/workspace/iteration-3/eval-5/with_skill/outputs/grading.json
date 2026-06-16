@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 explicitly replaces AddDeveloperSigningCredential with automatic key management"
+    },
+    {
+      "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows SigningAlgorithms with EcdsaSha256 first, then RsaSha256"
+    },
+    {
+      "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows RotationInterval = TimeSpan.FromDays(90) and PropagationTime = TimeSpan.FromDays(14)"
+    },
+    {
+      "assertion": "Program.cs configures DataProtectKeys = true for key management",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows options.KeyManagement.DataProtectKeys = true"
+    },
+    {
+      "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 2 shows AddDataProtection().PersistKeysToFileSystem(...).SetApplicationName('identity-server')"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

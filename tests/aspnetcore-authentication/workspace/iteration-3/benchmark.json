@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "skill_name": "aspnetcore-authentication",
+    "iteration": 3,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-06-16"
+  },
+  "summary": {
+    "with_skill": {"total_assertions": 33, "passed": 33, "failed": 0, "pass_rate": 1.0},
+    "without_skill": {"total_assertions": 33, "passed": 23, "failed": 10, "pass_rate": 0.7},
+    "delta": {"assertions_improved": 10, "delta_pass_rate": 0.3}
+  },
+  "evals": [
+    {"id": 1, "prompt_summary": "Configure OIDC client web app", "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 5, "score": 0.8}},
+    {"id": 2, "prompt_summary": "Configure JWT Bearer API protection", "with_skill": {"pass_count": 5, "total_count": 5, "score": 1.0}, "without_skill": {"pass_count": 4, "total_count": 5, "score": 0.8}},
+    {"id": 3, "prompt_summary": "Combined JWT and reference tokens", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 1, "total_count": 4, "score": 0.25}},
+    {"id": 4, "prompt_summary": "Fix SameSite cookie redirect loop", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}},
+    {"id": 5, "prompt_summary": "OIDC events with custom parameters", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}},
+    {"id": 6, "prompt_summary": "Implement federated logout endpoint", "with_skill": {"pass_count": 3, "total_count": 3, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 3, "score": 1.0}},
+    {"id": 7, "prompt_summary": "Fix oversized authentication cookie issue", "with_skill": {"pass_count": 3, "total_count": 3, "score": 1.0}, "without_skill": {"pass_count": 2, "total_count": 3, "score": 0.67}},
+    {"id": 8, "prompt_summary": "Debug missing claims after mapping", "with_skill": {"pass_count": 4, "total_count": 4, "score": 1.0}, "without_skill": {"pass_count": 3, "total_count": 4, "score": 0.75}}
+  ]
+}

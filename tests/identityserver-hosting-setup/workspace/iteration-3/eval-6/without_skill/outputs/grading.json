@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs registers CustomClaimsPrincipalFactory as IUserClaimsPrincipalFactory<ApplicationUser> BEFORE calling AddAspNetIdentity",
+      "pass": false,
+      "rationale": "The ordering requirement (before AddAspNetIdentity) is a Duende-specific detail that would not be known without the skill."
+    },
+    {
+      "assertion": "Program.cs calls AddAspNetIdentity<ApplicationUser>() which will wrap and call through to the custom factory",
+      "pass": true,
+      "rationale": "AddAspNetIdentity is known from general IdentityServer knowledge."
+    },
+    {
+      "assertion": "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync",
+      "pass": false,
+      "rationale": "ProfileService<T> base class and IsUserActiveAsync are Duende-specific patterns not commonly known."
+    },
+    {
+      "assertion": "The IsUserActiveAsync override checks a property on the user (e.g., user.IsEnabled or user.IsActive) to determine if the user is active",
+      "pass": false,
+      "rationale": "Without knowing the ProfileService<T> pattern, a general LLM would likely use a different approach to check user activity."
+    },
+    {
+      "assertion": "The CustomProfileService is registered in DI as the IProfileService implementation",
+      "pass": true,
+      "rationale": "A general LLM would know to register a custom profile service in DI."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The tracing configuration includes .AddSource(\"Duende.IdentityServer\")",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 6 shows this."
+    },
+    {
+      "assertion": "The tracing configuration includes at least three additional Duende.IdentityServer sub-sources (Cache, Services, Stores, Validation)",
+      "pass": true,
+      "rationale": "SKILL.md shows all four sub-sources."
+    },
+    {
+      "assertion": "The metrics configuration includes .AddMeter(\"Duende.IdentityServer\")",
+      "pass": true,
+      "rationale": "SKILL.md shows .AddMeter(\"Duende.IdentityServer\")."
+    },
+    {
+      "assertion": "All source and meter names are string literals, not constants from any Duende package",
+      "pass": true,
+      "rationale": "SKILL.md explicitly warns to use string literals."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

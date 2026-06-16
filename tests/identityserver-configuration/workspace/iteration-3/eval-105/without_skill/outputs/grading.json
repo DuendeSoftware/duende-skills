@@ -1,0 +1,34 @@
+{
+  "eval_id": 105,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Client secret uses Type = IdentityServerConstants.SecretTypes.X509CertificateBase64 or JsonWebKey",
+      "pass": false,
+      "rationale": "SecretTypes constants are Duende-specific."
+    },
+    {
+      "assertion": "Uses GrantTypes.Code as the grant type",
+      "pass": true,
+      "rationale": "Authorization Code for web apps is standard."
+    },
+    {
+      "assertion": "Calls AddJwtBearerClientAuthentication() on the IdentityServer builder",
+      "pass": false,
+      "rationale": "Duende-specific registration method."
+    },
+    {
+      "assertion": "Includes RedirectUris pointing to the web application",
+      "pass": true,
+      "rationale": "Standard OIDC configuration."
+    },
+    {
+      "assertion": "Does NOT use a shared secret (no Sha256() call)",
+      "pass": false,
+      "rationale": "Generic answers might still show Sha256."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

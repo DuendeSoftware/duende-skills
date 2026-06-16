@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that UseRouting() must come before UseIdentityServer() in the pipeline",
+      "pass": true,
+      "rationale": "SKILL.md's anti-patterns section shows '\u274c WRONG: IdentityServer before routing' with the correct fix."
+    },
+    {
+      "assertion": "Response explains that UseAuthentication() is redundant because UseIdentityServer() already calls it internally",
+      "pass": true,
+      "rationale": "SKILL.md states: 'UseAuthentication is redundant (UseIdentityServer includes it)' in the anti-patterns section."
+    },
+    {
+      "assertion": "Response shows the correct ordering: UseRouting before UseIdentityServer before UseAuthorization",
+      "pass": true,
+      "rationale": "SKILL.md Pipeline Ordering Rules table clearly defines this order."
+    },
+    {
+      "assertion": "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template",
+      "pass": true,
+      "rationale": "SKILL.md states: 'Required after IdentityServer, must not be omitted' and shows anti-pattern of missing UseAuthorization."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

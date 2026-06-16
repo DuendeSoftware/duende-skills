@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains ForwardedHeaders configuration with XForwardedFor and XForwardedProto",
+      "pass": true,
+      "rationale": "Standard ASP.NET Core reverse proxy knowledge"
+    },
+    {
+      "assertion": "Program.cs restricts KnownProxies to the proxy IP address 10.0.0.1 and does not accept forwarded headers from any source",
+      "pass": true,
+      "rationale": "Best practice to restrict KnownProxies is somewhat known"
+    },
+    {
+      "assertion": "Program.cs configures HSTS with MaxAge of at least 365 days and IncludeSubDomains = true",
+      "pass": true,
+      "rationale": "Standard HSTS configuration knowledge"
+    },
+    {
+      "assertion": "Program.cs calls UseForwardedHeaders() before UseHttpsRedirection() and UseIdentityServer() in the middleware pipeline",
+      "pass": true,
+      "rationale": "Standard middleware ordering knowledge"
+    },
+    {
+      "assertion": "Program.cs uses StatusCodes.Status308PermanentRedirect or equivalent 308 status code for HTTPS redirection",
+      "pass": false,
+      "rationale": "Without skill, an LLM might use 301 or not specify the status code explicitly; 308 is a specific recommendation"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

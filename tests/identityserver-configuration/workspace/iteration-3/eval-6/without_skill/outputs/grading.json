@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection",
+      "pass": true,
+      "rationale": "Standard OIDC requirement."
+    },
+    {
+      "assertion": "Output includes new IdentityResources.Profile() in the identity resources collection",
+      "pass": true,
+      "rationale": "Prompt requests it."
+    },
+    {
+      "assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
+      "pass": true,
+      "rationale": "Custom IdentityResource pattern is known."
+    },
+    {
+      "assertion": "The custom 'organization' identity resource has Required set to true",
+      "pass": false,
+      "rationale": "Required property is a Duende-specific detail many miss."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

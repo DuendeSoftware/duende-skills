@@ -2,11 +2,31 @@
   "eval_id": 2,
   "variant": "without_skill",
   "assertions": [
-    {"assertion": "Warns against using in-memory stores in production", "pass": true, "rationale": "States in-memory stores are 'not suitable for production'."},
-    {"assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)", "pass": false, "rationale": "FindByEntityIdAsync is shown but without the CancellationToken parameter."},
-    {"assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>", "pass": false, "rationale": "Uses GetAllAsync returning IEnumerable<ServiceProvider>, not GetAllSamlServiceProvidersAsync with IAsyncEnumerable."},
-    {"assertion": "Uses AddSamlServiceProviderStore<T>() for registration", "pass": false, "rationale": "Uses services.AddSingleton<ISamlServiceProviderStore, ...>() instead of the builder extension method."},
-    {"assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer", "pass": false, "rationale": "Uses a generic decorator pattern with IMemoryCache, not AddSamlServiceProviderStoreCache<T>()."}
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "General knowledge would suggest persistent stores for production."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": false,
+      "rationale": "ISamlServiceProviderStore is a Duende-specific interface not in general knowledge."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": false,
+      "rationale": "The IAsyncEnumerable return type for this method is Duende-specific."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": false,
+      "rationale": "This registration method is Duende-specific."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": false,
+      "rationale": "AddSamlServiceProviderStoreCache is Duende-specific and would not be known without the skill."
+    }
   ],
   "pass_count": 1,
   "total_count": 5,

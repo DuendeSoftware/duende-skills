@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 11 states 'Set CookieSlidingExpiration = false and a fixed CookieLifetime'"
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 11 states 'Configure ExpiredSessionsTriggerBackchannelLogout = true'"
+    },
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 11 states 'Enable server-side sessions via idsvrBuilder.AddServerSideSessions()'"
+    },
+    {
+      "assertion": "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 11 states 'Set BackChannelLogoutUri on each client'"
+    },
+    {
+      "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+      "pass": true,
+      "rationale": "SKILL.md Pattern 11 states 'CoordinateClientLifetimesWithUserSession = true'"
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {"assertion": "Program.cs configures OpenIdConnectEvents on the OIDC handler", "pass": true, "rationale": "Events on OpenIdConnect handler are documented in Microsoft docs"},
+    {"assertion": "Program.cs sets OnRedirectToIdentityProvider to add AcrValues = 'tenant:myorg' to the ProtocolMessage", "pass": true, "rationale": "Setting AcrValues via OnRedirectToIdentityProvider is known in the community"},
+    {"assertion": "Program.cs sets OnRemoteFailure to call context.HandleResponse() and redirect to /auth-error", "pass": true, "rationale": "OnRemoteFailure with HandleResponse pattern is documented"},
+    {"assertion": "Program.cs passes login_hint via context.ProtocolMessage.LoginHint or SetParameter in the OnRedirectToIdentityProvider event", "pass": false, "rationale": "While possible to guess, the exact ProtocolMessage.LoginHint property might not be reliably produced without the skill reference"}
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

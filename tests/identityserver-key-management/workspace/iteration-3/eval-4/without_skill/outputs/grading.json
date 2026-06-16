@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true",
+      "pass": false,
+      "rationale": "SigningAlgorithmOptions with UseX509Certificate is Duende-specific and not general knowledge."
+    },
+    {
+      "assertion": "Program.cs includes a SigningAlgorithmOptions for EcdsaSha256 (ES256) in the SigningAlgorithms array",
+      "pass": false,
+      "rationale": "The SigningAlgorithmOptions class is Duende-specific."
+    },
+    {
+      "assertion": "Program.cs defines a client with ClientId 'mobile-app' that has AllowedIdentityTokenSigningAlgorithms containing EcdsaSha256 or 'ES256'",
+      "pass": true,
+      "rationale": "Per-client signing algorithm configuration is somewhat known from general IdentityServer knowledge."
+    },
+    {
+      "assertion": "The RS256 algorithm entry appears before ES256 in the SigningAlgorithms array to be the default",
+      "pass": false,
+      "rationale": "Without knowing the SigningAlgorithms array pattern, ordering cannot be correctly shown."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

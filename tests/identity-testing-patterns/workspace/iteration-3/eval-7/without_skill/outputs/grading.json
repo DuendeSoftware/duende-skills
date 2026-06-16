@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ProfileDataRequestContext with a subject ClaimsPrincipal containing a sub claim",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the ProfileDataRequestContext constructor signature"
+    },
+    {
+      "assertion": "Mocks an IUserRepository (or equivalent) to return known role values",
+      "pass": true,
+      "rationale": "Standard mocking pattern"
+    },
+    {
+      "assertion": "Calls GetProfileDataAsync and asserts that context.IssuedClaims contains the expected role claims",
+      "pass": true,
+      "rationale": "Standard IProfileService testing pattern, though exact context creation may differ"
+    },
+    {
+      "assertion": "Tests IsActiveAsync and asserts context.IsActive is set correctly based on the mock",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the IsActiveContext constructor or testing pattern"
+    },
+    {
+      "assertion": "Does NOT require a running IdentityServer -- tests the service in isolation",
+      "pass": true,
+      "rationale": "Unit testing in isolation is a standard principle"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

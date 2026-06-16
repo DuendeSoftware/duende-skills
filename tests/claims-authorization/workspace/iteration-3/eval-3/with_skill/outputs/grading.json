@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {"assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource", "pass": true, "rationale": "SKILL.md 'Common Pitfalls - Claims Not Appearing in Tokens' section #1 explicitly explains this"},
+    {"assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource", "pass": true, "rationale": "SKILL.md shows `new ApiScope(\"api.read\") { UserClaims = { \"department\", \"cost_center\" } }`"},
+    {"assertion": "Mentions that the client must also request the scope that contains the claim", "pass": true, "rationale": "SKILL.md Pitfall #2 states 'Client not requesting the scope: The client must include the scope in AllowedScopes and request it'"},
+    {"assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types", "pass": true, "rationale": "SKILL.md Pitfall #3 states 'AddRequestedClaims filtered it out: If you use context.AddRequestedClaims(claims), only claims whose types are in context.RequestedClaimTypes pass through'"}
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+      "pass": true,
+      "rationale": "CSP with frame-ancestors is standard web security knowledge"
+    },
+    {
+      "assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+      "pass": true,
+      "rationale": "X-Frame-Options DENY is standard security header knowledge"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+      "pass": true,
+      "rationale": "ASP.NET Core rate limiting with AddRateLimiter is standard; the specific PermitLimit=20 matches the prompt"
+    },
+    {
+      "assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+      "pass": true,
+      "rationale": "The prompt specifies 10 requests/minute for authorize; an LLM would follow the prompt"
+    },
+    {
+      "assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline",
+      "pass": false,
+      "rationale": "An LLM might use UseRateLimiter() but could potentially place it incorrectly or forget it in the pipeline"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": false,
+      "rationale": "Without skill, an LLM might not know the specific KeyManagement.Enabled option"
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential is known; persistKey: false is somewhat known"
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports -- use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "Standard WebApplicationFactory testing guidance"
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": false,
+      "rationale": "Without skill, this specific pitfall about claims provider state leakage might not be covered"
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}
