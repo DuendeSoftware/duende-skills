@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that SLO uses front-channel logout via iframes (not redirect chains)",
+      "pass": false,
+      "rationale": "The response describes redirect chains (HTTP-Redirect binding) and POST, but never mentions front-channel logout via iframes."
+    },
+    {
+      "assertion": "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect",
+      "pass": false,
+      "rationale": "The response shows 'SingleLogoutServices' (not 'SingleLogoutServiceUrls') using 'SamlConstants.BindingTypes.HttpPost/HttpRedirect' (not 'SamlBinding.HttpRedirect'), and does not use 'SamlEndpointType'."
+    },
+    {
+      "assertion": "Mentions that partial logout is normal/expected when some SPs don't respond",
+      "pass": false,
+      "rationale": "The response does not mention partial logout or what happens when some SPs fail to respond."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments",
+      "pass": false,
+      "rationale": "The response does not mention ISamlLogoutSessionStore. It only generically mentions persisting session grants but not this specific interface."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

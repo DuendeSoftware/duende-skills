@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+      "pass": false,
+      "rationale": "The response lists HTTP-POST binding as an option but also shows 'or HttpRedirect' as valid, and never states that HTTP-Redirect is not supported for ACS. It even notes 'The binding type doesn't match (SP requests HTTP-Redirect but only HTTP-POST is registered)' as a misconfiguration scenario, not a hard restriction."
+    },
+    {
+      "assertion": "States that AllowedScopes must contain at least one entry",
+      "pass": false,
+      "rationale": "AllowedScopes is never mentioned anywhere in the response."
+    },
+    {
+      "assertion": "Mentions that EntityId is required",
+      "pass": true,
+      "rationale": "The response clearly states EntityId is required and must match exactly: 'The EntityId registered in IdentityServer must match exactly what the SP sends in its AuthnRequest'."
+    },
+    {
+      "assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)",
+      "pass": false,
+      "rationale": "There is no mention of what happens to invalid SP registrations, null returns from stores, or how IdentityServer handles unknown/invalid SPs."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

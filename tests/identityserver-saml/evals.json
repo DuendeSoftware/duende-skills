@@ -88,12 +88,11 @@
     {
       "id": 7,
       "prompt": "I want to add SAML support to my IdentityServer. Do I need a separate NuGet package? What license edition is required? And what .NET version do I need?",
-      "expected_output": "Clear statement that SAML is built into Duende.IdentityServer (no separate package), requires Advanced or Custom Edition license, introduced in v8.0, and requires .NET 10.",
+      "expected_output": "Clear statement that SAML is built into Duende.IdentityServer (no separate package), requires Standard (add-on), Advanced, or Custom Edition license, introduced in v8.0.",
       "assertions": [
         "States that no separate NuGet package is needed — SAML is built into Duende.IdentityServer",
-        "States that Advanced or Custom Edition license is required",
-        "Mentions SAML support was introduced in version 8.0",
-        "Mentions .NET 10 as the required framework version"
+        "States that Standard (add-on), Advanced, or Custom Edition license is required",
+        "Mentions SAML support was introduced in version 8.0"
       ],
       "files": []
     },

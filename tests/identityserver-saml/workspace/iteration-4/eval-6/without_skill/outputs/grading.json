@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": false,
+      "rationale": "ISamlSigninStateStore is never mentioned. The response discusses distributed caching (Redis) and session state generically, but does not reference this SAML-specific interface."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": false,
+      "rationale": "ISamlLogoutSessionStore is never mentioned. SLO (Single Logout) distributed state is not addressed at all."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "The response recommends EF Core (SQL Server operational store) and Redis distributed cache as solutions for shared state across nodes, clearly contrasting with in-memory defaults."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "The response states: 'If this state is stored in memory (default), a user whose authentication flow spans two different nodes will get an error.' This captures the essence of the assertion."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

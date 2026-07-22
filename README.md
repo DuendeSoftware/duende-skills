@@ -132,18 +132,18 @@ Run evals for all skills using GitHub Models (via `gh` CLI):
 ./scripts/run-evals.sh --iteration 4 --verbose
 ```
 
-### Results — June 16, 2026 (claude-opus-4-20250514, iteration 3)
+### Results — July 22, 2026 (claude-opus-4-20250514, iteration 4)
 
-**219 evals across 24 skills — 977 total assertions**
+**219 evals across 24 skills — 976 total assertions**
 
 |             | With Skill          | Without Skill        | Delta      |
 |-------------|---------------------|----------------------|------------|
-| **Overall** | **976/977 (99.9%)** | **499/977 (51.1%)**  | **+48.8%** |
+| **Overall** | **975/976 (99.9%)** | **502/976 (51.4%)**  | **+48.5%** |
 
 | Skill                               | Evals | With Skill    | Without Skill   |      Delta | Prev Delta |
 |-------------------------------------|------:|---------------|-----------------|------------|------------|
 | `identityserver-usermanagement`     |     7 | 29/29 (100%)  |   0/29 (0.0%)   | **+100.0%**|    +69.0%  |
-| `identityserver-saml`               |     8 | 34/35 (97.1%) |   3/35 (8.6%)   | **+88.6%** |    +88.6%  |
+| `identityserver-saml`               |     8 | 33/34 (97.1%) |   6/34 (17.6%)  | **+79.4%** |    +88.6%  |
 | `identityserver-upgrade-v7-to-v8`   |     7 | 29/29 (100%)  |   5/29 (17.2%)  | **+82.8%** |    +51.7%  |
 | `identityserver-dcr`                |     8 | 39/39 (100%)  |   9/39 (23.1%)  | **+76.9%** |    +53.8%  |
 | `identityserver-sessions-providers` |     8 | 37/37 (100%)  |  12/37 (32.4%)  | **+67.6%** |    +35.1%  |
@@ -171,7 +171,7 @@ Run evals for all skills using GitHub Models (via `gh` CLI):
 - **Highest-value skills** (>50% delta): User Management (+100%), SAML (+88.6%), Upgrade v7→v8 (+82.8%), DCR (+76.9%), Sessions (+67.6%), BFF (+65.1%), Token Management (+61.4%), Token Security (+61.1%), Aspire (+59.4%), Deployment (+55.9%), API Protection (+53.3%), Key Management (+50.0%) — deeply Duende-specific knowledge where baseline LLM knowledge falls short.
 - **Moderate-value skills** (25–50% delta): Claims authorization, IS4 migration, UI flows, configuration, token lifecycle, hosting setup, authentication, testing patterns, stores — specialized patterns that improve precision significantly.
 - **Lower-delta skills** (<25%): Security hardening, OAuth/OIDC protocols, authorization — well-known patterns where baseline model knowledge is already strong, but skills still close remaining gaps.
-- **Notable changes vs. previous iteration**: Upgrade v7→v8 skill improved from +51.7% to +82.8% delta (expanded SKILL.md with 6 new breaking changes and NuGet version guidance). Key Management jumped from +6.0% to +50.0% (stricter grading). Sessions Providers jumped from +35.1% to +67.6%.
+- **Notable changes vs. previous iteration**: SAML skill updated to match current official docs (14 factual fixes); evals re-run with updated assertions. Upgrade v7→v8 skill improved from +51.7% to +82.8% delta (expanded SKILL.md with 6 new breaking changes and NuGet version guidance). Key Management jumped from +6.0% to +50.0% (stricter grading). Sessions Providers jumped from +35.1% to +67.6%.
 
 ---
 

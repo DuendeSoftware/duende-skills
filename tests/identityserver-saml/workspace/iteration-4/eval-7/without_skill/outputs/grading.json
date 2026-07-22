@@ -1,0 +1,24 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that no separate NuGet package is needed — SAML is built into Duende.IdentityServer",
+      "pass": false,
+      "rationale": "The response explicitly states the opposite: 'Yes, SAML support in Duende IdentityServer requires a separate NuGet package' and recommends installing Duende.IdentityServer.Saml."
+    },
+    {
+      "assertion": "States that Standard (add-on), Advanced, or Custom Edition license is required",
+      "pass": false,
+      "rationale": "The response mentions 'Business Edition' and 'Enterprise Edition' as the tiers including SAML, which do not match the correct tier names (Standard add-on, Advanced, Custom). The license tier names are wrong."
+    },
+    {
+      "assertion": "Mentions SAML support was introduced in version 8.0",
+      "pass": false,
+      "rationale": "No mention of SAML being introduced in version 8.0. The response discusses .NET version compatibility for IS versions but says nothing about when SAML support was added."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 3,
+  "score": 0.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ISamlNameIdGenerator interface",
+      "pass": true,
+      "rationale": "The response shows `public class EmployeeIdNameIdGenerator : ISamlNameIdGenerator` clearly implementing the interface."
+    },
+    {
+      "assertion": "The GenerateAsync method receives a NameIdGenerationContext with Subject claims",
+      "pass": true,
+      "rationale": "`GenerateAsync(NameIdGenerationContext context, CancellationToken ct)` is implemented and `context.Subject` is accessed for claims."
+    },
+    {
+      "assertion": "Extracts the employee_id claim from context.Subject",
+      "pass": true,
+      "rationale": "Code uses `context.Subject.FindFirst(\"employee_id\")?.Value` to extract the claim."
+    },
+    {
+      "assertion": "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value",
+      "pass": true,
+      "rationale": "Code returns `NameIdGenerationResult.Success(new NameId(employeeId, context.ResolvedFormat))` using the extracted employee_id value."
+    },
+    {
+      "assertion": "Handles the missing claim case with NameIdGenerationResult.Failure",
+      "pass": true,
+      "rationale": "Code checks `string.IsNullOrEmpty(employeeId)` and returns `NameIdGenerationResult.Failure(...)` for the missing claim case."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": true,
+      "rationale": "Section '1. ISamlSigninStateStore — Sign-in Request State' explicitly covers this interface and its role in distributed sign-in persistence."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": true,
+      "rationale": "Section '2. ISamlLogoutSessionStore — SLO Session Tracking' explicitly covers this interface for distributed SLO state."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "Response recommends EF Core via `AddOperationalStore()` and provides a Redis custom implementation example as alternatives to the default in-memory store."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "The 'Core Problem' section explicitly states that without distributed stores, AuthnRequest state on Node A is unavailable on Node B causing SSO flow failure, and the same problem affects SLO."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

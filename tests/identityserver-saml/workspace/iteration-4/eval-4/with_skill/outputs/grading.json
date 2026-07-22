@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that SLO uses front-channel logout via iframes (not redirect chains)",
+      "pass": true,
+      "rationale": "Lines 4-5 explicitly state 'Duende IdentityServer implements front-channel Single Logout via iframes, not redirect chains.' The flow description (lines 8-15) further details iframe usage."
+    },
+    {
+      "assertion": "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect",
+      "pass": true,
+      "rationale": "Lines 58-65 show `SingleLogoutServiceUrls` configured with `new SamlEndpointType { Location = ..., Binding = SamlBinding.HttpRedirect }`."
+    },
+    {
+      "assertion": "Mentions that partial logout is normal/expected when some SPs don't respond",
+      "pass": true,
+      "rationale": "Lines 17-18 state 'Partial logout is normal and expected — some SPs may not respond to the iframe requests'. The pitfalls table at line 227 also notes 'This is expected. Front-channel SLO is best-effort.'"
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments",
+      "pass": true,
+      "rationale": "Lines 119-168 have a dedicated section 'Distributed Deployments: ISamlLogoutSessionStore' explaining its use for multi-node deployments and showing both EF Core and custom Redis implementations."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}
