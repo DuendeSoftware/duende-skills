@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "The comparison table at line 160 explicitly marks in-memory as 'avoid in prod' and 'Local development only'. The intro (lines 1-3) also says 'fine for development, unacceptable in production'."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": true,
+      "rationale": "Lines 54-58 show `FindByEntityIdAsync(string entityId, CancellationToken ct)` implemented on `DatabaseSamlServiceProviderStore : ISamlServiceProviderStore`."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": true,
+      "rationale": "Lines 64-70 show `GetAllSamlServiceProvidersAsync` returning `IAsyncEnumerable<SamlServiceProvider>` using `yield return`."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": false,
+      "rationale": "The response uses `AddSamlServiceProviderStoreCache<DatabaseSamlServiceProviderStore>()` (line 128) and explicitly notes 'not AddSamlServiceProviderStore' in a comment. `AddSamlServiceProviderStore<T>()` itself is never shown or used."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": true,
+      "rationale": "Line 128 explicitly shows `.AddSamlServiceProviderStoreCache<DatabaseSamlServiceProviderStore>()` and lines 113-114 explain it wraps the store in a HybridCache layer."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

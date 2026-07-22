@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping",
+      "pass": false,
+      "rationale": "The response uses 'ClaimMapping' (singular, no 's') on a 'ServiceProvider' type, not 'ClaimMappings' on 'SamlServiceProvider'."
+    },
+    {
+      "assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings",
+      "pass": false,
+      "rationale": "The response mentions IdentityResources and user store claims as prerequisites, but does not mention AllowedScopes on the ServiceProvider as a prerequisite."
+    },
+    {
+      "assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults",
+      "pass": false,
+      "rationale": "The response does not mention DefaultClaimMappings on SamlOptions at all."
+    },
+    {
+      "assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)",
+      "pass": true,
+      "rationale": "The ClaimMapping dictionary has OIDC claim names as keys (e.g., 'email', 'given_name', 'sub') and SAML attribute URIs as values (e.g., 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress')."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

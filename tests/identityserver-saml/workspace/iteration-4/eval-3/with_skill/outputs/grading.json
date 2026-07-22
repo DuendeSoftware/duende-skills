@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping",
+      "pass": true,
+      "rationale": "Lines 51-64 show `ClaimMappings = new Dictionary<string, string> { ... }` set directly on a `SamlServiceProvider` instance."
+    },
+    {
+      "assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings",
+      "pass": true,
+      "rationale": "Lines 10-21 explicitly explain the claim pipeline showing AllowedScopes as step 1, and line 21 states 'ClaimMappings only renames claims that exist. If a claim type isn't in an identity resource that's in AllowedScopes, it will never reach ClaimMappings'."
+    },
+    {
+      "assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults",
+      "pass": true,
+      "rationale": "Lines 93-107 show `saml.DefaultClaimMappings = new Dictionary<string, string> { ... }` inside `.AddSaml(saml => { ... })`."
+    },
+    {
+      "assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)",
+      "pass": true,
+      "rationale": "Lines 27-29 explicitly state the dictionary key is 'the OIDC/internal claim type name' and value is 'the SAML attribute URI the SP expects'. The code examples at lines 54-64 and 98-105 follow this pattern consistently (e.g., [\"email\"] = \"http://schemas.xmlsoap.org/...\")."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

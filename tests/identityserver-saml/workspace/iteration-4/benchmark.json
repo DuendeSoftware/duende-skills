@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-saml",
+    "iteration": 4,
+    "model": "claude-opus-4-20250514",
+    "date": "2026-07-22"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 34,
+      "passed": 33,
+      "failed": 1,
+      "pass_rate": 0.97
+    },
+    "without_skill": {
+      "total_assertions": 34,
+      "passed": 6,
+      "failed": 28,
+      "pass_rate": 0.18
+    },
+    "delta": {
+      "assertions_improved": 27,
+      "delta_pass_rate": 0.79
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "with_skill": { "score": 1.0, "pass_count": 5, "total_count": 5 },
+      "without_skill": { "score": 0.0, "pass_count": 0, "total_count": 5 }
+    },
+    {
+      "eval_id": 2,
+      "with_skill": { "score": 0.8, "pass_count": 4, "total_count": 5 },
+      "without_skill": { "score": 0.4, "pass_count": 2, "total_count": 5 }
+    },
+    {
+      "eval_id": 3,
+      "with_skill": { "score": 1.0, "pass_count": 4, "total_count": 4 },
+      "without_skill": { "score": 0.25, "pass_count": 1, "total_count": 4 }
+    },
+    {
+      "eval_id": 4,
+      "with_skill": { "score": 1.0, "pass_count": 4, "total_count": 4 },
+      "without_skill": { "score": 0.0, "pass_count": 0, "total_count": 4 }
+    },
+    {
+      "eval_id": 5,
+      "with_skill": { "score": 1.0, "pass_count": 5, "total_count": 5 },
+      "without_skill": { "score": 0.0, "pass_count": 0, "total_count": 5 }
+    },
+    {
+      "eval_id": 6,
+      "with_skill": { "score": 1.0, "pass_count": 4, "total_count": 4 },
+      "without_skill": { "score": 0.5, "pass_count": 2, "total_count": 4 }
+    },
+    {
+      "eval_id": 7,
+      "with_skill": { "score": 1.0, "pass_count": 3, "total_count": 3 },
+      "without_skill": { "score": 0.0, "pass_count": 0, "total_count": 3 }
+    },
+    {
+      "eval_id": 8,
+      "with_skill": { "score": 1.0, "pass_count": 4, "total_count": 4 },
+      "without_skill": { "score": 0.25, "pass_count": 1, "total_count": 4 }
+    }
+  ]
+}
