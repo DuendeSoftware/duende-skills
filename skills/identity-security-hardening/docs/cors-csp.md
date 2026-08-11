@@ -84,7 +84,6 @@ app.Use(async (context, next) =>
     var isIdentityUiPath =
         path.StartsWith("/account", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/consent", StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/connect", StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/diagnostics", StringComparison.OrdinalIgnoreCase);
 
     if (isIdentityUiPath)
