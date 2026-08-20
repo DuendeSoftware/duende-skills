@@ -204,6 +204,21 @@ When adding new skills, use the appropriate prefix:
 
 See `CLAUDE.md` for the full contribution workflow.
 
+## Publishing
+
+To publish a new release, bump the version and publish it:
+
+```bash
+./scripts/bump-version.sh 0.3.0
+./scripts/build.sh
+git commit -am "Bump version to 0.3.0"
+```
+
+Then submit to the plugin directories:
+
+- **ChatGPT/Codex:** https://platform.openai.com/plugins
+- **Claude Code:** https://claude.ai/admin-settings/directory/submissions/plugins/
+
 ---
 
 ## License

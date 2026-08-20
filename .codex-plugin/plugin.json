@@ -1,0 +1,41 @@
+{
+  "name": "duende-skills",
+  "version": "0.2.0",
+  "description": "Duende development skills and agents — covering OAuth/OIDC protocols, IdentityServer, token management, ASP.NET Core authentication/authorization, BFF patterns, and secure identity architecture",
+  "author": {
+    "name": "Duende Software",
+    "email": "support@duendesoftware.com",
+    "url": "https://duendesoftware.com"
+  },
+  "homepage": "https://github.com/DuendeSoftware/duende-skills",
+  "repository": "https://github.com/DuendeSoftware/duende-skills",
+  "license": "MIT",
+  "keywords": [
+    "identityserver",
+    "oauth",
+    "oidc",
+    "openid-connect",
+    "aspnetcore",
+    "authentication",
+    "authorization",
+    "bff",
+    "token-management",
+    "duende",
+    "dotnet",
+    "security"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Duende Skills",
+    "shortDescription": "IdentityServer & OAuth skills",
+    "longDescription": "Specialized skills and agents covering Duende IdentityServer configuration, OAuth 2.0 / OpenID Connect protocols, ASP.NET Core authentication and authorization, BFF patterns, token management, SAML, key management, deployment, and security hardening.",
+    "developerName": "Duende Software",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "websiteURL": "https://duendesoftware.com",
+    "privacyPolicyURL": "https://duendesoftware.com/privacy",
+    "termsOfServiceURL": "https://duendesoftware.com/terms",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  }
+}

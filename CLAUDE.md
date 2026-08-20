@@ -15,8 +15,12 @@ This is a knowledge base repository — not a traditional code project. There is
 ```
 duende-skills/
 ├── .claude-plugin/
-│   ├── marketplace.json    # Marketplace catalog
-│   └── plugin.json         # Plugin metadata + skill/agent registry
+│   ├── marketplace.json    # Claude Code marketplace catalog
+│   └── plugin.json         # Claude Code plugin metadata + skill/agent registry
+├── .codex-plugin/
+│   └── plugin.json         # ChatGPT/Codex plugin manifest
+├── .agents/plugins/
+│   └── marketplace.json    # ChatGPT/Codex marketplace catalog
 ├── skills/                 # Flat structure for Copilot compatibility
 │   ├── identityserver-configuration/SKILL.md
 │   ├── oauth-oidc-protocols/SKILL.md
@@ -70,7 +74,7 @@ color: purple  # optional
 1. Create a folder: `skills/<skill-name>/SKILL.md`
    - Use appropriate prefix for domain-specific skills (see naming convention above)
 2. Add evals for the new skill (see [Adding Evals](#adding-evals) below)
-3. Add the skill path to `.claude-plugin/plugin.json` in the `skills` array
+3. Add the skill path to `.claude-plugin/plugin.json` in the `skills` array (Codex picks up skills from `./skills/` automatically)
 4. Run `./scripts/validate-marketplace.sh` to verify
 5. Run `./scripts/generate-skill-index-snippets.sh --update-readme` to regenerate the compressed index
 6. Commit all changes together (SKILL.md, evals, plugin.json, and README.md)
@@ -204,14 +208,20 @@ Every new or updated skill **must** include evals. Evals measure the incremental
 ## Marketplace Publishing
 
 **To publish a release:**
-1. Update version in `.claude-plugin/plugin.json`
-2. Push a semver tag: `git tag v0.1.0 && git push origin v0.1.0`
-3. GitHub Actions creates the release automatically
+1. Bump the version: `./scripts/bump-version.sh 0.3.0`
+2. Run `./scripts/build.sh` to validate and create distribution archives
+3. Push a semver tag: `git tag v0.3.0 && git push origin v0.3.0`
+4. GitHub Actions creates the release automatically
 
-**Users install with:**
+**Claude Code users install with:**
 ```bash
 /plugin marketplace add DuendeSoftware/duende-skills
 /plugin install duende-skills
+```
+
+**ChatGPT/Codex users install with:**
+```bash
+codex plugin marketplace add DuendeSoftware/duende-skills
 ```
 
 ## Content Guidelines
