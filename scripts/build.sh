@@ -52,16 +52,12 @@ fi
 # ── Step 2: Sync versions ────────────────────────────────────────────────────
 
 CLAUDE_VERSION=$(json_version "$REPO_ROOT/.claude-plugin/plugin.json")
+CLAUDE_MARKETPLACE_VERSION=$(json_version "$REPO_ROOT/.claude-plugin/marketplace.json")
 CODEX_VERSION=$(json_version "$REPO_ROOT/.codex-plugin/plugin.json")
 
-if [[ "$CLAUDE_VERSION" != "$CODEX_VERSION" ]]; then
-  warn "Version mismatch: .claude-plugin ($CLAUDE_VERSION) vs .codex-plugin ($CODEX_VERSION)"
-  warn "Syncing .codex-plugin/plugin.json to $CLAUDE_VERSION..."
-  if [[ "$(uname)" == "Darwin" ]]; then
-    sed -i '' "s/\"$CODEX_VERSION\"/\"$CLAUDE_VERSION\"/g" "$REPO_ROOT/.codex-plugin/plugin.json"
-  else
-    sed -i "s/\"$CODEX_VERSION\"/\"$CLAUDE_VERSION\"/g" "$REPO_ROOT/.codex-plugin/plugin.json"
-  fi
+if [[ "$CLAUDE_VERSION" != "$CLAUDE_MARKETPLACE_VERSION" || "$CLAUDE_VERSION" != "$CODEX_VERSION" ]]; then
+  error "Version mismatch: Claude plugin ($CLAUDE_VERSION), Claude marketplace ($CLAUDE_MARKETPLACE_VERSION), Codex plugin ($CODEX_VERSION)"
+  exit 1
 fi
 
 VERSION="$CLAUDE_VERSION"
