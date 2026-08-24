@@ -129,4 +129,5 @@ echo "  Version:  $VERSION"
 echo "  Skills:   $SKILL_COUNT"
 echo "  Agents:   $AGENT_COUNT"
 echo "  Output:   $OUTPUT_DIR/"
-ls -lh "$OUTPUT_DIR"/*.tar.gz "$OUTPUT_DIR"/*.zip 2>/dev/null | awk '{print "  " $NF " (" $5 ")"}'
+find "$OUTPUT_DIR" -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec ls -lh {} + |
+  awk '{print "  " $NF " (" $5 ")"}'
