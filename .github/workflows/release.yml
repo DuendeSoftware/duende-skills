@@ -90,15 +90,40 @@ jobs:
             fi
           done
 
+      - name: Validate Codex plugin.json
+        run: |
+          echo "Validating .codex-plugin/plugin.json..."
+          jq . .codex-plugin/plugin.json > /dev/null
+          echo "Validating .agents/plugins/marketplace.json..."
+          jq . .agents/plugins/marketplace.json > /dev/null
+
       - name: Summary
         run: |
           echo "=== Marketplace Summary ==="
           echo "Plugin version: $(jq -r '.version' .claude-plugin/plugin.json)"
+          echo "Codex version:  $(jq -r '.version' .codex-plugin/plugin.json)"
           echo "Skills: $(jq '.skills | length' .claude-plugin/plugin.json)"
           echo "Agents: $(jq '.agents | length' .claude-plugin/plugin.json)"
 
-  release:
+  build:
     needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build packages
+        run: ./scripts/build.sh --skip-validate
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: duende-skills-packages
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+
+  release:
+    needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -179,8 +204,17 @@ jobs:
             git log --oneline "$PREV_TAG"..HEAD >> notes.md
           fi
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: duende-skills-packages
+          path: dist/
+
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           body_path: notes.md
           generate_release_notes: false
+          files: |
+            dist/*.tar.gz
+            dist/*.zip

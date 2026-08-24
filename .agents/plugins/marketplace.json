@@ -1,0 +1,20 @@
+{
+  "name": "duende-skills",
+  "interface": {
+    "displayName": "Duende Skills"
+  },
+  "plugins": [
+    {
+      "name": "duende-skills",
+"source": {
+        "source": "local",
+        "path": "./"
+      }
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    }
+  ]
+}

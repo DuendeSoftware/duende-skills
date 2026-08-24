@@ -65,3 +65,6 @@ $RECYCLE.BIN/
 
 bin/
 obj/
+
+# Build output
+dist/
