@@ -28,11 +28,15 @@ echo -e "${GREEN}[INFO]${NC} Current version: $CURRENT"
 echo -e "${GREEN}[INFO]${NC} Bumping to: $NEW_VERSION"
 
 for manifest in "${MANIFESTS[@]}"; do
-  [[ -f "$manifest" ]] || continue
+  if [[ ! -f "$manifest" ]]; then
+    echo -e "${RED}[ERROR]${NC} Missing manifest: $manifest" >&2
+    exit 1
+  fi
+  manifest_current=$(grep -m1 '"version"' "$manifest" | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
   if [[ "$(uname)" == "Darwin" ]]; then
-    sed -i '' "s/\"$CURRENT\"/\"$NEW_VERSION\"/g" "$manifest"
+    sed -i '' "s/\"$manifest_current\"/\"$NEW_VERSION\"/g" "$manifest"
   else
-    sed -i "s/\"$CURRENT\"/\"$NEW_VERSION\"/g" "$manifest"
+    sed -i "s/\"$manifest_current\"/\"$NEW_VERSION\"/g" "$manifest"
   fi
   echo "  Updated: $manifest"
 done
