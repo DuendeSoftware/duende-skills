@@ -16,7 +16,7 @@ invocable: false
 - Configuring APIs to validate proof-of-possession tokens
 - Meeting regulatory or industry security requirements (open banking, e-health, e-government)
 
-Docs: https://docs.duendesoftware.com/identityserver/tokens/security
+Docs: https://docs.duendesoftware.com/identityserver/tokens/
 
 ## Proof-of-Possession Tokens: Why They Matter
 

@@ -37,7 +37,7 @@ Use this skill when:
 - `aspnetcore-authentication` — Applying OIDC authentication hardening in client applications
 - `aspnetcore-authorization` — Enforcing authorization policies that consume the hardened tokens produced here
 
-Docs: https://docs.duendesoftware.com/identityserver/configuration/security
+Docs: https://docs.duendesoftware.com/general/security-best-practices/
 
 ---
 
@@ -876,6 +876,6 @@ options.KeyManagement.DataProtectKeys = true;
 - [PKCE (RFC 7636)](https://tools.ietf.org/html/rfc7636)
 - [JWT Client Authentication (RFC 7523)](https://datatracker.ietf.org/doc/html/rfc7523)
 - [mTLS Client Authentication (RFC 8705)](https://www.rfc-editor.org/rfc/rfc8705)
-- [OWASP OAuth 2.0 Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/OAuth_Cheat_Sheet.html)
+- [OWASP OAuth 2.0 Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html)
 - [ASP.NET Core Data Protection — Microsoft Docs](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview)
 - [ASP.NET Core Rate Limiting — Microsoft Docs](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit)

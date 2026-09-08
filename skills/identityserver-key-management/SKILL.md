@@ -17,7 +17,7 @@ invocable: false
 - Configuring per-algorithm or per-resource signing
 - Troubleshooting key-related errors (CryptographicException, unprotecting key failures)
 
-Docs: https://docs.duendesoftware.com/identityserver/fundamentals/keys
+Docs: https://docs.duendesoftware.com/identityserver/fundamentals/key-management/
 
 ## Core Concepts
 

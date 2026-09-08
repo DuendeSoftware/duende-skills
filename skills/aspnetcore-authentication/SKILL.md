@@ -33,7 +33,7 @@ Use this skill when:
 - `oauth-oidc-protocols` — Protocol fundamentals underlying these handlers
 - `token-management` — Automatic token refresh with Duende.AccessTokenManagement
 
-Docs: https://docs.duendesoftware.com/identityserver/tokens/authentication
+Docs: https://docs.duendesoftware.com/identityserver/apis/aspnetcore/jwt/
 
 ---
 
@@ -466,6 +466,6 @@ Usually caused by the cookie not being set due to SameSite restrictions:
 
 - [ASP.NET Core Authentication — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/)
 - [OpenID Connect Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/social/)
-- [JWT Bearer Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/jwt-bearer/)
+- [JWT Bearer Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/configure-jwt-bearer-authentication)
 - [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/quickstarts/)
 - [OIDC Handler Events — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/openid-connect-events/)

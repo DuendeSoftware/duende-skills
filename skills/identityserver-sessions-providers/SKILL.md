@@ -17,7 +17,7 @@ invocable: false
 - Building a CIBA (Client Initiated Backchannel Authentication) flow
 - Understanding edition requirements (Business vs Enterprise) for these features
 
-Docs: https://docs.duendesoftware.com/identityserver/ui/sessions
+Docs: https://docs.duendesoftware.com/identityserver/ui/server-side-sessions/
 
 ## Server-Side Sessions
 
