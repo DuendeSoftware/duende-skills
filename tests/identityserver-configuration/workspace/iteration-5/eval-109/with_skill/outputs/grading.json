@@ -1,0 +1,34 @@
+{
+  "eval_id": 109,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Subclasses DefaultScopeParser (or implements IScopeParser) and overrides ParseScopeValue(ParseScopeContext)",
+      "pass": true,
+      "rationale": "ParameterizedScopeParser subclasses DefaultScopeParser and overrides ParseScopeValue(ParseScopeContext scopeContext)."
+    },
+    {
+      "assertion": "Uses scopeContext.SetParsedValues(name, parameter) for the parameterized scope and SetError/SetIgnore for other cases",
+      "pass": true,
+      "rationale": "Uses SetParsedValues(transactionScopeName, parts[1]), SetError for missing parameter, SetIgnore for the bare name, and base for others."
+    },
+    {
+      "assertion": "Registers the parser via AddScopeParser<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "idsvrBuilder.AddScopeParser<ParameterizedScopeParser>() is called."
+    },
+    {
+      "assertion": "In IProfileService reads context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == \"transaction\") and uses its ParsedParameter",
+      "pass": true,
+      "rationale": "The profile service uses context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == \"transaction\") and emits transaction.ParsedParameter as a claim."
+    },
+    {
+      "assertion": "Does NOT define the parameterized value as a static ApiScope name",
+      "pass": true,
+      "rationale": "Only the base ApiScope \"transaction\" is registered; the :abc123 parameter is parsed at request time, not registered as a static scope."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

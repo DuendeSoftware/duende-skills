@@ -33,7 +33,7 @@ Use this skill when:
 - `oauth-oidc-protocols` — Protocol fundamentals underlying these handlers
 - `token-management` — Automatic token refresh with Duende.AccessTokenManagement
 
-Docs: https://docs.duendesoftware.com/identityserver/tokens/authentication
+Docs: https://docs.duendesoftware.com/identityserver/apis/aspnetcore/jwt/
 
 ---
 
@@ -370,6 +370,87 @@ httpClient.SetBearerToken(accessToken);
 
 ---
 
+## Pattern 9: mTLS (Certificate-Bound Tokens) with the OIDC Handler
+
+When IdentityServer issues certificate-bound tokens via mTLS (RFC 8705), the OIDC client must (1) present its client certificate on all back-channel calls and (2) target the mTLS endpoint aliases. The stock handler does neither on its own.
+
+### Step 1 — Present the client certificate on back-channel calls
+
+Set `BackchannelHttpHandler` so code redemption, refresh, and userinfo calls run over a mutually-authenticated TLS channel. No client secret is needed — the certificate authenticates the client:
+
+```csharp
+var clientCert = X509CertificateLoader.LoadPkcs12(File.ReadAllBytes("client.p12"), "password");
+
+.AddOpenIdConnect("oidc", options =>
+{
+    options.Authority = "https://identity.example.com";
+    options.ClientId = "mtls.client";
+    // no ClientSecret — the certificate authenticates the client
+    options.ResponseType = "code";
+    options.MapInboundClaims = false;
+    options.SaveTokens = true;
+
+    options.BackchannelHttpHandler = new SocketsHttpHandler
+    {
+        SslOptions = new SslClientAuthenticationOptions
+        {
+            ClientCertificates = new X509CertificateCollection { clientCert }
+        }
+    };
+});
+```
+
+### Step 2 — Point the handler at `mtls_endpoint_aliases`
+
+The stock OIDC handler reads endpoints from standard discovery metadata and does **not** understand `mtls_endpoint_aliases` — it would call the non-mTLS `token_endpoint`. Wrap the standard configuration manager and rewrite the endpoints to their mTLS aliases:
+
+```csharp
+public sealed class MtlsConfigurationManager : IConfigurationManager<OpenIdConnectConfiguration>
+{
+    private readonly ConfigurationManager<OpenIdConnectConfiguration> _inner;
+
+    public MtlsConfigurationManager(ConfigurationManager<OpenIdConnectConfiguration> inner)
+        => _inner = inner;
+
+    public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(CancellationToken ct)
+    {
+        var config = await _inner.GetConfigurationAsync(ct);
+
+        if (config.AdditionalData.TryGetValue("mtls_endpoint_aliases", out var raw)
+            && raw is JsonElement aliases)
+        {
+            config.TokenEndpoint                      = aliases.GetProperty("token_endpoint").GetString();
+            config.IntrospectionEndpoint              = aliases.GetProperty("introspection_endpoint").GetString();
+            config.DeviceAuthorizationEndpoint        = aliases.GetProperty("device_authorization_endpoint").GetString();
+            // .NET 9+ auto-uses PAR when advertised — rewrite it too, or the handler
+            // pushes to the non-mTLS PAR endpoint and the certificate binding is lost
+            config.PushedAuthorizationRequestEndpoint = aliases.GetProperty("pushed_authorization_request_endpoint").GetString();
+            // revocation has no strongly-typed slot — keep the mTLS value in AdditionalData
+            config.AdditionalData["revocation_endpoint"] = aliases.GetProperty("revocation_endpoint").GetString();
+        }
+
+        return config;
+    }
+
+    public void RequestRefresh() => _inner.RequestRefresh();
+}
+
+// Wire it onto the handler
+.AddOpenIdConnect("oidc", options =>
+{
+    // ... options from Step 1 ...
+    options.ConfigurationManager = new MtlsConfigurationManager(
+        new ConfigurationManager<OpenIdConnectConfiguration>(
+            $"{options.Authority}/.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever { RequireHttps = true }));
+});
+```
+
+> **PAR + mTLS on .NET 9+:** because the handler automatically uses PAR when the server advertises a `pushed_authorization_request_endpoint`, you **must** rewrite that endpoint to the mTLS alias as well. Otherwise the pushed authorization request goes to the non-mTLS endpoint and the certificate binding is lost.
+
+---
+
 ## Common Pitfalls
 
 ### 1. Forgetting MapInboundClaims
@@ -466,6 +547,6 @@ Usually caused by the cookie not being set due to SameSite restrictions:
 
 - [ASP.NET Core Authentication — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/)
 - [OpenID Connect Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/social/)
-- [JWT Bearer Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/jwt-bearer/)
+- [JWT Bearer Handler — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authentication/configure-jwt-bearer-authentication)
 - [Duende IdentityServer Quickstarts](https://docs.duendesoftware.com/identityserver/quickstarts/)
 - [OIDC Handler Events — Duende Docs](https://docs.duendesoftware.com/identityserver/fundamentals/openid-connect-events/)

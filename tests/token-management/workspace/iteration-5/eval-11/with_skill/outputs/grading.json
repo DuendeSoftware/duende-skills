@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ITokenRequestCustomizer interface with a Customize method",
+      "pass": true,
+      "rationale": "TenantTokenRequestCustomizer : ITokenRequestCustomizer implements the async Customize method."
+    },
+    {
+      "assertion": "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+      "pass": true,
+      "rationale": "Customize(HttpRequestMessage httpRequest, TokenRequestParameters baseParameters, CancellationToken cancellationToken) matches the required signature."
+    },
+    {
+      "assertion": "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+      "pass": true,
+      "rationale": "Returns baseParameters with { Resource = ..., Scope = ... } and explains not to mutate the base instance."
+    },
+    {
+      "assertion": "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler",
+      "pass": true,
+      "rationale": "Passes the customizer to AddClientCredentialsTokenHandler(customizer, ...) and AddUserAccessTokenHandler(customizer)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

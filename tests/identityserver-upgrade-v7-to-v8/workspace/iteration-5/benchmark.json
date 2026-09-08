@@ -1,0 +1,190 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-upgrade-v7-to-v8",
+    "iteration": 5,
+    "model": "claude-opus-4.8",
+    "date": "2026-09-08"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 34,
+      "passed": 34,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 34,
+      "passed": 22,
+      "failed": 12,
+      "pass_rate": 0.65
+    },
+    "delta": {
+      "assertions_improved": 12,
+      "delta_pass_rate": 0.35
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Adds GetAllClientsAsync(CancellationToken ct) method returning IAsyncEnumerable<Client>",
+        "Updates TargetFramework to net10.0"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Uses [FromKeyedServices(\"ConfigurationStoreCache\")] or ServiceProviderKeys.ConfigurationStoreCache for keyed injection",
+        "Mentions that CachingOptions.CacheLockTimeout is obsolete"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions that v8 adds SAML-related tables to the schema"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Adds CancellationToken parameter to the affected methods"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Includes updating TargetFramework to net10.0 as a first step",
+        "Includes adding CancellationToken to all async store/service methods"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Explains the v8 license key is a new format: a signed JWT carrying a kid header",
+        "States a v7/earlier key still works with v8 core, but a v8 key fails on v7/earlier or the BFF runtime with IDX10503",
+        "States that v8 throws at startup for Server-Side Sessions, Automatic Key Management, and SAML when licensed but lacking the entitlement, while other features only log a warning",
+        "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production"
+      ]
+    }
+  ]
+}

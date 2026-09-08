@@ -158,6 +158,37 @@
         "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
         "Registers clients via AddInMemoryClients — no sub-documents needed for this core pattern"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "I scaffolded an IdentityServer host from the duende-is-inmem template and want to add an integration test project that references it and tests the discovery document and a client credentials token against the real endpoints. What do I need to change in the test .csproj and how do I write the test?",
+      "expected_output": "Guidance to change the test project SDK to Microsoft.NET.Sdk.Web, add Microsoft.AspNetCore.Mvc.Testing and Duende.IdentityModel packages plus a project reference to the host, then a test class using IClassFixture<WebApplicationFactory<Program>> that calls GetDiscoveryDocumentAsync and RequestClientCredentialsTokenAsync.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj"
+      ],
+      "assertions": [
+        "Changes the test project SDK from Microsoft.NET.Sdk to Microsoft.NET.Sdk.Web",
+        "Adds Microsoft.AspNetCore.Mvc.Testing (for WebApplicationFactory<T>) and Duende.IdentityModel packages to the test project",
+        "Uses a test class with IClassFixture<WebApplicationFactory<Program>> and factory.CreateClient()",
+        "Calls GetDiscoveryDocumentAsync and asserts disco.IsError is false",
+        "Calls RequestClientCredentialsTokenAsync against 'connect/token' and asserts the token is not an error",
+        "Notes that mutating shared static Config collections can cause cross-test interference under parallel test execution"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I need a post-deployment smoke test that verifies the login flow works against my deployed IdentityServer, but I don't want to run a headless browser like Playwright. How can I do this with just HttpClient?",
+      "expected_output": "A cookie-aware HttpClient (CookieContainer + HttpClientHandler) that GETs the protected URL, parses the login HTML with AngleSharp to read the __RequestVerificationToken, POSTs credentials to the resolved form action, and asserts the final response host equals the original protected host.",
+      "files": [],
+      "assertions": [
+        "Uses a CookieContainer with HttpClientHandler so cookies flow across requests",
+        "Uses AngleSharp (HtmlParser().ParseDocumentAsync) to parse the login page HTML",
+        "Reads the antiforgery token from input[name='__RequestVerificationToken'] via GetAttribute(\"value\")",
+        "POSTs FormUrlEncodedContent with Username, Password, __RequestVerificationToken, and button=login to the form's resolved action URL",
+        "Asserts success by comparing the final RequestMessage.RequestUri.Host to the original protected host",
+        "Does NOT require Playwright, Selenium, or another headless browser"
+      ]
     }
   ]
 }

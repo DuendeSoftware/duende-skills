@@ -60,7 +60,8 @@
         "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
         "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
         "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
-        "Program.cs calls UseRateLimiter() in the middleware pipeline"
+        "Program.cs calls UseRateLimiter() in the middleware pipeline",
+        "Notes that IdentityServer protocol endpoints (/connect/token, /connect/authorize) receive only the global limiter because they are not matched by ASP.NET Core endpoint routing, so named RequireRateLimiting policies do not apply to them (e.g. partitions the global limiter on request path)"
       ]
     },
     {
@@ -120,6 +121,32 @@
         "Output identifies RequirePkce = true as a required control and warns against setting it to false",
         "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
         "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Set up an audit trail for our IdentityServer by enabling events and forwarding them to Seq. We also need failed and successful UI logins captured. Show the configuration and a custom sink, and call out anything I might miss.",
+      "expected_output": "Enable events in AddIdentityServer (RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, RaiseInformationEvents) because events are off by default. Implement and register a custom IEventSink for Seq, noting that registering a custom sink replaces the default ASP.NET Core logger sink (so it must forward to logging if you still want logs). Raise UI login success/failure events from your own UI code via IEventService.RaiseAsync because IdentityServer only raises protocol events itself.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "States that events are NOT enabled by default and enables RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents in AddIdentityServer",
+        "Implements and registers a custom IEventSink (e.g. AddTransient<IEventSink, ...>) for Seq",
+        "Warns that a custom IEventSink replaces the default ASP.NET Core logger sink (each event goes to exactly one sink), so the custom sink must forward to logging to keep log output",
+        "Explains that UI login success/failure events must be raised by your own UI code via IEventService.RaiseAsync, since IdentityServer only raises protocol events itself"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "We use static (manually managed) signing keys and need to rotate to a new key without breaking token validation. Walk me through the correct rotation sequence and explain the overlap requirement.",
+      "expected_output": "Use a phased rotation: publish the new public key (as a validation key) BEFORE signing with it so JWKS consumers can fetch it, then switch signing to the new key while keeping the old public key as a validation key until all tokens signed with it have expired, then drop the old key. Automatic Key Management handles this overlap automatically; manual key managers must do the phased process themselves.",
+      "files": [],
+      "assertions": [
+        "Explains that a new public key must be published (available via JWKS as a validation key) BEFORE it is used to sign tokens",
+        "Explains that the retired public key must remain available until all tokens signed with it have expired",
+        "Describes a phased/multi-step rotation using AddSigningCredential and AddValidationKey (or equivalent) rather than a single hard cut-over",
+        "Notes that Automatic Key Management handles this overlap automatically while manual key managers must do phased rotation"
       ]
     }
   ]

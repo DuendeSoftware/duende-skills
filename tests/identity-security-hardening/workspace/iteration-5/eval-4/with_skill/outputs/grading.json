@@ -1,0 +1,39 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets a Content-Security-Policy header that includes frame-ancestors 'none' or frame-ancestors 'self'",
+      "pass": true,
+      "rationale": "CSP middleware sets Content-Security-Policy including frame-ancestors 'none'."
+    },
+    {
+      "assertion": "Program.cs sets X-Frame-Options to DENY on IdentityServer UI paths",
+      "pass": true,
+      "rationale": "Appends X-Frame-Options: DENY on /account, /consent, /diagnostics UI paths."
+    },
+    {
+      "assertion": "Program.cs configures rate limiting with AddRateLimiter and a policy for the token endpoint with PermitLimit = 20",
+      "pass": true,
+      "rationale": "AddRateLimiter global limiter uses a sliding window with PermitLimit = 20 for /connect/token."
+    },
+    {
+      "assertion": "Program.cs configures rate limiting for the authorize endpoint with PermitLimit = 10",
+      "pass": true,
+      "rationale": "Fixed window with PermitLimit = 10 for /connect/authorize."
+    },
+    {
+      "assertion": "Program.cs calls UseRateLimiter() in the middleware pipeline",
+      "pass": true,
+      "rationale": "Calls app.UseRateLimiter() before UseIdentityServer()."
+    },
+    {
+      "assertion": "Notes that IdentityServer protocol endpoints (/connect/token, /connect/authorize) receive only the global limiter because they are not matched by ASP.NET Core endpoint routing, so named RequireRateLimiting policies do not apply to them (e.g. partitions the global limiter on request path)",
+      "pass": true,
+      "rationale": "Explicitly states protocol endpoints use IdentityServer's own middleware not endpoint routing, so named policies never fire; implements limits in the global limiter partitioned on request path."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

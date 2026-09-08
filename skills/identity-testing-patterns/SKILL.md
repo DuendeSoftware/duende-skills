@@ -15,6 +15,8 @@ Use this skill when:
 - Testing custom `IProfileService` implementations or claim transformation logic
 - Verifying `IAuthorizationHandler` and policy-based authorization against specific claim sets
 - Testing BFF endpoints that rely on cookie-based sessions and proxied API calls
+- Scaffolding an integration-test project from the `duende-is-inmem` template to test IdentityServer itself
+- Running a post-deployment login-flow smoke test without a headless browser
 
 ## Core Principles
 
@@ -57,6 +59,7 @@ Docs: https://docs.duendesoftware.com/identityserver/fundamentals
 | Protected API access control | `WebApplicationFactory` with `TestAuthHandler` and constructed `ClaimsPrincipal` |
 | BFF endpoints (login/logout/user) | `WebApplicationFactory` with cookie simulation |
 | EF Core store implementations | In-memory EF provider or isolated SQL container |
+| Deployed login flow (smoke test) | Cookie-aware `HttpClient` + AngleSharp HTML parsing (Pattern 10) |
 
 ---
 
@@ -161,6 +164,86 @@ public class TokenEndpointTests : IClassFixture<IdentityServerFactory>
     }
 }
 ```
+
+### Testing IdentityServer Itself from the `duende-is-inmem` Template
+
+The fastest way to get a real, in-process IdentityServer under test is to scaffold from the in-memory template `duende-is-inmem` (from the **`Duende.Templates`** NuGet package) and add a test project that references the host. Unlike the `TestAuthHandler`/`TestTokenFactory` patterns below — which mock auth in a *downstream API* — this exercises IdentityServer's **real** endpoints and token issuance (no auth mocking).
+
+**Test project setup:**
+
+1. The test project must use the **Web SDK** so ASP.NET Core testing APIs resolve. Change the top of the `.csproj`:
+
+```xml
+<!-- ❌ Default test project SDK -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+<!-- ✅ Web SDK — required for WebApplicationFactory<T> against a web host -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+```
+
+2. Add packages to the test project:
+
+```xml
+<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="*" /> <!-- WebApplicationFactory<T> -->
+<PackageReference Include="Duende.IdentityModel" Version="*" />            <!-- OIDC/OAuth client helpers -->
+```
+
+3. Reference the IdentityServer host project (`<ProjectReference Include="..\IdentityServerHost\IdentityServerHost.csproj" />`).
+
+4. Make the template's static `Config` collections mutable so tests can add/clear clients and scopes:
+
+```csharp
+// Config.cs — expose List<> instead of IEnumerable<> so tests can mutate
+public static List<Client> Clients = [ /* ... */ ];
+public static List<ApiScope> ApiScopes = [ /* ... */ ];
+public static List<IdentityResource> IdentityResources = [ /* ... */ ];
+```
+
+> **Caution:** With xUnit's parallel test execution, mutating shared static `Config` collections causes cross-test interference. Prefer per-test collections (or a fresh factory per test) over mutating shared statics.
+
+**Test class using the primary-constructor `IClassFixture`:**
+
+```csharp
+public class IdentityServerTests(WebApplicationFactory<Program> factory)
+    : IClassFixture<WebApplicationFactory<Program>>
+{
+    // factory.CreateClient() serves the host over https on localhost
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task Discovery_document_is_available()
+    {
+        var disco = await _client.GetDiscoveryDocumentAsync();
+        Assert.False(disco.IsError);
+    }
+
+    [Fact]
+    public async Task Can_request_client_credentials_token()
+    {
+        var token = await _client.RequestClientCredentialsTokenAsync(new()
+        {
+            Address = "connect/token",
+            ClientId = "m2m.client",
+            ClientSecret = "secret",
+            Scope = "api1"
+        });
+
+        Assert.False(token.IsError);
+        Assert.NotNull(token.AccessToken);
+    }
+
+    [Fact]
+    public void Can_resolve_in_process_services()
+    {
+        // Reach into the running host's DI container
+        using var scope = factory.Services.CreateScope();
+        var profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
+        Assert.NotNull(profileService);
+    }
+}
+```
+
+> The discovery/token helpers (`GetDiscoveryDocumentAsync`, `RequestClientCredentialsTokenAsync`) come from **`Duende.IdentityModel`**. Accessing `factory.Services` lets you assert on real in-process services such as `IProfileService`, stores, or options.
 
 ---
 
@@ -746,6 +829,55 @@ public async Task IssuedToken_ShouldContainExpectedClaims()
     Assert.True(jwt.ValidTo > DateTime.UtcNow);
 }
 ```
+
+---
+
+## Pattern 10: Post-Deployment Login Smoke Test (No Headless Browser)
+
+Verify a real login flow against a deployed environment **without** Playwright/Selenium by driving a cookie-aware `HttpClient` and parsing HTML with **AngleSharp**. This exercises the interactive authorize → login-form → post-back → redirect-back chain end to end.
+
+```
+dotnet add package AngleSharp
+```
+
+```csharp
+using AngleSharp.Html.Parser;
+
+[Fact]
+public async Task User_can_log_in_via_the_login_form()
+{
+    // ✅ Cookie-aware client so the antiforgery + auth cookies flow across requests
+    var cookies = new CookieContainer();
+    using var handler = new HttpClientHandler { CookieContainer = cookies };
+    using var client = new HttpClient(handler) { BaseAddress = new Uri("https://app.example.com") };
+
+    // 1) GET the protected URL — auto-redirects to the IdentityServer login page
+    var loginPage = await client.GetAsync("/protected");
+
+    // 2) Parse the login HTML and read the antiforgery token from the form
+    var html = await loginPage.Content.ReadAsStringAsync();
+    var doc = await new HtmlParser().ParseDocumentAsync(html);
+    var form = doc.QuerySelector("form")!;
+    var antiforgery = form.QuerySelector("input[name='__RequestVerificationToken']")!
+        .GetAttribute("value");
+
+    // 3) POST credentials to the form's resolved action URL
+    var action = new Uri(loginPage.RequestMessage!.RequestUri!, form.GetAttribute("action"));
+    var result = await client.PostAsync(action, new FormUrlEncodedContent(new Dictionary<string, string>
+    {
+        ["Username"] = "alice",
+        ["Password"] = "alice",
+        ["__RequestVerificationToken"] = antiforgery!,
+        ["button"] = "login"
+    }));
+
+    // 4) Success = we ended back on the original protected host (login redirected us home)
+    Assert.Equal(new Uri("https://app.example.com").Host,
+        result.RequestMessage!.RequestUri!.Host);
+}
+```
+
+> Field names (`Username`, `Password`, `__RequestVerificationToken`, `button="login"`) assume the **default template login form**. Adjust selectors if you customized the login UI. This is a smoke test — it confirms the deployed flow works, not per-claim correctness (use the in-process patterns above for that).
 
 ---
 

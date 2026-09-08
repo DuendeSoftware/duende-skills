@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses JsonWebTokenHandler.ReadJsonWebToken (or JwtSecurityTokenHandler) to parse the access token string",
+      "pass": true,
+      "rationale": "Calls `new JsonWebTokenHandler().ReadJsonWebToken(response.AccessToken)` (and mentions the JwtSecurityTokenHandler alternative)."
+    },
+    {
+      "assertion": "Asserts the client_id claim matches the test client's ID",
+      "pass": true,
+      "rationale": "Asserts `jwt.GetClaim(\"client_id\").Value` equals \"test-client\", the request's client id."
+    },
+    {
+      "assertion": "Asserts the scope claim contains the expected scope value",
+      "pass": true,
+      "rationale": "Splits the scope claim and asserts `Contains(\"api1\", scope.Split(' '))`."
+    },
+    {
+      "assertion": "Asserts the issuer (iss) claim matches the expected authority URL",
+      "pass": true,
+      "rationale": "Asserts `jwt.Issuer` equals \"https://localhost\"."
+    },
+    {
+      "assertion": "Does NOT make a network call to validate the token — parses it locally",
+      "pass": true,
+      "rationale": "Reads the token locally with ReadJsonWebToken; explicitly states no introspection/userinfo request is made."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

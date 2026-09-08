@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that PAR moves authorization parameters from the query string to a backchannel POST to the /connect/par endpoint, returning a request_uri that the client uses in the authorize redirect",
+      "pass": true,
+      "rationale": "It describes the authenticated backchannel POST to /connect/par returning a request_uri that is then used in the /connect/authorize redirect."
+    },
+    {
+      "assertion": "Response explains that DPoP binds access tokens to a client's cryptographic key pair via a 'cnf' claim, preventing stolen tokens from being used by attackers",
+      "pass": true,
+      "rationale": "It explains the key pair, the DPoP proof, and the cnf confirmation claim binding the token to the key so a stolen token is useless without the private key."
+    },
+    {
+      "assertion": "Response mentions that PAR prevents parameter tampering and URL length issues with authorization requests",
+      "pass": true,
+      "rationale": "It explicitly lists prevention of parameter tampering and elimination of URL-length issues as PAR benefits."
+    },
+    {
+      "assertion": "Response mentions FAPI 2.0 as a financial-grade API profile that requires PAR and DPoP (or mTLS) for enhanced security",
+      "pass": true,
+      "rationale": "The FAPI 2.0 section states it is the financial-grade profile that requires PAR and sender-constrained tokens via DPoP or mTLS."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

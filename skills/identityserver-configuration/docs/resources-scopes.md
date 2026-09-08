@@ -120,7 +120,9 @@ When using only API Scopes (without API Resources), no `aud` claim is added to t
 
 ### Parameterized Scopes
 
-For scopes with dynamic parameters (e.g., `transaction:123`):
+Parameterized scopes carry a value alongside the scope name (e.g. `transaction:abc123`, `tenant:acme:read`). Implement `IScopeParser` — its single method is `ParsedScopesResult ParseScopeValues(IEnumerable<string> scopeValues)`. In practice, subclass `DefaultScopeParser` (the default registration) and override `ParseScopeValue(ParseScopeContext scopeContext)`.
+
+`ParseScopeContext` members: `RawValue`, `ParsedName`, `ParsedParameter`, `Error`, `Ignore`, `Succeeded`; methods `SetParsedValues(name, parameter)`, `SetIgnore()`, `SetError(message)`.
 
 ```csharp
 public class ParameterizedScopeParser : DefaultScopeParser
@@ -160,7 +162,60 @@ public class ParameterizedScopeParser : DefaultScopeParser
 }
 ```
 
-## API Resources
+Register the parser on the IdentityServer builder:
+
+```csharp
+idsvrBuilder.AddScopeParser<ParameterizedScopeParser>();
+```
+
+Read the parsed parameter downstream in an `IProfileService` via `RequestedResources.ParsedScopes`:
+
+```csharp
+public async Task GetProfileDataAsync(ProfileDataRequestContext context)
+{
+    var transaction = context.RequestedResources.ParsedScopes
+        .FirstOrDefault(x => x.ParsedName == "transaction");
+
+    if (transaction is not null)
+    {
+        // transaction.ParsedParameter holds "abc123" for scope "transaction:abc123"
+        context.IssuedClaims.Add(new Claim("transaction_id", transaction.ParsedParameter));
+    }
+}
+```
+
+## Custom Resource Validation
+
+`IResourceValidator` validates the resources (scopes + resource indicators) a client requests at the authorize/token endpoints. The default is `DefaultResourceValidator`. Implement the interface to add cross-scope rules, tenant checks, or resource-indicator policy:
+
+```csharp
+public class CustomResourceValidator : IResourceValidator
+{
+    // NOTE: the CancellationToken parameter was ADDED in v8.
+    public Task<ResourceValidationResult> ValidateRequestedResourcesAsync(
+        ResourceValidationRequest request, CancellationToken cancellationToken)
+    {
+        // request.Client, request.Scopes, request.ResourceIndicators (RFC 8707)
+        // ... custom validation ...
+        return Task.FromResult(new ResourceValidationResult());
+    }
+}
+```
+
+Register on the builder:
+
+```csharp
+idsvrBuilder.AddResourceValidator<CustomResourceValidator>();
+```
+
+When **decorating/wrapping** the default validator, also register it so it can be resolved:
+
+```csharp
+services.AddTransient<DefaultResourceValidator>();
+idsvrBuilder.AddResourceValidator<CustomResourceValidator>();
+```
+
+> **v8 breaking change:** `ValidateRequestedResourcesAsync` gained a `CancellationToken` parameter. Implementations written for v7 or earlier must add it to compile.
 
 API Resources group scopes under a logical API, providing:
 

@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that a new public key must be published (available via JWKS as a validation key) BEFORE it is used to sign tokens",
+      "pass": true,
+      "rationale": "Step 1 publishes the new key as a validation key first and explains APIs must fetch it from JWKS before it signs, to avoid unknown-kid rejections."
+    },
+    {
+      "assertion": "Explains that the retired public key must remain available until all tokens signed with it have expired",
+      "pass": true,
+      "rationale": "Step 2/3 keep the old key as a validation key until all tokens signed with it expire before removing it."
+    },
+    {
+      "assertion": "Describes a phased/multi-step rotation using AddSigningCredential and AddValidationKey (or equivalent) rather than a single hard cut-over",
+      "pass": true,
+      "rationale": "Gives a three-step sequence using AddSigningCredential and AddValidationKey with wait periods, explicitly not a single swap."
+    },
+    {
+      "assertion": "Notes that Automatic Key Management handles this overlap automatically while manual key managers must do phased rotation",
+      "pass": false,
+      "rationale": "Does not mention Automatic Key Management at all, nor the contrast that it handles the overlap automatically while manual key management requires the phased process."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

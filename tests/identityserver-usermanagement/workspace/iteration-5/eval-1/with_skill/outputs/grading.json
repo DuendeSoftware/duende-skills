@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+      "pass": true,
+      "rationale": "The response explicitly runs `dotnet add package Duende.UserManagement.IdentityServer8` and lists it in the csproj ItemGroup."
+    },
+    {
+      "assertion": "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+      "pass": true,
+      "rationale": "It adds `Duende.Storage.Sqlite` via dotnet CLI and includes it as a PackageReference."
+    },
+    {
+      "assertion": "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+      "pass": true,
+      "rationale": "`AddUserManagement(options => { ... })` is chained onto the AddIdentityServer builder with a configuration lambda."
+    },
+    {
+      "assertion": "Calls AddSqliteStore() inside the AddUserManagement options lambda (not at top level)",
+      "pass": true,
+      "rationale": "`options.AddSqliteStore(\"Data Source=users.db\")` is placed inside the AddUserManagement lambda, with a comment noting it must be there."
+    },
+    {
+      "assertion": "Calls IDatabaseSchema.CreateIfNotExistsAsync() to ensure database schema exists",
+      "pass": true,
+      "rationale": "It resolves IDatabaseSchema and calls `await schema.CreateIfNotExistsAsync()` at startup."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

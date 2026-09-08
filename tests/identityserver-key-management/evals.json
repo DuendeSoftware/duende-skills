@@ -128,6 +128,19 @@
         "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'",
         "Program.cs does not disable automatic key management"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "We're enabling the SAML component on our IdentityServer, which uses static key management. What signing key do we need to configure, and why won't our existing AddDeveloperSigningCredential() raw RSA key work for SAML? Also explain how key rotation is shared between OIDC and SAML.",
+      "expected_output": "Explanation that SAML requires an X.509 signing certificate with a private key, that a raw RSA key (including AddDeveloperSigningCredential) cannot be auto-wrapped for SAML under static key management, that OIDC and SAML share one signing credential and rotation schedule, and that PropagationTime/RetentionDuration govern metadata rollover.",
+      "files": [],
+      "assertions": [
+        "Explains that with static key management SAML requires an X.509 signing certificate that includes a private key",
+        "States that a manually registered raw RSA key, including one from AddDeveloperSigningCredential(), cannot be auto-wrapped into an X.509 certificate for SAML",
+        "Notes that OIDC tokens and SAML messages share the same signing credentials and rotation schedule, published via the OIDC JWKS endpoint and SAML IdP metadata",
+        "Mentions that PropagationTime and RetentionDuration control how long keys/certs are published before signing and retained for validation during rollover",
+        "Notes that under Automatic Key Management the SAML component auto-wraps managed RSA keys in self-signed X.509 certificates, so UseX509Certificate is not required just to enable SAML"
+      ]
     }
   ]
 }

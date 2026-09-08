@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": true,
+      "rationale": "The server AddBff() chain ends with .AddBffBlazorClient()."
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": true,
+      "rationale": "The WASM code calls AddBffBlazorClient with Polling.Interval = TimeSpan.FromSeconds(30)."
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": true,
+      "rationale": "builder.Services.AddLocalApiHttpClient<WeatherClient>() is present on the client."
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": true,
+      "rationale": "The server uses AddBff().ConfigureOpenIdConnect(...)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

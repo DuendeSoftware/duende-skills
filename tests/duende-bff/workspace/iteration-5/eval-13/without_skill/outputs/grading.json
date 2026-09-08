@@ -1,0 +1,29 @@
+{
+  "eval_id": 13,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that DefaultAccessTokenRetriever is internal in v4 and cannot be inherited",
+      "pass": true,
+      "rationale": "It infers and states the class was made internal/sealed in v4, which is why inheritance no longer works."
+    },
+    {
+      "assertion": "Shows implementing IAccessTokenRetriever interface directly",
+      "pass": false,
+      "rationale": "It only vaguely mentions 'an interface such as IAccessTokenRetriever (or similar)' and never actually implements it; its concrete solution is a DelegatingHandler."
+    },
+    {
+      "assertion": "Shows registration via WithAccessTokenRetriever<T>() on the remote API endpoint",
+      "pass": false,
+      "rationale": "No WithAccessTokenRetriever<T>() registration is shown; it registers a delegating handler on the HttpClient instead."
+    },
+    {
+      "assertion": "Mentions AccessTokenResult and its implementations (BearerTokenResult, DPoPTokenResult, NoAccessTokenResult, or AccessTokenRetrievalError)",
+      "pass": false,
+      "rationale": "AccessTokenResult and its implementations are never mentioned."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

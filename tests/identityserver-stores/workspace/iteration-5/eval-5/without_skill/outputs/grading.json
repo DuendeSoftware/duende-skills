@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddStackExchangeRedisCache with the Redis connection string from configuration",
+      "pass": true,
+      "rationale": "AddStackExchangeRedisCache sets options.Configuration = builder.Configuration[\"Redis:ConnectionString\"]."
+    },
+    {
+      "assertion": "HybridCache is registered (AddHybridCache) so the configuration-store cache uses the distributed Redis backend shared across nodes — the v8 replacement for the legacy ICache<>/DistributedCache<> AddSingleton registration",
+      "pass": false,
+      "rationale": "The response uses the legacy v7 pattern AddSingleton(typeof(ICache<>), typeof(DistributedCache<>)) and never registers HybridCache/AddHybridCache, so it does not use the v8 configuration-store cache backend."
+    },
+    {
+      "assertion": "AddConfigurationStoreCache() is called after the configuration store registration",
+      "pass": true,
+      "rationale": "AddConfigurationStoreCache() is chained after AddConfigurationStore()."
+    },
+    {
+      "assertion": "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": true,
+      "rationale": "options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(10) is set."
+    },
+    {
+      "assertion": "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
+      "pass": true,
+      "rationale": "options.Caching.ResourceStoreExpiration = TimeSpan.FromMinutes(10) is set."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

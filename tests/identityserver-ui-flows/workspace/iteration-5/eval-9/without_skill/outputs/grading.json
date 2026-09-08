@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The 'profile' IdentityResource sets Required = true and the response explains omitting a required scope returns access_denied and fails the request",
+      "pass": true,
+      "rationale": "Sets IdentityResources.Profile { Required = true } and correctly explains a required scope cannot be declined and that declining causes the authorization request to be denied and fail."
+    },
+    {
+      "assertion": "The 'marketing' ApiScope sets Required = false and the response explains optional scopes can be declined while the flow still succeeds",
+      "pass": true,
+      "rationale": "Declares new ApiScope(\"marketing\") { Required = false } and explains the user can decline it while the flow still completes successfully."
+    },
+    {
+      "assertion": "The admin/support action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants",
+      "pass": false,
+      "rationale": "It uses IPersistedGrantService.RemoveAllGrantsAsync(subjectId, \"web.app\") rather than the interaction service's RevokeUserConsentAsync(\"web.app\") the assertion requires."
+    },
+    {
+      "assertion": "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access",
+      "pass": true,
+      "rationale": "States the client-credentials M2M flow never prompts for consent and that AllowedScopes alone determines what it can access."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

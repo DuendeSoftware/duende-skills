@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response includes checking that the discovery document at /.well-known/openid-configuration is reachable and returns valid JSON",
+      "pass": true,
+      "rationale": "Step 1 tells the user to load /.well-known/openid-configuration and confirm it is reachable and returns valid JSON."
+    },
+    {
+      "assertion": "Response includes verifying the client ID in the request exactly matches the server registration",
+      "pass": true,
+      "rationale": "Step 2 requires the client_id to exactly match the registered client, noting case, whitespace, and environment mismatches."
+    },
+    {
+      "assertion": "Response includes checking the client secret for encoding issues (e.g., Sha256 hash vs plaintext mismatch)",
+      "pass": true,
+      "rationale": "Step 3 explicitly covers Duende storing secrets as SHA256 hashes and the plaintext-vs-hash mismatch, plus whitespace and auth-method issues."
+    },
+    {
+      "assertion": "Response includes verifying that the requested scopes are registered in AllowedScopes on the client and the grant type is in AllowedGrantTypes",
+      "pass": true,
+      "rationale": "Step 4 checks the grant type against AllowedGrantTypes and requested scopes against AllowedScopes by name."
+    },
+    {
+      "assertion": "Response covers checking redirect URI for exact string match including scheme, host, port, path, and trailing slash",
+      "pass": true,
+      "rationale": "Step 5 enumerates exact match on scheme, host, port, path, and trailing slash."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

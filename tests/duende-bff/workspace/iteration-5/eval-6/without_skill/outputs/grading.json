@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends RequiredTokenType.UserOrNone",
+      "pass": false,
+      "rationale": "It recommends WithOptionalUserAccessToken() and gestures at RequiredTokenType.None, never naming RequiredTokenType.UserOrNone."
+    },
+    {
+      "assertion": "Explains that UserOrNone forwards user token if available, no token if anonymous, without triggering a challenge",
+      "pass": false,
+      "rationale": "It explains the optional-token concept correctly but does not attribute it to UserOrNone, which is what the assertion requires."
+    },
+    {
+      "assertion": "Does NOT recommend RequiredTokenType.User (which would challenge anonymous users)",
+      "pass": true,
+      "rationale": "It explicitly advises against the required user token because it challenges anonymous callers."
+    },
+    {
+      "assertion": "Shows MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrNone)",
+      "pass": false,
+      "rationale": "The code uses .WithOptionalUserAccessToken() rather than .WithAccessToken(RequiredTokenType.UserOrNone)."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

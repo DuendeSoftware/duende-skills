@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Includes updating TargetFramework to net10.0 as a first step",
+      "pass": false,
+      "rationale": "It says to bump the TFM but shows net8.0 / 'whatever v8 requires' and never identifies net10.0."
+    },
+    {
+      "assertion": "Includes replacing IClock with TimeProvider",
+      "pass": true,
+      "rationale": "Step 6 replaces the custom IClock with an injected TimeProvider using GetUtcNow()."
+    },
+    {
+      "assertion": "Includes adding CancellationToken to all async store/service methods",
+      "pass": false,
+      "rationale": "It only generically notes signatures 'may add parameters'; it never instructs adding CancellationToken to all async store/service methods."
+    },
+    {
+      "assertion": "Includes running EF database migration",
+      "pass": true,
+      "rationale": "Step 4 runs dotnet ef migrations add and dotnet ef database update."
+    },
+    {
+      "assertion": "Lists at least 8 distinct migration steps",
+      "pass": true,
+      "rationale": "The checklist has 10 distinct numbered steps."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

@@ -293,9 +293,45 @@ For .NET clients: use the BFF framework which has built-in back-channel logout s
 
 ### When Consent Is Required
 
-Consent is controlled per client via `RequireConsent` (default: `false`). When enabled, IdentityServer redirects to the consent page before completing authorization.
+Consent applies **only to user-based (interactive) authorization requests**. Client-credentials (M2M) flows never prompt for consent — there `Client.AllowedScopes` alone governs access.
+
+Consent is controlled per client via `RequireConsent` (default: `false`). Set `RequireConsent = false` for first-party clients to suppress the scope prompt; set `true` for third-party clients. When enabled, IdentityServer redirects to the consent page before completing authorization.
 
 The `offline_access` scope always triggers consent when the client has consent enabled.
+
+### Required vs. Optional Scopes
+
+`IdentityResource` and `ApiScope` expose a `Required` bool:
+
+- If the consent response **omits a `Required` scope**, IdentityServer returns `access_denied` and the request fails.
+- **Optional** scopes can be declined and the flow still succeeds — the issued tokens/userinfo simply omit that data.
+
+```csharp
+new IdentityResource("profile", /* ... */) { Required = true }; // cannot be declined
+new ApiScope("api.read") { Required = false };                  // may be declined
+```
+
+### Remembered Consent
+
+Enable persistence with `Client.AllowRememberConsent` (bool) and `Client.ConsentLifetime` (expiry). Granted scopes are stored in the operational (persisted grant) store; set `RememberConsent = true` on the `ConsentResponse` to persist a grant.
+
+IdentityServer **re-prompts** for consent when:
+
+- there is no remembered consent, or it has expired,
+- a new, not-previously-granted scope is requested,
+- the request includes `offline_access`,
+- the request contains a parameterized scope value, or
+- `AllowRememberConsent = false`.
+
+**Device flow**: in IdentityServer v8, device-flow (Device Authorization Grant) consent is **never remembered** — the user consents on every device authorization.
+
+### Revoking Consent
+
+Use `IIdentityServerInteractionService.RevokeUserConsentAsync(clientId)` for the current user. This removes **all** persisted grants for that user/client — remembered consent, reference tokens, and refresh tokens.
+
+```csharp
+await _interaction.RevokeUserConsentAsync("web.app");
+```
 
 ### Consent Page Flow
 
@@ -334,6 +370,53 @@ if (await _interaction.IsValidReturnUrl(returnUrl))
 }
 // Or check if GetAuthorizationContextAsync returns non-null
 ```
+
+## User Registration (prompt=create)
+
+The `prompt=create` OIDC parameter sends the user straight to a registration page instead of login.
+
+### Host Configuration
+
+Set `CreateAccountUrl` in `AddIdentityServer`. This makes IdentityServer advertise `create` in `prompt_values_supported` in discovery. If unset, `prompt=create` is **ignored and not advertised**.
+
+```csharp
+// Program.cs
+builder.Services.AddIdentityServer(options =>
+{
+    options.UserInteraction.CreateAccountUrl = "/Account/Register";
+});
+```
+
+`prompt=create` must be the **only** prompt value — it cannot be combined with `login`, `consent`, `select_account`, or `none`.
+
+### Triggering Registration from an ASP.NET Core Client
+
+```csharp
+return Results.Challenge(
+    new OpenIdConnectChallengeProperties { Prompt = "create", RedirectUri = "/" },
+    ["oidc"]);
+```
+
+### Registration Page Handler (Host)
+
+```csharp
+public async Task<IActionResult> OnPost(string returnUrl, CancellationToken ct)
+{
+    // Returns null for an invalid returnUrl → prevents open redirect
+    var context = await _interaction.GetAuthorizationContextAsync(returnUrl, ct);
+    if (context is null) return Redirect("~/");
+
+    // Create + persist the local user
+    var user = await _users.CreateAsync(/* ... */);
+
+    // Sign in ONLY after email confirmation / approval / MFA — not on submit
+    await HttpContext.SignInAsync(new IdentityServerUser(user.SubjectId));
+
+    return Redirect(returnUrl);
+}
+```
+
+**Important**: `GetAuthorizationContextAsync` returning `null` signals an invalid `returnUrl` — redirect away instead of trusting it. Establish the session only after any required confirmation/approval/MFA step.
 
 ## Error Page
 

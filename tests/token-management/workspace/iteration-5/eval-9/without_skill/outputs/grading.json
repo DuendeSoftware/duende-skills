@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+      "pass": true,
+      "rationale": "Clearly explains the SignalR circuit outlives the initial request and HttpContext is null/stale afterward, causing 401s."
+    },
+    {
+      "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+      "pass": false,
+      "rationale": "Only vaguely suggests checking Duende docs for a Blazor integration; never calls AddBlazorServerAccessTokenManagement<T>() or names IUserTokenStore."
+    },
+    {
+      "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+      "pass": false,
+      "rationale": "Describes a generic server-side store but does not implement IUserTokenStore with GetTokenAsync/StoreTokenAsync/ClearTokenAsync."
+    },
+    {
+      "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store",
+      "pass": true,
+      "rationale": "Shows an OnTokenValidated handler reading TokenEndpointResponse access/refresh tokens to persist them for the principal."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

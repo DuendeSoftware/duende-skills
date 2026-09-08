@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response maps IdentityServer4 to Duende.IdentityServer",
+      "pass": true,
+      "rationale": "The mapping table and the replace steps state IdentityServer4 becomes Duende.IdentityServer."
+    },
+    {
+      "assertion": "Response maps IdentityServer4.Models to Duende.IdentityServer.Models",
+      "pass": true,
+      "rationale": "The table and both file examples map IdentityServer4.Models to Duende.IdentityServer.Models."
+    },
+    {
+      "assertion": "Response maps IdentityServer4.EntityFramework.DbContexts to Duende.IdentityServer.EntityFramework.DbContexts",
+      "pass": true,
+      "rationale": "Included in the table and the Program.cs example."
+    },
+    {
+      "assertion": "Response maps IdentityServer4.EntityFramework.Mappers to Duende.IdentityServer.EntityFramework.Mappers",
+      "pass": true,
+      "rationale": "Included in the table and the Program.cs example."
+    },
+    {
+      "assertion": "Response maps IdentityModel to Duende.IdentityModel",
+      "pass": true,
+      "rationale": "The table and the first replace step map IdentityModel to Duende.IdentityModel."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

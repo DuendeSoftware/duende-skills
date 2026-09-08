@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs configures OpenIdConnectEvents on the OIDC handler",
+      "pass": true,
+      "rationale": "options.Events = new OpenIdConnectEvents { ... } is configured on the OIDC handler."
+    },
+    {
+      "assertion": "Program.cs sets OnRedirectToIdentityProvider to add AcrValues = 'tenant:myorg' to the ProtocolMessage",
+      "pass": true,
+      "rationale": "OnRedirectToIdentityProvider sets context.ProtocolMessage.AcrValues = \"tenant:myorg\"."
+    },
+    {
+      "assertion": "Program.cs sets OnRemoteFailure to call context.HandleResponse() and redirect to /auth-error",
+      "pass": true,
+      "rationale": "OnRemoteFailure calls context.HandleResponse() and redirects to /auth-error."
+    },
+    {
+      "assertion": "Program.cs passes login_hint via context.ProtocolMessage.LoginHint or SetParameter in the OnRedirectToIdentityProvider event",
+      "pass": true,
+      "rationale": "It sets context.ProtocolMessage.LoginHint = email inside OnRedirectToIdentityProvider."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

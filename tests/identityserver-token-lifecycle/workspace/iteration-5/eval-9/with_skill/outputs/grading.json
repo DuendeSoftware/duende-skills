@@ -1,0 +1,24 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that by default IdentityServer derives the iss claim from the incoming request's host/origin, so different domains yield different issuers",
+      "pass": true,
+      "rationale": "It clearly states the iss is derived from the request origin/host by default and shows a.example.com and b.example.com yielding different issuers with no extra config."
+    },
+    {
+      "assertion": "States that setting options.IssuerUri pins a single fixed issuer value and disables the dynamic multi-issuer behavior",
+      "pass": true,
+      "rationale": "It shows options.IssuerUri = \"...\" and explains this pins a fixed issuer and disables the per-host behavior."
+    },
+    {
+      "assertion": "Clarifies that multi-issuer is NOT multi-tenancy and does not isolate users, grants, or keys per domain",
+      "pass": true,
+      "rationale": "It explicitly says multi-issuer is not multi-tenancy and does not isolate users, grants, sessions, or signing keys, leaving tenant isolation to the implementer."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

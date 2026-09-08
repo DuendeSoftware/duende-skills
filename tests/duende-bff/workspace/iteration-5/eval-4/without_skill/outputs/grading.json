@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": false,
+      "rationale": "It leads with credentials: 'include' and CORS as the likely causes and only vaguely references a possible anti-forgery header, never identifying the missing X-CSRF: 1 header as the root cause."
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": false,
+      "rationale": "The provided wrapper adds credentials: 'include' but does not add the X-CSRF: 1 header."
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "The wrapper handles status === 401 by setting window.location.href = '/bff/login'."
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": false,
+      "rationale": "It navigates to /bff/login in the 401 handler but never explains that login/logout must be browser navigations rather than fetch, and does not mention logout."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

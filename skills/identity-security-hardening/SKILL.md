@@ -37,7 +37,7 @@ Use this skill when:
 - `aspnetcore-authentication` — Applying OIDC authentication hardening in client applications
 - `aspnetcore-authorization` — Enforcing authorization policies that consume the hardened tokens produced here
 
-Docs: https://docs.duendesoftware.com/identityserver/configuration/security
+Docs: https://docs.duendesoftware.com/general/security-best-practices/
 
 ---
 
@@ -139,7 +139,9 @@ builder.WebHost.ConfigureKestrel(options =>
 
 ## Pattern 2: Signing Key Security — Algorithm Selection and Rotation
 
-Signing keys are the root of trust for every token IdentityServer issues. The default RS256 algorithm is broadly compatible. ES256 (ECDSA) offers smaller tokens and is appropriate for new deployments.
+Signing keys are the root of trust for every token IdentityServer issues. The default RS256 algorithm is broadly compatible. ES256 (ECDSA) offers smaller tokens and is appropriate for new deployments. Supported signing algorithm families are **RS** (RSA PKCS#1), **PS** (RSA-PSS), and **ES** (ECDSA).
+
+> **Rotation overlap rule:** Always **publish a new public key before using it to sign tokens**, and **keep a retired public key available until all tokens signed with it have expired**. Consumers must be able to fetch the key (via JWKS) both before it starts signing and after it stops. **Automatic Key Management handles this overlap automatically**; **manual key managers must do phased rotation** (below).
 
 ### Automatic Key Management (Recommended)
 
@@ -180,6 +182,8 @@ builder.Services.AddIdentityServer(options =>
 ### Key Storage — ASP.NET Data Protection
 
 Automatic key management encrypts signing keys at rest using ASP.NET Data Protection. Configure Data Protection to use durable, shared storage. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for complete configuration guidance.
+
+> **v8 licensing note:** On IdentityServer v8, **Automatic Key Management, Server-Side Sessions, and SAML throw at startup** when a license is present but lacks the entitlement (other licensed features only log a warning). Run lower environments with the production license key so entitlement gaps surface before production. Also note the v8 license key is a signed JWT with a `kid` header and fails on v7/BFF runtimes with `IDX10503`. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for complete configuration guidance.
 
 ```csharp
 // ✅ Data Protection for load-balanced IdentityServer
@@ -682,9 +686,9 @@ Add a middleware that appends `Content-Security-Policy`, `X-Frame-Options: DENY`
 
 ## Pattern 10: Rate Limiting
 
-Use `AddRateLimiter` with a sliding window policy (e.g., 20 requests/minute per IP) for `/connect/token` and a fixed window policy (e.g., 10 requests/minute) for `/connect/authorize`. Set `RejectionStatusCode = 429`. In load-balanced deployments, use `X-Forwarded-For` (after `ForwardedHeaders` middleware) for accurate IP partitioning.
+Duende IdentityServer has **no built-in rate limiting**. Use ASP.NET Core `AddRateLimiter` (set `RejectionStatusCode = 429`), but note a critical constraint: IdentityServer matches its **protocol endpoints** (`/connect/token`, `/connect/authorize`) with its own middleware, **not** ASP.NET Core endpoint routing. You therefore **cannot attach a named per-endpoint policy** to those endpoints — only the **global limiter** applies. Approximate per-endpoint limits by partitioning the global limiter on `context.Request.Path`. Named policies (`RequireRateLimiting`) still work on your own routed Razor Pages (login/consent). In load-balanced deployments, use `X-Forwarded-For` (after `ForwardedHeaders` middleware) for accurate IP partitioning. For identity-aware limits, add an `ICustomTokenRequestValidator` (runs after the client/user are known).
 
-> See [docs/rate-limiting.md](docs/rate-limiting.md) for the complete rate limiter configuration and route application code.
+> See [docs/rate-limiting.md](docs/rate-limiting.md) for the complete rate limiter configuration, the protocol-endpoint caveat, and the `ICustomTokenRequestValidator` approach.
 
 ---
 
@@ -726,6 +730,62 @@ builder.Services.AddIdentityServer(options =>
     options.InputLengthRestrictions.CodeChallengeMaxLength = 128; // RFC 7636 maximum
 });
 ```
+
+---
+
+## Pattern 13: Audit Logging via Events
+
+Events emit high-level, structured audit records (login success/failure, token issuance, consent, errors) suitable for a security audit trail. Audit events can contain **usernames, subject/client ids, scopes, redirect URIs, and IPs** — token values are obfuscated.
+
+**Events are NOT enabled by default.** Turn them on in `AddIdentityServer`:
+
+```csharp
+// ✅ Enable audit events
+builder.Services.AddIdentityServer(options =>
+{
+    options.Events.RaiseSuccessEvents = true;
+    options.Events.RaiseFailureEvents = true;
+    options.Events.RaiseErrorEvents = true;
+    options.Events.RaiseInformationEvents = true;
+});
+```
+
+IdentityServer raises **protocol** events itself, but **UI actions (login success/failure) must be raised by your UI code**. Inject `IEventService` and call `RaiseAsync(...)`:
+
+```csharp
+// ✅ Raise UI login events from your account controller/page
+public LoginModel(IEventService events) => _events = events;
+
+await _events.RaiseAsync(
+    new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
+// or on failure:
+await _events.RaiseAsync(
+    new UserLoginFailureEvent(username, "invalid credentials"));
+```
+
+### Custom Sink — Replaces the Default Sink
+
+Implement `IEventSink` and register it. **`IEventService` sends each event to exactly ONE `IEventSink`, so registering a custom sink REPLACES the default (ASP.NET Core logger) sink.** If you still want log output, the custom sink must forward to logging itself.
+
+```csharp
+// ✅ Forward audit events to Seq (Serilog.Sinks.Seq) — and keep logging
+public sealed class SeqEventSink : IEventSink
+{
+    private readonly ILogger<SeqEventSink> _logger; // default sink is replaced — log here
+    public SeqEventSink(ILogger<SeqEventSink> logger) => _logger = logger;
+
+    public Task PersistAsync(Event evt)
+    {
+        _logger.LogInformation("{Name} ({Id}) {@Event}", evt.Name, evt.Id, evt);
+        return Task.CompletedTask;
+    }
+}
+
+// Registration — replaces the built-in logger sink
+services.AddTransient<IEventSink, SeqEventSink>();
+```
+
+Custom events derive from the base **`Event`** class with a **unique event id**.
 
 ---
 
@@ -876,6 +936,6 @@ options.KeyManagement.DataProtectKeys = true;
 - [PKCE (RFC 7636)](https://tools.ietf.org/html/rfc7636)
 - [JWT Client Authentication (RFC 7523)](https://datatracker.ietf.org/doc/html/rfc7523)
 - [mTLS Client Authentication (RFC 8705)](https://www.rfc-editor.org/rfc/rfc8705)
-- [OWASP OAuth 2.0 Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/OAuth_Cheat_Sheet.html)
+- [OWASP OAuth 2.0 Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html)
 - [ASP.NET Core Data Protection — Microsoft Docs](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview)
 - [ASP.NET Core Rate Limiting — Microsoft Docs](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit)

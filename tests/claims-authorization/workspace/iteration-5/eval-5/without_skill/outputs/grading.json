@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses context.Caller to differentiate between token types",
+      "pass": true,
+      "rationale": "Branches on context.Caller to differentiate identity vs access token claim sets."
+    },
+    {
+      "assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+      "pass": true,
+      "rationale": "Compares context.Caller against IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken."
+    },
+    {
+      "assertion": "Emits a minimal claim set (e.g. just name) for identity tokens",
+      "pass": true,
+      "rationale": "Identity-token branch adds only a single name claim."
+    },
+    {
+      "assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering",
+      "pass": false,
+      "rationale": "The richer access-token branch uses context.IssuedClaims.AddRange, not AddRequestedClaims, so it does not apply scope filtering."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

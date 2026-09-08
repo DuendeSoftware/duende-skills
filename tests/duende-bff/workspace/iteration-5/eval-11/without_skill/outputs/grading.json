@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": false,
+      "rationale": "The server registers AddBff() but never calls .AddBffBlazorClient()."
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": false,
+      "rationale": "It hand-rolls a custom AuthenticationStateProvider with a 30s PeriodicTimer instead of using AddBffBlazorClient's polling options."
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": false,
+      "rationale": "It uses AddHttpClient<WeatherClient>(...) rather than AddLocalApiHttpClient<WeatherClient>()."
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": false,
+      "rationale": "AddBff() is present but OIDC is wired via manual AddOpenIdConnect, not .ConfigureOpenIdConnect."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.MutualTls.DomainName = \"mtls\" for the sub-domain endpoint strategy",
+      "pass": true,
+      "rationale": "`options.MutualTls.DomainName = \"mtls\"` is set with the sub-domain endpoint explanation."
+    },
+    {
+      "assertion": "Configures certificate forwarding via AddCertificateForwarding with the proxy's certificate header (e.g. X-SSL-CERT) and a HeaderConverter, and calls UseCertificateForwarding() before UseAuthentication()",
+      "pass": true,
+      "rationale": "AddCertificateForwarding sets CertificateHeader = \"X-SSL-CERT\" with a HeaderConverter, and UseCertificateForwarding() is placed before UseAuthentication() with a note."
+    },
+    {
+      "assertion": "Sets Kestrel ClientCertificateMode.NoCertificate because the reverse proxy terminates TLS",
+      "pass": true,
+      "rationale": "Kestrel is configured with ClientCertificateMode.NoCertificate, explained by the proxy terminating TLS."
+    },
+    {
+      "assertion": "Uses AllowedCertificateTypes = CertificateTypes.Chained for production PKI certificates",
+      "pass": true,
+      "rationale": "AddCertificate sets AllowedCertificateTypes = CertificateTypes.Chained for production PKI."
+    },
+    {
+      "assertion": "Explains clients read the mTLS token endpoint from disco.MtlsEndpointAliases (mtls_endpoint_aliases in discovery) and that the proxy must strip or overwrite the inbound certificate header",
+      "pass": true,
+      "rationale": "Clients read disco.MtlsEndpointAliases.TokenEndpoint, and a security section explains the proxy must strip/overwrite the inbound X-SSL-CERT header to prevent spoofing."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

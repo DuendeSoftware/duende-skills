@@ -1,0 +1,29 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output calls AddClientCredentialsTokenManagement() to register the token management services",
+      "pass": true,
+      "rationale": "Calls builder.Services.AddClientCredentialsTokenManagement().AddClient(...)."
+    },
+    {
+      "assertion": "Output calls .AddClient() with at least TokenEndpoint, ClientId, and Scope configured",
+      "pass": true,
+      "rationale": "AddClient sets TokenEndpoint, ClientId, ClientSecret, and Scope."
+    },
+    {
+      "assertion": "Output registers an HTTP client with AddClientCredentialsHttpClient or AddClientCredentialsTokenHandler",
+      "pass": true,
+      "rationale": "Registers AddClientCredentialsHttpClient(\"catalog-client\", \"catalog\", ...)."
+    },
+    {
+      "assertion": "Output does NOT require any sub-documents to answer correctly (core SKILL.md is sufficient)",
+      "pass": true,
+      "rationale": "Answer is fully general client-credentials setup; no sub-document material is needed."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

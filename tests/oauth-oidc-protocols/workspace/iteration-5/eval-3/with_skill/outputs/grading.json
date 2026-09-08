@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code fetches the discovery document to resolve the introspection endpoint rather than hardcoding it",
+      "pass": true,
+      "rationale": "The code calls GetDiscoveryDocumentAsync and uses disco.IntrospectionEndpoint instead of a hardcoded path."
+    },
+    {
+      "assertion": "Code calls IntrospectTokenAsync (or POSTs to the introspection endpoint) with the API's ClientId and ClientSecret for authentication",
+      "pass": true,
+      "rationale": "IntrospectTokenAsync is called with ClientId = \"catalog-api\" and ClientSecret = \"api-secret\"."
+    },
+    {
+      "assertion": "Code checks the IsActive property (or 'active' field) of the introspection response to determine if the token is valid",
+      "pass": true,
+      "rationale": "The code checks `if (!response.IsActive)` to reject invalid tokens and notes it maps to the RFC 7662 active field."
+    },
+    {
+      "assertion": "Response explains that reference tokens are opaque identifiers (not self-contained JWTs) and require server-side validation via introspection",
+      "pass": true,
+      "rationale": "The intro explains reference tokens are opaque random identifiers with no local signature and must be validated via the introspection endpoint."
+    },
+    {
+      "assertion": "Response mentions that reference tokens enable immediate revocation unlike JWTs which are valid until expiry",
+      "pass": true,
+      "rationale": "It states a revoked reference token stops working immediately whereas a JWT remains valid until its exp."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

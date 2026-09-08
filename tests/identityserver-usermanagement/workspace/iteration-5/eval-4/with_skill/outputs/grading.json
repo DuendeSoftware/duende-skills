@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database",
+      "pass": true,
+      "rationale": "`options.AddAspNetIdentityMigration(migration => { migration.ConnectionString = ... legacy Identity DB ... })` is shown pointing at the existing database."
+    },
+    {
+      "assertion": "States that existing password hashes are preserved (users can log in with current passwords)",
+      "pass": true,
+      "rationale": "A dedicated section explains password hashes are imported verbatim so users log in immediately with the same password, no reset."
+    },
+    {
+      "assertion": "Mentions that migration is idempotent (subsequent runs skip already-imported users)",
+      "pass": true,
+      "rationale": "It states the migration is idempotent and that subsequent runs skip users already imported."
+    },
+    {
+      "assertion": "Mentions that after migration users can enroll in passwordless methods",
+      "pass": true,
+      "rationale": "It notes imported users can enroll in OTP, TOTP, and passkeys after migration while retaining their password fallback."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A Document class/record is defined with at least Department and OwnerId properties",
+      "pass": true,
+      "rationale": "record Document defines Department and OwnerId (plus Id/Title)."
+    },
+    {
+      "assertion": "An Operations class is defined with static OperationAuthorizationRequirement fields for Read and Edit",
+      "pass": true,
+      "rationale": "static class Operations exposes static readonly OperationAuthorizationRequirement Read and Edit."
+    },
+    {
+      "assertion": "DocumentAuthorizationHandler extends AuthorizationHandler<OperationAuthorizationRequirement, Document>",
+      "pass": true,
+      "rationale": "The handler is declared AuthorizationHandler<OperationAuthorizationRequirement, Document>."
+    },
+    {
+      "assertion": "The Read operation checks the user's 'department' claim against the resource's Department property",
+      "pass": true,
+      "rationale": "context.User.HasClaim(\"department\", resource.Department) guards the Read branch."
+    },
+    {
+      "assertion": "The Edit operation checks the user's 'sub' claim against the resource's OwnerId property",
+      "pass": true,
+      "rationale": "userId from FindFirst(\"sub\") is compared to resource.OwnerId in the Edit branch."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

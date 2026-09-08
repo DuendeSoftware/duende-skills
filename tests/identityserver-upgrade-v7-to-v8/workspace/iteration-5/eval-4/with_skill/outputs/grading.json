@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that EF migrations are required even if not using SAML",
+      "pass": true,
+      "rationale": "Explicitly states migrations are required even for non-SAML deployments because the schema must match the v8 model."
+    },
+    {
+      "assertion": "Shows the migration command: dotnet ef migrations add Update_DuendeIdentityServer_v8_0",
+      "pass": true,
+      "rationale": "Shows the exact command dotnet ef migrations add Update_DuendeIdentityServer_v8_0 with the -c ConfigurationDbContext option."
+    },
+    {
+      "assertion": "Mentions that v8 adds SAML-related tables to the schema",
+      "pass": true,
+      "rationale": "Explains v8 added SAML-related tables to both the Configuration and Operational stores."
+    },
+    {
+      "assertion": "Includes dotnet ef database update or equivalent to apply the migration",
+      "pass": true,
+      "rationale": "Includes dotnet ef database update for both ConfigurationDbContext and PersistedGrantDbContext."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

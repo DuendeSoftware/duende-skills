@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response configures ForwardedHeadersOptions with ForwardedHeaders including XForwardedProto to restore the original HTTPS scheme",
+      "pass": true,
+      "rationale": "It configures ForwardedHeadersOptions including ForwardedHeaders.XForwardedProto and explains it restores https as the request scheme."
+    },
+    {
+      "assertion": "Response calls UseForwardedHeaders() early in the pipeline, before UseIdentityServer()",
+      "pass": true,
+      "rationale": "app.UseForwardedHeaders() is placed before UseIdentityServer() with an explicit instruction to call it early."
+    },
+    {
+      "assertion": "Response mentions the ASPNETCORE_FORWARDEDHEADERS_ENABLED=true environment variable as a simpler alternative for cloud/Kubernetes",
+      "pass": true,
+      "rationale": "A 'Simpler alternative' section gives ASPNETCORE_FORWARDEDHEADERS_ENABLED=true for containerized/Kubernetes deployments."
+    },
+    {
+      "assertion": "Response explains that the reverse proxy strips the original scheme and host headers, causing IdentityServer to generate HTTP URLs in discovery",
+      "pass": true,
+      "rationale": "The root-cause section explains the proxy strips the original scheme/host, causing http:// discovery URLs and missing secure cookies."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

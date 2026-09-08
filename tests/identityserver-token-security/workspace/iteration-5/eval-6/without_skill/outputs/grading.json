@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)",
+      "pass": true,
+      "rationale": "`opt.KeyManagement.SigningAlgorithms.Add(new SigningAlgorithmOptions(SecurityAlgorithms.RsaSsaPssSha256))` adds PS256."
+    },
+    {
+      "assertion": "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms",
+      "pass": false,
+      "rationale": "The response only sets RequireDPoP and mentions PS256/ES256 in prose; it never configures DPoP.SupportedDPoPSigningAlgorithms with the algorithm list."
+    },
+    {
+      "assertion": "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0",
+      "pass": false,
+      "rationale": "It only advises reducing clock skew conceptually; it does not set JwtValidationClockSkew = TimeSpan.FromSeconds(10)."
+    },
+    {
+      "assertion": "Client has RequireDPoP = true AND RequirePushedAuthorization = true",
+      "pass": true,
+      "rationale": "The client sets both `RequireDPoP = true` and `RequirePushedAuthorization = true`."
+    },
+    {
+      "assertion": "Client uses a JsonWebKey secret (not shared secret) for authentication, consistent with FAPI 2.0 requirement for private_key_jwt or mTLS",
+      "pass": true,
+      "rationale": "The client uses a JsonWebKey ClientSecret for private_key_jwt authentication, explicitly not a shared secret."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

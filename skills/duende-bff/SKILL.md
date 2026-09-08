@@ -24,7 +24,7 @@ invocable: false
 4. **Server-Side Sessions for Production** — The default in-memory cookie session is unsuitable for production; persist sessions with `Duende.BFF.EntityFramework`
 5. **Token Management Is Automatic** — BFF integrates with `Duende.AccessTokenManagement`; never manually refresh tokens or pass raw access tokens to the frontend
 
-Docs: https://docs.duendesoftware.com/identityserver/bff
+Docs: https://docs.duendesoftware.com/bff/
 
 ---
 
@@ -341,6 +341,10 @@ app.MapRemoteBffApiEndpoint("/", new Uri("https://backend-service")); // Exposes
 ### Server-Side Sessions
 
 Default cookie-based sessions embed claims and tokens in the cookie. For production, move session data server-side: the cookie only carries a session ID, keeping cookie size small and enabling server-initiated revocation.
+
+> **Tokens never touch the cookie with server-side sessions.** All tokens — including **refresh tokens** — live in the server-side session store; the cookie holds only the session id. This is why the store choice is a security/availability decision, not just a size optimization.
+>
+> **The in-memory store is not durable and not shared:** sessions are lost on process restart, and in a load-balanced deployment a request routed to a *different* instance won't find the session (the user appears logged out). For any multi-node BFF, use a **persistent, shared** store — the EF store from `Duende.BFF.EntityFramework` (`AddEntityFrameworkServerSideSessions`).
 
 ```csharp
 // ✅ In-memory server-side sessions (development/testing only)

@@ -248,6 +248,40 @@
         "Mentions the alternative of defining an ApiResource as a more targeted approach",
         "Does NOT suggest using the Implicit grant type or any deprecated patterns"
       ]
+    },
+    {
+      "id": 109,
+      "prompt": "I need parameterized scopes like 'transaction:abc123'. Write a scope parser that extracts the parameter, register it with IdentityServer, and show me how to read the parsed parameter value inside my IProfileService so I can emit it as a claim.",
+      "expected_output": "A parser subclassing DefaultScopeParser overriding ParseScopeValue that calls SetParsedValues for the transaction scope. Registration via AddScopeParser<T>(). In IProfileService, reads context.RequestedResources.ParsedScopes to find the parsed scope by ParsedName and uses ParsedParameter.",
+      "sub_documents": ["resources-scopes.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Subclasses DefaultScopeParser (or implements IScopeParser) and overrides ParseScopeValue(ParseScopeContext)",
+        "Uses scopeContext.SetParsedValues(name, parameter) for the parameterized scope and SetError/SetIgnore for other cases",
+        "Registers the parser via AddScopeParser<T>() on the IdentityServer builder",
+        "In IProfileService reads context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == \"transaction\") and uses its ParsedParameter",
+        "Does NOT define the parameterized value as a static ApiScope name"
+      ]
+    },
+    {
+      "id": 110,
+      "prompt": "I need custom resource validation logic that runs at the authorize/token endpoints. Show me how to implement and register a custom IResourceValidator in Duende IdentityServer v8, including the correct method signature. I also want to wrap the default validator rather than replace it entirely.",
+      "expected_output": "A class implementing IResourceValidator with ValidateRequestedResourcesAsync(ResourceValidationRequest request, CancellationToken ct). Registered via AddResourceValidator<T>(). When decorating the default, also registers services.AddTransient<DefaultResourceValidator>(). Notes the CancellationToken was added in v8.",
+      "sub_documents": ["resources-scopes.md"],
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Implements IResourceValidator with method ValidateRequestedResourcesAsync taking ResourceValidationRequest and a CancellationToken",
+        "Notes that the CancellationToken parameter was added in v8",
+        "Registers the validator via AddResourceValidator<T>() on the IdentityServer builder",
+        "When wrapping/decorating the default, also registers services.AddTransient<DefaultResourceValidator>()",
+        "References ResourceValidationRequest members such as Client, Scopes, and ResourceIndicators (RFC 8707)"
+      ]
     }
   ]
 }

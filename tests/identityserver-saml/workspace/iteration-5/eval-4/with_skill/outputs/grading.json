@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that SLO uses front-channel logout via iframes (not redirect chains)",
+      "pass": true,
+      "rationale": "States SLO uses front-channel logout driven by iframes, explicitly 'not a chain of browser redirects', and describes parallel iframe notification."
+    },
+    {
+      "assertion": "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect",
+      "pass": true,
+      "rationale": "Shows `SingleLogoutServiceUrls` with a `SamlEndpointType` whose Binding is `SamlBinding.HttpRedirect`."
+    },
+    {
+      "assertion": "Mentions that partial logout is normal/expected when some SPs don't respond",
+      "pass": true,
+      "rationale": "Explicitly states 'Partial logout is expected behavior, not an error' and warns against treating a missing SP response as failure."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments",
+      "pass": true,
+      "rationale": "Recommends a distributed `ISamlLogoutSessionStore` (EF Core/Redis) for multi-node deployments."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

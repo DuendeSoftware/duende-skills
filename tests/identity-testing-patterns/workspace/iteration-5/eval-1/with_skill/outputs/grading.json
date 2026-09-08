@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "Defines `public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>` with the required constructor and HandleAuthenticateAsync override."
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": true,
+      "rationale": "Provides `ITestClaimsProvider` with `GetClaims()` plus a `TestClaimsProvider` exposing `SetClaims`/`ClearClaims`."
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "ApiFactory calls `AddAuthentication(TestAuthHandler.SchemeName).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(...)` in ConfigureTestServices."
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "GetProducts_Unauthenticated_ShouldReturn401 calls `ClaimsProvider.ClearClaims()` and asserts `HttpStatusCode.Unauthorized`."
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely — authorization policies remain active",
+      "pass": true,
+      "rationale": "Explicitly notes AddAuthorization is untouched and ApiScope/AdminOnly policies remain enforced; only authentication is replaced."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

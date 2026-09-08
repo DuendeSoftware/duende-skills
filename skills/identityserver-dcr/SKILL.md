@@ -56,6 +56,8 @@ app.MapDynamicClientRegistration();
 app.Run();
 ```
 
+`MapDynamicClientRegistration()` is an endpoint-routing extension from the **`Duende.IdentityServer.Configuration`** package (separate from `Duende.IdentityServer`). Call it where you configure the pipeline/endpoint routing — in the quickstart/template hosts this is the `ConfigurePipeline()` method (`HostingExtensions.cs`), alongside `UseIdentityServer()`. `AddIdentityServerConfiguration()` registers the DCR services; `MapDynamicClientRegistration()` maps the `/connect/dcr` endpoint. Both are required.
+
 ### Securing the DCR Endpoint
 
 Apply standard ASP.NET Core authorization policies to the DCR endpoint:

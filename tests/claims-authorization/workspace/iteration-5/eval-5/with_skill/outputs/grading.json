@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses context.Caller to differentiate between token types",
+      "pass": true,
+      "rationale": "Branches on context.Caller to decide the claim set per token type."
+    },
+    {
+      "assertion": "Checks for IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken for identity tokens",
+      "pass": true,
+      "rationale": "Explicitly compares context.Caller == IdentityServerConstants.ProfileDataCallers.ClaimsProviderIdentityToken."
+    },
+    {
+      "assertion": "Emits a minimal claim set (e.g. just name) for identity tokens",
+      "pass": true,
+      "rationale": "Identity-token branch adds only JwtClaimTypes.Name and returns."
+    },
+    {
+      "assertion": "Emits a richer claim set for access tokens, using AddRequestedClaims for scope filtering",
+      "pass": true,
+      "rationale": "Access-token branch builds name/email/department/cost_center/role and passes them through context.AddRequestedClaims."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

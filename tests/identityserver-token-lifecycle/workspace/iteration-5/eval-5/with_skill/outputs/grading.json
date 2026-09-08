@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A class extending DefaultRefreshTokenService is defined",
+      "pass": true,
+      "rationale": "ResilientRefreshTokenService : DefaultRefreshTokenService is defined with the base constructor wired up."
+    },
+    {
+      "assertion": "The AcceptConsumedTokenAsync method is overridden to allow consumed tokens within a 30-second grace window using ConsumedTime",
+      "pass": true,
+      "rationale": "AcceptConsumedTokenAsync is overridden and returns true when now minus refreshToken.ConsumedTime is under 30 seconds."
+    },
+    {
+      "assertion": "The service is registered as IRefreshTokenService in the DI container",
+      "pass": true,
+      "rationale": "TryAddTransient<IRefreshTokenService, ResilientRefreshTokenService>() is used."
+    },
+    {
+      "assertion": "The mobile_app client has RefreshTokenUsage set to TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "The mobile_app client sets RefreshTokenUsage = TokenUsage.OneTimeOnly."
+    },
+    {
+      "assertion": "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options",
+      "pass": true,
+      "rationale": "options.PersistentGrants.DeleteOneTimeOnlyRefreshTokensOnUse = false is set so consumed tokens are marked, not deleted."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

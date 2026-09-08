@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that SameSite=Strict prevents the cookie from being set during the OIDC callback redirect from IdentityServer",
+      "pass": true,
+      "rationale": "The response explains the callback is a cross-site top-level navigation from identity.example.com and that Strict blocks the cookie there, causing the loop."
+    },
+    {
+      "assertion": "Response recommends changing SameSiteMode.Strict to SameSiteMode.Lax for the authentication cookie",
+      "pass": true,
+      "rationale": "It explicitly recommends switching from Strict to Lax as the fix."
+    },
+    {
+      "assertion": "Response includes code setting options.Cookie.SameSite = SameSiteMode.Lax on the cookie handler",
+      "pass": true,
+      "rationale": "The AddCookie block sets options.Cookie.SameSite = SameSiteMode.Lax."
+    },
+    {
+      "assertion": "Response mentions setting Cookie.SecurePolicy to Always for HTTPS",
+      "pass": true,
+      "rationale": "The code sets options.Cookie.SecurePolicy = CookieSecurePolicy.Always and explains it enforces HTTPS-only delivery."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

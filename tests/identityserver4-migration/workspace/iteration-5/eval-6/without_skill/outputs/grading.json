@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends removing AddDeveloperSigningCredential",
+      "pass": true,
+      "rationale": "It explicitly drops the AddDeveloperSigningCredential() call."
+    },
+    {
+      "assertion": "Response mentions Duende's automatic key management as the recommended replacement",
+      "pass": true,
+      "rationale": "It presents Duende automatic key management as the recommended replacement for the developer credential."
+    },
+    {
+      "assertion": "Response addresses the concern about existing tokens by suggesting a transitional period where the old key remains available for validation",
+      "pass": true,
+      "rationale": "The rolling transition keeps the current key available for validation and publishes both keys until old tokens expire."
+    },
+    {
+      "assertion": "Response suggests that if all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically",
+      "pass": true,
+      "rationale": "The coordinated restart option states relying parties re-fetch discovery/JWKS and pick up the new key automatically."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

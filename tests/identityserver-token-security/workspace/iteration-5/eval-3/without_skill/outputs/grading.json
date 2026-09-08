@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.MutualTls.Enabled = true in AddIdentityServer options",
+      "pass": true,
+      "rationale": "The AddIdentityServer options set `options.MutualTls.Enabled = true`."
+    },
+    {
+      "assertion": "Sets options.MutualTls.DomainName = 'mtls' for the mTLS subdomain",
+      "pass": true,
+      "rationale": "`options.MutualTls.DomainName = \"mtls\"` is set for the sub-domain endpoints."
+    },
+    {
+      "assertion": "Calls AddMutualTlsSecretValidators() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "`.AddMutualTlsSecretValidators()` is chained on the IdentityServer builder."
+    },
+    {
+      "assertion": "Configures the client secret with Type = SecretTypes.X509CertificateThumbprint (or IdentityServerConstants.SecretTypes.X509CertificateThumbprint)",
+      "pass": true,
+      "rationale": "The client secret uses Type = SecretTypes.X509CertificateThumbprint with the given thumbprint."
+    },
+    {
+      "assertion": "Adds certificate authentication scheme (AddCertificate) and references it via MutualTls.ClientCertificateAuthenticationScheme",
+      "pass": false,
+      "rationale": "AddCertificate() is registered with the default scheme, but the response never sets MutualTls.ClientCertificateAuthenticationScheme to wire the scheme to mTLS."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

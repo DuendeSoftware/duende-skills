@@ -1,0 +1,29 @@
+{
+  "eval_id": 108,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Shows setting options.EmitStaticAudienceClaim = true in the IdentityServer options",
+      "pass": true,
+      "rationale": "Sets options.EmitStaticAudienceClaim = true in the options lambda."
+    },
+    {
+      "assertion": "Explains that this emits a static audience claim of '{issuer}/resources'",
+      "pass": true,
+      "rationale": "States the emitted aud is {issuer}/resources and shows the token JSON."
+    },
+    {
+      "assertion": "Mentions the alternative of defining an ApiResource as a more targeted approach",
+      "pass": true,
+      "rationale": "Notes the alternative of a minimal ApiResource for a more targeted, API-specific aud."
+    },
+    {
+      "assertion": "Does NOT suggest using the Implicit grant type or any deprecated patterns",
+      "pass": true,
+      "rationale": "Explicitly warns against implicit/deprecated patterns; none are suggested."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

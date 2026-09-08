@@ -633,7 +633,7 @@ Use this checklist to track your migration progress:
 ## Resources
 
 - [Migration Analysis Tool](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-upgrade-analysis/) — pre-migration configuration inspector
-- [Official Duende Migration Guide: IdentityServer4 to Duende v8](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-to-duende-identityserver/)
+- [Official Duende Migration Guide: IdentityServer4 to Duende v8](https://docs.duendesoftware.com/identityserver/upgrades/identityserver4-to-duende-identityserver-v8/)
 - [UpgradeSample-IdentityServer4-v3 (reference project)](https://github.com/DuendeSoftware/UpgradeSample-IdentityServer4-v3)
 - [Duende IdentityServer Upgrade Overview](https://docs.duendesoftware.com/identityserver/upgrades/)
 - [Microsoft ASP.NET Core Migration Guides](https://learn.microsoft.com/en-us/aspnet/core/migration/)

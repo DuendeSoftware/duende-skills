@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "AddOperationalStore options set EnableTokenCleanup to false",
+      "pass": true,
+      "rationale": "options.EnableTokenCleanup = false is set on the web node's operational store."
+    },
+    {
+      "assertion": "A class inheriting from BackgroundService (or IHostedService) is created named TokenCleanupWorker or similar",
+      "pass": true,
+      "rationale": "public class TokenCleanupWorker : BackgroundService is defined."
+    },
+    {
+      "assertion": "The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework",
+      "pass": true,
+      "rationale": "It resolves TokenCleanupService via scope.ServiceProvider.GetRequiredService<TokenCleanupService>() with the Duende.IdentityServer.EntityFramework using directive."
+    },
+    {
+      "assertion": "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken",
+      "pass": false,
+      "rationale": "The loop calls RemoveExpiredGrantsAsync() (the older IdentityServer4-era name) instead of the required CleanupGrantsAsync(), so the specific method the assertion names is not called."
+    },
+    {
+      "assertion": "The delay between cleanup runs is 2 hours (TimeSpan.FromHours(2) or equivalent)",
+      "pass": true,
+      "rationale": "await Task.Delay(TimeSpan.FromHours(2), stoppingToken) sets the 2-hour interval."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

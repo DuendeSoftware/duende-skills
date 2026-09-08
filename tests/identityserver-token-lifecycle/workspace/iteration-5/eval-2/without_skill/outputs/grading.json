@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web_app client has AccessTokenType = AccessTokenType.Reference",
+      "pass": true,
+      "rationale": "AccessTokenType = AccessTokenType.Reference is set on the client."
+    },
+    {
+      "assertion": "The web_app client has AccessTokenLifetime set to 900 (15 minutes)",
+      "pass": true,
+      "rationale": "AccessTokenLifetime = 900 is set with a 15-minute comment."
+    },
+    {
+      "assertion": "The ApiResource api1_resource has ApiSecrets with at least one Secret configured",
+      "pass": true,
+      "rationale": "api1_resource is given ApiSecrets = { new Secret(...) }."
+    },
+    {
+      "assertion": "The Secret uses Sha256() hashing",
+      "pass": true,
+      "rationale": "The secret is new Secret(\"api1_secret\".Sha256())."
+    },
+    {
+      "assertion": "Explains that JWT access tokens cannot be revoked (RFC 7009 revocation applies only to reference access tokens and refresh tokens), which is why reference tokens are used here for immediate revocation",
+      "pass": true,
+      "rationale": "It explains JWTs are self-contained and stay valid until expiry (cannot be revoked) while reference tokens can be invalidated immediately, though it does not cite RFC 7009 by number."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

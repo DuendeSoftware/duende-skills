@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The notification service implements SendLoginRequestAsync(BackchannelUserLoginRequest request, CancellationToken) and is registered via AddBackchannelAuthenticationUserNotificationService<T>()",
+      "pass": true,
+      "rationale": "CibaUserNotificationService implements SendLoginRequestAsync(BackchannelUserLoginRequest, CancellationToken) and is registered via AddBackchannelAuthenticationUserNotificationService<CibaUserNotificationService>()."
+    },
+    {
+      "assertion": "Code uses request.BindingMessage and treats request.InternalId as sensitive (not exposed in the notification)",
+      "pass": true,
+      "rationale": "The notification uses request.BindingMessage and explicitly keeps request.InternalId out of the push payload/deep link, flagging it as sensitive."
+    },
+    {
+      "assertion": "The approval UI calls GetPendingLoginRequestsForCurrentUserAsync and GetLoginRequestByInternalIdAsync on IBackchannelAuthenticationInteractionService",
+      "pass": true,
+      "rationale": "OnGetAsync calls GetPendingLoginRequestsForCurrentUserAsync and OnPostAsync reloads via GetLoginRequestByInternalIdAsync on IBackchannelAuthenticationInteractionService."
+    },
+    {
+      "assertion": "Ownership is verified by comparing request.Subject.GetSubjectId() to the current user before completing",
+      "pass": true,
+      "rationale": "Before completing, it compares request.Subject.GetSubjectId() to User.GetSubjectId() and returns Forbid() on mismatch."
+    },
+    {
+      "assertion": "Approval calls CompleteLoginRequestAsync with a CompleteBackchannelLoginRequest whose ScopesValuesConsented is set (empty/null to deny), and the response notes the server rejects scopes not in the original CIBA request",
+      "pass": true,
+      "rationale": "Approve sets ScopesValuesConsented to the validated scopes and deny sets it to null via CompleteBackchannelLoginRequest, and the security notes state the server rejects any scope not in the original CIBA request."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

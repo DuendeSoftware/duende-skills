@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that AddUserManagement() automatically registers IProfileService",
+      "pass": false,
+      "rationale": "The response instead shows writing and registering a custom IProfileService (or relying on AddAspNetIdentity); it never states AddUserManagement() auto-registers one."
+    },
+    {
+      "assertion": "Mentions that claims mapping is based on requested scopes (openid → sub, email → email)",
+      "pass": true,
+      "rationale": "It explains claims are gated by requested identity scopes, with sub from openid and email/email_verified from the email scope, using AddRequestedClaims."
+    },
+    {
+      "assertion": "Notes that custom user attributes can be exposed via custom identity resources",
+      "pass": true,
+      "rationale": "It defines a custom IdentityResource (company_profile) declaring department/employee_id and allows the scope on the client."
+    },
+    {
+      "assertion": "Sets LoginUrl and LogoutUrl in IdentityServer options to point to account pages",
+      "pass": false,
+      "rationale": "The response does not set or mention UserInteraction.LoginUrl/LogoutUrl."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

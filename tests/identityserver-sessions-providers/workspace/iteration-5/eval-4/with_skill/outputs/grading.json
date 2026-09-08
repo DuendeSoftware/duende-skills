@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs removes or replaces at least one static AddOpenIdConnect registration with dynamic provider configuration",
+      "pass": true,
+      "rationale": "The static AddOpenIdConnect(\"EntraId\", ...) is removed and replaced with AddConfigurationStore-backed dynamic providers, explicitly noted in a comment."
+    },
+    {
+      "assertion": "Program.cs or a seed file creates an OidcProvider with Scheme set to 'demoidsrv' and Authority set to 'https://demo.duendesoftware.com'",
+      "pass": true,
+      "rationale": "SeedData adds an OidcProvider with Scheme = \"demoidsrv\", Authority = \"https://demo.duendesoftware.com\", and ClientId = \"login\"."
+    },
+    {
+      "assertion": "Program.cs calls AddConfigurationStoreCache() for caching dynamic provider lookups",
+      "pass": true,
+      "rationale": "The builder chain calls .AddConfigurationStoreCache() after AddConfigurationStore."
+    },
+    {
+      "assertion": "Response mentions or acknowledges that dynamic identity providers require the Enterprise Edition",
+      "pass": true,
+      "rationale": "An explicit edition note states dynamic identity providers are a Duende IdentityServer Enterprise Edition feature."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

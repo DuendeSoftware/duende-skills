@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Replaces ICache<T> with HybridCache from Microsoft.Extensions.Caching.Hybrid",
+      "pass": true,
+      "rationale": "Correctly identifies HybridCache from Microsoft.Extensions.Caching.Hybrid as the replacement for the Duende ICache abstraction."
+    },
+    {
+      "assertion": "Uses [FromKeyedServices(\"ConfigurationStoreCache\")] or ServiceProviderKeys.ConfigurationStoreCache for keyed injection",
+      "pass": false,
+      "rationale": "Injects a plain HybridCache and explicitly admits uncertainty about any keyed-service convention; the ConfigurationStoreCache key is not used."
+    },
+    {
+      "assertion": "Uses GetOrCreateAsync (not GetOrAddAsync) for the cache retrieval pattern",
+      "pass": true,
+      "rationale": "Uses _cache.GetOrCreateAsync and notes it replaces the old GetOrAddAsync-style call."
+    },
+    {
+      "assertion": "Mentions that CachingOptions.CacheLockTimeout is obsolete",
+      "pass": false,
+      "rationale": "CacheLockTimeout / CachingOptions is never mentioned."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

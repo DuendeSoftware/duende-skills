@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Replaces Duende.IdentityServer.IClock with System.TimeProvider",
+      "pass": true,
+      "rationale": "Correctly identifies System.TimeProvider as the replacement for the custom IClock, matching the well-known modern .NET pattern."
+    },
+    {
+      "assertion": "Uses GetUtcNow() method instead of UtcNow property",
+      "pass": true,
+      "rationale": "Uses _timeProvider.GetUtcNow() and explicitly notes it is a method replacing the UtcNow property."
+    },
+    {
+      "assertion": "TimeProvider is injected via constructor (standard DI)",
+      "pass": true,
+      "rationale": "Injects TimeProvider through the constructor via standard DI and discusses registration/faking."
+    },
+    {
+      "assertion": "Does NOT reference Duende.IdentityServer.IClock or ICancellationTokenProvider",
+      "pass": true,
+      "rationale": "The final code uses neither; IClock appears only as the abstraction being removed and ICancellationTokenProvider is not mentioned."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

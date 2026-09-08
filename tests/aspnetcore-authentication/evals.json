@@ -128,6 +128,23 @@
         "Response shows setting TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role' so User.Identity.Name and role checks still work",
         "Response explains this is a common pitfall where claims are silently renamed by the handler"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "My ASP.NET Core web app authenticates against IdentityServer which issues certificate-bound (mTLS) tokens. The stock OIDC handler keeps calling the non-mTLS token endpoint and doesn't present my client certificate. How do I wire up the OIDC handler for mTLS?",
+      "expected_output": "Set BackchannelHttpHandler to a SocketsHttpHandler with SslClientAuthenticationOptions.ClientCertificates so back-channel calls present the client certificate (no client secret needed), and provide a custom IConfigurationManager<OpenIdConnectConfiguration> that rewrites TokenEndpoint, IntrospectionEndpoint, DeviceAuthorizationEndpoint, and (on .NET 9+) PushedAuthorizationRequestEndpoint to the mtls_endpoint_aliases values.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApp.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets options.BackchannelHttpHandler to a SocketsHttpHandler with SslOptions.ClientCertificates (SslClientAuthenticationOptions) containing the client certificate",
+        "Notes that no ClientSecret is required because the client certificate authenticates the client on back-channel calls",
+        "Implements a custom IConfigurationManager<OpenIdConnectConfiguration> that rewrites endpoints to the mtls_endpoint_aliases values from discovery",
+        "Rewrites TokenEndpoint, IntrospectionEndpoint, and DeviceAuthorizationEndpoint to their mTLS aliases",
+        "Explains that on .NET 9+ the handler auto-uses PAR when advertised, so the PushedAuthorizationRequestEndpoint must also be rewritten to the mTLS alias"
+      ]
     }
   ]
 }

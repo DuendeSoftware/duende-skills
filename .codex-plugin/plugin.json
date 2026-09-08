@@ -1,6 +1,6 @@
 {
   "name": "duende-skills",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Duende development skills and agents — covering OAuth/OIDC protocols, IdentityServer, token management, ASP.NET Core authentication/authorization, BFF patterns, and secure identity architecture",
   "author": {
     "name": "Duende Software",
@@ -32,6 +32,11 @@
     "developerName": "Duende Software",
     "category": "Developer Tools",
     "capabilities": ["Read"],
+    "defaultPrompt": [
+      "My IdentityServer is deployed behind an nginx reverse proxy. How do I fix the wrong URL schema used?",
+      "Configure the IdentityServerOptions for my project. Also configure data protection for a multi-instance deployment.",
+      "Give me a complete checklist of everything I need to do to upgrade from IdentityServer v7.4 to the latest."
+    ],
     "websiteURL": "https://duendesoftware.com",
     "privacyPolicyURL": "https://duendesoftware.com/privacy",
     "termsOfServiceURL": "https://duendesoftware.com/terms",

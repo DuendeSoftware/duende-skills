@@ -1,0 +1,39 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Changes the test project SDK from Microsoft.NET.Sdk to Microsoft.NET.Sdk.Web",
+      "pass": true,
+      "rationale": "Shows changing the SDK from `Microsoft.NET.Sdk` to `Microsoft.NET.Sdk.Web`."
+    },
+    {
+      "assertion": "Adds Microsoft.AspNetCore.Mvc.Testing (for WebApplicationFactory<T>) and Duende.IdentityModel packages to the test project",
+      "pass": true,
+      "rationale": "csproj adds both `Microsoft.AspNetCore.Mvc.Testing` and `Duende.IdentityModel` references."
+    },
+    {
+      "assertion": "Uses a test class with IClassFixture<WebApplicationFactory<Program>> and factory.CreateClient()",
+      "pass": true,
+      "rationale": "Test class implements `IClassFixture<WebApplicationFactory<Program>>` and uses `factory.CreateClient()`."
+    },
+    {
+      "assertion": "Calls GetDiscoveryDocumentAsync and asserts disco.IsError is false",
+      "pass": true,
+      "rationale": "Discovery_document_is_available calls `GetDiscoveryDocumentAsync` and asserts `Assert.False(disco.IsError)`."
+    },
+    {
+      "assertion": "Calls RequestClientCredentialsTokenAsync against 'connect/token' and asserts the token is not an error",
+      "pass": true,
+      "rationale": "Token test uses `Address = \"connect/token\"` with `RequestClientCredentialsTokenAsync` and asserts `Assert.False(token.IsError)`."
+    },
+    {
+      "assertion": "Notes that mutating shared static Config collections can cause cross-test interference under parallel test execution",
+      "pass": false,
+      "rationale": "The response mentions matching client values to the template Config but does not warn about mutating shared static Config collections causing cross-test interference under parallel execution."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 6,
+  "score": 0.83
+}

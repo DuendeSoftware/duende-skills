@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that IdentityServer matches protocol endpoints with its own middleware (not ASP.NET Core endpoint routing), so named per-endpoint rate limiting policies do not apply to /connect/token or /connect/authorize",
+      "pass": true,
+      "rationale": "Explains the paths are handled by the UseIdentityServer middleware rather than routed endpoints, so no routed endpoint carries the policy metadata and the named policy never triggers."
+    },
+    {
+      "assertion": "States that only the global limiter applies to protocol endpoints and shows partitioning the global limiter on context.Request.Path",
+      "pass": true,
+      "rationale": "States only a global limiter will see those requests and partitions the GlobalLimiter on context.Request.Path."
+    },
+    {
+      "assertion": "Registers the rate limiter middleware (UseRateLimiter) before app.UseIdentityServer()",
+      "pass": true,
+      "rationale": "Shows app.UseRateLimiter() before app.UseIdentityServer() and explains the ordering requirement."
+    },
+    {
+      "assertion": "Notes that IdentityServer has no built-in rate limiting and/or mentions ICustomTokenRequestValidator (AddCustomTokenRequestValidator) for identity-aware limits",
+      "pass": false,
+      "rationale": "Does not state IdentityServer has no built-in rate limiting nor mention ICustomTokenRequestValidator/AddCustomTokenRequestValidator; it only suggests a reverse-proxy layer."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

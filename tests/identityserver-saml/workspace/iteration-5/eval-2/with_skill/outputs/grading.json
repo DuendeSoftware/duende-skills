@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "Opens by stating AddInMemorySamlServiceProviders is development-only and 'Do not use it in production.'"
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": true,
+      "rationale": "The custom class implements ISamlServiceProviderStore with `FindByEntityIdAsync(string entityId, CancellationToken ct)` exactly."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": true,
+      "rationale": "GetAllSamlServiceProvidersAsync is implemented with an `IAsyncEnumerable<SamlServiceProvider>` return type and yields SPs."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": true,
+      "rationale": "Registration chain calls `.AddSamlServiceProviderStore<SqlSamlServiceProviderStore>()`."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": true,
+      "rationale": "Shows `.AddSamlServiceProviderStoreCache<SqlSamlServiceProviderStore>()` and describes it as a HybridCache-backed layer."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

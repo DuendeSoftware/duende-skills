@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsFrequency to 5 minutes (TimeSpan.FromMinutes(5))",
+      "pass": true,
+      "rationale": "sss.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5) is set."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsBatchSize to 200",
+      "pass": true,
+      "rationale": "sss.RemoveExpiredSessionsBatchSize = 200 is set."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false",
+      "pass": true,
+      "rationale": "sss.ExpiredSessionsTriggerBackchannelLogout = false is set to suppress back-channel logout on expiry."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)",
+      "pass": true,
+      "rationale": "sss.FuzzExpiredSessionRemovalStart = true is set explicitly and explained as the multi-instance randomization mechanism."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

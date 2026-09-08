@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": false,
+      "rationale": "The response replaces key management with a developer signing credential but never recommends explicitly setting `options.KeyManagement.Enabled = false`; automatic key management is left enabled alongside the dev credential."
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": true,
+      "rationale": "Recommends `.AddDeveloperSigningCredential(persistKey: false)` and explains it prevents the tempkey.jwk file from being written."
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "Section 2 warns against hard-coded localhost:5001 and shows resolving the address from `client.BaseAddress`."
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": false,
+      "rationale": "The response covers test environment and port issues but does not mention shared HttpClient/ClaimsProvider or mutable state bleeding across parallel tests."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

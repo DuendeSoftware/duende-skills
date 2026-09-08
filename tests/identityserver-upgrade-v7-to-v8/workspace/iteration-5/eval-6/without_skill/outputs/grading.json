@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Changes return types from IEnumerable<T> to IReadOnlyCollection<T>",
+      "pass": true,
+      "rationale": "Correctly changes the method return type to Task<IReadOnlyCollection<ApiScope>> to match the v8 interface."
+    },
+    {
+      "assertion": "Shows using .ToList() or .ToArray() to convert query results",
+      "pass": true,
+      "rationale": "Uses .ToListAsync()/.ToList() to materialize the query so it satisfies IReadOnlyCollection<T>."
+    },
+    {
+      "assertion": "Adds CancellationToken parameter to the affected methods",
+      "pass": false,
+      "rationale": "The fixed signatures do not add a CancellationToken; it only vaguely warns the parameter list 'may also have changed' without adding one."
+    },
+    {
+      "assertion": "Mentions this applies to multiple interfaces (IResourceStore, etc.)",
+      "pass": true,
+      "rationale": "Notes that other custom stores implementing IdentityServer interfaces may have the same return-type change and should be rebuilt/checked."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

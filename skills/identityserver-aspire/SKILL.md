@@ -31,7 +31,7 @@ Use this skill when:
 - `identityserver-deployment` — production deployment, data protection, health check implementations
 - `identityserver-data-storage` — EF Core stores for configuration and operational data
 
-Docs: https://docs.duendesoftware.com/identityserver/aspire
+Docs: https://docs.duendesoftware.com/identityserver/deployment/
 
 ---
 
@@ -453,6 +453,6 @@ The important details:
 ---
 
 ## Resources
-- .NET Aspire orchestration: https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/app-host
-- Aspire service dependencies: https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/app-host#waiting-for-resources
+- .NET Aspire orchestration: https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/app-host-overview
+- Aspire service dependencies: https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/app-host-overview#waiting-for-resources
 - Duende IdentityServer documentation: https://docs.duendesoftware.com/

@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I have a .NET 9 worker service (background service) that needs to call a catalog API at https://api.example.com/catalog/ using client credentials. The token endpoint is https://sts.example.com/connect/token, client ID is 'catalog-worker', client secret is 'worker-secret', and it needs the 'catalog:read' scope. Set up Duende.AccessTokenManagement with HttpClientFactory so the worker can call the API without manually managing tokens.",
+      "prompt": "I have a .NET 10 worker service (background service) that needs to call a catalog API at https://api.example.com/catalog/ using client credentials. The token endpoint is https://sts.example.com/connect/token, client ID is 'catalog-worker', client secret is 'worker-secret', and it needs the 'catalog:read' scope. Set up Duende.AccessTokenManagement with HttpClientFactory so the worker can call the API without manually managing tokens.",
       "expected_output": "A Program.cs (or equivalent) that registers a client credentials client via AddClientCredentialsTokenManagement().AddClient(), then registers an HttpClient via AddClientCredentialsHttpClient() (or AddClientCredentialsTokenHandler()), and a BackgroundService that uses IHttpClientFactory to call the API with tokens attached automatically.",
       "files": [
         "files/begin-state/WebApp.csproj",
@@ -152,7 +152,8 @@
         "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
         "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
         "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
-        "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)"
+        "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)",
+        "Sets the JWT 'typ' header to 'client-authentication+jwt' (e.g. via AdditionalHeaderClaims) to opt into strict audience validation (RFC 7523bis / StrictClientAssertionAudienceValidation)"
       ]
     },
     {
@@ -173,7 +174,7 @@
     },
     {
       "id": 12,
-      "prompt": "What is the simplest way to set up client credentials token management in a .NET 9 worker service using Duende.AccessTokenManagement v4? Just show me the minimal registration code.",
+      "prompt": "What is the simplest way to set up client credentials token management in a .NET 10 worker service using Duende.AccessTokenManagement v4? Just show me the minimal registration code.",
       "expected_output": "Minimal Program.cs calling AddClientCredentialsTokenManagement().AddClient() with a named client, then using AddClientCredentialsHttpClient() or AddClientCredentialsTokenHandler() on an HttpClient registration.",
       "files": [],
       "assertions": [

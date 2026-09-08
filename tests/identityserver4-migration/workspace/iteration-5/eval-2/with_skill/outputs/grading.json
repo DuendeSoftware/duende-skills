@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output uses WebApplication.CreateBuilder (minimal hosting) instead of the Startup class pattern",
+      "pass": true,
+      "rationale": "Program.cs uses top-level statements with var builder = WebApplication.CreateBuilder(args) and no Startup class."
+    },
+    {
+      "assertion": "Output calls builder.Services.AddIdentityServer() with Duende namespace instead of IdentityServer4",
+      "pass": true,
+      "rationale": "It calls builder.Services.AddIdentityServer() and uses Duende.IdentityServer.EntityFramework.DbContexts, explaining the resolution comes from Duende packages."
+    },
+    {
+      "assertion": "Output calls AddConfigurationStore and AddOperationalStore with UseSqlServer and MigrationsAssembly configuration",
+      "pass": true,
+      "rationale": "Both AddConfigurationStore and AddOperationalStore use UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly))."
+    },
+    {
+      "assertion": "Output includes UseIdentityServer() in the middleware pipeline after UseRouting() and before UseAuthorization()",
+      "pass": true,
+      "rationale": "The pipeline is UseRouting() then UseIdentityServer() then UseAuthorization(), with a comment noting the ordering."
+    },
+    {
+      "assertion": "Output removes AddDeveloperSigningCredential() or replaces it with Duende key management",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential() is dropped and the response explains Duende automatic key management replaces it, with AddSigningCredential as the static alternative."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

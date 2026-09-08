@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The kiosk.app client AllowedGrantTypes includes Ciba or 'urn:openid:params:grant-type:ciba'",
+      "pass": true,
+      "rationale": "kiosk.app sets AllowedGrantTypes = GrantTypes.Ciba, with the urn documented in a comment."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserValidator that processes login_hint",
+      "pass": true,
+      "rationale": "CibaUserValidator implements IBackchannelAuthenticationUserValidator and resolves context.LoginHint to a subject/sub claim."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserNotificationService",
+      "pass": true,
+      "rationale": "CibaUserNotificationService implements IBackchannelAuthenticationUserNotificationService.SendLoginRequestAsync."
+    },
+    {
+      "assertion": "Both CIBA interfaces are registered in the DI container",
+      "pass": true,
+      "rationale": "The notification service is registered via AddBackchannelAuthenticationUserNotificationService<T>() and the validator via AddTransient<IBackchannelAuthenticationUserValidator, CibaUserValidator>()."
+    },
+    {
+      "assertion": "Response mentions that CIBA requires the Enterprise Edition",
+      "pass": true,
+      "rationale": "An explicit edition note states CIBA is a Duende IdentityServer Enterprise Edition feature."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures an OpenID Connect handler for Azure AD with MapInboundClaims = false",
+      "pass": true,
+      "rationale": "AddOpenIdConnect(\"aad\", ...) configures AAD authority and sets options.MapInboundClaims = false."
+    },
+    {
+      "assertion": "Calls ClaimActions.Clear() to remove default claim mappings before adding explicit ones",
+      "pass": false,
+      "rationale": "The handler adds MapJsonKey mappings but never calls ClaimActions.Clear() to strip the defaults first."
+    },
+    {
+      "assertion": "Uses ClaimActions.MapJsonKey to map specific claims like 'oid' and 'groups'",
+      "pass": true,
+      "rationale": "Calls MapJsonKey for oid, groups, and roles."
+    },
+    {
+      "assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": true,
+      "rationale": "Sets options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme."
+    },
+    {
+      "assertion": "Shows mapping AAD 'groups' claims to role claims in either the callback or ClaimActions",
+      "pass": true,
+      "rationale": "The callback maps AAD groups to ClaimTypes.Role claims via GroupToRoleMap, and ClaimActions also maps roles."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

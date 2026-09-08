@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the v8 license key is a new format: a signed JWT carrying a kid header",
+      "pass": true,
+      "rationale": "States the v8 key is a new-format signed JWT that carries a kid header, distinct from older keys."
+    },
+    {
+      "assertion": "States a v7/earlier key still works with v8 core, but a v8 key fails on v7/earlier or the BFF runtime with IDX10503",
+      "pass": true,
+      "rationale": "Explains the v7-format key still runs v8 core (no new purchase) while a v8 key fails on v7/earlier or the BFF runtime with IDX10503, and prescribes putting the v7 key back in the BFF."
+    },
+    {
+      "assertion": "States that v8 throws at startup for Server-Side Sessions, Automatic Key Management, and SAML when licensed but lacking the entitlement, while other features only log a warning",
+      "pass": true,
+      "rationale": "The two-tier table lists Server-Side Sessions, Automatic Key Management, and SAML as throwing at startup while Tier B features only log a warning."
+    },
+    {
+      "assertion": "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production",
+      "pass": true,
+      "rationale": "Explicitly recommends running lower/non-production environments with the production license key so gaps like Server-Side Sessions fail fast."
+    },
+    {
+      "assertion": "Does NOT claim a new license purchase is required to run v8 core on an existing v7 key",
+      "pass": true,
+      "rationale": "Explicitly states running v8 core does not require a new purchase and the v7-format key still works; only production add-ons need a v8 key."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

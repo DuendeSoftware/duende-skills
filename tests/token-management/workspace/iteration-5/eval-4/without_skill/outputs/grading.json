@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup",
+      "pass": true,
+      "rationale": "Reads builder.Configuration[\"DPoP:JsonWebKey\"] and validates it instead of generating a key at startup."
+    },
+    {
+      "assertion": "Output sets the DPoPJsonWebKey property on the client credentials client configuration",
+      "pass": true,
+      "rationale": "Sets client.DPoPJsonWebKey = dpopJwk inside AddClient."
+    },
+    {
+      "assertion": "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart",
+      "pass": true,
+      "rationale": "Shows a ❌ RSA.Create(2048) example and explains it invalidates existing DPoP-bound tokens."
+    },
+    {
+      "assertion": "Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured",
+      "pass": true,
+      "rationale": "Registers AddClientCredentialsTokenManagement().AddClient(\"catalog\", ...) with the DPoP key set."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": true,
+      "rationale": "Explicitly recommends `options.KeyManagement.Enabled = false` to stop disk writes."
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": true,
+      "rationale": "Recommends `.AddDeveloperSigningCredential(persistKey: false)` and notes the default overload persists to disk."
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports — use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "Section 2 warns against hard-coded localhost:5001 and shows using `factory.CreateClient()` BaseAddress."
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": true,
+      "rationale": "Section 3 covers shared HttpClient/ClaimsProvider/static Config state bleeding across parallel xUnit tests and fixes."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

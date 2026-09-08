@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code shows one-step registration: AddServerSideSessions<CustomStore>() with a custom store type parameter",
+      "pass": true,
+      "rationale": "Shows .AddServerSideSessions<RedisSessionStore>() as the one-step form."
+    },
+    {
+      "assertion": "Code shows two-step registration: AddServerSideSessions() followed by AddServerSideSessionStore<CustomStore>()",
+      "pass": true,
+      "rationale": "Shows .AddServerSideSessions().AddServerSideSessionStore<RedisSessionStore>() as the two-step form."
+    },
+    {
+      "assertion": "Response explains that session data contains the serialized AuthenticationTicket protected by Data Protection",
+      "pass": true,
+      "rationale": "States each ServerSideSession holds the serialized AuthenticationTicket protected by ASP.NET Core Data Protection, stored as an encrypted blob."
+    },
+    {
+      "assertion": "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
+      "pass": true,
+      "rationale": "A table enumerates SubjectId (sub claim), SessionId (sid claim), and DisplayName (configurable claim type)."
+    },
+    {
+      "assertion": "Response notes that UserDisplayNameClaimType is null by default due to PII concerns",
+      "pass": true,
+      "rationale": "Explicitly states UserDisplayNameClaimType is null by default, deliberately, because a display name is PII, and must be set to populate the DisplayName index."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

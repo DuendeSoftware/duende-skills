@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains a call to builder.Services.AddIdentityServer with an options lambda",
+      "pass": true,
+      "rationale": "Uses builder.Services.AddIdentityServer(options => { ... }) with an options lambda."
+    },
+    {
+      "assertion": "Output enables all four event types: RaiseErrorEvents, RaiseInformationEvents, RaiseFailureEvents, RaiseSuccessEvents all set to true",
+      "pass": true,
+      "rationale": "All four Raise*Events are set to true."
+    },
+    {
+      "assertion": "Output calls AddInMemoryIdentityResources with at least IdentityResources.OpenId() and IdentityResources.Profile()",
+      "pass": true,
+      "rationale": "IdentityResources collection includes OpenId() and Profile(), registered via AddInMemoryIdentityResources."
+    },
+    {
+      "assertion": "Output calls AddInMemoryApiScopes with a scope named 'weatherapi'",
+      "pass": true,
+      "rationale": "AddInMemoryApiScopes registers a scope named 'weatherapi'."
+    },
+    {
+      "assertion": "Output calls app.UseIdentityServer() and does NOT separately call app.UseAuthentication()",
+      "pass": true,
+      "rationale": "Calls app.UseIdentityServer() and does not call app.UseAuthentication() separately."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.IssuerUri = 'https://identity.mycompany.com' inside the AddIdentityServer options lambda",
+      "pass": true,
+      "rationale": "Inside the AddIdentityServer options lambda it sets options.IssuerUri = \"https://identity.mycompany.com\"."
+    },
+    {
+      "assertion": "Program.cs loads the license key from configuration via builder.Configuration rather than hardcoding it",
+      "pass": true,
+      "rationale": "options.LicenseKey = builder.Configuration[\"IdentityServer:LicenseKey\"] loads it from configuration, with explicit warning against source control."
+    },
+    {
+      "assertion": "Program.cs sets options.EmitScopesAsSpaceDelimitedStringInJwt = true",
+      "pass": true,
+      "rationale": "The lambda sets options.EmitScopesAsSpaceDelimitedStringInJwt = true."
+    },
+    {
+      "assertion": "Program.cs calls builder.Services.AddDataProtection() with PersistKeysToDbContext or equivalent persistent storage",
+      "pass": true,
+      "rationale": "It calls AddDataProtection().PersistKeysToDbContext<KeysDbContext>()."
+    },
+    {
+      "assertion": "Program.cs calls SetApplicationName on the data protection builder to prevent key isolation across instances",
+      "pass": true,
+      "rationale": "The data protection chain calls .SetApplicationName(\"MyCompany.IdentityServer\") and explains it prevents per-instance key isolation."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

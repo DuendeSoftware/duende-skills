@@ -44,7 +44,7 @@ Load these sub-documents when the user's question specifically targets one of th
 | Document | Description | When to Load |
 |----------|-------------|--------------|
 | [docs/client-types.md](docs/client-types.md) | Grant type selection matrix, client property reference tables, client authentication methods (shared secret, private_key_jwt, mTLS), secret rollover, and CORS | private_key_jwt, mTLS, secret rotation, refresh token settings, client authentication, CORS origins |
-| [docs/resources-scopes.md](docs/resources-scopes.md) | Resource type decision matrix, identity resources, API scopes (including parameterized scopes), and API resources with audience isolation | aud claim, audience isolation, parameterized scopes, EmitStaticAudienceClaim, API Resources, Identity Resources |
+| [docs/resources-scopes.md](docs/resources-scopes.md) | Resource type decision matrix, identity resources, API scopes (including parameterized scopes), and API resources with audience isolation | aud claim, audience isolation, parameterized scopes, IScopeParser, IResourceValidator, EmitStaticAudienceClaim, API Resources, Identity Resources |
 
 ---
 

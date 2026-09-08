@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+      "pass": true,
+      "rationale": "Sets ForwardLimit = 2 and explains the default of 1 only peels a single proxy, so it must match the two-proxy chain."
+    },
+    {
+      "assertion": "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+      "pass": true,
+      "rationale": "Adds Nginx to KnownProxies and Cloudflare egress ranges to KnownNetworks, trusting both hops."
+    },
+    {
+      "assertion": "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+      "pass": true,
+      "rationale": "ForwardedHeaders is set to XForwardedProto | XForwardedHost and explains XForwardedHost fixes the host."
+    },
+    {
+      "assertion": "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed",
+      "pass": true,
+      "rationale": "States every proxy in the chain must be trusted or the X-Forwarded-* values are dropped."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

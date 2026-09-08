@@ -133,6 +133,55 @@
         "Response mentions the three queryable indices: SubjectId (sub), SessionId (sid), and DisplayName",
         "Response notes that UserDisplayNameClaimType is null by default due to PII concerns"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Build the CIBA user-notification and approval experience for our IdentityServer. Implement IBackchannelAuthenticationUserNotificationService.SendLoginRequestAsync that delivers a push linking to our approval page, and show the registration. Then build the approval page that lists the current user's pending requests, reloads one by internal id, verifies the request belongs to the signed-in user, and either approves it with the originally requested scopes or denies it. Note anything security-sensitive.",
+      "expected_output": "A IBackchannelAuthenticationUserNotificationService implementation whose SendLoginRequestAsync(BackchannelUserLoginRequest, CancellationToken) uses request.Subject.GetSubjectId() and request.BindingMessage, treats request.InternalId as sensitive, and is registered via AddBackchannelAuthenticationUserNotificationService<T>(). The approval UI uses IBackchannelAuthenticationInteractionService: GetPendingLoginRequestsForCurrentUserAsync to list, GetLoginRequestByInternalIdAsync to reload, verifies request.Subject.GetSubjectId() matches the current user, then CompleteLoginRequestAsync with ScopesValuesConsented to approve (empty/null to deny). Notes that the server rejects scopes outside the original request, the user compares BindingMessage on both devices, and ConsentGranted/DeniedEvent should be raised for audit.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The notification service implements SendLoginRequestAsync(BackchannelUserLoginRequest request, CancellationToken) and is registered via AddBackchannelAuthenticationUserNotificationService<T>()",
+        "Code uses request.BindingMessage and treats request.InternalId as sensitive (not exposed in the notification)",
+        "The approval UI calls GetPendingLoginRequestsForCurrentUserAsync and GetLoginRequestByInternalIdAsync on IBackchannelAuthenticationInteractionService",
+        "Ownership is verified by comparing request.Subject.GetSubjectId() to the current user before completing",
+        "Approval calls CompleteLoginRequestAsync with a CompleteBackchannelLoginRequest whose ScopesValuesConsented is set (empty/null to deny), and the response notes the server rejects scopes not in the original CIBA request"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "We use server-side sessions and want to record per-sign-in metadata like device name and region so an admin session viewer can display it. This data must NOT be issued as claims. Show how to store the metadata at sign-in (both plain HttpContext.SignInAsync and the ASP.NET Identity path) and how to read it back through ISessionManagementService. Note any query limitations.",
+      "expected_output": "At sign-in, metadata is written to AuthenticationProperties.Items (e.g. properties.Items[\"device_name\"]) and passed to HttpContext.SignInAsync(user, properties); for ASP.NET Identity it is passed to SignInManager.SignInWithClaimsAsync(user, properties, additionalClaims: []), with a note to override SignInWithClaimsAsync in a custom SignInManager when using PasswordSignInAsync. Reading back uses ISessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue(...). Explains the metadata is not issued as claims and is not indexed, so SessionQuery cannot filter by it — query by subject/session/display name first, then inspect tickets.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Metadata is stored in AuthenticationProperties.Items and passed to HttpContext.SignInAsync(user, properties)",
+        "The ASP.NET Identity path passes properties to SignInManager.SignInWithClaimsAsync (and notes overriding it in a custom SignInManager when PasswordSignInAsync is used)",
+        "Reading back uses ISessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue",
+        "Response states the metadata is NOT issued as claims",
+        "Response notes custom metadata is not indexed and cannot be filtered via SessionQuery — query by subject/session/display name first, then inspect tickets"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "With server-side sessions enabled, we noticed a user's authentication cookie keeps extending past our intended 8-hour limit whenever they sign into additional clients, so they never have to re-authenticate. Explain why this happens and enforce a hard 8-hour cap that forces interactive re-authentication on the web.app client, including for refresh-token-driven sessions.",
+      "expected_output": "Explains that with server-side sessions IdentityServer calls SignInAsync whenever the session's client list changes, re-issuing the cookie and resetting its expiration (unlike the without-server-side-sessions case where it is set once at login). The fix sets Client.UserSsoLifetime to 28800 (8h) to force interactive re-auth, combined with AbsoluteRefreshTokenLifetime and RefreshTokenExpiration = TokenExpiration.Absolute to cap refresh-token-driven extension.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Response explains the cookie extends because IdentityServer re-issues it via SignInAsync when the session's client list changes",
+        "The web.app client sets UserSsoLifetime to an 8-hour value (28800 seconds) to force interactive re-authentication",
+        "The client sets RefreshTokenExpiration = TokenExpiration.Absolute together with AbsoluteRefreshTokenLifetime to cap refresh-driven session extension"
+      ]
     }
   ]
 }

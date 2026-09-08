@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls .AddSaml() on the IdentityServer builder chain",
+      "pass": false,
+      "rationale": "The response calls `.AddSamlPlugin(...)` (the Rock Solid Knowledge plugin API), not the built-in `.AddSaml()`."
+    },
+    {
+      "assertion": "No separate NuGet package is added — SAML is built into Duende.IdentityServer",
+      "pass": false,
+      "rationale": "It adds a separate `Rsk.Saml` PackageReference, incorrectly treating SAML as a third-party add-on package."
+    },
+    {
+      "assertion": "A SamlServiceProvider is created with EntityId set to 'https://crm.contoso.com'",
+      "pass": false,
+      "rationale": "It creates a `ServiceProvider` (the RSK type) rather than a Duende `SamlServiceProvider`, though EntityId is correct."
+    },
+    {
+      "assertion": "AssertionConsumerServiceUrls uses IndexedEndpoint with Location 'https://crm.contoso.com/saml/acs' and Binding = SamlBinding.HttpPost",
+      "pass": false,
+      "rationale": "It uses `AssertionConsumerServices` with a `Service`/`SamlConstants.BindingTypes.HttpPost`, not `AssertionConsumerServiceUrls` with `IndexedEndpoint` and `SamlBinding.HttpPost`."
+    },
+    {
+      "assertion": "AllowedScopes is configured on the SamlServiceProvider (not empty)",
+      "pass": false,
+      "rationale": "No AllowedScopes is configured anywhere on the SP registration."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

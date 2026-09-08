@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": true,
+      "rationale": "AddFrontend(\"admin\", ...) sets MatchingPath = \"/admin\" and CdnIndexHtmlUrl to https://cdn.example.com/admin/index.html."
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": true,
+      "rationale": "AddFrontend(\"portal\", ...) sets MatchingPath = \"/portal\" and CdnIndexHtmlUrl to https://cdn.example.com/portal/index.html."
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": true,
+      "rationale": "Each frontend calls frontend.ConfigureOpenIdConnect with distinct clients (admin-client and portal-client)."
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": true,
+      "rationale": "Each frontend calls frontend.AddRemoteApi pointing to admin-api and portal-api respectively."
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "The configuration starts from builder.Services.AddBff()."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

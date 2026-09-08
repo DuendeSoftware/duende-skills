@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that the default Microsoft OIDC/JWT handler maps 'sub' to the long XML URI 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'",
+      "pass": true,
+      "rationale": "The table explicitly shows sub being remapped to http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier by default."
+    },
+    {
+      "assertion": "Response recommends setting MapInboundClaims = false on the OIDC or JWT Bearer handler to preserve original claim names",
+      "pass": true,
+      "rationale": "The fix sets options.MapInboundClaims = false to keep original claim names."
+    },
+    {
+      "assertion": "Response shows setting TokenValidationParameters with NameClaimType = 'name' and RoleClaimType = 'role' so User.Identity.Name and role checks still work",
+      "pass": true,
+      "rationale": "TokenValidationParameters sets NameClaimType = \"name\" and RoleClaimType = \"role\" with explanation."
+    },
+    {
+      "assertion": "Response explains this is a common pitfall where claims are silently renamed by the handler",
+      "pass": true,
+      "rationale": "It calls it a classic, silent pitfall where the handler renames claims with no error and lookups quietly break."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The fixture class implements IAsyncLifetime with InitializeAsync and DisposeAsync methods",
+      "pass": true,
+      "rationale": "AspireAppFixture implements IAsyncLifetime and defines both InitializeAsync and DisposeAsync."
+    },
+    {
+      "assertion": "InitializeAsync uses DistributedApplicationTestingBuilder.CreateAsync to build the AppHost",
+      "pass": true,
+      "rationale": "InitializeAsync calls DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>()."
+    },
+    {
+      "assertion": "The fixture calls WaitForResourceHealthyAsync(\"identity-server\") or equivalent to wait for IdentityServer readiness",
+      "pass": true,
+      "rationale": "It calls _app.ResourceNotifications.WaitForResourceHealthyAsync(\"identity-server\")."
+    },
+    {
+      "assertion": "The fixture provides a method to get the authority URL using GetEndpoint(\"identity-server\", \"https\") or equivalent",
+      "pass": true,
+      "rationale": "GetAuthorityUrl() returns _app.GetEndpoint(\"identity-server\", \"https\")."
+    },
+    {
+      "assertion": "DisposeAsync calls StopAsync and/or DisposeAsync on the DistributedApplication to clean up",
+      "pass": true,
+      "rationale": "DisposeAsync calls both _app.StopAsync() and _app.DisposeAsync()."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

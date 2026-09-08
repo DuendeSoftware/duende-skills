@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ISamlNameIdGenerator interface",
+      "pass": false,
+      "rationale": "Implements a guessed `INameIdGenerator`, not the actual `ISamlNameIdGenerator` interface."
+    },
+    {
+      "assertion": "The GenerateAsync method receives a NameIdGenerationContext with Subject claims",
+      "pass": false,
+      "rationale": "Defines `GenerateNameId(ClaimsPrincipal user, ServiceProvider sp)` — no `GenerateAsync` method and no `NameIdGenerationContext`."
+    },
+    {
+      "assertion": "Extracts the employee_id claim from context.Subject",
+      "pass": false,
+      "rationale": "Reads the claim from a `user` ClaimsPrincipal parameter, not from `context.Subject`."
+    },
+    {
+      "assertion": "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value",
+      "pass": false,
+      "rationale": "Returns a raw string value; never uses `NameIdGenerationResult.Success` or a `NameId` object."
+    },
+    {
+      "assertion": "Handles the missing claim case with NameIdGenerationResult.Failure",
+      "pass": false,
+      "rationale": "Throws an `InvalidOperationException` for the missing claim instead of returning `NameIdGenerationResult.Failure`."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

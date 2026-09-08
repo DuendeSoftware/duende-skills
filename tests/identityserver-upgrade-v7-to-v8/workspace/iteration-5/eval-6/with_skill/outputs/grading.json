@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Changes return types from IEnumerable<T> to IReadOnlyCollection<T>",
+      "pass": true,
+      "rationale": "Updates FindApiScopesByNameAsync/FindApiResourcesByNameAsync to return Task<IReadOnlyCollection<T>>."
+    },
+    {
+      "assertion": "Shows using .ToList() or .ToArray() to convert query results",
+      "pass": true,
+      "rationale": "Uses .ToListAsync(ct) for EF and .ToList() for in-memory LINQ to materialize results."
+    },
+    {
+      "assertion": "Adds CancellationToken parameter to the affected methods",
+      "pass": true,
+      "rationale": "Every affected method gains a CancellationToken ct final parameter that is propagated into the query."
+    },
+    {
+      "assertion": "Mentions this applies to multiple interfaces (IResourceStore, etc.)",
+      "pass": true,
+      "rationale": "States nine interfaces changed in v8 and advises applying the same fix to other custom stores/services."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

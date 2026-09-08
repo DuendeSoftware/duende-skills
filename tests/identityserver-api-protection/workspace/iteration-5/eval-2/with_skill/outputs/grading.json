@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddOAuth2Introspection with Authority set to 'https://auth.mycompany.com'",
+      "pass": true,
+      "rationale": "AddOAuth2Introspection(\"introspection\", ...) sets options.Authority = \"https://auth.mycompany.com\"."
+    },
+    {
+      "assertion": "Sets ClientId to 'invoicing' and ClientSecret to 'invoicing_secret'",
+      "pass": true,
+      "rationale": "options.ClientId = \"invoicing\" and options.ClientSecret = \"invoicing_secret\" are both set."
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.OAuth2Introspection or Duende.IdentityServer.AccessTokenValidation package",
+      "pass": true,
+      "rationale": "Provides dotnet add package commands for both Duende.IdentityServer.AccessTokenValidation and Duende.AspNetCore.Authentication.OAuth2Introspection."
+    },
+    {
+      "assertion": "Warns that the ApiResource in IdentityServer must have ApiSecrets configured for introspection to work",
+      "pass": true,
+      "rationale": "A dedicated section states introspection only works if the ApiResource has an ApiSecrets entry, with example code adding new Secret(\"invoicing_secret\".Sha256())."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

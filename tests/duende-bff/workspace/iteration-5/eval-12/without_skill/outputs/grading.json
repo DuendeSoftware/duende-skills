@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": false,
+      "rationale": "It hand-rolls named OIDC schemes and path routing; there is no AddFrontend/MatchingPath/CdnIndexHtmlUrl configuration."
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": false,
+      "rationale": "No AddFrontend is used for the portal; it uses a second AddOpenIdConnect scheme and a redirect instead."
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": false,
+      "rationale": "Distinct clients exist but are configured via named AddOpenIdConnect schemes, not per-frontend ConfigureOpenIdConnect."
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": true,
+      "rationale": "It provides equivalent remote proxying for each app: /admin/api -> admin-api and /portal/api -> portal-api via MapRemoteBffApiEndpoint."
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "The setup begins with builder.Services.AddBff().AddRemoteApis()."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

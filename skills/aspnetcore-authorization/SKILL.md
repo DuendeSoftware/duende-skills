@@ -31,7 +31,7 @@ Use this skill when:
 - `identityserver-configuration` — Server-side scope and resource configuration
 - `oauth-oidc-protocols` — Understanding scopes, claims, and token contents
 
-Docs: https://docs.duendesoftware.com/identityserver/tokens/authorization
+Docs: https://docs.duendesoftware.com/identityserver/apis/aspnetcore/authorization/
 
 ---
 
@@ -470,5 +470,5 @@ options.AddPolicy("write", p =>
 - [Authorization in ASP.NET Core — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/introduction)
 - [Policy-Based Authorization — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/policies)
 - [Resource-Based Authorization — Microsoft Docs](https://learn.microsoft.com/aspnet/core/security/authorization/resourcebased)
-- [Protecting APIs — Duende Docs](https://docs.duendesoftware.com/identityserver/latest/apis/)
-- [API Authorization — Duende Docs](https://docs.duendesoftware.com/identityserver/latest/apis/aspnetcore/authorization/)
+- [Protecting APIs — Duende Docs](https://docs.duendesoftware.com/identityserver/apis/)
+- [API Authorization — Duende Docs](https://docs.duendesoftware.com/identityserver/apis/aspnetcore/authorization/)

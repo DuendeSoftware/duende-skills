@@ -1,0 +1,24 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that Client.UpdateAccessTokenClaimsOnRefresh defaults to false, so refreshed tokens reuse the original claims and only IsActiveAsync is called",
+      "pass": true,
+      "rationale": "States the flag is off by default and that the refreshed token reuses the originally-computed claims rather than recomputing them, though it does not explicitly note that only IsActiveAsync runs."
+    },
+    {
+      "assertion": "Shows setting Client.UpdateAccessTokenClaimsOnRefresh = true to re-invoke GetProfileDataAsync on refresh",
+      "pass": true,
+      "rationale": "Shows the client with UpdateAccessTokenClaimsOnRefresh = true and explains it re-runs the profile service on refresh."
+    },
+    {
+      "assertion": "Explains this makes refreshed access-token claims reflect the current state from the profile service",
+      "pass": true,
+      "rationale": "Explains that enabling the flag makes the refreshed access token's claims reflect the user's current state."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

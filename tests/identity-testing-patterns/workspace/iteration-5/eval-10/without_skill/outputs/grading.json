@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration",
+      "pass": true,
+      "rationale": "IdentityServerFactory extends `WebApplicationFactory<Program>` and overrides registration in `ConfigureTestServices`."
+    },
+    {
+      "assertion": "Sets options.KeyManagement.Enabled = false to avoid disk writes in CI",
+      "pass": false,
+      "rationale": "AddIdentityServer() is called with no options lambda; `KeyManagement.Enabled = false` is never set. The response only vaguely mentions ensuring key management doesn't write to disk without actually setting the option."
+    },
+    {
+      "assertion": "Calls AddDeveloperSigningCredential(persistKey: false) for a static test signing key",
+      "pass": false,
+      "rationale": "Uses `AddDeveloperSigningCredential()` without the `persistKey: false` argument required by this assertion."
+    },
+    {
+      "assertion": "Registers clients via AddInMemoryClients — no sub-documents needed for this core pattern",
+      "pass": true,
+      "rationale": "Registers `.AddInMemoryClients(...)` (and AddInMemoryApiScopes) inline."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the id_token is minimal by default and profile claims are available at the userinfo endpoint",
+      "pass": true,
+      "rationale": "Explains IdentityServer keeps the id_token small by default and exposes profile claims at the userinfo endpoint instead."
+    },
+    {
+      "assertion": "Recommends GetClaimsFromUserInfoEndpoint = true on the client OIDC handler (or AlwaysIncludeUserClaimsInIdToken = true to embed claims in the id_token, noting the size tradeoff)",
+      "pass": true,
+      "rationale": "Recommends GetClaimsFromUserInfoEndpoint = true and offers AlwaysIncludeUserClaimsInIdToken = true noting the larger token tradeoff."
+    },
+    {
+      "assertion": "Suggests enabling Duende.IdentityServer debug logging, noting the default profile service logs requested vs issued claim types",
+      "pass": false,
+      "rationale": "The answer suggests decoding the id_token but never recommends enabling Duende.IdentityServer debug logging or mentions the requested-vs-issued claim type logging."
+    },
+    {
+      "assertion": "Does NOT conclude the claim is missing from the profile service or from token issuance",
+      "pass": true,
+      "rationale": "Explicitly states the claim is being issued correctly and is not missing from issuance."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

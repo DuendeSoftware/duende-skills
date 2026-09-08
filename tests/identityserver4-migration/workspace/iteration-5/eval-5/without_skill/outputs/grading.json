@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response shows ApiScope as a top-level independent object rather than nested under ApiResource",
+      "pass": true,
+      "rationale": "It defines ApiScopes as a standalone top-level collection of ApiScope objects, distinct from the v3 nested Scope form."
+    },
+    {
+      "assertion": "Response shows ApiResource.Scopes containing string scope names instead of Scope objects",
+      "pass": true,
+      "rationale": "The v4 ApiResource uses Scopes = { \"api1.read\", \"api1.write\" } as string references."
+    },
+    {
+      "assertion": "Response includes registering API scopes separately via AddInMemoryApiScopes or equivalent",
+      "pass": true,
+      "rationale": "It registers scopes via AddInMemoryApiScopes(Config.ApiScopes) and notes it is the new required call."
+    },
+    {
+      "assertion": "Response warns about data loss if using auto-generated EF Core migrations for the v3 to v4 ConfigurationDbContext schema change",
+      "pass": true,
+      "rationale": "It cautions that the scaffolded migration can be destructive, to back up first, and to verify it preserves data rather than dropping and recreating tables."
+    },
+    {
+      "assertion": "Response mentions the table renames from v3 to v4 (e.g., ApiClaims to ApiResourceClaims, ApiProperties to ApiResourceProperties, or similar)",
+      "pass": false,
+      "rationale": "The response only speaks generally about schema changes and does not name any specific v3 to v4 table renames like ApiClaims to ApiResourceClaims."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

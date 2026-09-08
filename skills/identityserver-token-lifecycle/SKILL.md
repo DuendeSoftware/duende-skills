@@ -113,6 +113,10 @@ var api = new ApiResource("api1")
 | Performance at scale | Better (no server call)             | Introspection adds latency           |
 | Best for             | High-throughput APIs, microservices | Sensitive APIs needing revocation    |
 
+### Token Revocation (RFC 7009)
+
+Revocation via the `/connect/revocation` endpoint applies **only to reference access tokens and refresh tokens** — the tokens that are persisted in the operational (persisted grant) store. A JWT access token is stateless and is **not** stored server-side by default, so there is no revocation state to deactivate: a JWT simply remains valid until its `exp`. If you need to invalidate access tokens immediately (logout, compromise, entitlement change), issue **reference** tokens (`AccessTokenType.Reference`).
+
 ### Controlling Token Format Per Client
 
 ```csharp
@@ -421,6 +425,27 @@ app.MapGet("/myAction", async (IIdentityServerTools tools) =>
     // Use token to call backend API
 });
 ```
+
+## Dynamic Issuer (Multi-Issuer)
+
+By **default**, a single IdentityServer derives the `iss` claim (and the discovery issuer) from the origin of the incoming request. The same deployment can therefore serve multiple hosts/domains and return a different `iss` for each — no extra configuration required.
+
+```csharp
+// Requests to https://a.example.com  → iss = "https://a.example.com"
+// Requests to https://b.example.com  → iss = "https://b.example.com"
+```
+
+Setting a fixed issuer **disables** this behavior — every token then carries the configured value regardless of host:
+
+```csharp
+builder.Services.AddIdentityServer(options =>
+{
+    // Pins iss to a single value; multi-issuer is turned off
+    options.IssuerUri = "https://identity.example.com";
+});
+```
+
+> **Multi-issuer is not multi-tenancy.** Returning a per-host `iss` (RFC 7519 §4.1.1) does not isolate users, grants, keys, or any other data per domain. Tenant isolation remains the implementer's responsibility.
 
 ## Token Lifetime Best Practices
 

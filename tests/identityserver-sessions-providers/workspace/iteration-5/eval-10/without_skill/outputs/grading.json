@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Metadata is stored in AuthenticationProperties.Items and passed to HttpContext.SignInAsync(user, properties)",
+      "pass": true,
+      "rationale": "properties.Items[\"device_name\"]/[\"region\"] are set and passed to HttpContext.SignInAsync(user, properties)."
+    },
+    {
+      "assertion": "The ASP.NET Identity path passes properties to SignInManager.SignInWithClaimsAsync (and notes overriding it in a custom SignInManager when PasswordSignInAsync is used)",
+      "pass": false,
+      "rationale": "It passes properties to SignInWithClaimsAsync but never mentions overriding it in a custom SignInManager for the PasswordSignInAsync flow, so the compound assertion is not fully satisfied."
+    },
+    {
+      "assertion": "Reading back uses ISessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue",
+      "pass": true,
+      "rationale": "Reads via _sessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue(\"device_name\", ...)."
+    },
+    {
+      "assertion": "Response states the metadata is NOT issued as claims",
+      "pass": true,
+      "rationale": "Explicitly states the metadata is part of the ticket and is not issued as claims."
+    },
+    {
+      "assertion": "Response notes custom metadata is not indexed and cannot be filtered via SessionQuery — query by subject/session/display name first, then inspect tickets",
+      "pass": false,
+      "rationale": "The response does not mention that the custom metadata is unindexed or that it cannot be filtered via SessionQuery."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that events are NOT enabled by default and enables RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents in AddIdentityServer",
+      "pass": true,
+      "rationale": "Enables all four Raise* flags and states IdentityServer won't emit events unless turned on / by default nothing is emitted."
+    },
+    {
+      "assertion": "Implements and registers a custom IEventSink (e.g. AddTransient<IEventSink, ...>) for Seq",
+      "pass": true,
+      "rationale": "Implements SeqEventSink : IEventSink and registers it via AddTransient<IEventSink, SeqEventSink>()."
+    },
+    {
+      "assertion": "Warns that a custom IEventSink replaces the default ASP.NET Core logger sink (each event goes to exactly one sink), so the custom sink must forward to logging to keep log output",
+      "pass": false,
+      "rationale": "Never mentions that a custom sink replaces the default logger sink or the one-sink-per-event rule. It logs via ILogger incidentally but does not warn about losing default log output."
+    },
+    {
+      "assertion": "Explains that UI login success/failure events must be raised by your own UI code via IEventService.RaiseAsync, since IdentityServer only raises protocol events itself",
+      "pass": false,
+      "rationale": "Incorrectly implies enabling success/failure events captures logins automatically ('confirm your login page surfaces the relevant events'). Does not explain that UI login events must be raised by your own code via IEventService.RaiseAsync."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

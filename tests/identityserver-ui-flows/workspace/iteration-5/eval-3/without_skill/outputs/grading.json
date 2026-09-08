@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details",
+      "pass": true,
+      "rationale": "ConsentModel injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync, using Client.ClientName and ValidatedResources.RawScopeValues."
+    },
+    {
+      "assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true",
+      "pass": false,
+      "rationale": "GrantConsentAsync is called but the ConsentResponse uses the legacy property name ScopesConsented, not the required ScopesValuesConsented (Duende v8), so it would not compile against the current API."
+    },
+    {
+      "assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent",
+      "pass": true,
+      "rationale": "The deny branch calls DenyAuthorizationAsync(context, AuthorizationError.AccessDenied)."
+    },
+    {
+      "assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting",
+      "pass": true,
+      "rationale": "Both OnGet and OnPost check if (context == null) and redirect away before trusting returnUrl."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}
