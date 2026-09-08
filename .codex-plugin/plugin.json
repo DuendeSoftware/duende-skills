@@ -1,6 +1,6 @@
 {
   "name": "duende-skills",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Duende development skills and agents — covering OAuth/OIDC protocols, IdentityServer, token management, ASP.NET Core authentication/authorization, BFF patterns, and secure identity architecture",
   "author": {
     "name": "Duende Software",
