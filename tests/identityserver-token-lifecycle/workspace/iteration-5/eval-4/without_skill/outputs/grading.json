@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "A class extending DefaultProfileService or implementing IProfileService is defined",
+      "pass": true,
+      "rationale": "CustomProfileService : DefaultProfileService is defined and overrides GetProfileDataAsync."
+    },
+    {
+      "assertion": "The GetProfileDataAsync method uses context.AddRequestedClaims() rather than directly adding all claims to IssuedClaims",
+      "pass": true,
+      "rationale": "It calls context.AddRequestedClaims(claims) for the DB-loaded user claims."
+    },
+    {
+      "assertion": "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present",
+      "pass": false,
+      "rationale": "It forwards the JwtClaimTypes.Actor claim whenever it is present but does not check the token-exchange authentication method (e.g. GetAuthenticationMethod()), so the act claim would leak into non-exchange flows; the guard the assertion requires is missing."
+    },
+    {
+      "assertion": "The profile service is registered via AddProfileService<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddProfileService<CustomProfileService>() is chained on AddIdentityServer()."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

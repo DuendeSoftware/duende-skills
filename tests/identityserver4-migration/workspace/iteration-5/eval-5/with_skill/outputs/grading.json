@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response shows ApiScope as a top-level independent object rather than nested under ApiResource",
+      "pass": true,
+      "rationale": "It defines ApiScopes as a standalone top-level collection of ApiScope objects, contrasted against the v3 nested Scope form."
+    },
+    {
+      "assertion": "Response shows ApiResource.Scopes containing string scope names instead of Scope objects",
+      "pass": true,
+      "rationale": "The v4 ApiResource uses Scopes = { \"api1.read\", \"api1.write\" } string references."
+    },
+    {
+      "assertion": "Response includes registering API scopes separately via AddInMemoryApiScopes or equivalent",
+      "pass": true,
+      "rationale": "It calls AddInMemoryApiScopes(Config.ApiScopes) alongside AddInMemoryApiResources and AddInMemoryClients."
+    },
+    {
+      "assertion": "Response warns about data loss if using auto-generated EF Core migrations for the v3 to v4 ConfigurationDbContext schema change",
+      "pass": true,
+      "rationale": "It explicitly states not to rely on auto-generated migrations because EF will drop and recreate the renamed tables and lose all data, recommending a custom delta SQL script."
+    },
+    {
+      "assertion": "Response mentions the table renames from v3 to v4 (e.g., ApiClaims to ApiResourceClaims, ApiProperties to ApiResourceProperties, or similar)",
+      "pass": true,
+      "rationale": "It lists ApiClaims to ApiResourceClaims, ApiProperties to ApiResourceProperties, ApiSecrets to ApiResourceSecrets, and the IdentityClaims/IdentityProperties renames plus the ApiResourceScopes join table."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

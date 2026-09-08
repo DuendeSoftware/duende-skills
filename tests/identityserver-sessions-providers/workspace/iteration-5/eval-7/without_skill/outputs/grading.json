@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsFrequency to 5 minutes (TimeSpan.FromMinutes(5))",
+      "pass": true,
+      "rationale": "sessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMinutes(5) is set."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.RemoveExpiredSessionsBatchSize to 200",
+      "pass": true,
+      "rationale": "sessions.RemoveExpiredSessionsBatchSize = 200 is set."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = false",
+      "pass": true,
+      "rationale": "sessions.ExpiredSessionsTriggerBackchannelLogout = false is set."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.FuzzExpiredSessionRemovalStart = true (explicitly or by relying on the default)",
+      "pass": false,
+      "rationale": "The built-in FuzzExpiredSessionRemovalStart option is never used; the response instead proposes a hand-rolled random startup delay / leader-election, missing the actual setting that satisfies the requirement."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

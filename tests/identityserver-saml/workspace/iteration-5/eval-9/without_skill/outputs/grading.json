@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Registers the handler with AddSamlServiceProvider on the AddAuthentication builder",
+      "pass": false,
+      "rationale": "Registers a third-party `AddSaml2` (Sustainsys) handler, not the Duende `AddSamlServiceProvider` handler."
+    },
+    {
+      "assertion": "Sets AllowUnsolicitedAuthnResponse = true and also sets IdpInitiatedCallbackUrl (required when unsolicited responses are allowed)",
+      "pass": false,
+      "rationale": "Sets AllowUnsolicitedAuthnResponse = true but never sets the required IdpInitiatedCallbackUrl."
+    },
+    {
+      "assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": false,
+      "rationale": "Uses a hard-coded \"External\" scheme string rather than IdentityServerConstants.ExternalCookieAuthenticationScheme."
+    },
+    {
+      "assertion": "Callback authenticates against the external cookie scheme and reads RelayState from AuthenticationProperties.Items[\"relayState\"]",
+      "pass": false,
+      "rationale": "Reads from Items[\"RelayState\"] (capitalized) rather than the Duende-populated Items[\"relayState\"], so the key would not match at runtime."
+    },
+    {
+      "assertion": "Warns that RelayState is untrusted input and must be validated before being used as a redirect target",
+      "pass": true,
+      "rationale": "Explicitly states RelayState is untrusted, warns against blind redirects, and validates it as a local allow-listed URL before use."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

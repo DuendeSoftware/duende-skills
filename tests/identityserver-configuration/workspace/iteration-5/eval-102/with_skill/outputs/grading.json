@@ -1,0 +1,34 @@
+{
+  "eval_id": 102,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses GrantTypes.Code (not Implicit) as the grant type",
+      "pass": true,
+      "rationale": "AllowedGrantTypes = GrantTypes.Code, explicitly warning against Implicit."
+    },
+    {
+      "assertion": "Sets RequireClientSecret = false since it is a public SPA client",
+      "pass": true,
+      "rationale": "RequireClientSecret = false is set for the public client."
+    },
+    {
+      "assertion": "Includes AllowedCorsOrigins with 'https://spa.myapp.com'",
+      "pass": true,
+      "rationale": "AllowedCorsOrigins = { \"https://spa.myapp.com\" }."
+    },
+    {
+      "assertion": "Sets AllowOfflineAccess = true to enable refresh tokens",
+      "pass": true,
+      "rationale": "AllowOfflineAccess = true is set."
+    },
+    {
+      "assertion": "AllowedScopes includes 'openid', 'profile', and 'orders.read'",
+      "pass": true,
+      "rationale": "AllowedScopes includes OpenId, Profile, and 'orders.read'."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

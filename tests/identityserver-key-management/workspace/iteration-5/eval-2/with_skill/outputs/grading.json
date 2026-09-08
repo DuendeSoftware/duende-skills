@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'options.KeyManagement.Enabled = false'",
+      "pass": true,
+      "rationale": "The options lambda sets options.KeyManagement.Enabled = false to disable automatic key management."
+    },
+    {
+      "assertion": "Program.cs loads a certificate from '/certs/signing.pfx' using X509CertificateLoader.LoadPkcs12 or X509Certificate2",
+      "pass": true,
+      "rationale": "It reads /certs/signing.pfx bytes and calls X509CertificateLoader.LoadPkcs12(pfxBytes, pfxPassword)."
+    },
+    {
+      "assertion": "Program.cs calls AddSigningCredential with the loaded certificate and RS256 algorithm (SecurityAlgorithms.RsaSha256 or 'RS256')",
+      "pass": true,
+      "rationale": "idsvrBuilder.AddSigningCredential(signingCertificate, SecurityAlgorithms.RsaSha256) is called."
+    },
+    {
+      "assertion": "Program.cs does not remove the existing client and scope configuration",
+      "pass": true,
+      "rationale": "Both clients, the api1 scope, and identity resources are retained unchanged."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

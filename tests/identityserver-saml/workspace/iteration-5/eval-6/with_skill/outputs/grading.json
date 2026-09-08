@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": true,
+      "rationale": "Section 1 names `ISamlSigninStateStore` and explains it holds inbound AuthnRequest sign-in state needed on the callback node."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": true,
+      "rationale": "Section 2 names `ISamlLogoutSessionStore` for distributed SLO session/iframe-response tracking."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "Recommends EF Core AddConfigurationStore/AddOperationalStore (and Redis) over AddInMemorySamlServiceProviders for multi-node."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "States 'in-memory anything is unsafe for multi-node' and that without distributed stores SSO/SLO state is lost when a request hits a different node."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

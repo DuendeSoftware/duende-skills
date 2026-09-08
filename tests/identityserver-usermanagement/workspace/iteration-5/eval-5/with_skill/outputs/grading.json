@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that AddUserManagement() automatically registers IProfileService",
+      "pass": true,
+      "rationale": "The response has a dedicated section stating AddUserManagement() automatically registers an IProfileService so profile data flows into tokens without custom code."
+    },
+    {
+      "assertion": "Mentions that claims mapping is based on requested scopes (openid → sub, email → email)",
+      "pass": true,
+      "rationale": "It includes a table mapping openid → sub, profile → name/given_name, email → email/email_verified based on requested scopes."
+    },
+    {
+      "assertion": "Notes that custom user attributes can be exposed via custom identity resources",
+      "pass": true,
+      "rationale": "It shows defining a custom IdentityResource (company_profile) with custom user claims and allowing that scope on the client."
+    },
+    {
+      "assertion": "Sets LoginUrl and LogoutUrl in IdentityServer options to point to account pages",
+      "pass": true,
+      "rationale": "It sets options.UserInteraction.LoginUrl and LogoutUrl to the account pages in the IdentityServer options."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

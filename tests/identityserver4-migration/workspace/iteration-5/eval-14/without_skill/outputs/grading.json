@@ -1,0 +1,29 @@
+{
+  "eval_id": 14,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response warns that the issuer URI (iss claim) must remain the same after migration",
+      "pass": true,
+      "rationale": "It states the golden rule that the issuer must stay exactly the same before and after migration and ties it to the iss claim."
+    },
+    {
+      "assertion": "Response explains that changing the issuer breaks existing tokens and/or client trust relationships",
+      "pass": true,
+      "rationale": "It explains a changed issuer makes previously issued tokens fail validation and breaks OIDC client trust relationships."
+    },
+    {
+      "assertion": "Response recommends setting options.IssuerUri explicitly in the Duende IdentityServer configuration",
+      "pass": true,
+      "rationale": "It shows pinning options.IssuerUri explicitly inside AddIdentityServer rather than leaving it inferred."
+    },
+    {
+      "assertion": "Response suggests checking the current /.well-known/openid-configuration discovery document to find the existing issuer value",
+      "pass": true,
+      "rationale": "Step 1 instructs hitting the old server's /.well-known/openid-configuration and copying the issuer value verbatim."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

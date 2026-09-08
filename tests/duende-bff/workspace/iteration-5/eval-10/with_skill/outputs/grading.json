@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'AddReverseProxy()' with '.AddBffExtensions()'",
+      "pass": true,
+      "rationale": "builder.Services.AddReverseProxy().AddBffExtensions() is present."
+    },
+    {
+      "assertion": "Program.cs contains 'LoadFromMemory' with RouteConfig and ClusterConfig",
+      "pass": true,
+      "rationale": "LoadFromMemory is called with a RouteConfig and a ClusterConfig."
+    },
+    {
+      "assertion": "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+      "pass": true,
+      "rationale": "The RouteConfig chains .WithAccessToken(TokenType.User) and the text notes TokenType vs RequiredTokenType."
+    },
+    {
+      "assertion": "Program.cs contains '.WithAntiforgeryCheck()' on the RouteConfig",
+      "pass": true,
+      "rationale": "The RouteConfig chains .WithAntiforgeryCheck()."
+    },
+    {
+      "assertion": "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'",
+      "pass": true,
+      "rationale": "MapReverseProxy(proxyApp => proxyApp.UseAntiforgeryCheck()) is used."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

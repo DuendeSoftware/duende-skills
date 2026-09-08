@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda",
+      "pass": false,
+      "rationale": "The response builds a custom MailKit-based IEmailSender and never uses UseSmtpOtpDispatcher() or an AddUserManagement lambda."
+    },
+    {
+      "assertion": "Configures SMTP host and port",
+      "pass": true,
+      "rationale": "It configures Host and Port (587/STARTTLS) both in appsettings and in the ConnectAsync call."
+    },
+    {
+      "assertion": "Configures from address for outgoing emails",
+      "pass": true,
+      "rationale": "A FromAddress (and FromName) is configured and used to build the MimeMessage.From."
+    },
+    {
+      "assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)",
+      "pass": true,
+      "rationale": "The solution is a real SMTP sender and never uses a console dispatcher for production."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

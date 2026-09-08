@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements the IClientConfigurationStore interface",
+      "pass": true,
+      "rationale": "MongoClientConfigurationStore : IClientConfigurationStore implements the interface."
+    },
+    {
+      "assertion": "Includes an AddAsync method for persisting new clients",
+      "pass": true,
+      "rationale": "AddAsync(Client client) inserts the client via InsertOneAsync."
+    },
+    {
+      "assertion": "Includes a FindByClientIdAsync method that returns Client or null",
+      "pass": true,
+      "rationale": "FindByClientIdAsync returns Task<Client?> via FirstOrDefaultAsync, yielding null when not found."
+    },
+    {
+      "assertion": "Includes UpdateAsync and DeleteAsync methods for client lifecycle management",
+      "pass": true,
+      "rationale": "UpdateAsync uses ReplaceOneAsync and DeleteAsync uses DeleteOneAsync."
+    },
+    {
+      "assertion": "Mentions that client secrets should be stored securely (hashed, not plaintext)",
+      "pass": true,
+      "rationale": "A security note states secrets must be stored hashed, never in plaintext."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

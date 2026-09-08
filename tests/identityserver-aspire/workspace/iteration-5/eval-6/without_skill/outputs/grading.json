@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The migration runner project has .WithReference() for the database resource",
+      "pass": true,
+      "rationale": "The migrations project chains .WithReference(identityDb)."
+    },
+    {
+      "assertion": "The migration runner project has .WaitFor() for the SQL Server or database resource",
+      "pass": true,
+      "rationale": "The migrations project chains .WaitFor(sql)."
+    },
+    {
+      "assertion": "The IdentityServer project uses .WaitFor() referencing the migration runner project, not directly waiting for SQL Server",
+      "pass": true,
+      "rationale": "IdentityServer uses .WaitForCompletion(migrations) — a WaitFor-family call that references the migration runner and does not wait directly on SQL, satisfying the ordering requirement (and is the more correct method for a one-shot runner)."
+    },
+    {
+      "assertion": "The IdentityServer project still has .WithReference() for the database resource so it gets the connection string",
+      "pass": true,
+      "rationale": "IdentityServer keeps .WithReference(identityDb) so it still receives the connection string at runtime."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

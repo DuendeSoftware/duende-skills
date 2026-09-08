@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output adds the 'Duende.IdentityServer' meter (or Telemetry.ServiceName) to the metrics configuration",
+      "pass": true,
+      "rationale": "WithMetrics includes AddMeter(\"Duende.IdentityServer\")."
+    },
+    {
+      "assertion": "Output configures a Prometheus exporter for metrics (AddPrometheusExporter) and maps the scraping endpoint (UseOpenTelemetryPrometheusScrapingEndpoint)",
+      "pass": true,
+      "rationale": "Uses AddPrometheusExporter() and app.UseOpenTelemetryPrometheusScrapingEndpoint()."
+    },
+    {
+      "assertion": "Output adds only IdentityServerConstants.Tracing.Basic as the tracing source for production, and does NOT include Stores, Validation, Cache, or Services sources",
+      "pass": false,
+      "rationale": "Tracing adds the generic AddSource(\"Duende.IdentityServer\") and relies on sampling rather than IdentityServerConstants.Tracing.Basic; it never selects the Basic source specifically for production."
+    },
+    {
+      "assertion": "Output includes the necessary OpenTelemetry NuGet packages (OpenTelemetry.Extensions.Hosting, OpenTelemetry.Instrumentation.AspNetCore, OpenTelemetry.Exporter.OpenTelemetryProtocol or Prometheus exporter)",
+      "pass": true,
+      "rationale": "Lists OpenTelemetry.Extensions.Hosting, OpenTelemetry.Instrumentation.AspNetCore, the Prometheus exporter, and the OTLP exporter."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

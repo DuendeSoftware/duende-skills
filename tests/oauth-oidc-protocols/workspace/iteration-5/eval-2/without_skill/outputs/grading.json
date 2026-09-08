@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that the client generates a random code_verifier and computes a code_challenge as its SHA256 hash",
+      "pass": true,
+      "rationale": "The response states the client creates a random code_verifier and computes code_challenge = base64url(SHA256(code_verifier))."
+    },
+    {
+      "assertion": "Response describes the authorize endpoint redirect including the code_challenge and code_challenge_method=S256 parameters",
+      "pass": true,
+      "rationale": "Step 2 lists and shows code_challenge and code_challenge_method=S256 on the authorization request."
+    },
+    {
+      "assertion": "Response explains that the authorization code returned in the callback is exchanged at the token endpoint along with the original code_verifier",
+      "pass": true,
+      "rationale": "Steps 4-5 describe the callback code being exchanged at the token endpoint with the original code_verifier."
+    },
+    {
+      "assertion": "Response explains that PKCE prevents authorization code interception attacks because an attacker who intercepts the code cannot produce the matching code_verifier",
+      "pass": true,
+      "rationale": "The 'Why it stops interception' section explains an attacker with the code cannot supply the verifier and cannot derive it from the one-way hash."
+    },
+    {
+      "assertion": "Response mentions that Duende IdentityServer requires PKCE by default (RequirePkce = true) and ASP.NET Core's OIDC handler sends PKCE automatically since .NET 7",
+      "pass": false,
+      "rationale": "The response only says libraries handle PKCE automatically in general; it does not mention Duende's RequirePkce = true default or ASP.NET Core sending PKCE automatically since .NET 7."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

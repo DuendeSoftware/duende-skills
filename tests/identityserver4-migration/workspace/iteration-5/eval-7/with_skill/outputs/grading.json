@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response identifies ASP.NET Core Data Protection as the root cause of the decryption failure",
+      "pass": true,
+      "rationale": "It states the failure is ASP.NET Core Data Protection, which encrypts the persisted grant Data column and needs the same discriminator and key ring."
+    },
+    {
+      "assertion": "Response explains that the default application name (content root path discriminator) changed between .NET versions",
+      "pass": true,
+      "rationale": "It explains the default discriminator is derived from the content root path and details how it changed across .NET 5/6/7+."
+    },
+    {
+      "assertion": "Response recommends calling SetApplicationName() on AddDataProtection() with an explicit application name",
+      "pass": true,
+      "rationale": "It shows AddDataProtection().SetApplicationName(\"YourIdentityServer\") as the fix."
+    },
+    {
+      "assertion": "Response mentions ensuring old Data Protection keys are still accessible (not deleted or rotated away)",
+      "pass": true,
+      "rationale": "Point 2 stresses the original key ring must still be present and not deleted or rotated away, pointing to the same persistent repository."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

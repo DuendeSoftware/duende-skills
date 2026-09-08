@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Shows AddUserAccessTokenHttpClient for the named HttpClient pattern with automatic token attachment",
+      "pass": true,
+      "rationale": "Pattern 1 registers AddUserAccessTokenHttpClient(\"remoteApi\", ...) and notes the token is attached automatically."
+    },
+    {
+      "assertion": "Shows GetUserAccessTokenAsync for the manual pattern",
+      "pass": true,
+      "rationale": "Pattern 2 calls await ctx.GetUserAccessTokenAsync() and uses SetBearerToken."
+    },
+    {
+      "assertion": "Both API endpoints use .AsBffApiEndpoint() for CSRF protection",
+      "pass": true,
+      "rationale": "Both /api/data and /api/data-manual chain .AsBffApiEndpoint()."
+    },
+    {
+      "assertion": "Does NOT return the raw access token to the browser (no Results.Json with the token value)",
+      "pass": true,
+      "rationale": "Both endpoints return the downstream response body via Results.Text and explicitly warn against returning the token."
+    },
+    {
+      "assertion": "Mentions that token refresh is handled automatically by AccessTokenManagement",
+      "pass": true,
+      "rationale": "It states AccessTokenManagement refreshes the token transparently for both patterns."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

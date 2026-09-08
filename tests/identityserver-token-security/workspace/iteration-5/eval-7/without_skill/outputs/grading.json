@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options",
+      "pass": false,
+      "rationale": "The response only sets MutualTls.Enabled = true and never sets AlwaysEmitConfirmationClaim, which is the specific option required to emit the cnf claim without certificate-based authentication."
+    },
+    {
+      "assertion": "Client uses standard shared secret authentication (not certificate-based authentication)",
+      "pass": true,
+      "rationale": "hybrid_app keeps its hashed shared secret only, with no certificate secret, and the text stresses the certificate is not used for authentication."
+    },
+    {
+      "assertion": "Explains that the cnf claim with x5t#S256 will be embedded in the access token",
+      "pass": true,
+      "rationale": "It describes the access token receiving a `cnf` claim containing the `x5t#S256` certificate thumbprint."
+    },
+    {
+      "assertion": "Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)",
+      "pass": true,
+      "rationale": "The response explicitly states the client must present a TLS client certificate at the token endpoint even though it is not used for authentication."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

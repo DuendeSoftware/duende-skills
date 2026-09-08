@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output includes new IdentityResources.OpenId() in the identity resources collection",
+      "pass": true,
+      "rationale": "The collection includes new IdentityResources.OpenId()."
+    },
+    {
+      "assertion": "Output includes new IdentityResources.Profile() in the identity resources collection",
+      "pass": true,
+      "rationale": "The collection includes new IdentityResources.Profile()."
+    },
+    {
+      "assertion": "Output defines a custom IdentityResource with name 'organization' and userClaims containing 'org_id', 'org_name', and 'org_role'",
+      "pass": true,
+      "rationale": "Defines a custom IdentityResource named 'organization' with the three specified user claims."
+    },
+    {
+      "assertion": "The custom 'organization' identity resource has Required set to true",
+      "pass": true,
+      "rationale": "Sets Required = true on the organization resource."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

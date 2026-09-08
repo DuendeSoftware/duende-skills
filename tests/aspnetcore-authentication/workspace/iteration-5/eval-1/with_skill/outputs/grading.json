@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains 'MapInboundClaims = false' on the OIDC handler to prevent XML claim type mapping",
+      "pass": true,
+      "rationale": "The OIDC handler explicitly sets options.MapInboundClaims = false with a comment about avoiding XML/SOAP URI remapping."
+    },
+    {
+      "assertion": "Program.cs calls Scope.Clear() before adding individual scopes to avoid duplicates",
+      "pass": true,
+      "rationale": "options.Scope.Clear() is called before adding openid, profile, api1, and offline_access."
+    },
+    {
+      "assertion": "Program.cs sets DefaultScheme to a cookie scheme and DefaultChallengeScheme to the OIDC scheme",
+      "pass": true,
+      "rationale": "DefaultScheme is set to 'Cookies' and DefaultChallengeScheme to 'oidc'."
+    },
+    {
+      "assertion": "Program.cs calls app.UseAuthentication() before app.UseAuthorization() in the middleware pipeline",
+      "pass": true,
+      "rationale": "The pipeline calls app.UseAuthentication() immediately before app.UseAuthorization()."
+    },
+    {
+      "assertion": "Program.cs sets ResponseType to 'code' for authorization code flow",
+      "pass": true,
+      "rationale": "options.ResponseType = \"code\" is set with a comment noting automatic PKCE."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IProfileService or extends DefaultProfileService",
+      "pass": true,
+      "rationale": "ApplicationProfileService implements IProfileService directly with both interface methods."
+    },
+    {
+      "assertion": "Uses context.AddRequestedClaims for scope-filtered claims like 'department'",
+      "pass": true,
+      "rationale": "department (with name/email) is emitted through context.AddRequestedClaims(claims)."
+    },
+    {
+      "assertion": "Uses context.IssuedClaims.Add (not AddRequestedClaims) for the mandatory tenant_id claim to bypass scope filtering",
+      "pass": true,
+      "rationale": "tenant_id is added with context.IssuedClaims.Add(...) and the answer explains it is not scope-filtered."
+    },
+    {
+      "assertion": "Implements IsActiveAsync to check whether the user is still active",
+      "pass": true,
+      "rationale": "IsActiveAsync is implemented and sets context.IsActive from user.IsEnabled."
+    },
+    {
+      "assertion": "Registers the profile service with AddProfileService<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "Registration chains .AddProfileService<ApplicationProfileService>() on the IdentityServer builder."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

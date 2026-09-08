@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against exposing the DCR endpoint without authentication or authorization",
+      "pass": true,
+      "rationale": "Item 1 calls an open endpoint the most dangerous mistake and requires RequireAuthorization with a scoped policy."
+    },
+    {
+      "assertion": "Warns against allowing dynamically registered clients to use any grant type — should restrict and enforce PKCE",
+      "pass": true,
+      "rationale": "Item 2 restricts grant types to authorization_code and enforces RequirePkce = true in the validator."
+    },
+    {
+      "assertion": "Warns against using in-memory stores for DCR clients in production",
+      "pass": true,
+      "rationale": "Item 3 explains in-memory stores lose clients on restart and mandates a persistent store in production."
+    },
+    {
+      "assertion": "Mentions that client secrets must be stored securely (hashed, not plaintext)",
+      "pass": true,
+      "rationale": "Item 4 requires storing secrets hashed (Secret(value.Sha256())), never plaintext."
+    },
+    {
+      "assertion": "Mentions that software statements must be validated against trusted signing keys — never accept unknown issuers",
+      "pass": true,
+      "rationale": "Item 5 requires validating software statements against trusted signing keys, pinning the issuer, and rejecting unknown issuers."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

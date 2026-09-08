@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause — each instance generates its own keys",
+      "pass": true,
+      "rationale": "It correctly identifies the per-instance Data Protection key ring as the cause of decryption failures across nodes."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "It shows PersistKeysToDbContext, Redis, and Azure Blob Storage options with SetApplicationName."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": false,
+      "rationale": "It mentions backing distributed sessions/caches with a shared store generally but never recommends BFF server-side sessions via AddEntityFrameworkServerSideSessions."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "It provides AddDataProtection().PersistKeysTo...() code with persistent backends."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

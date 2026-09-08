@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.UserInteraction.CreateAccountUrl to '/Account/Register' in AddIdentityServer",
+      "pass": true,
+      "rationale": "AddIdentityServer sets options.UserInteraction.CreateAccountUrl = \"/Account/Register\"."
+    },
+    {
+      "assertion": "Response notes that this makes IdentityServer advertise 'create' in prompt_values_supported (discovery) and that prompt=create is ignored if CreateAccountUrl is unset",
+      "pass": true,
+      "rationale": "Explicitly states it advertises create in prompt_values_supported in the discovery document and that if CreateAccountUrl is unset, prompt=create is not advertised and is ignored."
+    },
+    {
+      "assertion": "The client triggers the flow with Results.Challenge using OpenIdConnectChallengeProperties with Prompt = 'create'",
+      "pass": true,
+      "rationale": "Client uses Results.Challenge(new OpenIdConnectChallengeProperties { Prompt = \"create\", ... }, [\"oidc\"])."
+    },
+    {
+      "assertion": "The registration handler calls GetAuthorizationContextAsync(returnUrl) and redirects away when it returns null to prevent open redirect",
+      "pass": true,
+      "rationale": "OnPost calls GetAuthorizationContextAsync(returnUrl, ct) and returns Redirect(\"~/\") when context is null."
+    },
+    {
+      "assertion": "The handler signs the user in via HttpContext.SignInAsync(new IdentityServerUser(...)) only after email confirmation, then redirects to returnUrl",
+      "pass": true,
+      "rationale": "The register handler only creates the user and sends a confirmation email; HttpContext.SignInAsync(new IdentityServerUser(user.SubjectId)) happens in the ConfirmEmail handler, then Redirect(returnUrl)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

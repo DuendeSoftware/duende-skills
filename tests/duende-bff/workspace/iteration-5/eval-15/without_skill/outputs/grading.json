@@ -1,0 +1,29 @@
+{
+  "eval_id": 15,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that with server-side sessions the cookie carries only the session id, not tokens",
+      "pass": true,
+      "rationale": "It states the cookie holds only a random session identifier and no claims or tokens."
+    },
+    {
+      "assertion": "States that all tokens, including refresh tokens, are stored server-side in the session store",
+      "pass": true,
+      "rationale": "It says the access, ID, and refresh tokens are all stored server-side, not in the cookie."
+    },
+    {
+      "assertion": "Explains the in-memory store is lost on process restart and not shared across instances (users appear logged out on a different node)",
+      "pass": true,
+      "rationale": "It explains the in-memory store is not durable (wiped on restart) and not shared between nodes, causing random logouts across instances."
+    },
+    {
+      "assertion": "Recommends a persistent, shared store for multi-node BFF via Duende.BFF.EntityFramework / AddEntityFrameworkServerSideSessions",
+      "pass": false,
+      "rationale": "It recommends a generic shared persistent store (SQL/Redis) but does not name Duende.BFF.EntityFramework or AddEntityFrameworkServerSideSessions."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

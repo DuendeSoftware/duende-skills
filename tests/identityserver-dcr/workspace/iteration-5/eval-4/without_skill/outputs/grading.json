@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Overrides ValidateSoftwareStatementAsync in a DynamicClientRegistrationValidator subclass",
+      "pass": false,
+      "rationale": "Subclasses the validator but overrides a guessed monolithic ValidateAsync, not the specific ValidateSoftwareStatementAsync method."
+    },
+    {
+      "assertion": "Calls context.SetError when the software statement is missing or invalid",
+      "pass": false,
+      "rationale": "Returns DynamicClientRegistrationValidationError objects rather than calling context.SetError."
+    },
+    {
+      "assertion": "Validates the JWT software statement using JsonWebTokenHandler or equivalent with ValidIssuer set to the trusted issuer URL",
+      "pass": true,
+      "rationale": "Uses JsonWebTokenHandler.ValidateTokenAsync with ValidIssuer pinned to https://trusted-issuer.example.com and JWKS-resolved signing keys."
+    },
+    {
+      "assertion": "Maps claims from the software statement (e.g. software_name) to context.Client properties",
+      "pass": true,
+      "rationale": "Extracts the software_name claim and assigns it to the registered client's ClientName property."
+    },
+    {
+      "assertion": "Calls base.ValidateSoftwareStatementAsync at the end of successful validation",
+      "pass": false,
+      "rationale": "Calls base.ValidateAsync instead of base.ValidateSoftwareStatementAsync."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

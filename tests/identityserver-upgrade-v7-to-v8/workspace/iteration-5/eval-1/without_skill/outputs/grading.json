@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds CancellationToken parameter to FindClientByIdAsync method signature",
+      "pass": true,
+      "rationale": "Shows FindClientByIdAsync(string clientId, CancellationToken ct = default) with the token flowed into the query, correctly anticipating the common interface change."
+    },
+    {
+      "assertion": "Adds GetAllClientsAsync(CancellationToken ct) method returning IAsyncEnumerable<Client>",
+      "pass": false,
+      "rationale": "The new GetAllClientsAsync member is never mentioned; it only advises letting the compiler surface new members."
+    },
+    {
+      "assertion": "Updates TargetFramework to net10.0",
+      "pass": false,
+      "rationale": "It suggests net8.0 and hedges about the required TFM, never identifying net10.0."
+    },
+    {
+      "assertion": "Updates Duende.IdentityServer package version to latest stable 8.x (e.g. 8.0.1 or newer)",
+      "pass": true,
+      "rationale": "Bumps Duende.IdentityServer and .EntityFramework to 8.0.0 and tells the user to check NuGet for the latest patch."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

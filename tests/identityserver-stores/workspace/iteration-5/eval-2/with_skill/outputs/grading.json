@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A class implementing IClientStore is created with a constructor accepting IMongoDatabase",
+      "pass": true,
+      "rationale": "MongoClientStore : IClientStore has a constructor accepting IMongoDatabase and obtaining the 'clients' collection."
+    },
+    {
+      "assertion": "The FindClientByIdAsync method does NOT include a CancellationToken parameter (v7 target)",
+      "pass": true,
+      "rationale": "FindClientByIdAsync(string clientId) has no CancellationToken, matching the v7 interface."
+    },
+    {
+      "assertion": "Registration calls AddClientStore<T> where T is the custom store class",
+      "pass": true,
+      "rationale": "AddClientStore<MongoClientStore>() is called on the IdentityServer builder."
+    },
+    {
+      "assertion": "Registration calls AddInMemoryCaching() and AddClientStoreCache<T>() to wrap the custom store with caching",
+      "pass": true,
+      "rationale": "Both AddInMemoryCaching() and AddClientStoreCache<MongoClientStore>() are chained after the store registration."
+    },
+    {
+      "assertion": "ClientStoreExpiration is set to TimeSpan.FromMinutes(5) or equivalent 5-minute duration",
+      "pass": true,
+      "rationale": "options.Caching.ClientStoreExpiration = TimeSpan.FromMinutes(5) is set in AddIdentityServer."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

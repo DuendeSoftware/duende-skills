@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details",
+      "pass": true,
+      "rationale": "IndexModel injects IIdentityServerInteractionService and OnGet/OnPost call GetAuthorizationContextAsync, reading Client and ValidatedResources.RawScopeValues."
+    },
+    {
+      "assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true",
+      "pass": true,
+      "rationale": "GrantConsentAsync is called with new ConsentResponse { ScopesValuesConsented = ScopesConsented.ToArray(), RememberConsent = true }."
+    },
+    {
+      "assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent",
+      "pass": true,
+      "rationale": "The deny branch calls DenyAuthorizationAsync(context, AuthorizationError.AccessDenied)."
+    },
+    {
+      "assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting",
+      "pass": true,
+      "rationale": "Redirects away when context is null and additionally guards the final redirect with await _interaction.IsValidReturnUrl(returnUrl)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

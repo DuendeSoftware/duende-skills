@@ -1,0 +1,24 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains the cookie extends because IdentityServer re-issues it via SignInAsync when the session's client list changes",
+      "pass": false,
+      "rationale": "It attributes the extension to sliding expiration renewing the cookie per request, not to IdentityServer re-issuing the cookie via SignInAsync when the session's client list changes."
+    },
+    {
+      "assertion": "The web.app client sets UserSsoLifetime to an 8-hour value (28800 seconds) to force interactive re-authentication",
+      "pass": false,
+      "rationale": "The response never sets UserSsoLifetime; it relies on CookieLifetime plus disabling sliding expiration, which does not force interactive re-auth against the SignInAsync re-issue behavior."
+    },
+    {
+      "assertion": "The client sets RefreshTokenExpiration = TokenExpiration.Absolute together with AbsoluteRefreshTokenLifetime to cap refresh-driven session extension",
+      "pass": true,
+      "rationale": "web.app sets AbsoluteRefreshTokenLifetime = 8 * 3600 and RefreshTokenExpiration = TokenExpiration.Absolute to cap refresh-token-driven extension."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 3,
+  "score": 0.33
+}

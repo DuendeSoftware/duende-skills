@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets Authentication.CookieLifetime to 8 hours and CookieSlidingExpiration to false",
+      "pass": false,
+      "rationale": "Uses ConfigureApplicationCookie ExpireTimeSpan/SlidingExpiration instead of IdentityServer's options.Authentication.CookieLifetime / CookieSlidingExpiration. It does not set the specified IdentityServer authentication options, and this generic cookie is not how IdentityServer's own session cookie is configured."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true",
+      "pass": false,
+      "rationale": "Does not set ExpiredSessionsTriggerBackchannelLogout; only vaguely defers to 'check the ServerSideSessions options' and says to verify the exact option name in docs."
+    },
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "Calls idsvrBuilder.AddServerSideSessions() to enable server-side sessions."
+    },
+    {
+      "assertion": "The web.app client has BackChannelLogoutUri set to a valid HTTPS URL",
+      "pass": true,
+      "rationale": "web.app sets BackChannelLogoutUri = \"https://app.example.com/bff/backchannel\" (HTTPS) and BackChannelLogoutSessionRequired = true."
+    },
+    {
+      "assertion": "Program.cs sets Authentication.CoordinateClientLifetimesWithUserSession = true",
+      "pass": false,
+      "rationale": "Does not set CoordinateClientLifetimesWithUserSession; explicitly defers it as something to 'confirm in the docs' and leaves it unimplemented."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

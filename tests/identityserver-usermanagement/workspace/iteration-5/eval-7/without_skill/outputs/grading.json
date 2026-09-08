@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies that storage configuration must be inside the AddUserManagement() options lambda",
+      "pass": true,
+      "rationale": "By analogy with fluent builder APIs it identifies the likely cause as scoping and recommends configuring the store inside the options callback."
+    },
+    {
+      "assertion": "Shows the correct pattern: AddUserManagement(options => { options.AddSqliteStore(...); })",
+      "pass": true,
+      "rationale": "It shows AddUserManagement(options => { options.AddSqliteStore(\"Data Source=users.db\"); }) as the corrected pattern versus the top-level version."
+    },
+    {
+      "assertion": "Explains that configuring storage outside the lambda is the cause of the error",
+      "pass": true,
+      "rationale": "It explains that registering the store on the root service collection means the component never sees it and fails to resolve its store at startup."
+    },
+    {
+      "assertion": "Does NOT suggest using EF Core migrations as a fix",
+      "pass": true,
+      "rationale": "The recommended fix is relocating the config into the lambda; it only mentions 'whatever schema-initialization or migration step the product provides,' not EF Core migrations as the fix."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

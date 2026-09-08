@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+      "pass": true,
+      "rationale": "Directly names the root cause: Data Protection keys not shared across replicas, with per-pod ephemeral key rings causing intermittent failures."
+    },
+    {
+      "assertion": "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+      "pass": true,
+      "rationale": "Uses PersistKeysToStackExchangeRedis and lists PersistKeysToDbContext, PersistKeysToAzureBlobStorage, etc."
+    },
+    {
+      "assertion": "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+      "pass": true,
+      "rationale": "Calls SetApplicationName(\"My.IdentityServer\") and explains it must be identical on every replica."
+    },
+    {
+      "assertion": "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+      "pass": true,
+      "rationale": "Dedicated section shows AddOperationalStore and warns the default file-system signing key store is per-pod."
+    },
+    {
+      "assertion": "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+      "pass": true,
+      "rationale": "Explicitly states never to rely on default ephemeral/local-file keys for multi-instance."
+    },
+    {
+      "assertion": "Output references the general data protection documentation or mentions this is a cross-cutting concern for all Duende SDKs",
+      "pass": true,
+      "rationale": "Includes a 'Cross-cutting note' referencing Duende's general Data Protection guidance covering IdentityServer and BFF."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs configures opt.UserInteraction.ErrorUrl to a specific error page path",
+      "pass": true,
+      "rationale": "Sets options.UserInteraction.ErrorUrl = \"/Home/Error\" (and ErrorId) in AddIdentityServer."
+    },
+    {
+      "assertion": "An error page calls GetErrorContextAsync(errorId) to retrieve error details from IIdentityServerInteractionService",
+      "pass": true,
+      "rationale": "OnGet calls await _interaction.GetErrorContextAsync(errorId) and reads Error, RequestId, ErrorDescription, ClientId."
+    },
+    {
+      "assertion": "The error page displays the Error code and RequestId to the user but does not render ErrorDescription directly in the view",
+      "pass": true,
+      "rationale": "The view renders Model.Error and Model.RequestId only; ErrorDescription is never exposed to the model or the view."
+    },
+    {
+      "assertion": "The error page logs the full error details including ErrorDescription using ILogger at Debug level",
+      "pass": true,
+      "rationale": "Calls _logger.LogDebug(...) including message.ErrorDescription along with Error, RequestId, and ClientId."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

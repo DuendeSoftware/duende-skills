@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ITokenRequestCustomizer interface with a Customize method",
+      "pass": false,
+      "rationale": "Never uses ITokenRequestCustomizer; proposes manual parameter overrides and a custom DelegatingHandler instead."
+    },
+    {
+      "assertion": "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+      "pass": false,
+      "rationale": "No Customize method exists; the DelegatingHandler uses SendAsync(HttpRequestMessage, CancellationToken) instead."
+    },
+    {
+      "assertion": "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+      "pass": true,
+      "rationale": "Constructs new UserTokenRequestParameters { Scope = cfg.RequiredScopes, Resource = cfg.ApiResource } per tenant, an equivalent way to set per-tenant Resource/Scope."
+    },
+    {
+      "assertion": "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler",
+      "pass": false,
+      "rationale": "No customizer is passed to any Add*Handler; registration uses a generic AddHttpMessageHandler with a hand-rolled handler."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

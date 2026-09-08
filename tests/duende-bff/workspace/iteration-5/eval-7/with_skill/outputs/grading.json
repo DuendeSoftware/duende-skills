@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause — each instance generates its own keys",
+      "pass": true,
+      "rationale": "It states each instance generates its own in-memory key ring so cookies from one node can't be decrypted by another."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "It shows PersistKeysToDbContext, PersistKeysToAzureBlobStorage, and Redis options with a shared SetApplicationName."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "Fix 2 recommends AddEntityFrameworkServerSideSessions with SQL Server instead of in-memory sessions."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "Multiple AddDataProtection().PersistKeysTo...() code samples are provided."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response identifies ASP.NET Core Data Protection as the root cause of the decryption failure",
+      "pass": true,
+      "rationale": "It attributes the failure to ASP.NET Core Data Protection and its key ring/application discriminator, not IdentityServer."
+    },
+    {
+      "assertion": "Response explains that the default application name (content root path discriminator) changed between .NET versions",
+      "pass": true,
+      "rationale": "It explains the default application name is based on the content root path and that how it is computed shifted between .NET 6 and .NET 8, changing the discriminator."
+    },
+    {
+      "assertion": "Response recommends calling SetApplicationName() on AddDataProtection() with an explicit application name",
+      "pass": true,
+      "rationale": "It shows AddDataProtection().SetApplicationName(\"my-identityserver\") and advises pinning it."
+    },
+    {
+      "assertion": "Response mentions ensuring old Data Protection keys are still accessible (not deleted or rotated away)",
+      "pass": true,
+      "rationale": "It states the fix only works if the original key ring is still available and warns against deleting or rotating those keys away."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'",
+      "pass": false,
+      "rationale": "Calls AddIdentityServerConfiguration() but never sets the IdentityServerBaseUrl option; only vaguely defers base-URL config to appsettings."
+    },
+    {
+      "assertion": "Sets up JWT bearer authentication pointing to the main IdentityServer as Authority",
+      "pass": true,
+      "rationale": "AddJwtBearer(\"dcr\", ...) sets Authority = https://identity.example.com, the main IdentityServer."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()",
+      "pass": true,
+      "rationale": "MapDynamicClientRegistration().RequireAuthorization(\"dcr\") is used."
+    },
+    {
+      "assertion": "Does NOT call AddIdentityServer() — this is a separate host, not an IdentityServer instance",
+      "pass": true,
+      "rationale": "AddIdentityServer() is not called and the response notes the host does not run IdentityServer itself."
+    },
+    {
+      "assertion": "Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from",
+      "pass": true,
+      "rationale": "Explicitly states both apps must share the same client database and points the DbContext at the shared database."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

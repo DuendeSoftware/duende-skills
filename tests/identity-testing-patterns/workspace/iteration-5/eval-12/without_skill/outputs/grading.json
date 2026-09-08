@@ -1,0 +1,39 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses a CookieContainer with HttpClientHandler so cookies flow across requests",
+      "pass": true,
+      "rationale": "Creates `new HttpClientHandler { CookieContainer = cookies }` and uses it so antiforgery/auth cookies persist across requests."
+    },
+    {
+      "assertion": "Uses AngleSharp (HtmlParser().ParseDocumentAsync) to parse the login page HTML",
+      "pass": false,
+      "rationale": "Parses the HTML with HtmlAgilityPack (`HtmlDocument.LoadHtml`), not AngleSharp's `HtmlParser().ParseDocumentAsync`."
+    },
+    {
+      "assertion": "Reads the antiforgery token from input[name='__RequestVerificationToken'] via GetAttribute(\"value\")",
+      "pass": true,
+      "rationale": "Selects `//input[@name='__RequestVerificationToken']` and reads its value via `GetAttributeValue(\"value\", \"\")` — the same input and value attribute (different parser API)."
+    },
+    {
+      "assertion": "POSTs FormUrlEncodedContent with Username, Password, __RequestVerificationToken, and button=login to the form's resolved action URL",
+      "pass": false,
+      "rationale": "Posts FormUrlEncodedContent with Username, Password, and __RequestVerificationToken to the resolved action but omits the `button=login` field required by the default Duende login form."
+    },
+    {
+      "assertion": "Asserts success by comparing the final RequestMessage.RequestUri.Host to the original protected host",
+      "pass": true,
+      "rationale": "Asserts `result.RequestMessage!.RequestUri!.Host` equals the original app host."
+    },
+    {
+      "assertion": "Does NOT require Playwright, Selenium, or another headless browser",
+      "pass": true,
+      "rationale": "Uses only HttpClient + an HTML parser; explicitly states no browser automation is required."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 6,
+  "score": 0.67
+}

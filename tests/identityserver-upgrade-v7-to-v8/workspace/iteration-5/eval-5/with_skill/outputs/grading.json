@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that IAuthorizationParametersMessageStore is removed in v8",
+      "pass": true,
+      "rationale": "Confirms the interface was removed in v8 and explains what it previously did."
+    },
+    {
+      "assertion": "Identifies PAR (Pushed Authorization Requests) as the replacement",
+      "pass": true,
+      "rationale": "Explicitly names PAR (RFC 9126) as the replacement and explains the push-then-request_uri flow."
+    },
+    {
+      "assertion": "Mentions configuring clients to use require_pushed_authorization_requests or the PAR endpoint",
+      "pass": true,
+      "rationale": "Shows RequirePushedAuthorization = true, cites require_pushed_authorization_requests, and references the /connect/par endpoint."
+    },
+    {
+      "assertion": "Does NOT suggest reimplementing IAuthorizationParametersMessageStore",
+      "pass": true,
+      "rationale": "Explicitly tells the user to remove it and not reimplement it."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

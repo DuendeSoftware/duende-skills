@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output replaces IClientCredentialsTokenManagementService with IClientCredentialsTokenManager",
+      "pass": true,
+      "rationale": "MyService injects IClientCredentialsTokenManager and the summary table documents the rename."
+    },
+    {
+      "assertion": "Output uses ClientCredentialsClientName.Parse() for the client name argument instead of a raw string",
+      "pass": true,
+      "rationale": "GetAccessTokenAsync is called with ClientCredentialsClientName.Parse(\"api-client\")."
+    },
+    {
+      "assertion": "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value",
+      "pass": true,
+      "rationale": "Code checks if (!tokenResult.Succeeded) return; before calling tokenResult.GetToken()."
+    },
+    {
+      "assertion": "Output removes or notes that AddDistributedMemoryCache() is no longer required because v4 uses HybridCache automatically",
+      "pass": true,
+      "rationale": "Explicitly removes AddDistributedMemoryCache() and states v4 caches with HybridCache automatically."
+    },
+    {
+      "assertion": "Output uses strongly-typed property setters like ClientId.Parse(), ClientSecret.Parse(), and Scope.Parse()",
+      "pass": true,
+      "rationale": "Registration uses ClientId.Parse, ClientSecret.Parse, and Scope.Parse."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

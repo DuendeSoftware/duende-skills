@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web.app client has RequirePkce = true and does not set it to false",
+      "pass": true,
+      "rationale": "Sets RequirePkce = true and explains PKCE is required by RFC 9700."
+    },
+    {
+      "assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+      "pass": true,
+      "rationale": "Replaces the wildcard with exact https://app.example.com/signin-oidc and signout-callback-oidc URIs."
+    },
+    {
+      "assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+      "pass": true,
+      "rationale": "AllowedGrantTypes = GrantTypes.Code, and recommends a separate client for M2M."
+    },
+    {
+      "assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+      "pass": true,
+      "rationale": "AccessTokenLifetime = 300 (5 minutes)."
+    },
+    {
+      "assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "Sets RefreshTokenUsage = TokenUsage.OneTimeOnly with Absolute expiration."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

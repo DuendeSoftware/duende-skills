@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The notification service implements SendLoginRequestAsync(BackchannelUserLoginRequest request, CancellationToken) and is registered via AddBackchannelAuthenticationUserNotificationService<T>()",
+      "pass": true,
+      "rationale": "CibaUserNotificationService implements SendLoginRequestAsync(BackchannelUserLoginRequest, CancellationToken) and is registered via AddBackchannelAuthenticationUserNotificationService<CibaUserNotificationService>()."
+    },
+    {
+      "assertion": "Code uses request.BindingMessage and treats request.InternalId as sensitive (not exposed in the notification)",
+      "pass": false,
+      "rationale": "It uses request.BindingMessage but embeds request.InternalId directly in the notification deep link URL, exposing the sensitive handle rather than protecting it."
+    },
+    {
+      "assertion": "The approval UI calls GetPendingLoginRequestsForCurrentUserAsync and GetLoginRequestByInternalIdAsync on IBackchannelAuthenticationInteractionService",
+      "pass": false,
+      "rationale": "It calls GetPendingLoginRequestsForCurrentUserAsync but never uses GetLoginRequestByInternalIdAsync; it reloads by filtering the pending list with FirstOrDefault instead."
+    },
+    {
+      "assertion": "Ownership is verified by comparing request.Subject.GetSubjectId() to the current user before completing",
+      "pass": true,
+      "rationale": "Before completing, it compares request.Subject.GetSubjectId() to User.GetSubjectId() and returns Forbid() on mismatch."
+    },
+    {
+      "assertion": "Approval calls CompleteLoginRequestAsync with a CompleteBackchannelLoginRequest whose ScopesValuesConsented is set (empty/null to deny), and the response notes the server rejects scopes not in the original CIBA request",
+      "pass": false,
+      "rationale": "It calls CompleteLoginRequestAsync with ScopesValuesConsented set/null correctly, but the response never notes that the server rejects scopes not present in the original CIBA request, so the compound assertion is not fully met."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

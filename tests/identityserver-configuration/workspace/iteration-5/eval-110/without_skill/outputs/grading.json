@@ -1,0 +1,34 @@
+{
+  "eval_id": 110,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IResourceValidator with method ValidateRequestedResourcesAsync taking ResourceValidationRequest and a CancellationToken",
+      "pass": false,
+      "rationale": "The method signature is ValidateRequestedResourcesAsync(ResourceValidationRequest request) with no CancellationToken — the v7-style signature that will not compile against v8."
+    },
+    {
+      "assertion": "Notes that the CancellationToken parameter was added in v8",
+      "pass": false,
+      "rationale": "Makes no mention of the v8 CancellationToken addition."
+    },
+    {
+      "assertion": "Registers the validator via AddResourceValidator<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "idsvrBuilder.AddResourceValidator<CustomResourceValidator>() is called."
+    },
+    {
+      "assertion": "When wrapping/decorating the default, also registers services.AddTransient<DefaultResourceValidator>()",
+      "pass": true,
+      "rationale": "builder.Services.AddTransient<DefaultResourceValidator>() is registered so the decorator can inject the default."
+    },
+    {
+      "assertion": "References ResourceValidationRequest members such as Client, Scopes, and ResourceIndicators (RFC 8707)",
+      "pass": false,
+      "rationale": "References request.Client and request.Scopes only; does not mention ResourceIndicators or RFC 8707."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

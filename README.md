@@ -129,49 +129,51 @@ Each skill is evaluated using 5–12 realistic prompts with concrete assertions.
 Run evals for all skills using GitHub Models (via `gh` CLI):
 
 ```bash
-./scripts/run-evals.sh --iteration 4 --verbose
+./scripts/run-evals.sh --iteration 5 --verbose
 ```
 
-### Results — July 22, 2026 (claude-opus-4-20250514, iteration 4)
+### Results — September 8, 2026 (claude-opus-4.8, iteration 5)
 
-**219 evals across 24 skills — 976 total assertions**
+**241 evals across 24 skills — 1,079 total assertions**
 
-|             | With Skill          | Without Skill        | Delta      |
-|-------------|---------------------|----------------------|------------|
-| **Overall** | **975/976 (99.9%)** | **502/976 (51.4%)**  | **+48.5%** |
+|             | With Skill            | Without Skill        | Delta      |
+|-------------|-----------------------|----------------------|------------|
+| **Overall** | **1079/1079 (100%)**  | **833/1079 (77.2%)** | **+22.8%** |
 
 | Skill                               | Evals | With Skill    | Without Skill   |      Delta | Prev Delta |
 |-------------------------------------|------:|---------------|-----------------|------------|------------|
-| `identityserver-usermanagement`     |     7 | 29/29 (100%)  |   0/29 (0.0%)   | **+100.0%**|    +69.0%  |
-| `identityserver-saml`               |     8 | 33/34 (97.1%) |   6/34 (17.6%)  | **+79.4%** |    +88.6%  |
-| `identityserver-upgrade-v7-to-v8`   |     7 | 29/29 (100%)  |   5/29 (17.2%)  | **+82.8%** |    +51.7%  |
-| `identityserver-dcr`                |     8 | 39/39 (100%)  |   9/39 (23.1%)  | **+76.9%** |    +53.8%  |
-| `identityserver-sessions-providers` |     8 | 37/37 (100%)  |  12/37 (32.4%)  | **+67.6%** |    +35.1%  |
-| `duende-bff`                        |    14 | 63/63 (100%)  |  22/63 (34.9%)  | **+65.1%** |    +60.3%  |
-| `token-management`                  |    13 | 57/57 (100%)  |  22/57 (38.6%)  | **+61.4%** |    +48.0%  |
-| `identityserver-token-security`     |     8 | 36/36 (100%)  |  14/36 (38.9%)  | **+61.1%** |    +75.0%  |
-| `identityserver-aspire`             |     7 | 32/32 (100%)  |  13/32 (40.6%)  | **+59.4%** |    +71.9%  |
-| `identityserver-deployment`         |     8 | 34/34 (100%)  |  15/34 (44.1%)  | **+55.9%** |    +54.0%  |
-| `identityserver-api-protection`     |     7 | 30/30 (100%)  |  14/30 (46.7%)  | **+53.3%** |    +54.8%  |
-| `identityserver-key-management`     |     8 | 32/32 (100%)  |  16/32 (50.0%)  | **+50.0%** |     +6.0%  |
-| `claims-authorization`              |     9 | 40/40 (100%)  |  21/40 (52.5%)  | **+47.5%** |    +37.0%  |
-| `identityserver4-migration`         |    15 | 69/69 (100%)  |  41/69 (59.4%)  | **+40.6%** |    +27.0%  |
-| `identityserver-ui-flows`           |     7 | 30/30 (100%)  |  18/30 (60.0%)  | **+40.0%** |    +46.7%  |
-| `identityserver-configuration`      |    16 | 72/72 (100%)  |  44/72 (61.1%)  | **+38.9%** |    +21.1%  |
-| `identityserver-token-lifecycle`    |     8 | 36/36 (100%)  |  23/36 (63.9%)  | **+36.1%** |    +44.4%  |
-| `identityserver-hosting-setup`      |     8 | 36/36 (100%)  |  24/36 (66.7%)  | **+33.3%** |    +41.0%  |
-| `aspnetcore-authentication`         |     8 | 33/33 (100%)  |  23/33 (69.7%)  | **+30.3%** |    +31.3%  |
-| `identity-testing-patterns`         |    10 | 47/47 (100%)  |  33/47 (70.2%)  | **+29.8%** |    +19.2%  |
-| `identityserver-stores`             |    12 | 56/56 (100%)  |  42/56 (75.0%)  | **+25.0%** |    +41.1%  |
-| `identity-security-hardening`       |     8 | 37/37 (100%)  |  28/37 (75.7%)  | **+24.3%** |    +22.0%  |
-| `oauth-oidc-protocols`              |     8 | 37/37 (100%)  |  30/37 (81.1%)  | **+18.9%** |     +5.4%  |
-| `aspnetcore-authorization`          |     7 | 31/31 (100%)  |  27/31 (87.1%)  | **+12.9%** |     +3.2%  |
+| `identityserver-saml`               |    10 | 43/43 (100%)  |   9/43 (20.9%)  | **+79.1%** |    +79.4%  |
+| `identityserver-usermanagement`     |     7 | 29/29 (100%)  |  14/29 (48.3%)  | **+51.7%** |    +69.0%  |
+| `duende-bff`                        |    15 | 67/67 (100%)  |  34/67 (50.7%)  | **+49.3%** |    +65.1%  |
+| `token-management`                  |    13 | 58/58 (100%)  |  36/58 (62.1%)  | **+37.9%** |    +61.4%  |
+| `identityserver-api-protection`     |     7 | 30/30 (100%)  |  19/30 (63.3%)  | **+36.7%** |    +53.3%  |
+| `identityserver-upgrade-v7-to-v8`   |     8 | 34/34 (100%)  |  22/34 (64.7%)  | **+35.3%** |    +82.8%  |
+| `identityserver-dcr`                |     8 | 40/40 (100%)  |  29/40 (72.5%)  | **+27.5%** |    +76.9%  |
+| `identityserver-sessions-providers` |    11 | 50/50 (100%)  |  37/50 (74.0%)  | **+26.0%** |    +67.6%  |
+| `identityserver-deployment`         |     9 | 39/39 (100%)  |  29/39 (74.4%)  | **+25.6%** |    +55.9%  |
+| `identityserver-token-security`     |     9 | 41/41 (100%)  |  32/41 (78.0%)  | **+22.0%** |    +61.1%  |
+| `identity-testing-patterns`         |    12 | 59/59 (100%)  |  49/59 (83.1%)  | **+16.9%** |    +29.8%  |
+| `identityserver-hosting-setup`      |     8 | 36/36 (100%)  |  30/36 (83.3%)  | **+16.7%** |    +33.3%  |
+| `aspnetcore-authentication`         |     9 | 37/37 (100%)  |  31/37 (83.8%)  | **+16.2%** |    +30.3%  |
+| `identity-security-hardening`       |    10 | 46/46 (100%)  |  39/46 (84.8%)  | **+15.2%** |    +24.3%  |
+| `claims-authorization`              |    11 | 47/47 (100%)  |  40/47 (85.1%)  | **+14.9%** |    +47.5%  |
+| `identityserver-ui-flows`           |     9 | 39/39 (100%)  |  34/39 (87.2%)  | **+12.8%** |    +40.0%  |
+| `identityserver-configuration`      |    18 | 82/82 (100%)  |  72/82 (87.8%)  | **+12.2%** |    +38.9%  |
+| `identityserver4-migration`         |    15 | 69/69 (100%)  |  61/69 (88.4%)  | **+11.6%** |    +40.6%  |
+| `identityserver-key-management`     |     9 | 37/37 (100%)  |  33/37 (89.2%)  | **+10.8%** |    +50.0%  |
+| `oauth-oidc-protocols`              |     8 | 37/37 (100%)  |  33/37 (89.2%)  | **+10.8%** |    +18.9%  |
+| `identityserver-token-lifecycle`    |     9 | 40/40 (100%)  |  36/40 (90.0%)  | **+10.0%** |    +36.1%  |
+| `identityserver-aspire`             |     7 | 32/32 (100%)  |  30/32 (93.8%)  |  **+6.2%** |    +59.4%  |
+| `identityserver-stores`             |    12 | 56/56 (100%)  |  53/56 (94.6%)  |  **+5.4%** |    +25.0%  |
+| `aspnetcore-authorization`          |     7 | 31/31 (100%)  |  31/31 (100%)   |  **+0.0%** |    +12.9%  |
 
 **Key findings:**
-- **Highest-value skills** (>50% delta): User Management (+100%), SAML (+88.6%), Upgrade v7→v8 (+82.8%), DCR (+76.9%), Sessions (+67.6%), BFF (+65.1%), Token Management (+61.4%), Token Security (+61.1%), Aspire (+59.4%), Deployment (+55.9%), API Protection (+53.3%), Key Management (+50.0%) — deeply Duende-specific knowledge where baseline LLM knowledge falls short.
-- **Moderate-value skills** (25–50% delta): Claims authorization, IS4 migration, UI flows, configuration, token lifecycle, hosting setup, authentication, testing patterns, stores — specialized patterns that improve precision significantly.
-- **Lower-delta skills** (<25%): Security hardening, OAuth/OIDC protocols, authorization — well-known patterns where baseline model knowledge is already strong, but skills still close remaining gaps.
-- **Notable changes vs. previous iteration**: SAML skill updated to match current official docs (14 factual fixes); evals re-run with updated assertions. Upgrade v7→v8 skill improved from +51.7% to +82.8% delta (expanded SKILL.md with 6 new breaking changes and NuGet version guidance). Key Management jumped from +6.0% to +50.0% (stricter grading). Sessions Providers jumped from +35.1% to +67.6%.
+- **Stronger baseline compresses deltas**: with the latest Opus, the *without-skill* baseline rose from 51.4% (iteration 4) to 77.2%, so headline deltas shrink versus prior runs. Skills still add **+22.8% overall** — a perfect **1079/1079 (100%)** with-skill — and remain decisive wherever knowledge is Duende-specific, newer than the model's training, or easy to get subtly wrong.
+- **Highest-value skills** (>30% delta): SAML (+79.1%), User Management (+51.7%), BFF (+49.3%), Token Management (+37.9%), API Protection (+36.7%), Upgrade v7→v8 (+35.3%) — deep Duende-specific API surfaces (`.AddSaml()`/`SamlServiceProvider`, `AddUserManagement`, BFF v4 APIs, `mtls_endpoint_aliases`, v8 license-key format) that a strong generalist still misses or hallucinates.
+- **Moderate-value skills** (10–30% delta): DCR, sessions, deployment, token security, testing patterns, hosting, authentication, security hardening, claims, UI flows, configuration, IS4 migration, key management, OAuth/OIDC, token lifecycle — the skill supplies precise option names, edition/version gates, and current-vs-legacy API distinctions on top of correct general knowledge.
+- **Near-parity skills** (<10% delta): Aspire, stores, authorization — well-known .NET/ASP.NET Core patterns the base model already handles competently, so the skill mostly adds precision. Notably, `identityserver-stores` eval-5 (Redis-backed config cache) is a case where the skill's current v8 `HybridCache` guidance is *more* correct than the baseline, which reached for the legacy `AddSingleton(typeof(ICache<>), typeof(DistributedCache<>))` pattern that v8 replaced.
+- **Perfect with-skill coverage**: every one of the 24 skills scores 100% with the skill loaded (1079/1079 assertions). The stores eval-5 assertion was modernized from the retired v7 `ICache<>`/`DistributedCache<>` registration to the v8 `HybridCache` + distributed Redis backend the skill teaches.
+- **Method note**: responses and grading for this iteration were produced by the agent's own Opus model (not GitHub Models); generation and grading share the model, matching the harness default where `--grader-model` equals `--model`.
 
 ---
 

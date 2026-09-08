@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddServerSideSessions() is chained on AddIdentityServer()."
+    },
+    {
+      "assertion": "AddOperationalStore is configured with EnableTokenCleanup set to true",
+      "pass": true,
+      "rationale": "options.EnableTokenCleanup = true is set in AddOperationalStore."
+    },
+    {
+      "assertion": "AddOperationalStore options set RemoveConsumedTokens to true",
+      "pass": true,
+      "rationale": "options.RemoveConsumedTokens = true is set."
+    },
+    {
+      "assertion": "AddOperationalStore options set ConsumedTokenCleanupDelay to 300",
+      "pass": true,
+      "rationale": "options.ConsumedTokenCleanupDelay = 300 is set."
+    },
+    {
+      "assertion": "AddServerSideSessions is called before or alongside AddOperationalStore, not after it without the operational store",
+      "pass": true,
+      "rationale": "AddServerSideSessions() is placed after AddOperationalStore, but within the same builder chain and with the operational store present, so it does not hit the prohibited case of enabling sessions without an operational store; the ideal ordering would place it before."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

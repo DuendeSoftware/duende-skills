@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Names RequirePkce = true for all code clients and states it should never be disabled."
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Requires exact fully-qualified HTTPS redirect URIs and warns about wildcard open-redirect risk."
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "Covers least-privilege grant types and removing the deprecated implicit flow. (Note: the answer explicitly states it is reasoning from general OAuth knowledge, not the named skill, but the substance matches.)"
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

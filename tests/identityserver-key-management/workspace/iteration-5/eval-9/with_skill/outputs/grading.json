@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that with static key management SAML requires an X.509 signing certificate that includes a private key",
+      "pass": true,
+      "rationale": "It states that under static key management, enabling SAML requires an X.509 signing certificate that includes a private key."
+    },
+    {
+      "assertion": "States that a manually registered raw RSA key, including one from AddDeveloperSigningCredential(), cannot be auto-wrapped into an X.509 certificate for SAML",
+      "pass": true,
+      "rationale": "It explains AddDeveloperSigningCredential() registers a raw RSA key that IdentityServer will not auto-wrap into an X.509 certificate for SAML under static management."
+    },
+    {
+      "assertion": "Notes that OIDC tokens and SAML messages share the same signing credentials and rotation schedule, published via the OIDC JWKS endpoint and SAML IdP metadata",
+      "pass": true,
+      "rationale": "It explicitly states OIDC and SAML share the same signing credentials and rotation schedule, published in parallel via JWKS and SAML IdP metadata."
+    },
+    {
+      "assertion": "Mentions that PropagationTime and RetentionDuration control how long keys/certs are published before signing and retained for validation during rollover",
+      "pass": true,
+      "rationale": "It describes PropagationTime as publish-before-signing time for SPs to refresh metadata and RetentionDuration as keeping the previous certificate for validation during overlap."
+    },
+    {
+      "assertion": "Notes that under Automatic Key Management the SAML component auto-wraps managed RSA keys in self-signed X.509 certificates, so UseX509Certificate is not required just to enable SAML",
+      "pass": true,
+      "rationale": "The contrast note states that under Automatic Key Management the SAML component auto-wraps managed RSA keys into self-signed X.509 certificates and UseX509Certificate is not required just to enable SAML."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

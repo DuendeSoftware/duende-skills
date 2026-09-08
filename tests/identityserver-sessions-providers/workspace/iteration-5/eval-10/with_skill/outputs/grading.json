@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Metadata is stored in AuthenticationProperties.Items and passed to HttpContext.SignInAsync(user, properties)",
+      "pass": true,
+      "rationale": "properties.Items[\"device_name\"]/[\"region\"] are set and passed to HttpContext.SignInAsync(user, properties)."
+    },
+    {
+      "assertion": "The ASP.NET Identity path passes properties to SignInManager.SignInWithClaimsAsync (and notes overriding it in a custom SignInManager when PasswordSignInAsync is used)",
+      "pass": true,
+      "rationale": "Uses _signInManager.SignInWithClaimsAsync(user, properties, additionalClaims: []) and shows overriding SignInWithClaimsAsync in a custom SignInManager for the PasswordSignInAsync case."
+    },
+    {
+      "assertion": "Reading back uses ISessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue",
+      "pass": true,
+      "rationale": "Reads via _sessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue(\"device_name\", ...)."
+    },
+    {
+      "assertion": "Response states the metadata is NOT issued as claims",
+      "pass": true,
+      "rationale": "Explicitly states the metadata lives in the ticket and is never issued as claims to clients or tokens."
+    },
+    {
+      "assertion": "Response notes custom metadata is not indexed and cannot be filtered via SessionQuery — query by subject/session/display name first, then inspect tickets",
+      "pass": true,
+      "rationale": "States the metadata is not indexed, cannot be filtered by SessionQuery, and instructs querying by subject/session/display name first, then inspecting the tickets."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

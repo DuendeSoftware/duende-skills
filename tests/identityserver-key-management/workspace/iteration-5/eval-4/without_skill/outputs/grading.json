@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs sets options.KeyManagement.SigningAlgorithms to an array containing a SigningAlgorithmOptions for RsaSha256 with UseX509Certificate = true",
+      "pass": false,
+      "rationale": "The RsaSha256 entry is created without UseX509Certificate = true; the response only vaguely mentions certificate-backed keys without setting the property, so the X.509 wrapping requirement is not met."
+    },
+    {
+      "assertion": "Program.cs includes a SigningAlgorithmOptions for EcdsaSha256 (ES256) in the SigningAlgorithms array",
+      "pass": true,
+      "rationale": "The array includes new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256)."
+    },
+    {
+      "assertion": "Program.cs defines a client with ClientId 'mobile-app' that has AllowedIdentityTokenSigningAlgorithms containing EcdsaSha256 or 'ES256'",
+      "pass": true,
+      "rationale": "The mobile-app client sets AllowedIdentityTokenSigningAlgorithms = { SecurityAlgorithms.EcdsaSha256 }."
+    },
+    {
+      "assertion": "The RS256 algorithm entry appears before ES256 in the SigningAlgorithms array to be the default",
+      "pass": true,
+      "rationale": "RsaSha256 is listed first, ES256 second, so RS256 is the default."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

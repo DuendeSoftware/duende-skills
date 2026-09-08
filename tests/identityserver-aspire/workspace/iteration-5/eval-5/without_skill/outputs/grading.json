@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The response identifies the root cause as the API starting before IdentityServer is ready",
+      "pass": true,
+      "rationale": "It identifies the timing race — the API boots and fetches discovery before IdentityServer is listening — as the most likely root cause."
+    },
+    {
+      "assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+      "pass": true,
+      "rationale": "The fix adds .WaitFor(identityServer) to the API project."
+    },
+    {
+      "assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+      "pass": true,
+      "rationale": "It adds .WithReference(identityServer) and notes it makes the endpoint URL available."
+    },
+    {
+      "assertion": "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work",
+      "pass": false,
+      "rationale": "The response never mentions configuring health checks on IdentityServer; it treats WaitFor as sufficient on its own without a readiness endpoint."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code calls GetDiscoveryDocumentAsync to resolve endpoints from the authority rather than hardcoding the token endpoint URL",
+      "pass": true,
+      "rationale": "The code calls GetDiscoveryDocumentAsync(\"https://identity.example.com\") and uses the discovered token endpoint."
+    },
+    {
+      "assertion": "Code checks disco.IsError before using the discovery response to handle unreachable or invalid discovery documents",
+      "pass": true,
+      "rationale": "An `if (disco.IsError)` check returns early before the token request."
+    },
+    {
+      "assertion": "Code uses RequestClientCredentialsTokenAsync (or equivalent POST to the token endpoint) with grant_type=client_credentials",
+      "pass": true,
+      "rationale": "It calls RequestClientCredentialsTokenAsync with a ClientCredentialsTokenRequest."
+    },
+    {
+      "assertion": "Code sets the Scope to 'catalog.read' and provides ClientId and ClientSecret in the token request",
+      "pass": true,
+      "rationale": "Scope = \"catalog.read\", ClientId = \"backend-service\", and ClientSecret = \"service-secret\" are all set."
+    },
+    {
+      "assertion": "Code uses disco.TokenEndpoint as the Address for the token request rather than a hardcoded URL",
+      "pass": true,
+      "rationale": "Address = disco.TokenEndpoint is used for the token request address."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

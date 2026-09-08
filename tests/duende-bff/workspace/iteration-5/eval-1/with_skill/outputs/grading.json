@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddBff() on builder.Services",
+      "pass": true,
+      "rationale": "The response calls builder.Services.AddBff() as the entry point for BFF registration."
+    },
+    {
+      "assertion": "Uses ConfigureOpenIdConnect with Authority, ClientId, ClientSecret, ResponseType='code', and SaveTokens=true",
+      "pass": true,
+      "rationale": "ConfigureOpenIdConnect sets Authority, ClientId, ClientSecret, ResponseType = \"code\", and SaveTokens = true."
+    },
+    {
+      "assertion": "Adds 'offline_access' to the OIDC scopes",
+      "pass": true,
+      "rationale": "options.Scope.Add(\"offline_access\") is present alongside openid and profile."
+    },
+    {
+      "assertion": "Middleware order is UseRouting -> UseAuthentication -> UseBff -> UseAuthorization",
+      "pass": true,
+      "rationale": "The pipeline is UseRouting(), UseAuthentication(), UseBff(), UseAuthorization() in exactly that order."
+    },
+    {
+      "assertion": "Does NOT manually call AddAuthentication().AddCookie().AddOpenIdConnect() — uses the v4 fluent API instead",
+      "pass": true,
+      "rationale": "It uses AddBff().ConfigureOpenIdConnect().ConfigureCookies() and explicitly avoids manual scheme wiring."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.BackchannelHttpHandler to a SocketsHttpHandler with SslOptions.ClientCertificates (SslClientAuthenticationOptions) containing the client certificate",
+      "pass": true,
+      "rationale": "It sets options.BackchannelHttpHandler to a SocketsHttpHandler whose SslOptions is an SslClientAuthenticationOptions containing the client certificate."
+    },
+    {
+      "assertion": "Notes that no ClientSecret is required because the client certificate authenticates the client",
+      "pass": false,
+      "rationale": "The response keeps options.ClientSecret = \"secret\" and never states the certificate replaces the need for a client secret."
+    },
+    {
+      "assertion": "Implements a custom IConfigurationManager<OpenIdConnectConfiguration> that rewrites endpoints to the mtls_endpoint_aliases values from discovery",
+      "pass": false,
+      "rationale": "No custom IConfigurationManager is implemented; the response only supplies a back-channel handler and troubleshooting tips."
+    },
+    {
+      "assertion": "Rewrites TokenEndpoint, IntrospectionEndpoint, and DeviceAuthorizationEndpoint to their mTLS aliases",
+      "pass": false,
+      "rationale": "It does not read mtls_endpoint_aliases or rewrite any of the token, introspection, or device authorization endpoints."
+    },
+    {
+      "assertion": "Explains that on .NET 9+ the handler auto-uses PAR when advertised, so the PushedAuthorizationRequestEndpoint must also be rewritten to the mTLS alias",
+      "pass": false,
+      "rationale": "The response does not mention PAR or the PushedAuthorizationRequestEndpoint at all."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

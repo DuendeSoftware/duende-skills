@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda",
+      "pass": true,
+      "rationale": "`options.UseSmtpOtpDispatcher(...)` is placed inside the AddUserManagement(options => { ... }) lambda in the shown Program.cs."
+    },
+    {
+      "assertion": "Configures SMTP host and port",
+      "pass": true,
+      "rationale": "The dispatcher sets smtp.Host = \"smtp.example.com\" and smtp.Port = 587."
+    },
+    {
+      "assertion": "Configures from address for outgoing emails",
+      "pass": true,
+      "rationale": "smtp.FromAddress = \"noreply@example.com\" is set (and included in the bound config section)."
+    },
+    {
+      "assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)",
+      "pass": true,
+      "rationale": "A dedicated section explicitly warns that ConsoleOtpDispatcher is development-only and must not be used in production."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

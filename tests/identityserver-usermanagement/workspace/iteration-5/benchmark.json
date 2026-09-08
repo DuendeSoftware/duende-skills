@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-usermanagement",
+    "iteration": 5,
+    "model": "claude-opus-4.8",
+    "date": "2026-09-08"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 29,
+      "passed": 29,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 29,
+      "passed": 14,
+      "failed": 15,
+      "pass_rate": 0.48
+    },
+    "delta": {
+      "assertions_improved": 15,
+      "delta_pass_rate": 0.52
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+        "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+        "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+        "Calls AddSqliteStore() inside the AddUserManagement options lambda (not at top level)",
+        "Calls IDatabaseSchema.CreateIfNotExistsAsync() to ensure database schema exists"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Uses AddPostgreSqlStore() with a connection string inside AddUserManagement options",
+        "Adds Duende.Storage.PostgreSQL package (or references it)",
+        "Explains that no EF Core migrations are needed (document-based storage)",
+        "Shows IDatabaseSchema.CreateIfNotExistsAsync() for automatic schema creation"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database",
+        "Mentions that after migration users can enroll in passwordless methods"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Explains that AddUserManagement() automatically registers IProfileService",
+        "Sets LoginUrl and LogoutUrl in IdentityServer options to point to account pages"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Notes that OTP (email/SMS) is the default passwordless flow"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    }
+  ]
+}

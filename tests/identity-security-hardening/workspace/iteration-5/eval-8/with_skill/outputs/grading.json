@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies RequirePkce = true as a required control and warns against setting it to false",
+      "pass": true,
+      "rationale": "Names RequirePkce = true as step 1 and explicitly states it must never be set to false."
+    },
+    {
+      "assertion": "Output identifies exact-match fully-qualified redirect URIs with no wildcards as required",
+      "pass": true,
+      "rationale": "Step 2 requires exact-match fully-qualified HTTPS redirect URIs and shows a wildcard as the anti-pattern."
+    },
+    {
+      "assertion": "Output identifies restricting grant types to only what a client needs (principle of least grant) and removing implicit flow",
+      "pass": true,
+      "rationale": "Step 3 covers principle of least grant and removing the deprecated implicit flow in favor of code + PKCE."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

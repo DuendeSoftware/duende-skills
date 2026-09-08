@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses AddEntityFrameworkServerSideSessions (not AddServerSideSessions alone)",
+      "pass": true,
+      "rationale": "It calls .AddEntityFrameworkServerSideSessions(options => options.UseSqlServer(...)); the EF store is configured rather than relying on the in-memory store alone."
+    },
+    {
+      "assertion": "Configures UseSqlServer with the connection string from configuration",
+      "pass": true,
+      "rationale": "UseSqlServer(connectionString) is used with connectionString from GetConnectionString(\"BffSessions\")."
+    },
+    {
+      "assertion": "Sets SessionCleanupInterval to 10 minutes (TimeSpan.FromMinutes(10))",
+      "pass": true,
+      "rationale": "options.SessionCleanupInterval = TimeSpan.FromMinutes(10) is set."
+    },
+    {
+      "assertion": "Calls AddSessionCleanupBackgroundProcess()",
+      "pass": false,
+      "rationale": "It relies on the removed v3 option EnableSessionCleanup = true rather than calling the v4 .AddSessionCleanupBackgroundProcess()."
+    },
+    {
+      "assertion": "Warns against or does NOT use in-memory sessions for production",
+      "pass": true,
+      "rationale": "The final configuration uses the EF/SQL Server store for production and does not rely on in-memory sessions."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

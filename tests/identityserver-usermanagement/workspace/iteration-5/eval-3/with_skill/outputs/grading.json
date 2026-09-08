@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses AddPostgreSqlStore() with a connection string inside AddUserManagement options",
+      "pass": true,
+      "rationale": "`options.AddPostgreSqlStore(builder.Configuration.GetConnectionString(\"UserManagement\"))` is called inside the AddUserManagement lambda."
+    },
+    {
+      "assertion": "Adds Duende.Storage.PostgreSQL package (or references it)",
+      "pass": true,
+      "rationale": "The response runs `dotnet add package Duende.Storage.PostgreSQL`."
+    },
+    {
+      "assertion": "Explains that no EF Core migrations are needed (document-based storage)",
+      "pass": true,
+      "rationale": "It clearly states no EF Core migrations are needed because storage is document-based, with no DbContext or migration files."
+    },
+    {
+      "assertion": "Shows IDatabaseSchema.CreateIfNotExistsAsync() for automatic schema creation",
+      "pass": true,
+      "rationale": "It resolves IDatabaseSchema and calls `await schema.CreateIfNotExistsAsync()` at startup, noting it is idempotent."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output replaces 'using IdentityServer4.Models' with 'using Duende.IdentityServer.Models'",
+      "pass": true,
+      "rationale": "The migrated file's first using directive is using Duende.IdentityServer.Models; and the change is called out explicitly."
+    },
+    {
+      "assertion": "Output preserves the Client definitions with ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes intact",
+      "pass": true,
+      "rationale": "Both clients retain ClientId, AllowedGrantTypes, ClientSecrets, and AllowedScopes unchanged."
+    },
+    {
+      "assertion": "Output preserves the ApiScope, ApiResource, and IdentityResource definitions",
+      "pass": true,
+      "rationale": "IdentityResources.OpenId/Profile, ApiScope(\"api1\"), and ApiResource(\"api1\") with Scopes = { \"api1\" } are all preserved."
+    },
+    {
+      "assertion": "Output maintains the Secret and GrantTypes usage (these types exist in Duende with the same API surface)",
+      "pass": true,
+      "rationale": "Secret(\"secret\".Sha256()) and GrantTypes.ClientCredentials/Code are retained, and the text confirms they exist unchanged in Duende."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

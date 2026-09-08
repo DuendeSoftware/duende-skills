@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls builder.AddSqlServer() to create a SQL Server resource",
+      "pass": true,
+      "rationale": "The response calls builder.AddSqlServer(\"sql\") to provision the SQL Server resource."
+    },
+    {
+      "assertion": "Program.cs calls .AddDatabase() to create a database resource from the SQL Server",
+      "pass": true,
+      "rationale": "It calls sqlServer.AddDatabase(\"identitydb\") to create the database resource."
+    },
+    {
+      "assertion": "The IdentityServer project uses both .WithReference(identityDb) and .WaitFor() for the SQL Server or database resource",
+      "pass": true,
+      "rationale": "IdentityServer chains .WithReference(identityDb) and .WaitFor(sqlServer)."
+    },
+    {
+      "assertion": "The Weather API project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": true,
+      "rationale": "The weather-api project chains .WithReference(identityServer) and .WaitFor(identityServer)."
+    },
+    {
+      "assertion": "The Web App project uses both .WithReference(identityServer) and .WaitFor(identityServer)",
+      "pass": true,
+      "rationale": "The web-app project chains .WithReference(identityServer) and .WaitFor(identityServer)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

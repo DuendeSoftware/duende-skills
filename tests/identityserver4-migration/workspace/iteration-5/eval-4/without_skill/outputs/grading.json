@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response includes dotnet ef migrations add commands for both ConfigurationDbContext and PersistedGrantDbContext",
+      "pass": true,
+      "rationale": "It gives dotnet ef migrations add commands for both contexts and the matching database update commands."
+    },
+    {
+      "assertion": "Response mentions the new Keys table for automatic key management",
+      "pass": true,
+      "rationale": "The Keys table is described as storage for automatic managed signing-key rotation."
+    },
+    {
+      "assertion": "Response mentions the new ServerSideSessions table",
+      "pass": true,
+      "rationale": "The ServerSideSessions table is explicitly listed for server-side sessions."
+    },
+    {
+      "assertion": "Response mentions new client properties for DPoP (RequireDPoP) or PAR (RequirePushedAuthorization)",
+      "pass": true,
+      "rationale": "It names RequireDPoP and RequirePushedAuthorization as new client columns."
+    },
+    {
+      "assertion": "Response mentions the new IdentityProviders table for dynamic OIDC providers",
+      "pass": true,
+      "rationale": "The IdentityProviders table is listed for dynamically configured OIDC identity providers."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

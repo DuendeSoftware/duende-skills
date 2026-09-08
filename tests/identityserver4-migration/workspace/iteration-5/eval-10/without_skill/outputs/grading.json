@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response includes updating the .NET target framework as one of the first steps",
+      "pass": true,
+      "rationale": "Step 1 bumps the target framework to net8.0 and states to do it first."
+    },
+    {
+      "assertion": "Response includes replacing IdentityServer4 NuGet packages with Duende equivalents",
+      "pass": true,
+      "rationale": "Step 2 swaps IdentityServer4 packages for Duende.IdentityServer* equivalents and IdentityModel for Duende.IdentityModel."
+    },
+    {
+      "assertion": "Response includes updating namespaces from IdentityServer4 to Duende.IdentityServer",
+      "pass": true,
+      "rationale": "Step 3 find-and-replaces IdentityServer4 -> Duende.IdentityServer across .cs and .cshtml files."
+    },
+    {
+      "assertion": "Response includes creating and applying EF Core database migrations for both ConfigurationDbContext and PersistedGrantDbContext",
+      "pass": true,
+      "rationale": "Steps 7-8 scaffold and apply migrations for both ConfigurationDbContext and PersistedGrantDbContext."
+    },
+    {
+      "assertion": "Response includes configuring a license key for Duende IdentityServer",
+      "pass": true,
+      "rationale": "Step 6 configures options.LicenseKey from configuration/secret storage."
+    },
+    {
+      "assertion": "Response includes verifying the deployment (e.g., checking discovery document, testing token issuance)",
+      "pass": true,
+      "rationale": "Steps 12-13 hit the discovery endpoint and test token issuance end-to-end."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

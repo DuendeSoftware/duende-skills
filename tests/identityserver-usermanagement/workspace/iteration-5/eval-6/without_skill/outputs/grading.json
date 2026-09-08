@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Lists passkeys/WebAuthn/FIDO2 as a supported authentication method",
+      "pass": true,
+      "rationale": "Passkeys are listed and described as using WebAuthn and the FIDO2/CTAP standards."
+    },
+    {
+      "assertion": "Lists TOTP (authenticator apps) as a supported method",
+      "pass": true,
+      "rationale": "TOTP is listed as RFC 6238 codes from authenticator apps with an enrollment description."
+    },
+    {
+      "assertion": "Mentions that multiple authentication methods can coexist for the same user",
+      "pass": true,
+      "rationale": "It states a user can enroll both a passkey and TOTP at the same time since they aren't mutually exclusive."
+    },
+    {
+      "assertion": "Notes that OTP (email/SMS) is the default passwordless flow",
+      "pass": false,
+      "rationale": "Email/SMS OTP is listed as one option, but the response never identifies it as the product's default passwordless flow (and explicitly lacks product-specific detail)."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

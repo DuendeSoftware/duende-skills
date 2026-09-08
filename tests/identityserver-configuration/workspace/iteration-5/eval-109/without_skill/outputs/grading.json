@@ -1,0 +1,34 @@
+{
+  "eval_id": 109,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Subclasses DefaultScopeParser (or implements IScopeParser) and overrides ParseScopeValue(ParseScopeContext)",
+      "pass": true,
+      "rationale": "Implements IScopeParser directly with the interface's ParseScopeValues(IEnumerable<string>) method — a valid alternative the assertion explicitly allows — though it does not use the ParseScopeValue(ParseScopeContext) override path."
+    },
+    {
+      "assertion": "Uses scopeContext.SetParsedValues(name, parameter) for the parameterized scope and SetError/SetIgnore for other cases",
+      "pass": false,
+      "rationale": "Does not use SetParsedValues/SetError/SetIgnore; instead builds ParsedScopesResult by adding ParsedScopeValue/ParsedScopeValidationError objects manually, so the specified ParseScopeContext API is absent."
+    },
+    {
+      "assertion": "Registers the parser via AddScopeParser<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "idsvrBuilder.AddScopeParser<TransactionScopeParser>() is called."
+    },
+    {
+      "assertion": "In IProfileService reads context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == \"transaction\") and uses its ParsedParameter",
+      "pass": false,
+      "rationale": "The profile service reads context.RequestedScopes and manually substrings the raw 'transaction:' string rather than using RequestedResources.ParsedScopes with ParsedName/ParsedParameter."
+    },
+    {
+      "assertion": "Does NOT define the parameterized value as a static ApiScope name",
+      "pass": true,
+      "rationale": "Registers only the base 'transaction' ApiScope; the parameter is provided per request, not as a static scope."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

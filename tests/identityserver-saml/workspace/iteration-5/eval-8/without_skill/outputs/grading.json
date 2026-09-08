@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+      "pass": false,
+      "rationale": "Says the ACS 'generally uses HTTP-POST' as a SAML convention but does not state it is required nor that HTTP-Redirect is unsupported for ACS."
+    },
+    {
+      "assertion": "States that AllowedScopes must contain at least one entry",
+      "pass": false,
+      "rationale": "Only says the SP should be granted the scopes/claims it needs; never states AllowedScopes must contain at least one entry to pass validation."
+    },
+    {
+      "assertion": "Mentions that EntityId is required",
+      "pass": true,
+      "rationale": "States EntityId must be present and unique and match the SP's Issuer exactly."
+    },
+    {
+      "assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)",
+      "pass": false,
+      "rationale": "Does not mention that invalid SPs are treated as non-existent or that the store returns null."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

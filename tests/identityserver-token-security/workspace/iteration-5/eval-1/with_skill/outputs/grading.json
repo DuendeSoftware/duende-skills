@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Sets RequireDPoP = true on the client configuration",
+      "pass": true,
+      "rationale": "The client config includes `RequireDPoP = true`."
+    },
+    {
+      "assertion": "Sets DPoPClockSkew to TimeSpan.FromMinutes(2) on the client",
+      "pass": true,
+      "rationale": "The client config sets `DPoPClockSkew = TimeSpan.FromMinutes(2)`."
+    },
+    {
+      "assertion": "Explains that DPoP binds the token to the client's key via the cnf claim with a jkt (JWK thumbprint) value",
+      "pass": true,
+      "rationale": "Explanation states the token gets a `cnf` claim with a `jkt` value that is the SHA-256 JWK thumbprint, shown in JSON."
+    },
+    {
+      "assertion": "Mentions that DPoP requires Enterprise Edition and version >= 6.3",
+      "pass": true,
+      "rationale": "The response explicitly states DPoP requires Enterprise Edition and version 6.3 or later."
+    },
+    {
+      "assertion": "Client still uses AllowedGrantTypes = GrantTypes.ClientCredentials with a shared secret, demonstrating DPoP is separate from client authentication",
+      "pass": true,
+      "rationale": "The client keeps ClientCredentials grant + hashed shared secret, and the prose stresses DPoP is separate from client authentication."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

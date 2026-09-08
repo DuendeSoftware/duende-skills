@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the missing .Sha256() call on the client secret and fixes it (e.g., new Secret(\"...\".Sha256()))",
+      "pass": true,
+      "rationale": "Identifies the plaintext secret and fixes it with .Sha256()."
+    },
+    {
+      "assertion": "Output identifies the trailing slash on the redirect URI as a potential mismatch issue and removes it",
+      "pass": true,
+      "rationale": "Explains the exact-match requirement and removes the trailing slash."
+    },
+    {
+      "assertion": "Output identifies the missing 'openid' scope (IdentityServerConstants.StandardScopes.OpenId) and adds it to AllowedScopes",
+      "pass": true,
+      "rationale": "Adds the 'openid' scope and explains OIDC requires it (string form is accepted)."
+    },
+    {
+      "assertion": "Output changes AllowOfflineAccess to true to enable refresh token issuance",
+      "pass": true,
+      "rationale": "Changes AllowOfflineAccess to true for refresh tokens."
+    },
+    {
+      "assertion": "Output warns about hardcoding secrets in source code or recommends loading from configuration/vault",
+      "pass": true,
+      "rationale": "Flags the hardcoded secret and recommends configuration/secrets manager or certificate auth."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

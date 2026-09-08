@@ -71,7 +71,7 @@
     {
       "id": 5,
       "prompt": "We run IdentityServer on 4 nodes behind a load balancer. I want to add caching for the EF configuration store but using Redis as a distributed cache instead of in-memory, so all nodes see the same cached data. The Redis connection string is in appsettings.json at Redis:ConnectionString. Set cache expiration to 10 minutes for clients and resources.",
-      "expected_output": "Program.cs registers AddStackExchangeRedisCache with the Redis connection string, replaces ICache<T> with a distributed cache implementation, calls AddConfigurationStoreCache(), and sets client and resource cache expiration to 10 minutes.",
+      "expected_output": "Program.cs registers AddStackExchangeRedisCache with the Redis connection string, gives HybridCache that distributed Redis backend via AddHybridCache (the v8 replacement for the legacy ICache<T> registration), calls AddConfigurationStoreCache(), and sets client and resource cache expiration to 10 minutes.",
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj",
@@ -79,7 +79,7 @@
       ],
       "assertions": [
         "Program.cs calls AddStackExchangeRedisCache with the Redis connection string from configuration",
-        "ICache<> is replaced with a distributed cache implementation (e.g. DistributedCache<> or equivalent) via AddSingleton or similar registration",
+        "HybridCache is registered (AddHybridCache) so the configuration-store cache uses the distributed Redis backend shared across nodes — the v8 replacement for the legacy ICache<>/DistributedCache<> AddSingleton registration",
         "AddConfigurationStoreCache() is called after the configuration store registration",
         "ClientStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching",
         "ResourceStoreExpiration is set to 10 minutes via IdentityServerOptions.Caching"

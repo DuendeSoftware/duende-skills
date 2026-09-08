@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": false,
+      "rationale": "Never mentions ISamlSigninStateStore; only refers generically to 'SAML session/state' storage."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": false,
+      "rationale": "Never mentions ISamlLogoutSessionStore; refers only to generic 'session/logout state' in a shared operational store."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "Explicitly recommends replacing in-memory registrations with persistent shared stores using EF Core / Redis."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "Notes in-memory state is per-process so different nodes see different data and node restarts lose it, conveying state loss across nodes."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

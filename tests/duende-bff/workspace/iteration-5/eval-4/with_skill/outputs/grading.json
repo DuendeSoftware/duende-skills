@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "It states directly that the 401s are caused by API fetch calls missing the required X-CSRF: 1 anti-forgery header."
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "The bffFetch wrapper injects 'X-CSRF': '1' into headers for every call."
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "The wrapper checks response.status === 401 and sets window.location.href to /bff/login with a returnUrl."
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": true,
+      "rationale": "A dedicated section states login/logout must be full browser navigations via window.location.href and never fetch/XHR."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

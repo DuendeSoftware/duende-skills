@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+      "pass": true,
+      "rationale": "The web app sets .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) exactly as specified."
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "It sets .WithEnvironment(\"Authentication__ClientId\", \"web-app\") with a concrete client ID."
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+      "pass": true,
+      "rationale": "It passes Authentication__Scopes__0 (openid), __1, and __2 using the double-underscore array indexing convention."
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": true,
+      "rationale": "The API sets .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))."
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": true,
+      "rationale": "IssuerUri is not set; the response explicitly recommends leaving it unset to avoid iss-claim mismatches."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

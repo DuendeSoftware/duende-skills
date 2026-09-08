@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+      "pass": true,
+      "rationale": "Both tests build a ClaimsPrincipal with a ClaimsIdentity containing a `new Claim(\"birthdate\", ...)`."
+    },
+    {
+      "assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+      "pass": true,
+      "rationale": "Uses `new AuthorizationHandlerContext(new[] { requirement }, user, resource: null)`."
+    },
+    {
+      "assertion": "Calls HandleAsync on the handler directly",
+      "pass": true,
+      "rationale": "Invokes `await _handler.HandleAsync(context)`."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+      "pass": true,
+      "rationale": "MeetsAgeRequirement_Succeeds asserts `Assert.True(context.HasSucceeded)`."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement",
+      "pass": true,
+      "rationale": "BelowAgeRequirement_Fails asserts `Assert.False(context.HasSucceeded)` for a 15-year-old."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

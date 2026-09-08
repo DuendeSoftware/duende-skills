@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "States in-memory stores are for development only and explains why they are unsuitable for production."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": false,
+      "rationale": "Implements a guessed `IServiceProviderStore` with `FindServiceProviderAsync(string entityId)` — wrong interface and method signature (no CancellationToken)."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": false,
+      "rationale": "Provides a `GetAllAsync` returning `Task<IEnumerable<ServiceProvider>>`, not `GetAllSamlServiceProvidersAsync` returning `IAsyncEnumerable<SamlServiceProvider>`."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": false,
+      "rationale": "Registers via `AddScoped<IServiceProviderStore, DbServiceProviderStore>()` rather than `AddSamlServiceProviderStore<T>()`."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": false,
+      "rationale": "Uses ad-hoc IMemoryCache/Redis rather than the built-in `AddSamlServiceProviderStoreCache<T>()` HybridCache layer."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

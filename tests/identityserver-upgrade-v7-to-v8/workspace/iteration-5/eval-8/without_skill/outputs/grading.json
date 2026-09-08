@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the v8 license key is a new format: a signed JWT carrying a kid header",
+      "pass": false,
+      "rationale": "It explains IDX10503 generically as a JWT missing a kid and speculates about a format mismatch, but never correctly identifies the v8 key as a new-format signed JWT that carries a kid."
+    },
+    {
+      "assertion": "States a v7/earlier key still works with v8 core, but a v8 key fails on v7/earlier or the BFF runtime with IDX10503",
+      "pass": false,
+      "rationale": "It only guesses at a key/runtime mismatch and does not state that a v7 key runs v8 core while a v8 key fails on v7/earlier or BFF runtimes."
+    },
+    {
+      "assertion": "States that v8 throws at startup for Server-Side Sessions, Automatic Key Management, and SAML when licensed but lacking the entitlement, while other features only log a warning",
+      "pass": false,
+      "rationale": "It vaguely attributes the throw to 'stricter enforcement' but never identifies the specific throw-tier (Server-Side Sessions, Automatic Key Management, SAML) versus the warn-only tier."
+    },
+    {
+      "assertion": "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production",
+      "pass": false,
+      "rationale": "It advises keeping the correct key per environment but never recommends running lower environments with the production key to surface entitlement gaps early."
+    },
+    {
+      "assertion": "Does NOT claim a new license purchase is required to run v8 core on an existing v7 key",
+      "pass": true,
+      "rationale": "It does not assert that a new purchase is required to run v8 core; it only suggests confirming which key each runtime can validate."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

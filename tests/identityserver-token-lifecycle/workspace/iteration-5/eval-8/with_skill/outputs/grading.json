@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "web_app client has AccessTokenLifetime = 300",
+      "pass": true,
+      "rationale": "web_app is set to AccessTokenLifetime = 300 (5 minutes)."
+    },
+    {
+      "assertion": "m2m_client has AccessTokenLifetime = 600",
+      "pass": true,
+      "rationale": "m2m_client is set to AccessTokenLifetime = 600 (10 minutes)."
+    },
+    {
+      "assertion": "mobile_app client has AccessTokenLifetime = 300",
+      "pass": true,
+      "rationale": "mobile_app is set to AccessTokenLifetime = 300 (5 minutes)."
+    },
+    {
+      "assertion": "Operational store or token cleanup is configured with EnableTokenCleanup = true and TokenCleanupInterval = 1800",
+      "pass": true,
+      "rationale": "AddOperationalStore sets EnableTokenCleanup = true and TokenCleanupInterval = 1800."
+    },
+    {
+      "assertion": "RemoveConsumedTokens is set to true and ConsumedTokenCleanupDelay is set to 300",
+      "pass": true,
+      "rationale": "Both RemoveConsumedTokens = true and ConsumedTokenCleanupDelay = 300 are configured."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 13,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that v4 uses HybridCache for token caching (not the old IDistributedCache directly)",
+      "pass": true,
+      "rationale": "Explicitly states v4 caches with HybridCache, not IDistributedCache directly as in v3."
+    },
+    {
+      "assertion": "Explains the two-tier L1 (in-memory) + L2 (distributed) cache architecture",
+      "pass": true,
+      "rationale": "Describes L1 in-memory and optional L2 distributed (Redis) tiers and read fallthrough behavior."
+    },
+    {
+      "assertion": "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4",
+      "pass": true,
+      "rationale": "States no explicit cache registration is required in v4 for the default in-memory tier, unlike v3."
+    },
+    {
+      "assertion": "Mentions CacheLifetimeBuffer as a configuration option for controlling token refresh timing",
+      "pass": true,
+      "rationale": "Documents CacheLifetimeBuffer (default 60s) and its effect on early refresh."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures AddJwtBearer with an Authority and Audience for the DCR scheme",
+      "pass": true,
+      "rationale": "AddJwtBearer(\"dcr\", ...) sets both Authority and Audience for the dedicated DCR scheme."
+    },
+    {
+      "assertion": "Creates an authorization policy that requires an authenticated user and a specific scope claim",
+      "pass": true,
+      "rationale": "The 'DcrPolicy' calls RequireAuthenticatedUser() and RequireClaim(\"scope\", ...), with an alternative RequireAssertion scope check."
+    },
+    {
+      "assertion": "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()",
+      "pass": true,
+      "rationale": "MapDynamicClientRegistration().RequireAuthorization(\"DcrPolicy\") applies the named policy."
+    },
+    {
+      "assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy configuration",
+      "pass": true,
+      "rationale": "Both AddAuthentication().AddJwtBearer and AddAuthorization with AddPolicy are present and correctly ordered in the pipeline."
+    },
+    {
+      "assertion": "Does NOT expose MapDynamicClientRegistration() without authorization",
+      "pass": true,
+      "rationale": "Endpoint is mapped with RequireAuthorization and the closing note warns never to expose it without that call."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

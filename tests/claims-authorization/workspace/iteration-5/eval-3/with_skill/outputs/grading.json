@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that claims must be declared in the UserClaims collection of an IdentityResource, ApiScope, or ApiResource",
+      "pass": true,
+      "rationale": "States the claim type must be declared in a UserClaims collection of an IdentityResource, ApiScope, or ApiResource."
+    },
+    {
+      "assertion": "Shows adding 'department' to the UserClaims collection on the relevant ApiScope or ApiResource",
+      "pass": true,
+      "rationale": "Shows new ApiScope(\"api1\", ...) { UserClaims = { \"department\" } } and ApiResource/IdentityResource alternatives."
+    },
+    {
+      "assertion": "Mentions that the client must also request the scope that contains the claim",
+      "pass": true,
+      "rationale": "Explicitly states the client must include the scope in AllowedScopes and request it."
+    },
+    {
+      "assertion": "Explains the relationship between AddRequestedClaims and RequestedClaimTypes — AddRequestedClaims filters to only requested claim types",
+      "pass": true,
+      "rationale": "Explains RequestedClaimTypes is built from resource UserClaims and that AddRequestedClaims only emits claims whose type is in RequestedClaimTypes."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

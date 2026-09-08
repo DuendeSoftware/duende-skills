@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.BackchannelHttpHandler to a SocketsHttpHandler with SslOptions.ClientCertificates (SslClientAuthenticationOptions) containing the client certificate",
+      "pass": true,
+      "rationale": "options.BackchannelHttpHandler is set to a SocketsHttpHandler with SslOptions = new SslClientAuthenticationOptions { ClientCertificates = { clientCert } }."
+    },
+    {
+      "assertion": "Notes that no ClientSecret is required because the client certificate authenticates the client",
+      "pass": true,
+      "rationale": "It omits ClientSecret and explicitly explains the certificate is the client authentication (tls_client_auth / RFC 8705), so no secret is required."
+    },
+    {
+      "assertion": "Implements a custom IConfigurationManager<OpenIdConnectConfiguration> that rewrites endpoints to the mtls_endpoint_aliases values from discovery",
+      "pass": true,
+      "rationale": "It provides MtlsConfigurationManager : IConfigurationManager<OpenIdConnectConfiguration> that reads mtls_endpoint_aliases and rewrites endpoints, wired via options.ConfigurationManager."
+    },
+    {
+      "assertion": "Rewrites TokenEndpoint, IntrospectionEndpoint, and DeviceAuthorizationEndpoint to their mTLS aliases",
+      "pass": true,
+      "rationale": "The configuration manager assigns TokenEndpoint, IntrospectionEndpoint, and DeviceAuthorizationEndpoint from the alias values."
+    },
+    {
+      "assertion": "Explains that on .NET 9+ the handler auto-uses PAR when advertised, so the PushedAuthorizationRequestEndpoint must also be rewritten to the mTLS alias",
+      "pass": true,
+      "rationale": "It rewrites PushedAuthorizationRequestEndpoint and explains that .NET 9+ auto-uses PAR, so failing to rewrite it loses the certificate binding."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}
