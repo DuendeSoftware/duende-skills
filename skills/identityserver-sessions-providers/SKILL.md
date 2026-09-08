@@ -183,6 +183,46 @@ await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
 
 Internally, this uses `IServerSideTicketStore`, `IPersistedGrantStore`, and `IBackChannelLogoutService`.
 
+## Server-Side Session Custom Metadata
+
+Store per-sign-in metadata (device name, auth method, region) in the `AuthenticationTicket`'s `AuthenticationProperties.Items`. It stays inside IdentityServer and is **NOT** issued as claims.
+
+### Writing Metadata
+
+```csharp
+var properties = new AuthenticationProperties();
+properties.Items["device_name"] = "Bob's iPhone";
+properties.Items["region"] = "eu-west";
+
+await HttpContext.SignInAsync(identityServerUser, properties);
+```
+
+With ASP.NET Identity, pass `properties` to `SignInWithClaimsAsync`:
+
+```csharp
+await _signInManager.SignInWithClaimsAsync(user, properties, additionalClaims: []);
+```
+
+If you use `PasswordSignInAsync` (which does not accept properties), override `SignInWithClaimsAsync` in a custom `SignInManager` to inject the metadata.
+
+### Reading Metadata
+
+```csharp
+var sessions = await _sessionManagementService.QuerySessionsAsync(
+    new SessionQuery { SubjectId = "12345" });
+
+foreach (var session in sessions.Results)
+{
+    if (session.AuthenticationTicket.Properties.Items
+        .TryGetValue("device_name", out var deviceName))
+    {
+        // use deviceName
+    }
+}
+```
+
+**Limitation**: custom metadata is **not indexed** by the built-in store — you cannot filter `SessionQuery` by it. Query by subject id, session id, or display name first, then inspect the tickets.
+
 ## Inactivity Timeout
 
 ### The Challenge
@@ -277,6 +317,25 @@ The server-side session lifetime is inherited from the cookie authentication han
 
 - **Default (no ASP.NET Identity)**: Controlled by `options.Authentication.CookieLifetime` (defaults to 10 hours)
 - **With ASP.NET Core Identity**: Controlled by `ConfigureApplicationCookie(options => options.ExpireTimeSpan = ...)` (defaults to 14 days)
+
+### Session Renewal and Absolute Lifetime Cap
+
+With server-side sessions the **cookie expiration can extend beyond the configured lifetime**: IdentityServer calls `SignInAsync` whenever the session's client list changes (e.g. the user signs into an additional client), re-issuing the cookie and resetting its timer. Without server-side sessions, the cookie expiration is set once at login.
+
+To enforce an absolute cap, combine:
+
+- `Client.UserSsoLifetime` — forces interactive re-authentication after N seconds, regardless of cookie renewals.
+- `Client.AbsoluteRefreshTokenLifetime` with `RefreshTokenExpiration = TokenExpiration.Absolute` — caps refresh-token-driven session extension.
+
+```csharp
+var client = new Client
+{
+    ClientId = "web.app",
+    UserSsoLifetime = 8 * 3600,                 // re-auth after 8h
+    AbsoluteRefreshTokenLifetime = 8 * 3600,
+    RefreshTokenExpiration = TokenExpiration.Absolute,
+};
+```
 
 ## Dynamic Identity Providers
 
@@ -508,18 +567,71 @@ CIBA allows a user to authenticate on a different device than the one running th
 | `IBackchannelAuthenticationUserValidator`           | Validate the request and return the user's `sub` claim                          |
 | `IBackchannelAuthenticationUserNotificationService` | Notify the user (push, email, SMS, etc.) with the `BackchannelUserLoginRequest` |
 
-### Completing the Login Request
+### Client Configuration
 
 ```csharp
-// In your CIBA approval UI
-var request = await _cibaInteraction.GetLoginRequestByInternalIdAsync(internalId);
-
-await _cibaInteraction.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(internalId)
+var client = new Client
 {
-    ScopesValuesConsented = request.ValidatedResources.RawScopeValues,
-    // Or a subset if the user partially consents
-});
+    ClientId = "kiosk.app",
+    AllowedGrantTypes = GrantTypes.Ciba,   // CIBA grant
+    // ClientSecrets, AllowedScopes, etc.
+};
 ```
+
+The client calls the backchannel authentication endpoint, receives an `auth_req_id`, then polls the token endpoint (`poll` mode). It must handle `authorization_pending`, `slow_down`, expiration, and user denial.
+
+### User Notification Service
+
+```csharp
+public class UserNotificationService : IBackchannelAuthenticationUserNotificationService
+{
+    public Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CancellationToken ct)
+    {
+        // request.Subject.GetSubjectId() — the user to notify
+        // request.InternalId            — sensitive handle to the pending request
+        // request.BindingMessage        — show to user; compared on both devices
+        // Deliver a push/SMS/email linking to your approval UI.
+        return Task.CompletedTask;
+    }
+}
+```
+
+Register it:
+
+```csharp
+builder.Services.AddIdentityServer()
+    .AddBackchannelAuthenticationUserNotificationService<UserNotificationService>();
+```
+
+The built-in no-op implementation just logs a URL for testing — **replace it in production**. Treat `InternalId` as sensitive; never surface it in the notification. The user compares the `BindingMessage` shown on both the consumption device and their authentication device.
+
+### Approval UI
+
+Use `IBackchannelAuthenticationInteractionService`:
+
+```csharp
+// List this user's pending CIBA requests
+var pending = await _cibaInteraction.GetPendingLoginRequestsForCurrentUserAsync(ct);
+
+// Reload one by internal id and verify ownership
+var request = await _cibaInteraction.GetLoginRequestByInternalIdAsync(internalId, ct);
+if (request.Subject.GetSubjectId() != currentUserSubjectId) return Forbid();
+
+// Approve with consented scopes (a subset is allowed)
+await _cibaInteraction.CompleteLoginRequestAsync(
+    new CompleteBackchannelLoginRequest(internalId)
+    {
+        ScopesValuesConsented = request.ValidatedResources.RawScopeValues,
+    }, ct);
+await _events.RaiseAsync(new ConsentGrantedEvent(/* ... */));
+
+// Deny: leave ScopesValuesConsented empty/null
+await _cibaInteraction.CompleteLoginRequestAsync(
+    new CompleteBackchannelLoginRequest(internalId) { ScopesValuesConsented = null }, ct);
+await _events.RaiseAsync(new ConsentDeniedEvent(/* ... */));
+```
+
+The server **rejects any scope not present in the original CIBA request**. Raise `ConsentGrantedEvent` / `ConsentDeniedEvent` for audit.
 
 IdentityServer supports the `poll` mode for clients to obtain results.
 

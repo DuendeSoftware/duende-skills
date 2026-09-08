@@ -28,6 +28,12 @@ public class JwtClientAssertionService : IClientAssertionService
             IssuedAt = now,
             NotBefore = now,
             SigningCredentials = _signingCredentials,
+            // ✅ Marks this JWT as a client-authentication assertion, opting into
+            //    strict audience validation on the server (RFC 7523bis)
+            AdditionalHeaderClaims = new Dictionary<string, object>
+            {
+                [JwtClaimTypes.TokenType] = "client-authentication+jwt" // sets the JWT "typ" header
+            },
             Claims = new Dictionary<string, object>
             {
                 ["sub"] = "my_client_id",
@@ -61,7 +67,24 @@ Audience = "https://identity.example.com/connect/token"
 Audience = "https://identity.example.com"
 ```
 
-> **CVE-2025-27370 / CVE-2025-27371** — These vulnerabilities were caused by setting the client assertion JWT audience to the token endpoint URL rather than the issuer URL. Authorization servers that accept both values are susceptible to token endpoint confusion attacks. Always set `Audience` to the issuer URL obtained from the OIDC discovery document (`issuer` claim).
+> **CVE-2025-27370 / CVE-2025-27371** — These vulnerabilities were caused by setting the client assertion JWT audience to the token endpoint URL rather than the issuer URL. Authorization servers that accept both values are susceptible to token endpoint confusion attacks. Always set `Audience` to the issuer URL obtained from the OIDC discovery document (`issuer` claim / `disco.Issuer`).
+
+### Typed Client-Authentication Assertions (`typ` header)
+
+Set the JWT `typ` header to `client-authentication+jwt` on the assertion:
+
+```csharp
+// With JwtSecurityToken / JsonWebToken:
+token.Header[JwtClaimTypes.TokenType] = "client-authentication+jwt";
+
+// With SecurityTokenDescriptor (as above):
+AdditionalHeaderClaims = new Dictionary<string, object>
+{
+    [JwtClaimTypes.TokenType] = "client-authentication+jwt"
+}
+```
+
+This explicitly marks the JWT as a client-authentication assertion and opts into **strict audience validation** on the server (RFC 7523bis). Enable the matching server-side check with the IdentityServer option `StrictClientAssertionAudienceValidation`. Combined with `Audience = <issuer>`, it closes token-endpoint confusion attacks.
 
 ### Pitfall: Incorrect Audience Value
 

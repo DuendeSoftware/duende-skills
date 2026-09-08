@@ -114,6 +114,39 @@
         "The callback handler retrieves returnUrl from result.Properties.Items after authenticating against the external cookie scheme",
         "The returnUrl is validated using Url.IsLocalUrl or _interaction.IsValidReturnUrl before redirecting after the callback"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "Enable self-service registration via prompt=create on our IdentityServer. Configure the host so IdentityServer advertises 'create' in discovery and routes to /Account/Register. Show how an ASP.NET Core client kicks off registration, and implement the registration page handler that safely resolves the authorization context, creates and signs in the user, and redirects back. The user must only be signed in after email confirmation.",
+      "expected_output": "Program.cs sets options.UserInteraction.CreateAccountUrl = \"/Account/Register\" in AddIdentityServer so 'create' is added to prompt_values_supported. The client starts the flow with Results.Challenge using OpenIdConnectChallengeProperties { Prompt = \"create\" }. The registration page handler calls GetAuthorizationContextAsync(returnUrl) (redirecting away when it returns null to prevent open redirect), creates the user, signs in via HttpContext.SignInAsync(new IdentityServerUser(subjectId)) only after email confirmation, then redirects to returnUrl.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Program.cs sets options.UserInteraction.CreateAccountUrl to '/Account/Register' in AddIdentityServer",
+        "Response notes that this makes IdentityServer advertise 'create' in prompt_values_supported (discovery) and that prompt=create is ignored if CreateAccountUrl is unset",
+        "The client triggers the flow with Results.Challenge using OpenIdConnectChallengeProperties with Prompt = 'create'",
+        "The registration handler calls GetAuthorizationContextAsync(returnUrl) and redirects away when it returns null to prevent open redirect",
+        "The handler signs the user in via HttpContext.SignInAsync(new IdentityServerUser(...)) only after email confirmation, then redirects to returnUrl"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Explain and configure consent correctly for our IdentityServer. Our 'profile' identity resource must be mandatory (the flow should fail if the user declines it), while a 'marketing' scope should be optional and declinable. Also, we need a support endpoint that lets an admin revoke a user's remembered consent for the 'web.app' client. Finally, clarify whether our machine-to-machine client using client credentials will show a consent prompt.",
+      "expected_output": "The 'profile' IdentityResource sets Required = true so omitting it yields access_denied and the request fails; the 'marketing' ApiScope sets Required = false so it can be declined while the flow still succeeds. A support/admin action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to remove all persisted grants (remembered consent, reference and refresh tokens) for that user/client. The response clarifies that client-credentials (M2M) flows never prompt for consent — only AllowedScopes governs access.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "The 'profile' IdentityResource sets Required = true and the response explains omitting a required scope returns access_denied and fails the request",
+        "The 'marketing' ApiScope sets Required = false and the response explains optional scopes can be declined while the flow still succeeds",
+        "The admin/support action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants",
+        "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access"
+      ]
     }
   ]
 }

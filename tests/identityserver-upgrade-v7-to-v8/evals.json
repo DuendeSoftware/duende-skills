@@ -100,6 +100,19 @@
         "Includes running EF database migration",
         "Lists at least 8 distinct migration steps"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "After upgrading to v8 I dropped my existing license key into a BFF app and now it throws 'IDX10503: Signature validation failed. Token does not have a kid.' Separately, on the IdentityServer v8 host itself, startup now throws about Server-Side Sessions even though it just logged a warning before. Explain what changed with v8 licensing and how to resolve both.",
+      "expected_output": "The v8 license key is a new format (a signed JWT with a kid header) that fails on v7/earlier and the BFF Security Framework runtime with IDX10503; keep a v7-format key for those runtimes (it still runs v8 core). v8 also changed runtime enforcement: when a license is present but lacks the entitlement, Server-Side Sessions, Automatic Key Management, and SAML now throw at startup (other features only log). Use the production license key in lower environments so gaps surface early.",
+      "files": [],
+      "assertions": [
+        "Explains the v8 license key is a new format: a signed JWT carrying a kid header",
+        "States a v7/earlier key still works with v8 core, but a v8 key fails on v7/earlier or the BFF runtime with IDX10503",
+        "States that v8 throws at startup for Server-Side Sessions, Automatic Key Management, and SAML when licensed but lacking the entitlement, while other features only log a warning",
+        "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production",
+        "Does NOT claim a new license purchase is required to run v8 core on an existing v7 key"
+      ]
     }
   ]
 }

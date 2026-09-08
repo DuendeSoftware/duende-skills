@@ -105,7 +105,7 @@ public interface IProfileService
 | `Subject` | The `ClaimsPrincipal` from the authentication session (or from the access token for userinfo calls). |
 | `Client` | The `Client` making the request — use for per-client filtering. |
 | `Caller` | What triggered this call: `ClaimsProviderAccessToken`, `ClaimsProviderIdentityToken`, `UserInfoEndpoint`. |
-| `RequestedClaimTypes` | Claim types requested by the client via scopes/resources. |
+| `RequestedClaimTypes` | Claim types requested by the client, built from the `UserClaims` of the resources (`IdentityResource`/`ApiScope`/`ApiResource`) resolved for the request. |
 | `IssuedClaims` | Populate this collection with claims to include in the token. |
 | `AddRequestedClaims(IEnumerable<Claim>)` | Helper that filters your claims to only those in `RequestedClaimTypes`. |
 
@@ -239,6 +239,25 @@ public override async Task GetProfileDataAsync(ProfileDataRequestContext context
     context.AddRequestedClaims(BuildProfileClaims(user));
 }
 ```
+
+### Profile Service Invocation Count (Lifecycle)
+
+For an authorization-code + userinfo flow, `GetProfileDataAsync` can be called **up to three times** per login, distinguished by `context.Caller`:
+
+| Caller | When | Notes |
+|---|---|---|
+| `ClaimsProviderIdentityToken` | Building the id_token | Called with `includeAllIdentityClaims = false` → the id_token is **minimal** by default |
+| `ClaimsProviderAccessToken` | Building the access token | |
+| `UserInfoEndpoint` | Client calls `/connect/userinfo` | `Subject` comes from the access token |
+
+The ASP.NET Core OIDC handler fetches userinfo only when `options.GetClaimsFromUserInfoEndpoint = true`. Setting `Client.AlwaysIncludeUserClaimsInIdToken = true` puts all identity claims in the id_token and skips the userinfo round-trip.
+
+### Refresh Token Claim Updates
+
+On refresh, `Client.UpdateAccessTokenClaimsOnRefresh` (default `false`) controls whether `GetProfileDataAsync` is re-invoked for fresh access-token claims:
+
+- `false` (default): the original claims are reused; only `IsActiveAsync` is called.
+- `true`: `GetProfileDataAsync` runs again so access-token claims reflect current state.
 
 ---
 
@@ -612,6 +631,12 @@ new ApiScope("api.read")
 2. **Client not requesting the scope**: The client must include the scope in `AllowedScopes` and request it at authorization time.
 
 3. **`AddRequestedClaims` filtered it out**: If you use `context.AddRequestedClaims(claims)`, only claims whose types are in `context.RequestedClaimTypes` pass through. Check whether the scope was requested.
+
+4. **Check the userinfo endpoint first**: the identity token is minimal by default, so a "missing" claim is often available at `/connect/userinfo`. Verify there before modifying the profile service — the fix may just be `GetClaimsFromUserInfoEndpoint = true` on the client.
+
+5. **Enable debug logging**: turn on `Duende.IdentityServer` debug logging. The default profile service logs requested vs. issued claim types, which reveals whether a claim was filtered out by `RequestedClaimTypes` rather than never emitted.
+
+Adding a claim to the user/subject is **not** enough. To surface a new claim you must: (1) define a resource whose `UserClaims` include it (e.g. `new IdentityResource("department_info", ["department"], "Your department")`), (2) add that scope to the client's `AllowedScopes`, and (3) have the request include that scope. Adding a claim directly to `IssuedClaims` bypasses this filter — do that only when a claim must always be sent.
 
 ### Wrong Claim Names in APIs
 

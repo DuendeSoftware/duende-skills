@@ -129,6 +129,23 @@
         "Shows JWK generation using RsaSecurityKey with RSA.Create(2048) and JsonWebKeyConverter.ConvertFromSecurityKey, with Alg set to PS256",
         "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "We run IdentityServer behind an Nginx reverse proxy that terminates TLS in production. How do I set up mTLS so client certificates reach IdentityServer, and how do clients discover the mTLS token endpoint? We use the 'mtls' sub-domain strategy.",
+      "expected_output": "Guidance to set MutualTls.DomainName = 'mtls', configure Kestrel ClientCertificateMode.NoCertificate, add certificate forwarding (AddCertificateForwarding with the proxy's header and a HeaderConverter) and call UseCertificateForwarding() before UseAuthentication(), use CertificateTypes.Chained for production PKI, and read the mTLS token endpoint from disco.MtlsEndpointAliases (mtls_endpoint_aliases in discovery). Note the proxy must strip the inbound cert header.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets options.MutualTls.DomainName = \"mtls\" for the sub-domain endpoint strategy",
+        "Configures certificate forwarding via AddCertificateForwarding with the proxy's certificate header (e.g. X-SSL-CERT) and a HeaderConverter, and calls UseCertificateForwarding() before UseAuthentication()",
+        "Sets Kestrel ClientCertificateMode.NoCertificate because the reverse proxy terminates TLS",
+        "Uses AllowedCertificateTypes = CertificateTypes.Chained for production PKI certificates",
+        "Explains clients read the mTLS token endpoint from disco.MtlsEndpointAliases (mtls_endpoint_aliases in discovery) and that the proxy must strip or overwrite the inbound certificate header"
+      ]
     }
   ]
 }

@@ -475,6 +475,75 @@ public class SeqEventSink : IEventSink
 
 Events work well with structured logging stores like ELK, Seq, or Splunk.
 
+## Rate Limiting
+
+Duende IdentityServer has **no built-in rate limiting**. Assess it for public-facing or multi-tenant deployments. Three combinable approaches:
+
+### (a) Network Layer (first line of defense)
+
+Reverse proxy / gateway (nginx, Azure Application Gateway, AWS API Gateway, Cloudflare). Partitions only by IP/path — coarse, but stops most volumetric abuse before it reaches the app.
+
+### (b) ASP.NET Core Rate Limiting Middleware
+
+Register **before** `app.UseIdentityServer()`:
+
+```csharp
+app.UseRateLimiter();
+app.UseIdentityServer();
+```
+
+**Critical caveat:** IdentityServer matches its protocol endpoints (`/connect/authorize`, `/connect/token`, …) with its **own middleware, NOT ASP.NET Core endpoint routing**. You therefore **cannot attach a named per-endpoint policy** to protocol endpoints — only the **GLOBAL limiter** applies to them.
+
+- Approximate per-endpoint limits by **partitioning the global limiter on `context.Request.Path`**.
+- Named policies (`RequireRateLimiting("...")`) still work on **your own routed Razor Pages** (login/consent).
+- For the token endpoint, prefer returning a **JSON error + `Retry-After` header** rather than an HTML 429.
+
+```csharp
+builder.Services.AddRateLimiter(options =>
+{
+    // Global limiter — the ONLY limiter that applies to protocol endpoints
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        // Partition on path to approximate per-endpoint limits
+        return RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: $"{ip}:{context.Request.Path}",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4
+            });
+    });
+});
+```
+
+### (c) Identity-Aware Custom Validator
+
+Implement `ICustomTokenRequestValidator` — it runs **after** token request validation, so `ClientId`/user are known:
+
+```csharp
+public class RateLimitingTokenRequestValidator : ICustomTokenRequestValidator
+{
+    // v8 added the CancellationToken parameter to this interface
+    public Task ValidateAsync(CustomTokenRequestValidationContext context, CancellationToken ct)
+    {
+        var clientId = context.Result.ValidatedRequest.ClientId;
+        if (IsOverLimit(clientId))
+        {
+            context.Result.IsError = true;
+            context.Result.Error = "rate_limited";
+            context.Result.ErrorDescription = "Too many requests";
+        }
+        return Task.CompletedTask;
+    }
+}
+
+// idsvrBuilder.AddCustomTokenRequestValidator<RateLimitingTokenRequestValidator>();
+```
+
+**Note:** It runs **after** client authentication, secret validation, and DB lookups — so pair it with a coarser layer (a or b) to shed load earlier.
+
 ## Production Readiness Checklist
 
 | Item                                                  | Status                                 | Notes                                   |
@@ -493,6 +562,13 @@ Events work well with structured logging stores like ELK, Seq, or Splunk.
 | Signing key store uses durable storage                | Required for multi-instance            | EF operational store or custom          |
 | Logging level set to Warning+ for production          | Recommended                            | Avoid log bloat                         |
 | `~/keys` directory excluded from source control       | Required if using file-based key store | Prevent dev keys in production          |
+| HTTPS + ForwardedHeaders configured before IdentityServer | Required if behind proxy           | Discovery must publish HTTPS issuer     |
+| Signing keys shared by all instances + rotation plan  | Required for multi-instance            | Automatic Key Management where available |
+| DB schema changes applied before new app version starts | Required                             | Plus operational-store cleanup enabled  |
+| Same operational data / signing keys / DP keys / caches per instance | Required for multi-instance | Every instance shares all shared state  |
+| CORS allows only required client origins              | Required                               | Watch middleware order                  |
+| Token + session lifetimes match threat model          | Recommended                            | Tune per deployment                     |
+| Rate limiting assessed                                | Recommended                            | Public / multi-tenant deployments       |
 
 ## Common Anti-Patterns
 
@@ -531,6 +607,8 @@ Events work well with structured logging stores like ELK, Seq, or Splunk.
 7. **Cookie SameSite failures behind proxy**: If the proxy strips HTTPS, cookies won't get the `Secure` attribute, causing `SameSite=None` cookies to be rejected by browsers. Fix the proxy configuration first.
 
 8. **OpenTelemetry trace source selection**: In production, subscribing to all trace sources (`Stores`, `Validation`, etc.) can generate excessive trace data. Start with `Basic` and add more sources as needed for troubleshooting.
+
+9. **v8 license key format / runtime enforcement**: The v8 license key is a signed JWT with a `kid` header. A v7-format key still runs v8 core, but a v8 key fails on v7/earlier or the BFF runtime with `IDX10503: ... Token does not have a kid.` v8 also **throws at startup** when a configured license lacks the entitlement for Server-Side Sessions, Automatic Key Management, or SAML — run lower environments with the production key so gaps surface before production.
 
 ---
 

@@ -105,7 +105,8 @@
         "Output enables all four event categories: RaiseSuccessEvents, RaiseFailureEvents, RaiseErrorEvents, and RaiseInformationEvents on the IdentityServer options",
         "Output implements IEventSink with a PersistAsync method that receives Event objects",
         "Output writes events to Seq using structured logging (e.g., Serilog WriteTo.Seq) with event name, id, and details",
-        "Output registers the custom event sink in the DI container so IdentityServer uses it"
+        "Output registers the custom event sink in the DI container so IdentityServer uses it",
+        "Output notes that registering a custom IEventSink replaces the default (ASP.NET Core logger) sink, so the custom sink must forward to logging if log output is still wanted"
       ]
     },
     {
@@ -120,6 +121,21 @@
         "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
         "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
         "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "We want to rate limit our IdentityServer token and authorize endpoints using ASP.NET Core rate limiting middleware. I tried attaching a named RequireRateLimiting policy to /connect/token but it never triggers. Why, and what's the correct way to rate limit the protocol endpoints?",
+      "expected_output": "IdentityServer matches its protocol endpoints with its own middleware, not ASP.NET Core endpoint routing, so named per-endpoint policies never run on /connect/token or /connect/authorize — only the global limiter applies. Partition the global limiter on context.Request.Path to approximate per-endpoint limits, register UseRateLimiter before UseIdentityServer, and optionally add an ICustomTokenRequestValidator for identity-aware limits.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Explains that IdentityServer matches protocol endpoints with its own middleware (not ASP.NET Core endpoint routing), so named per-endpoint rate limiting policies do not apply to /connect/token or /connect/authorize",
+        "States that only the global limiter applies to protocol endpoints and shows partitioning the global limiter on context.Request.Path",
+        "Registers the rate limiter middleware (UseRateLimiter) before app.UseIdentityServer()",
+        "Notes that IdentityServer has no built-in rate limiting and/or mentions ICustomTokenRequestValidator (AddCustomTokenRequestValidator) for identity-aware limits"
       ]
     }
   ]

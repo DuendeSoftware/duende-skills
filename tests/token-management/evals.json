@@ -152,7 +152,8 @@
         "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
         "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
         "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
-        "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)"
+        "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)",
+        "Sets the JWT 'typ' header to 'client-authentication+jwt' (e.g. via AdditionalHeaderClaims) to opt into strict audience validation (RFC 7523bis / StrictClientAssertionAudienceValidation)"
       ]
     },
     {

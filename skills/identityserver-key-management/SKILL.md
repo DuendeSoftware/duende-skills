@@ -33,6 +33,10 @@ IdentityServer supports the `RS`, `PS`, and `ES` families:
 | PS     | `PS256`, `PS384`, `PS512` | RSA      |
 | ES     | `ES256`, `ES384`, `ES512` | ECDSA    |
 
+### Core Rotation Rule
+
+Regardless of approach, safe rotation obeys one rule: **publish a new public key in discovery (JWKS) BEFORE using it to sign tokens, and keep a RETIRED public key published until every token signed with it has expired.** Automatic Key Management enforces this overlap for you (Announced → Signing → Retired phases). With static/manual keys you must perform the overlap yourself via phased rotation (see [Manual Key Rotation](#manual-key-rotation-phased-approach)).
+
 ## Automatic Key Management (Recommended)
 
 Automatic Key Management handles key creation, rotation, announcement, and retirement. It is enabled by default and is part of the Business and Enterprise editions.
@@ -408,6 +412,31 @@ builder.Services.AddIdentityServer()
         options.ConfigureDbContext = b => b.UseSqlServer(connectionString);
     });
 ```
+
+## OIDC + SAML Shared Signing Keys
+
+When the SAML component is enabled, IdentityServer uses the **same signing credentials** for OIDC tokens and SAML messages — one key store, one rotation schedule. Rotated public keys are published in parallel via the OIDC JWKS endpoint and the SAML IdP metadata during rollover.
+
+### X.509 Requirement (SAML metadata needs certificates)
+
+SAML metadata requires X.509 certificates, not raw keys:
+
+- **Automatic Key Management** — creates RSA keys by default, and the SAML component **auto-wraps** managed RSA keys in self-signed X.509 certificates. You do **not** need to set `UseX509Certificate` just to enable SAML.
+- **Static Key Management** — you **must** configure an X.509 signing certificate **with a private key**. A manually registered raw RSA key — including one from `AddDeveloperSigningCredential()` — **cannot** be auto-wrapped for SAML.
+
+### Constraints
+
+- The default SAML signing service supports **RSA only**. `UseX509Certificate` is **not** supported for EC (`ES`) keys.
+- For a different certificate, independent rotation, or an external key system, implement a custom `ISamlSigningService`.
+
+### Rotation Knobs (shared with OIDC)
+
+| Knob                | Effect for SAML                                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `PropagationTime`   | How long a new managed key is published before it starts signing — set long enough for all SPs to refresh IdP metadata. |
+| `RetentionDuration` | Keeps the previous certificate in metadata while SPs may still validate old messages (and old OIDC tokens remain valid). |
+
+Service providers with **statically configured** IdP certificates must update those certs on every rotation.
 
 ## Common Pitfalls
 

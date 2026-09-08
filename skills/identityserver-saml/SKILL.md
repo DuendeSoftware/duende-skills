@@ -230,6 +230,14 @@ builder.Services.AddIdentityServer()
     });
 ```
 
+## SAML Signing Keys (X.509)
+
+SAML signing **requires an X.509 certificate**. OIDC and SAML share the same signing credentials; rotation timing is governed by Automatic Key Management `PropagationTime` and `RetentionDuration`.
+
+- **Automatic Key Management (RSA)**: auto-generated RSA keys are auto-wrapped into a self-signed X.509 container. You do **not** need `UseX509Certificate` just to enable SAML.
+- **Manual / raw RSA keys — including `AddDeveloperSigningCredential()`**: **cannot** be auto-wrapped. Register an X.509 certificate **with a private key** instead.
+- The default SAML signing service is **RSA-only**. `UseX509Certificate` is **not** supported for EC keys — implement a custom `ISamlSigningService` for EC (or HSM/Key Vault) scenarios.
+
 ## Service Provider Stores
 
 ### In-Memory (Development)
@@ -348,6 +356,10 @@ Call `CreateResponseAsync` from your custom endpoint to generate and return the 
 | `ISamlSigninStateStore` | Distributed sign-in state (for multi-node deployments); methods include `UpdateSigninRequestStateAsync` |
 | `ISamlServiceProviderConfigurationValidator` | Custom SP config validation rules |
 
+> **DI ordering is NOT required**: Custom SAML services do **not** need to be registered before `AddSaml()`. Defaults are registered with `TryAdd*` (e.g. `TryAddScoped`), so a custom scoped registration takes precedence regardless of order.
+
+> **State serializer & `Extensions`**: The default `ISamlSigninStateSerializer` **ignores** the `Extensions` property. To persist custom SAML extension data across the sign-in round-trip, implement a custom serializer.
+
 ### Example: Custom NameID Generator
 
 ```csharp
@@ -385,7 +397,43 @@ Inject `IIdentityServerInteractionService` and call `GetAuthenticationContextAsy
 
 ## Using IdentityServer as a SAML Service Provider (SP Mode)
 
-IdentityServer can consume SAML assertions from external IdPs via federation. Add a SAML authentication handler (e.g., `Sustainsys.Saml2` or `ITfoxtec.Identity.Saml2`) and configure it as an external provider in IdentityServer's login UI — same pattern as any external authentication scheme.
+IdentityServer can consume SAML assertions from external IdPs via federation. Add a SAML authentication handler and configure it as an external provider in IdentityServer's login UI — same pattern as any external authentication scheme.
+
+### Native SAML SP handler (`AddSamlServiceProvider`)
+
+Register the built-in Duende SAML SP handler as an external scheme feeding the IdentityServer external cookie:
+
+```csharp
+builder.Services.AddAuthentication()
+    .AddSamlServiceProvider("corporate-idp", options =>
+    {
+        options.SpEntityId = "https://sp.example.com";
+        options.IdpEntityId = "https://idp.example.com";
+        options.SingleSignOnServiceUrl = "https://idp.example.com/sso";
+        options.SigningCertificatesBase64 = ["<base64>"];   // LIST → supports IdP cert rollover
+        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+        // IdP-initiated (unsolicited) SSO — opt-in
+        options.AllowUnsolicitedAuthnResponse = true;                 // default false
+        options.IdpInitiatedCallbackUrl = "/ExternalLogin/Callback";  // REQUIRED when above is true
+    });
+```
+
+| Property | Default | Notes |
+|----------|---------|-------|
+| `AllowUnsolicitedAuthnResponse` | `false` | Accept IdP-initiated (unsolicited) `AuthnResponse`. When `true`, you **must** set `IdpInitiatedCallbackUrl`. |
+| `IdpInitiatedCallbackUrl` | `null` | **Required** when unsolicited responses are allowed. Relative path (e.g. `/ExternalLogin/Callback`) or absolute http/https URL; redirect target after processing an unsolicited response. |
+| `MaxRelayStateLength` | `1024` | Max bytes of RelayState persisted in auth properties; oversized values are **silently dropped** to avoid cookie bloat. |
+
+**Callback handling (IdP-initiated):** authenticate against `IdentityServerConstants.ExternalCookieAuthenticationScheme`. The IdP-supplied RelayState surfaces at `AuthenticationProperties.Items["relayState"]` (only when ≤ `MaxRelayStateLength`); `"scheme"` and `"returnUrl"` items are also populated.
+
+> ⚠️ **Security**: treat RelayState as **untrusted input**. Always validate it before using it as a redirect target.
+
+**Dynamic providers**: the dynamic `SamlProvider` model gains the same `AllowUnsolicitedAuthnResponse` and `IdpInitiatedCallbackUrl` properties. Note the dynamic model uses `SigningCertificateBase64` (**singular** string), whereas the static handler uses `SigningCertificatesBase64` (**list**, supports rollover).
+
+### Third-party handlers
+
+Alternatively, use a third-party handler (e.g., `Sustainsys.Saml2` or `ITfoxtec.Identity.Saml2`) configured as an external scheme.
 
 For step-by-step setup instructions, see the official docs: https://docs.duendesoftware.com/identityserver/ui/login/saml-provider/
 

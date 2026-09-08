@@ -294,6 +294,12 @@ var revocationResponse = await httpClient.RevokeTokenAsync(
     });
 ```
 
+> **What can actually be revoked:** revocation (RFC 7009) only deactivates **reference access tokens and refresh tokens**, which are persisted server-side. A **JWT access token is stateless and cannot be revoked** — it stays valid until `exp`. Use reference tokens when you need immediate invalidation.
+
+### Client Authentication: `private_key_jwt`
+
+Confidential clients can authenticate with a signed JWT assertion instead of a shared secret. The assertion's `aud` MUST be the authorization server's **issuer identifier** (`disco.Issuer`), never the token endpoint URL — the latter enabled token-endpoint confusion attacks (CVE-2025-27370 / CVE-2025-27371). Set the JWT `typ` header to `client-authentication+jwt` to opt into strict audience validation (RFC 7523bis).
+
 ---
 
 ## Concept 6: Scopes and Claims Mapping

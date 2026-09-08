@@ -112,6 +112,83 @@ new Client
 }
 ```
 
+Use `SecretTypes.X509CertificateName` for PKI/chained certificates (matched by distinguished name) and `SecretTypes.X509CertificateThumbprint` for self-issued certificates (matched by thumbprint).
+
+### mTLS Endpoint URL Strategies
+
+`options.MutualTls.DomainName` controls where the mTLS-protected endpoints live:
+
+| `DomainName` value | Endpoint layout             | Example                                  |
+| ------------------ | --------------------------- | ---------------------------------------- |
+| `null` / empty     | Path-based on the main host | `https://host/connect/mtls/token`        |
+| `"mtls"`           | Sub-domain                  | `https://mtls.host/connect/token`        |
+| full domain        | Separate dedicated domain   | `https://mtls.example.com/connect/token` |
+
+The mTLS endpoint URLs are published in discovery under `mtls_endpoint_aliases`. Clients must read them from there rather than the standard endpoints:
+
+```csharp
+var tokenEndpoint = disco.MtlsEndpointAliases?.TokenEndpoint;
+```
+
+### mTLS Deployment: Kestrel (dev) vs Reverse Proxy (production)
+
+**Development — Kestrel terminates TLS directly.** Use `mkcert` to create a locally-trusted CA (the private key stays on your machine, unlike shared sample certificates that ship public private keys). Accept — but don't require — client certificates; IdentityServer's mTLS middleware enforces them on the mTLS endpoint:
+
+```csharp
+builder.WebHost.ConfigureKestrel(kestrel =>
+{
+    kestrel.ConfigureHttpsDefaults(https =>
+    {
+        // Accept but do not require; the mTLS endpoint enforces the certificate
+        https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+    });
+});
+```
+
+> On .NET 10, Kestrel auto-resolves `*.localhost` sub-domains, so the `mtls.localhost` sub-domain strategy works locally with no hosts-file entry.
+
+**Production — a reverse proxy terminates TLS** and forwards the client certificate to Kestrel via a request header. Kestrel itself does not negotiate the certificate (`ClientCertificateMode.NoCertificate`); use certificate forwarding:
+
+```csharp
+// Kestrel: the proxy terminates TLS, so Kestrel never asks for a certificate
+builder.WebHost.ConfigureKestrel(k =>
+    k.ConfigureHttpsDefaults(h => h.ClientCertificateMode = ClientCertificateMode.NoCertificate));
+
+builder.Services.AddCertificateForwarding(options =>
+{
+    options.CertificateHeader = "X-SSL-CERT"; // match your proxy
+    options.HeaderConverter = headerValue =>
+    {
+        if (string.IsNullOrWhiteSpace(headerValue)) return null!;
+        // e.g. Nginx sends URL-encoded PEM; IIS sends base64 DER — decode accordingly
+        var pem = Uri.UnescapeDataString(headerValue);
+        return X509Certificate2.CreateFromPem(pem);
+    };
+});
+
+builder.Services.AddAuthentication()
+    .AddCertificate("Certificate", options =>
+    {
+        // Production PKI certificates are chained, not self-signed
+        options.AllowedCertificateTypes = CertificateTypes.Chained;
+    });
+
+// ...
+app.UseCertificateForwarding(); // MUST come before UseAuthentication()
+app.UseAuthentication();
+app.UseAuthorization();
+```
+
+Proxy header conventions:
+
+| Proxy  | Header             | Value format                                 |
+| ------ | ------------------ | -------------------------------------------- |
+| IIS    | `X-ARR-ClientCert` | base64 DER                                   |
+| Nginx  | `X-SSL-CERT`       | `$ssl_client_escaped_cert` (URL-encoded PEM) |
+| Apache | `X-SSL-CERT`       | `%{SSL_CLIENT_CERT}s` (PEM)                  |
+
+> **Security:** the proxy must strip or overwrite the certificate header on all inbound requests so a client cannot spoof a certificate by sending the header directly.
+
 ### mTLS without Client Authentication
 
 You can bind tokens to a client certificate without using the certificate for client authentication. This works with any authentication method, including public clients:

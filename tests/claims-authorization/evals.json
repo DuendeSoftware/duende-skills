@@ -131,6 +131,31 @@
         "Shows how to declare UserClaims on an ApiScope or ApiResource to include them in the requested types",
         "Does NOT require sub-documents — this is answered entirely from the core SKILL.md"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "A user's 'department' claim shows up when I call /connect/userinfo but is missing from the id_token my web app receives, and I can't tell why. Before I rewrite my IProfileService, how should I diagnose this and what's the likely fix?",
+      "expected_output": "An explanation that the id_token is minimal by default (GetProfileDataAsync is called for ClaimsProviderIdentityToken with includeAllIdentityClaims=false), so profile claims are expected at the userinfo endpoint rather than in the id_token. Recommends enabling GetClaimsFromUserInfoEndpoint = true on the ASP.NET Core OIDC handler (or AlwaysIncludeUserClaimsInIdToken on the client to embed them, at the cost of token size), and enabling Duende.IdentityServer debug logging where the default profile service logs requested vs issued claim types. Does not claim the claim is missing from issuance.",
+      "files": [],
+      "assertions": [
+        "Explains the id_token is minimal by default and profile claims are available at the userinfo endpoint",
+        "Recommends GetClaimsFromUserInfoEndpoint = true on the client OIDC handler (or AlwaysIncludeUserClaimsInIdToken = true to embed claims in the id_token, noting the size tradeoff)",
+        "Suggests enabling Duende.IdentityServer debug logging, noting the default profile service logs requested vs issued claim types",
+        "Does NOT conclude the claim is missing from the profile service or from token issuance"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Our access tokens carry role claims from IProfileService, but when the client redeems a refresh token the roles are stale — a user who lost a role still gets it in the refreshed access token. How do I make refreshed access tokens reflect current claims, and what is the default behavior?",
+      "expected_output": "An explanation that by default Client.UpdateAccessTokenClaimsOnRefresh is false, so on refresh the original claims are reused and only IsActiveAsync runs (GetProfileDataAsync is not re-invoked). Setting UpdateAccessTokenClaimsOnRefresh = true re-invokes GetProfileDataAsync on refresh so access-token claims reflect current state.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains that Client.UpdateAccessTokenClaimsOnRefresh defaults to false, so refreshed tokens reuse the original claims and only IsActiveAsync is called",
+        "Shows setting Client.UpdateAccessTokenClaimsOnRefresh = true to re-invoke GetProfileDataAsync on refresh",
+        "Explains this makes refreshed access-token claims reflect the current state from the profile service"
+      ]
     }
   ]
 }

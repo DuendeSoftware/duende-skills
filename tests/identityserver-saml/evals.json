@@ -109,6 +109,31 @@
         "Mentions that EntityId is required",
         "Explains that invalid SPs are treated as non-existent (returns null from store)"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "We use Duende IdentityServer as a SAML service provider consuming assertions from a corporate IdP. The IdP does IdP-initiated (unsolicited) SSO. Show me how to configure the built-in SAML SP handler to accept unsolicited AuthnResponses and how to handle the callback safely.",
+      "expected_output": "Registration via AddAuthentication().AddSamlServiceProvider(...) that sets AllowUnsolicitedAuthnResponse = true together with IdpInitiatedCallbackUrl, uses the external cookie sign-in scheme, and callback handling that reads RelayState from AuthenticationProperties.Items[\"relayState\"] while treating it as untrusted input.",
+      "files": [],
+      "assertions": [
+        "Registers the handler with AddSamlServiceProvider on the AddAuthentication builder",
+        "Sets AllowUnsolicitedAuthnResponse = true and also sets IdpInitiatedCallbackUrl (required when unsolicited responses are allowed)",
+        "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+        "Callback authenticates against the external cookie scheme and reads RelayState from AuthenticationProperties.Items[\"relayState\"]",
+        "Warns that RelayState is untrusted input and must be validated before being used as a redirect target"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "I enabled SAML but signing fails. I'm using AddDeveloperSigningCredential() in development. Why doesn't SAML signing work and what do I need instead?",
+      "expected_output": "Explanation that SAML signing requires an X.509 certificate. Automatic Key Management RSA keys are auto-wrapped into a self-signed X.509 container, but manually registered raw RSA keys — including AddDeveloperSigningCredential() — cannot be auto-wrapped; use an X.509 certificate with a private key instead. UseX509Certificate is not needed merely to enable SAML and is not supported for EC keys.",
+      "files": [],
+      "assertions": [
+        "States that SAML signing requires an X.509 certificate",
+        "Explains that Automatic Key Management RSA keys are auto-wrapped into a self-signed X.509 container",
+        "States that AddDeveloperSigningCredential() (raw RSA) cannot be auto-wrapped and an X.509 cert with a private key is required instead",
+        "Notes that UseX509Certificate is not required just to enable SAML and is not supported for EC keys (custom ISamlSigningService needed)"
+      ]
     }
   ]
 }

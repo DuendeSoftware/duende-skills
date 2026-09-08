@@ -211,6 +211,18 @@
         "Endpoint still uses .AsBffApiEndpoint() for CSRF protection",
         "Endpoint uses .RequireAuthorization() to trigger the challenge"
       ]
+    },
+    {
+      "id": 15,
+      "prompt": "With BFF server-side sessions, where do the access and refresh tokens actually live — in the cookie or on the server? And is the in-memory server-side session store OK for our 3-node production cluster?",
+      "expected_output": "Explanation that with server-side sessions the cookie holds only a session id; all tokens including refresh tokens live in the server-side store. The in-memory store is not durable (lost on restart) and not shared across instances, so it is unsuitable for multi-node deployments. Recommends a persistent shared store via Duende.BFF.EntityFramework (AddEntityFrameworkServerSideSessions).",
+      "files": [],
+      "assertions": [
+        "States that with server-side sessions the cookie carries only the session id, not tokens",
+        "States that all tokens, including refresh tokens, are stored server-side in the session store",
+        "Explains the in-memory store is lost on process restart and not shared across instances (users appear logged out on a different node)",
+        "Recommends a persistent, shared store for multi-node BFF via Duende.BFF.EntityFramework / AddEntityFrameworkServerSideSessions"
+      ]
     }
   ]
 }

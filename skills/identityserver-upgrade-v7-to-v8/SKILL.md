@@ -203,6 +203,32 @@ var info = LicenseInformation.Current;  // from Duende.IdentityServer.Licensing
 var skus = summary.EntitledSkus;        // collection replaces single edition
 ```
 
+#### New v8 License Key Format
+
+- v8 introduced a **new license key file format**: the v8 key is a signed **JWT carrying a `kid` header**.
+- A **v7/earlier key still works with v8 core** — no new purchase is needed to run v8 core on an existing key.
+- A **v8 key does NOT work on v7/earlier OR on the BFF Security Framework runtime**. It fails signature validation with Microsoft.IdentityModel error:
+  - `IDX10503: Signature validation failed. Token does not have a kid.`
+  - That exact error is the tell-tale sign of a **v8 key loaded into a v7 or BFF runtime**.
+- **Add-ons require a v8-format key in production**: using **SAML** or **Duende User Management** in production on v8 REQUIRES a new v8-format license key. Older-format keys run v8 core, but not these add-ons in production.
+
+#### Runtime License Enforcement Changed (behavioral reversal)
+
+v8 validates feature usage at runtime. When a **license IS present but lacks the entitlement**, behavior splits into two tiers:
+
+| Tier | Behavior when unlicensed | Features |
+| ---- | ------------------------ | -------- |
+| A | **THROWS** during startup validation | Server-Side Sessions, Automatic Key Management, SAML (IdP and Service Provider) |
+| B | **LOGS a warning** (rate-limited ~once/5 min) | DPoP, Resource Isolation, CIBA, Dynamic Identity Providers, Financial-grade/Conformance, User Management |
+
+- If **NO license is configured** (local dev / non-prod), Tier-A features **downgrade to logging** instead of throwing.
+- **Guidance**: use your **production license key in lower environments** so entitlement gaps (e.g. Server-Side Sessions) surface before production.
+- **Contrast with v7 and earlier**: those versions **disabled** some features at runtime when unlicensed (Server-Side Sessions, DPoP, Resource Isolation, PAR, Dynamic Identity Providers, CIBA). **v8 no longer disables** — it logs or throws per the tiers above.
+
+#### Editions → Plans
+
+The product moved from fixed **Starter / Business / Enterprise** editions to generic **plans**. The old three editions are still honored for legacy/long-term customers only. The **Community edition remains**. Update any code or docs that hard-code "three editions" to reflect the plan model.
+
 ### 13. Update EF Identity Provider Store
 
 ```csharp
@@ -316,6 +342,8 @@ options.StrictClientAssertionAudienceValidation = true;  // default changed to f
 3. **CancellationToken propagation**: Don't pass `CancellationToken.None` everywhere — propagate from the method parameter for proper request cancellation.
 4. **GetAllClientsAsync performance**: Return all clients from your store; used rarely but must be implemented.
 5. **PAR migration**: If you used `IAuthorizationParametersMessageStore` for large auth requests, switch clients to use PAR (`require_pushed_authorization_requests`).
+6. **`IDX10503` after dropping in a v8 key**: A v8-format license key (signed JWT with a `kid` header) fails signature validation on v7/earlier or the **BFF Security Framework runtime** with `IDX10503: Signature validation failed. Token does not have a kid.` Keep the v7-format key for those runtimes — it still works on v8 core; only SAML/User Management add-ons in production require the new v8-format key.
+7. **Entitlement gaps surface late**: v8 no longer silently disables unlicensed features — Server-Side Sessions, Automatic Key Management, and SAML now **throw at startup** when a license is present but missing the entitlement. Run lower environments with the production license key to catch this before deploying.
 
 ## Related Skills
 
