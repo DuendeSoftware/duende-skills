@@ -34,29 +34,92 @@ To update:
 > /plugin install dotnet-skills
 > ```
 
-### GitHub Copilot
+### GitHub Copilot CLI
 
-[Official Docs](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
+[Official Docs](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing)
 
-Clone or copy skills to your project or global config:
+Copilot CLI reads the Claude-format marketplace in `.claude-plugin/`, so the same plugin installs directly:
 
-**Project-level** (recommended):
 ```bash
-git clone https://github.com/DuendeSoftware/duende-skills.git /tmp/duende-skills
-cp -r /tmp/duende-skills/skills/* .github/skills/
+copilot plugin marketplace add DuendeSoftware/duende-skills
+copilot plugin install duende-skills@duende-skills
 ```
 
-**Global** (all projects):
-```bash
-mkdir -p ~/.copilot/skills
-cp -r /tmp/duende-skills/skills/* ~/.copilot/skills/
+Or from inside an interactive session: `/plugin marketplace add DuendeSoftware/duende-skills` then `/plugin install duende-skills@duende-skills`.
+
+### VS Code / VS Code Insiders (Preview)
+
+[Official Docs](https://code.visualstudio.com/docs/copilot/customization/agent-plugins)
+
+> Plugin support in VS Code is a preview feature and subject to change.
+
+Enable plugins and register the marketplace in `settings.json`:
+
+```jsonc
+{
+  "chat.plugins.enabled": true,
+  "chat.plugins.marketplaces": ["DuendeSoftware/duende-skills"]
+}
 ```
 
-> **Recommended:** Also install [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) for general .NET development coverage.
+Then type `/plugins` in Copilot Chat (or use the `@agentPlugins` filter in Extensions) to browse and install `duende-skills`. You can also use `/plugin marketplace add DuendeSoftware/duende-skills` in chat.
+
+### Cursor
+
+[Official Docs](https://cursor.com/docs/plugins)
+
+The repository ships a Cursor plugin manifest (`.cursor-plugin/plugin.json`). Once the plugin is listed on the [Cursor Marketplace](https://cursor.com/marketplace), install it from the Customize page / marketplace panel in Cursor. Until then, or for local use, either use `npx skills` (below) or copy/symlink a checkout to `~/.cursor/plugins/local/duende-skills` and run **Developer: Reload Window**.
+
+### ChatGPT / Codex
+
+```bash
+codex plugin marketplace add DuendeSoftware/duende-skills
+```
+
+### Any agent via `npx skills` (OpenCode, Copilot, Cursor, Codex, Claude Code, and [many more](https://github.com/vercel-labs/skills#supported-agents))
+
+[vercel-labs/skills](https://github.com/vercel-labs/skills) installs skills for whichever coding agents it detects:
+
+```bash
+# Install all Duende skills (interactive: pick agents and project/global scope)
+npx skills add DuendeSoftware/duende-skills
+
+# Global, non-interactive, for a specific agent
+npx skills add DuendeSoftware/duende-skills --all -g -a opencode -y
+
+# List what is available
+npx skills add DuendeSoftware/duende-skills --list
+
+# Update / remove later
+npx skills update
+npx skills remove duende-bff
+```
+
+> `npx skills` installs **skills only**. The two agents in `agents/` (`identity-server-specialist`, `oauth-oidc-specialist`) are installed by the plugin routes above, or manually (see OpenCode below).
+
+### Install a single skill
+
+Every skill is a self-contained folder under `skills/`, so you can install just the ones you need:
+
+```bash
+# Any agent (OpenCode, Copilot, Cursor, Codex, Claude Code, ...)
+npx skills add DuendeSoftware/duende-skills --skill duende-bff
+npx skills add DuendeSoftware/duende-skills --skill duende-bff --skill token-management
+
+# Equivalent, pointing at the folder directly
+npx skills add https://github.com/DuendeSoftware/duende-skills/tree/main/skills/duende-bff
+```
+
+Copilot CLI / VS Code plugins and the Claude Code plugin are installed as a whole (all skills). To pick individual skills for Copilot manually, copy the folder into `.github/skills/` (project) or `~/.copilot/skills/` (global).
 
 ### OpenCode
 
 [Official Docs](https://opencode.ai/docs/skills)
+
+Recommended: `npx skills add DuendeSoftware/duende-skills -a opencode -g` (see above).
+
+<details>
+<summary>Manual installation (skills + agents)</summary>
 
 ```bash
 git clone https://github.com/DuendeSoftware/duende-skills.git /tmp/duende-skills
@@ -72,6 +135,18 @@ for skill_file in /tmp/duende-skills/skills/*/SKILL.md; do
   find "$skill_dir" -mindepth 1 -maxdepth 1 -type d -exec cp -r {} ~/.config/opencode/skills/$skill_name/ \;
 done
 cp /tmp/duende-skills/agents/*.md ~/.config/opencode/agents/
+```
+
+</details>
+
+### Manual (GitHub Copilot and others)
+
+```bash
+git clone https://github.com/DuendeSoftware/duende-skills.git /tmp/duende-skills
+# Project-level
+mkdir -p .github/skills && cp -r /tmp/duende-skills/skills/* .github/skills/
+# Global
+mkdir -p ~/.copilot/skills && cp -r /tmp/duende-skills/skills/* ~/.copilot/skills/
 ```
 
 > **Recommended:** Also install [dotnet-skills](https://github.com/Aaronontheweb/dotnet-skills) for general .NET development coverage.
@@ -213,15 +288,16 @@ See `CLAUDE.md` for the full contribution workflow.
 To publish a new release, bump the version and publish it:
 
 ```bash
-./scripts/bump-version.sh 0.3.0
+./scripts/bump-version.sh 0.4.0
 ./scripts/build.sh
-git commit -am "Bump version to 0.3.0"
+git commit -am "Bump version to 0.4.0"
 ```
 
 Then submit to the plugin directories:
 
 - **ChatGPT/Codex:** https://platform.openai.com/plugins
 - **Claude Code:** https://claude.ai/admin-settings/directory/submissions/plugins/
+- **Cursor:** https://cursor.com/marketplace/publish
 
 ---
 

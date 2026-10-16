@@ -19,6 +19,8 @@ duende-skills/
 │   └── plugin.json         # Claude Code plugin metadata + skill/agent registry
 ├── .codex-plugin/
 │   └── plugin.json         # ChatGPT/Codex plugin manifest
+├── .cursor-plugin/
+│   └── plugin.json         # Cursor plugin manifest (skills: ./skills/)
 ├── .agents/plugins/
 │   └── marketplace.json    # ChatGPT/Codex marketplace catalog
 ├── skills/                 # Flat structure for Copilot compatibility
@@ -74,12 +76,14 @@ color: purple  # optional
 1. Create a folder: `skills/<skill-name>/SKILL.md`
    - Use appropriate prefix for domain-specific skills (see naming convention above)
 2. Add evals for the new skill (see [Adding Evals](#adding-evals) below)
-3. Update both plugin manifests:
-   - `.claude-plugin/plugin.json`: add the skill path to the `skills` array
+3. Update all plugin manifests:
+   - `.claude-plugin/plugin.json`: add the skill path to the `skills` array (this file is also read by GitHub Copilot CLI and VS Code, and by `npx skills` for manifest discovery)
    - `.codex-plugin/plugin.json`: skills are discovered from `./skills/`, but review and update `interface.longDescription`, `keywords`, and `defaultPrompt` so the Codex listing reflects the new coverage
+   - `.cursor-plugin/plugin.json`: skills are discovered from `./skills/`; review `description` and `keywords` if coverage changes
+   - `npx skills add` needs no manifest: it discovers `skills/<name>/SKILL.md` (the directory name must equal the frontmatter `name`; `validate-marketplace.sh` checks this)
 4. Run `./scripts/validate-marketplace.sh` to verify
 5. Run `./scripts/generate-skill-index-snippets.sh --update-readme` to regenerate the compressed index
-6. Commit all changes together (SKILL.md, evals, both plugin.json files, and README.md)
+6. Commit all changes together (SKILL.md, evals, all plugin.json files, and README.md)
 
 ## Sub-Documents
 
@@ -215,16 +219,20 @@ Every new or updated skill **must** include evals. Evals measure the incremental
 3. Push a semver tag: `git tag v0.3.0 && git push origin v0.3.0`
 4. GitHub Actions creates the release automatically
 
-**Claude Code users install with:**
-```bash
-/plugin marketplace add DuendeSoftware/duende-skills
-/plugin install duende-skills
-```
+**Version sync:** `bump-version.sh` updates `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json` and `.cursor-plugin/plugin.json`. `validate-marketplace.sh`, `build.sh` and `release.yml` fail if they diverge.
 
-**ChatGPT/Codex users install with:**
-```bash
-codex plugin marketplace add DuendeSoftware/duende-skills
-```
+**Install channels (all served from this repo, no extra manifests beyond the above):**
+
+| Channel | Install | Manifest used |
+|---------|---------|---------------|
+| Claude Code | `/plugin marketplace add DuendeSoftware/duende-skills` then `/plugin install duende-skills` | `.claude-plugin/` |
+| GitHub Copilot CLI | `copilot plugin marketplace add DuendeSoftware/duende-skills` then `copilot plugin install duende-skills@duende-skills` | `.claude-plugin/marketplace.json` (Copilot docs: marketplace.json in `.claude-plugin/` or `.github/plugin/`) |
+| VS Code (preview) | settings `chat.plugins.enabled: true`, `chat.plugins.marketplaces: ["DuendeSoftware/duende-skills"]` | `.claude-plugin/` |
+| ChatGPT/Codex | `codex plugin marketplace add DuendeSoftware/duende-skills` | `.codex-plugin/`, `.agents/plugins/marketplace.json` |
+| Cursor | Cursor Marketplace listing (manual submission, see below) | `.cursor-plugin/plugin.json` |
+| Any agent | `npx skills add DuendeSoftware/duende-skills [--skill <name>]` | none (discovers `skills/*/SKILL.md`) |
+
+**Cursor Marketplace submission is a manual, reviewed step.** Cursor manually reviews every plugin before listing. After a release, submit the repository URL at https://cursor.com/marketplace/publish (checklist: valid `.cursor-plugin/plugin.json`, unique kebab-case name, clear description). Re-submission is not part of the release automation.
 
 ## Content Guidelines
 
