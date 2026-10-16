@@ -40,6 +40,7 @@
       "Give me a complete checklist of everything I need to do to upgrade from IdentityServer v7.4 to the latest."
     ],
     "websiteURL": "https://duendesoftware.com",
+    "supportURL": "https://duende.link/community",
     "privacyPolicyURL": "https://duendesoftware.com/privacy",
     "termsOfServiceURL": "https://duendesoftware.com/terms",
     "composerIcon": "./assets/icon.png",
