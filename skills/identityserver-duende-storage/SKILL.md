@@ -145,12 +145,14 @@ Other model types: `ApiScopeConfiguration` (`Name`, `DisplayName`), `ApiResource
 - Results: create/update/delete return `SaveResult<TId>` (check `IsSuccess`; `Id`, `Version`, `Errors`); get returns `GetResult<T>` (`Found`, `Item`, `Version`).
 - **Optimistic concurrency**: `UpdateAsync(id, item, expectedVersion, ct)` requires the version from the preceding get/create. Handle validation, duplicate-name, not-found, version-conflict errors.
 - `QueryAsync(QueryRequest.Create<ApiScopeFilter, ApiScopeSortField>(new ApiScopeFilter { Name = "inventory" }), ct)` — filters can be *contains* matches, so compare business identifiers exactly; page via continuation tokens on `QueryResult<T>`. `DeleteAsync(id, ct)`.
-- Client and API secrets are **hashed** on write (plaintext in, never returned). **Dynamic identity provider properties (e.g. `ClientSecret`) are stored recoverably — not hashed, not field-encrypted.** Use encrypted connections, encryption at rest, restricted DB access and protected backups.
+- Client and API secrets are **hashed** on write (plaintext in, never returned). **Dynamic identity provider properties (e.g. `ClientSecret`) are stored recoverably — not hashed, not field-encrypted.** Use encrypted connections, encryption at rest, restricted DB access and protected backups. **Do not grant direct read access to the configuration store as a substitute for an authorized admin API** — go through the admin API (e.g. `IIdentityProviderAdmin`) with proper authorization.
 - Register the matching dynamic provider type (`AddOidcDynamicProvider()` / `AddSamlDynamicProvider()`) for IdPs you create.
 
 ## Data Extension Schemas
 
 Add typed custom properties (`ExtendedProperties`) to clients, API resources, API scopes, identity resources, dynamic IdPs and SAML SPs without DB schema changes.
+
+**No SQL migrations are needed when adding or changing extension schemas or attributes**: values are stored as generic attribute-value data, so only the schema definition changes. Values that are unknown to the schema or of the wrong type are rejected on write.
 
 | Schema store | Choose when |
 |--------------|-------------|
@@ -169,7 +171,7 @@ await clientAdmin.CreateAsync(new CreateClient { ClientId = "sales", AllowedGran
 
 - `SchemaId.Client | ApiResource | ApiScope | IdentityResource | SamlServiceProvider | OidcIdentityProvider ("idp:oidc") | SamlIdentityProvider ("idp:saml") | UserProfile`; custom IdP types: `SchemaId.BuildIdentityProviderId(type)`. One schema per ID.
 - Admin API rejects unknown properties, wrong types, missing required values, duplicates for unique attributes. `IsQueryable` adds indexing cost — only for filter/sort needs. Renaming/removing/retyping/making required is a contract change.
-- `AddInMemoryDataExtensionSchemas` does **not** register `ISchemaStore`/`ISchemaAdmin` and has no effect once `AddDynamicSchemas()` is used. With `AddDynamicSchemas()` the DB is the only source: in-memory built-ins are not used and not seeded (create via `ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ct)`). Update with get → modify → `UpdateAsync(schemaId, schema, version, ct)`. Provision from one deployment process to avoid races.
+- `AddInMemoryDataExtensionSchemas` does **not** register `ISchemaStore`/`ISchemaAdmin` and has no effect once `AddDynamicSchemas()` is used. With `AddDynamicSchemas()` the DB is the only source: in-memory built-ins are not used and not seeded (create via `ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ct)` and check `result.IsSuccess`, otherwise throw using `result.Errors`; e.g. in an `IHostedService` at startup, using `Duende.IdentityServer.Stores.Storage.IdentityProviders` / `Duende.Storage.EntityAttributeValue`; `SchemaId.SamlIdentityProvider` = `"idp:saml"`). Update with get → modify → `UpdateAsync(schemaId, schema, version, ct)`. Provision from one deployment process to avoid races.
 - **Built-in schemas** (`BuiltInSchemas.OidcProvider`, `.SamlProvider`, `.UserProfile`) return a fresh mutable instance on each access. Extend with `BuiltInSchemas.OidcProvider.Extend(attr)` (throws if the code already exists) or register a full replacement `SchemaConfiguration` with the same `SchemaId` (wins regardless of registration order; last registered wins; none of the built-in attributes remain implicitly).
 - `AddOidcDynamicProvider()` / `AddSamlDynamicProvider()` register the `idp:oidc` / `idp:saml` schema; creating SAML IdPs with `ExtendedProperties` **requires** `AddSamlDynamicProvider()`.
 - SAML SP extensions are **admin-only metadata**: not projected to the runtime `SamlServiceProvider`; don't use them for SAML protocol processing.

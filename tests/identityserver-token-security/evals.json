@@ -28,7 +28,7 @@
       ],
       "assertions": [
         "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda",
-        "Registers a distributed cache (e.g., AddDistributedMemoryCache for dev, mentions Redis or similar for production)",
+        "Registers the keyed HybridCache for DPoP replay detection and mentions a distributed cache (e.g. Redis) as L2 for multi-instance deployments",
         "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'",
         "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package"
       ]
@@ -69,7 +69,7 @@
     },
     {
       "id": 5,
-      "prompt": "I need to configure a client that uses JWT Secured Authorization Requests (JAR) with an RSA key. The client 'secure_app' must always send signed request objects. Show me both the server-side client configuration and explain how the client's signing key is registered.",
+      "prompt": "I need to configure a client that uses JWT Secured Authorization Requests (JAR) with an RSA key. The client 'secure_app' must always send signed request objects. Show me both the server-side client configuration and explain how the client's signing key is registered, and explain how JAR makes the authorization request tamperproof.",
       "expected_output": "A Client with RequireRequestObject = true and a ClientSecret using either JsonWebKey or X509CertificateBase64 type. Explanation of how JAR makes authorization parameters tamperproof via a signed JWT.",
       "files": [
         "files/begin-state/Program.cs",

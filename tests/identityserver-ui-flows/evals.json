@@ -70,7 +70,7 @@
     {
       "id": 5,
       "prompt": "Implement an error page for our IdentityServer. Configure the error URL and the error query parameter name in IdentityServer options. The page should use IIdentityServerInteractionService.GetErrorContextAsync to retrieve the error details and display the error code and request ID to the user, but must not expose the full error description for security reasons. Log the full error details at Debug level.",
-      "expected_output": "Program.cs configures opt.UserInteraction.ErrorUrl and optionally opt.UserInteraction.ErrorId. An error page injects IIdentityServerInteractionService and ILogger. OnGet calls GetErrorContextAsync(errorId) to retrieve ErrorMessage with Error, ErrorDescription, RequestId, and ClientId. The page displays Error and RequestId to the user but does not render ErrorDescription in the UI. The full error details including ErrorDescription are logged at Debug level.",
+      "expected_output": "Program.cs configures opt.UserInteraction.ErrorUrl and optionally opt.UserInteraction.ErrorIdParameter. An error page injects IIdentityServerInteractionService and ILogger. OnGet calls GetErrorContextAsync(errorId) to retrieve ErrorMessage with Error, ErrorDescription, RequestId, and ClientId. The page displays Error and RequestId to the user but does not render ErrorDescription in the UI. The full error details including ErrorDescription are logged at Debug level.",
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj",
@@ -134,8 +134,8 @@
     },
     {
       "id": 9,
-      "prompt": "Explain and configure consent correctly for our IdentityServer. Our 'profile' identity resource must be mandatory (the flow should fail if the user declines it), while a 'marketing' scope should be optional and declinable. Also, we need a support endpoint that lets an admin revoke a user's remembered consent for the 'web.app' client. Finally, clarify whether our machine-to-machine client using client credentials will show a consent prompt.",
-      "expected_output": "The 'profile' IdentityResource sets Required = true so omitting it yields access_denied and the request fails; the 'marketing' ApiScope sets Required = false so it can be declined while the flow still succeeds. A support/admin action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to remove all persisted grants (remembered consent, reference and refresh tokens) for that user/client. The response clarifies that client-credentials (M2M) flows never prompt for consent — only AllowedScopes governs access.",
+      "prompt": "Explain and configure consent correctly for our IdentityServer. Our 'profile' identity resource must be mandatory (the flow should fail if the user declines it), while a 'marketing' scope should be optional and declinable. Also, we need a 'My consents' endpoint in our IdentityServer UI where the signed-in user can revoke their own remembered consent for the 'web.app' client. Finally, clarify whether our machine-to-machine client using client credentials will show a consent prompt.",
+      "expected_output": "The 'profile' IdentityResource sets Required = true so omitting it yields access_denied and the request fails; the 'marketing' ApiScope sets Required = false so it can be declined while the flow still succeeds. A 'my consents' action for the signed-in user calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to remove all persisted grants (remembered consent, reference and refresh tokens) for the current user/client. The response clarifies that client-credentials (M2M) flows never prompt for consent — only AllowedScopes governs access.",
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj",
@@ -144,7 +144,7 @@
       "assertions": [
         "The 'profile' IdentityResource sets Required = true and the response explains omitting a required scope returns access_denied and fails the request",
         "The 'marketing' ApiScope sets Required = false and the response explains optional scopes can be declined while the flow still succeeds",
-        "The admin/support action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants",
+        "The signed-in user's revoke action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants for the current user",
         "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access"
       ]
     },

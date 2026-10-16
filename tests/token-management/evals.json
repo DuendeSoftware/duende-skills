@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I have a .NET 10 worker service (background service) that needs to call a catalog API at https://api.example.com/catalog/ using client credentials. The token endpoint is https://sts.example.com/connect/token, client ID is 'catalog-worker', client secret is 'worker-secret', and it needs the 'catalog:read' scope. Set up Duende.AccessTokenManagement with HttpClientFactory so the worker can call the API without manually managing tokens.",
+      "prompt": "I have a .NET 10 worker service (background service) that needs to call a catalog API at https://api.example.com/catalog/ using client credentials. The token endpoint is https://sts.example.com/connect/token, client ID is 'catalog-worker', client secret is 'worker-secret', and it needs the 'catalog:read' scope. Set up Duende.AccessTokenManagement with HttpClientFactory so the worker (a BackgroundService that injects IHttpClientFactory and calls CreateClient with the registered name) can call the API without manually managing tokens.",
       "expected_output": "A Program.cs (or equivalent) that registers a client credentials client via AddClientCredentialsTokenManagement().AddClient(), then registers an HttpClient via AddClientCredentialsHttpClient() (or AddClientCredentialsTokenHandler()), and a BackgroundService that uses IHttpClientFactory to call the API with tokens attached automatically.",
       "files": [
         "files/begin-state/WebApp.csproj",
@@ -218,6 +218,9 @@
         "States OpenIdConnectOptions.EventsType must not be used because it silently removes all library handlers",
         "With PAR, signs the request in OnPushAuthorization before invoking the library handler (so dpop_jkt is included in the signed request and the client assertion is added afterwards); without PAR signs in OnRedirectToIdentityProvider after the library handler",
         "Notes the library adds the client assertion from IClientAssertionService to the code exchange and, on .NET 9+, the PAR request, but does not create JAR request objects"
+      ],
+      "sub_documents": [
+        "dpop.md"
       ]
     },
     {

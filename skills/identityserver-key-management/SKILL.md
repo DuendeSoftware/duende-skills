@@ -248,6 +248,7 @@ Rotate immediately; don't wait for the schedule:
 4. Revoke refresh tokens/persisted grants issued before removal (all active grants if the exposure window is unknown).
 5. Notify relying parties (clients, APIs that cache JWKS, SAML SPs with static certificates).
 6. Investigate how it was exposed; review key and Data Protection key storage.
+7. **Backups:** treat backups of signing keys as compromised too. Backups of automatic-management signing keys are encrypted with Data Protection, so they only work with the **matching Data Protection keys** and the **same application name** (`SetApplicationName`). Back up and restore both together, and make sure no backup still contains the compromised key.
 
 ## Encryption of Keys at Rest
 

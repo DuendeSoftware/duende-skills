@@ -426,7 +426,7 @@ public async Task<IActionResult> OnPost(string returnUrl, CancellationToken ct)
 // Program.cs
 builder.Services.AddIdentityServer(opt => {
     opt.UserInteraction.ErrorUrl = "/path/to/error";
-    opt.UserInteraction.ErrorId = "ErrorQueryStringParamName"; // default: "errorId"
+    opt.UserInteraction.ErrorIdParameter = "errorId"; // query string parameter name; default: "errorId"
 });
 ```
 

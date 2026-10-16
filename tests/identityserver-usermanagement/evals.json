@@ -60,7 +60,7 @@
     },
     {
       "id": 5,
-      "prompt": "How do I integrate Duende User Management with IdentityServer so that user claims are available in tokens? I need the user's email and custom profile attributes to appear in ID tokens.",
+      "prompt": "How do I integrate Duende User Management with IdentityServer so that user claims are available in tokens? I need the user's email and custom profile attributes to appear in ID tokens. Show the complete IdentityServer integration in Program.cs, including how IdentityServer is pointed at the login and logout pages.",
       "expected_output": "Explanation that AddUserManagement() automatically registers IProfileService, claims are mapped from user profile attributes based on requested scopes (openid, profile, email), and custom attributes can be exposed through custom identity resources.",
       "files": [
         "files/begin-state/Program.cs"

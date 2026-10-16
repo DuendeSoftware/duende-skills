@@ -378,6 +378,8 @@ builder.Services.ConfigureDPoPTokensForScheme("token", options =>
 
 // Replay detection (enabled by default) needs a KEYED HybridCache
 builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
+
+// Multi-instance: also register an IDistributedCache (e.g. AddStackExchangeRedisCache) as HybridCache L2
 ```
 
 DPoP replay detection is **on by default** and uses a **keyed `HybridCache`** (key `ServiceProviderKeys.ProofTokenReplayHybridCache`), not `IDistributedCache` directly. If it's enabled and the keyed cache isn't registered, an `InvalidOperationException` is thrown when a proof is validated. `HybridCache` is in-memory by default and uses a registered `IDistributedCache` (e.g. Redis) as second level: register one when the API runs on multiple instances so replays are detected across instances. Disable with `EnableReplayDetection = false` only if you don't need it.
@@ -496,6 +498,8 @@ builder.Services.AddIdentityServer(options =>
 ## JWT Secured Authorization Requests (JAR)
 
 JAR packages authorization request parameters in a signed JWT, making them tamperproof and enabling front-channel client authentication.
+
+**How it works:** instead of sending plain query parameters (which a user or browser could alter), the client wraps all authorization request parameters (`scope`, `redirect_uri`, etc.) in a JWT signed with its private key and sends it as the `request` parameter. IdentityServer validates the signature against the public key registered on the client (`JsonWebKey` or `X509CertificateBase64` secret), so the parameters are **tamperproof** and the request is authenticated. Always state this when explaining JAR.
 
 ### Server Configuration
 

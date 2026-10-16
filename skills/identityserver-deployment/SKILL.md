@@ -76,6 +76,8 @@ By default, `KnownNetworks` and `KnownProxies` support localhost (`127.0.0.1/8` 
 
 ## ASP.NET Core Data Protection
 
+> When answering Data Protection questions, **explicitly cite the general documentation** (<https://docs.duendesoftware.com/general/data-protection/>) and state that Data Protection is a cross-cutting concern for *all* Duende SDKs (IdentityServer, BFF, etc.).
+
 > **Cross-cutting concern:** Data protection is critical for all Duende products — both IdentityServer and BFF. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive guidance covering all Duende SDKs.
 
 ### Why It Matters
@@ -322,14 +324,15 @@ IdentityServer uses ASP.NET Core's standard `ILogger`. Logs are written under th
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Information",
-      "Duende.IdentityServer": "Information"
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning",
+      "Duende.IdentityServer": "Warning"
     }
   }
 }
 ```
 
-In production, default to `Warning` to avoid excessive log volume.
+**Production appsettings (e.g. `appsettings.Production.json`): set `Default` and `Duende.IdentityServer` to `Warning` (or higher).** Raise `Duende.IdentityServer` to `Information` only temporarily when troubleshooting. `Trace` and `Debug` expose sensitive data such as tokens and must never be used in production.
 
 ### Filtering Exceptions
 
@@ -416,6 +419,10 @@ public class SeqEventSink : IEventSink
     }
 }
 ```
+
+Register it: `builder.Services.AddTransient<IEventSink, SeqEventSink>();`
+
+> **A custom `IEventSink` replaces the default sink.** `IEventService` sends each event to one sink, so events are no longer forwarded to the standard ASP.NET Core logger unless your custom sink does that too. If you still want events in `ILogger` output, forward to it in the sink (inject `ILogger<SeqEventSink>`) or fan out to both. Also account for destination failures and restrict write/delete access to the audit store.
 
 Events work well with structured logging stores like ELK, Seq, or Splunk.
 

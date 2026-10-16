@@ -132,7 +132,7 @@
       "files": [],
       "assertions": [
         "Output contains 'AddBff()' with '.ConfigureOpenIdConnect' replacing the manual AddAuthentication/AddCookie/AddOpenIdConnect setup",
-        "Output does NOT contain 'MapBffManagementEndpoints'",
+        "Does not call app.MapBffManagementEndpoints() (management endpoints are auto-registered in v4)",
         "Output contains '.WithAccessToken(RequiredTokenType.User)' instead of '.RequireAccessToken(TokenType.User)'",
         "Output contains '.AddRemoteApis()' since V4 requires it for remote API endpoints",
         "Output preserves the original OIDC settings (Authority, ClientId, ClientSecret, ResponseType, scopes)"

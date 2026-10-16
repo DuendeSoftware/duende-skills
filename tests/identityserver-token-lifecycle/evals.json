@@ -10,7 +10,7 @@
       ],
       "assertions": [
         "The web_app client has AllowOfflineAccess = true",
-        "The web_app client AllowedScopes includes 'offline_access'",
+        "The web_app client sets AllowOfflineAccess = true (which enables refresh tokens)",
         "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)",
         "SlidingRefreshTokenLifetime is set to 86400 (1 day)",
         "RefreshTokenExpiration is set to TokenExpiration.Sliding"
