@@ -223,6 +223,38 @@
         "Explains the in-memory store is lost on process restart and not shared across instances (users appear logged out on a different node)",
         "Recommends a persistent, shared store for multi-node BFF via Duende.BFF.EntityFramework / AddEntityFrameworkServerSideSessions"
       ]
+    },
+    {
+      "id": 16,
+      "prompt": "After upgrading Duende.BFF to 4.3.1 our remote API behind YARP no longer sees the browser's Cookie header, and calls to our frontend's remote APIs return 401. What changed and how should we handle it?",
+      "expected_output": "Security patch: Cookie header removed on all YARP routes (RemoveCookieHeaderFromYarpRequests default true) and anti-forgery header now required for frontend remote APIs.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Explains the BFF now removes the Cookie request header on every YARP-proxied route so the BFF session cookie never reaches remote APIs",
+        "Recommends authenticating the remote API with the access token the BFF attaches instead of cookies",
+        "Mentions BffOptions.RemoveCookieHeaderFromYarpRequests = false as an opt-out, warns it forwards the session cookie, and suggests RequestHeaderRemove/WithTransformRequestHeaderRemove(\"Cookie\") per route",
+        "Explains remote APIs defined on a frontend (WithRemoteApis or configuration) now require the X-CSRF: 1 anti-forgery header, otherwise the BFF returns 401",
+        "Mentions there is no per-API opt-out and that BffOptions.DisableAntiForgeryCheck is the only delegate-based way to skip the check"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "In BFF with YARP, I added a route transform that sets a Cookie header with a specific cookie for one API but it's ignored. Why?",
+      "expected_output": "Cookie removal runs after route transforms; use a transform registered after AddBffExtensions or disable removal.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/BffHost.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Explains the BFF removes the Cookie header after YARP copies headers and after the route's configured transforms run, so a route transform that sets Cookie has no effect while removal is on",
+        "Notes transforms/transform providers registered after AddBffExtensions (e.g. AddTransforms on the returned IReverseProxyBuilder) run later and can set a specific Cookie",
+        "Warns not to copy the browser's cookies back onto the request"
+      ]
     }
   ]
 }

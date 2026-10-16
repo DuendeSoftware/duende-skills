@@ -1,6 +1,6 @@
 ---
 name: identityserver-key-management
-description: Managing cryptographic signing keys in Duende IdentityServer, including automatic key management, KeyManagementOptions, data protection at rest, static key configuration, migration from static to automatic, and multi-instance deployment considerations.
+description: Managing cryptographic signing keys in Duende IdentityServer, including automatic key management, KeyManagementOptions, data protection at rest, static key configuration, migration from static to automatic, and multi-instance deployment considerations, HSM/cloud KMS signing, key backup, and key-compromise response.
 invocable: false
 ---
 
@@ -16,6 +16,8 @@ invocable: false
 - Protecting keys at rest using data protection
 - Configuring per-algorithm or per-resource signing
 - Troubleshooting key-related errors (CryptographicException, unprotecting key failures)
+- Integrating an HSM or cloud KMS (e.g. Azure Key Vault) for signing
+- Backing up signing keys and responding to a suspected key compromise
 
 Docs: https://docs.duendesoftware.com/identityserver/fundamentals/key-management/
 
@@ -39,7 +41,7 @@ Regardless of approach, safe rotation obeys one rule: **publish a new public key
 
 ## Automatic Key Management (Recommended)
 
-Automatic Key Management handles key creation, rotation, announcement, and retirement. It is enabled by default and is part of the Business and Enterprise editions.
+Automatic Key Management handles key creation, rotation, announcement, and retirement. It is enabled by default and is part of the Business and Enterprise editions (per the current licensing page: an add-on for the Standard edition, included in Advanced/Enterprise; the entry-level edition is now called Lite). In v8 a missing entitlement throws at startup.
 
 ### Key Lifecycle
 
@@ -164,6 +166,10 @@ builder.Services.AddIdentityServer()
     });
 ```
 
+### Duende Storage Store (preview)
+
+`AddStorage(...)` + `AddOperationalStorage()` stores signing keys through the Duende Storage layer (`ISigningKeyStore`). See `identityserver-duende-storage`.
+
 ### Custom Store
 
 Implement `ISigningKeyStore` for custom storage (e.g., Azure Key Vault, AWS KMS):
@@ -179,6 +185,69 @@ The store interface methods:
 - `LoadKeysAsync` - load all keys (cached for `KeyCacheDuration`)
 - `StoreKeyAsync` - persist a new key
 - `DeleteKeyAsync` - remove a retired key
+
+## HSM and Cloud KMS
+
+IdentityServer has **no built-in HSM/KMS provider**. Options depend on how the key is exposed:
+
+- **HSM key exposed to .NET** (`X509Certificate2`/`RSA`/`ECDsa` backed by CNG/PKCS#11): register as a static credential with `AddSigningCredential`; signing happens inside the HSM, no private-key export.
+- **Remote KMS signing via API**: custom `CryptoProviderFactory` + `SignatureProvider` attached to the `SecurityKey` (signing is synchronous, so async KMS calls block), **or** subclass `DefaultTokenCreationService` and override `CreateJwtAsync` to call the KMS async signing API.
+- **Custom `ISigningKeyStore`** only changes where automatic key management stores its (exportable) keys, e.g. a vault. It is not a way to use non-exportable keys.
+
+### Async remote KMS signing (Azure Key Vault example)
+
+All JWTs (access, identity, JWT introspection) go through `ITokenCreationService`.
+
+```csharp
+// KeyVaultTokenCreationService.cs
+public class KeyVaultTokenCreationService(
+    CryptographyClient crypto, TimeProvider timeProvider, IKeyMaterialService keys,
+    IdentityServerOptions options, ILogger<DefaultTokenCreationService> logger)
+    : DefaultTokenCreationService(timeProvider, keys, options, logger)
+{
+    protected override async Task<string> CreateJwtAsync(Token token, string payload,
+        Dictionary<string, object> headerElements, CancellationToken ct)
+    {
+        var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms, ct);
+        headerElements.TryAdd("typ", "JWT");
+        headerElements["alg"] = credential.Algorithm;
+        headerElements["kid"] = credential.Key.KeyId;
+
+        var header = Base64UrlEncoder.Encode(JsonSerializer.Serialize(headerElements));
+        var body = Base64UrlEncoder.Encode(payload);
+        var signingInput = $"{header}.{body}";
+        var result = await crypto.SignDataAsync(
+            new SignatureAlgorithm(credential.Algorithm), Encoding.UTF8.GetBytes(signingInput), ct);
+        return $"{signingInput}.{Base64UrlEncoder.Encode(result.Signature)}";
+    }
+}
+```
+
+```csharp
+// Program.cs: register the KMS *public* key as the signing credential and disable automatic key management
+var publicKey = new RsaSecurityKey(kmsKey.Key.ToRSA(includePrivateParameters: false)) { KeyId = kmsKey.Properties.Version };
+builder.Services.AddIdentityServer(o => o.KeyManagement.Enabled = false)
+    .AddSigningCredential(new SigningCredentials(publicKey, SecurityAlgorithms.RsaSha256));
+builder.Services.AddSingleton(new CryptographyClient(kmsKey.Id, azureCredential));
+builder.Services.AddTransient<ITokenCreationService, KeyVaultTokenCreationService>();
+```
+
+Caveats: IdentityServer still needs a signing credential (algorithm for `at_hash`/`c_hash`, `id_token_signing_alg_values_supported`, JWKS publishing), so use `AddSigningCredential`, not only `AddValidationKey`. Rotation is your job: publish the new public key ahead of time with `AddValidationKey`, keep the old one until tokens expire. **SAML signing does not use `ITokenCreationService`**; it reads the credential directly and needs a private key, so this approach doesn't cover SAML. Each token costs a KMS network call (latency/rate limits/availability). v7 differences: `IClock` instead of `TimeProvider`, no `CancellationToken` on `CreateJwtAsync`, `GetSigningCredentialsAsync` takes only the algorithms.
+
+## Backing Up Signing Keys
+
+With automatic key management, stored keys are encrypted with ASP.NET Core Data Protection by default, so a key-store backup is only usable together with the Data Protection keys: back up and restore both. The restored key ring is only readable with the same application name (`SetApplicationName`) and access to whatever protects it at rest (certificate / Key Vault). With static keys, back up the certificate and private key with the same protections.
+
+## Responding to a Key Compromise
+
+Rotate immediately; don't wait for the schedule:
+
+1. Add a new signing key and make it active (auto: create new key; static: replace the `AddSigningCredential` credential).
+2. Stop publishing/signing with the compromised key. Unlike routine phased rotation, **don't keep the old key as a validation key**. Auto: *delete* the key from the store (retired keys remain published for `RetentionDuration`), then **restart every instance** (keys are cached for `KeyManagement.KeyCacheDuration`). Static: remove it from `AddSigningCredential` and any `AddValidationKey`, redeploy all instances. Confirm every instance's JWKS no longer lists the `kid`.
+3. Accept that tokens signed with it become invalid; users may need to sign in again.
+4. Revoke refresh tokens/persisted grants issued before removal (all active grants if the exposure window is unknown).
+5. Notify relying parties (clients, APIs that cache JWKS, SAML SPs with static certificates).
+6. Investigate how it was exposed; review key and Data Protection key storage.
 
 ## Encryption of Keys at Rest
 

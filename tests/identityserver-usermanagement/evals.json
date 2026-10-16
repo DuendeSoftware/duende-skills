@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "I want to add Duende User Management to my existing IdentityServer project. I'd like passwordless login via email OTP, using SQLite for storage. Show me the full setup including packages needed and Program.cs changes.",
-      "expected_output": "Complete setup with NuGet packages (Duende.UserManagement.IdentityServer8, Duende.Storage.Sqlite), AddUserManagement() with AddSqliteStore() inside the options lambda, IOtpDispatcher registration, and IDatabaseSchema.CreateIfNotExistsAsync() call.",
+      "expected_output": "Complete setup with NuGet packages (Duende.UserManagement.IdentityServer8, Duende.Storage.Sqlite), AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder, AddUserManagement() with OTP dispatcher, and IStorageInstanceSchema.MigrateAsync() via IStorageInstanceSchemaFactory.",
       "files": [
         "files/begin-state/Program.cs",
         "files/begin-state/IdentityServer.csproj",
@@ -14,47 +14,47 @@
         "Adds Duende.UserManagement.IdentityServer8 NuGet package",
         "Adds Duende.Storage.Sqlite NuGet package (or references it)",
         "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
-        "Calls AddSqliteStore() inside the AddUserManagement options lambda (not at top level)",
-        "Calls IDatabaseSchema.CreateIfNotExistsAsync() to ensure database schema exists"
+        "Selects the SQLite provider with AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder (not inside the AddUserManagement lambda)",
+        "Creates the database schema with IStorageInstanceSchema.MigrateAsync() resolved from IStorageInstanceSchemaFactory.GetStorageInstanceSchema(...)"
       ]
     },
     {
       "id": 2,
       "prompt": "I need to configure an OTP email dispatcher for production using SMTP. Show me how to set it up with Duende User Management.",
-      "expected_output": "Configuration using UseSmtpOtpDispatcher inside AddUserManagement options with SMTP settings (host, port, username, password, from address).",
+      "expected_output": "Configuration using options.Authentication(auth => auth.UseSmtpOtpDispatcher(...)) inside AddUserManagement with SmtpOtpDispatcherOptions (Host, Port, EnableSsl, required FromEmail and FromName).",
       "files": [
         "files/begin-state/Program.cs"
       ],
       "assertions": [
-        "Uses UseSmtpOtpDispatcher() inside the AddUserManagement options lambda",
+        "Uses options.Authentication(auth => auth.UseSmtpOtpDispatcher(...)) inside the AddUserManagement options lambda",
         "Configures SMTP host and port",
-        "Configures from address for outgoing emails",
+        "Sets the required FromEmail and FromName options (not invented Username/Password/FromAddress)",
         "Does NOT use ConsoleOtpDispatcher for production (or warns against it)"
       ]
     },
     {
       "id": 3,
       "prompt": "I'm setting up User Management with PostgreSQL for production. Show me the storage configuration and explain if I need to run database migrations.",
-      "expected_output": "Configuration using AddPostgreSqlStore() inside AddUserManagement, explanation that storage is document-based so no EF migrations are needed, and IDatabaseSchema.CreateIfNotExistsAsync() handles schema creation.",
+      "expected_output": "Configuration using AddStorage(storage => storage.AddPostgreSql()) with an NpgsqlDataSource registered in DI, explanation that storage is document-based so no EF migrations are needed, and IStorageInstanceSchema.MigrateAsync() (ideally as a deployment step in production) to create the schema.",
       "files": [
         "files/begin-state/Program.cs"
       ],
       "assertions": [
-        "Uses AddPostgreSqlStore() with a connection string inside AddUserManagement options",
-        "Adds Duende.Storage.PostgreSQL package (or references it)",
-        "Explains that no EF Core migrations are needed (document-based storage)",
-        "Shows IDatabaseSchema.CreateIfNotExistsAsync() for automatic schema creation"
+        "Registers an NpgsqlDataSource singleton from the connection string and selects PostgreSQL with AddStorage(storage => storage.AddPostgreSql())",
+        "Adds Duende.Storage.PostgreSql package (or references it)",
+        "Explains that no EF Core migrations are needed (document-based storage) but the common storage schema must still be created",
+        "Shows IStorageInstanceSchema.MigrateAsync() resolved via IStorageInstanceSchemaFactory, and notes that in production it should run as a controlled deployment step rather than app startup"
       ]
     },
     {
       "id": 4,
       "prompt": "We have an existing app using ASP.NET Identity for user management. We want to migrate to Duende User Management. How do we import existing users without them losing access?",
-      "expected_output": "Configuration using AddAspNetIdentityMigration with connection string to existing database, explanation that password hashes are preserved so users can still log in, and that migration is idempotent.",
+      "expected_output": "A hosted service reads the source ASP.NET Identity database (e.g. IdentityDbContext), maps users to UserImportRecord (SubjectId, ProfileAttributes, AuthenticatorImport.Password = PasswordImport(HashedPasswordData)) and calls IUserImporter.ImportAsync in batches. A custom IPasswordHashAlgorithm registered via auth.AddPasswordHashAlgorithm<T>() verifies the preserved hash, and passwords are re-hashed on first login. Re-runs skip existing users unless an IUserImportConflictResolver is registered.",
       "files": [],
       "assertions": [
-        "Uses AddAspNetIdentityMigration() with a connection string pointing to the existing ASP.NET Identity database",
-        "States that existing password hashes are preserved (users can log in with current passwords)",
-        "Mentions that migration is idempotent (subsequent runs skip already-imported users)",
+        "Reads the source ASP.NET Identity DB and calls IUserImporter.ImportAsync with UserImportRecord(s) (does not use a non-existent AddAspNetIdentityMigration option)",
+        "Stores existing hashes via PasswordImport(HashedPasswordData) and registers a custom IPasswordHashAlgorithm (AddPasswordHashAlgorithm<T>) to verify them, with re-hash on first successful login",
+        "Mentions re-runs skip existing users by default, and an IUserImportConflictResolver can overwrite",
         "Mentions that after migration users can enroll in passwordless methods"
       ]
     },
@@ -86,16 +86,46 @@
     },
     {
       "id": 7,
-      "prompt": "I'm getting errors when setting up User Management. My storage configuration is at the top level of Program.cs, outside of AddUserManagement. What's wrong?",
-      "expected_output": "Explanation that storage configuration (AddSqliteStore, AddPostgreSqlStore, etc.) must be called inside the AddUserManagement options lambda, not on the top-level service collection or IdentityServer builder.",
+      "prompt": "I'm getting errors when setting up User Management. I put AddSqliteStore(...) inside the AddUserManagement lambda, and the database is never created. What's wrong?",
+      "expected_output": "Explanation that storage is selected with AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder (AddUserManagement only maps its data to a storage instance) and the schema must be created with IStorageInstanceSchema.MigrateAsync().",
       "files": [
         "files/begin-state/Program.cs"
       ],
       "assertions": [
-        "Identifies that storage configuration must be inside the AddUserManagement() options lambda",
-        "Shows the correct pattern: AddUserManagement(options => { options.AddSqliteStore(...); })",
-        "Explains that configuring storage outside the lambda is the cause of the error",
+        "Identifies that the storage provider is selected with AddStorage(...) on the IdentityServer builder, not inside the AddUserManagement lambda",
+        "Shows the correct pattern: .AddStorage(storage => storage.AddSqlite(options => options.ConnectionString = ...)).AddUserManagement(...)",
+        "Mentions the schema must be created/migrated with IStorageInstanceSchema.MigrateAsync()",
         "Does NOT suggest using EF Core migrations as a fix"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "My IdentityServer already uses Duende Storage (AddStorage + AddConfigurationStorage + AddOperationalStorage). I'm adding User Management but want its data in a separate PostgreSQL database to isolate write load. How do I wire this up and migrate it?",
+      "expected_output": "Create a StorageInstanceId, register a second storage instance with AddStorage(instanceId, ...) and map User Management with AddUserManagement(instanceId, ...); migrate each instance via IStorageInstanceSchemaFactory.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Creates a StorageInstanceId (e.g. StorageInstanceId.Create(\"user-management\"))",
+        "Registers the second database with AddStorage(storageInstanceId, storage => storage.AddPostgreSql(...))",
+        "Maps User Management to it with AddUserManagement(storageInstanceId, ...)",
+        "Migrates the named instance explicitly using IStorageInstanceSchemaFactory.GetStorageInstanceSchema(storageInstanceId, ct).MigrateAsync",
+        "Does NOT call AddStorage twice for the default instance (selecting a second provider for the same instance throws InvalidOperationException)"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I want to add a 'department' attribute to the built-in Duende User Management user profile and keep email/name attributes. Then later I want admins to edit the schema at runtime. Show me both approaches.",
+      "expected_output": "BuiltInSchemas.UserProfile.Extend(department) registered with AddInMemoryDataExtensionSchemas; for runtime editing, AddDynamicSchemas() with ISchemaAdmin get-modify-UpdateAsync using version; note that in-memory schemas are not used with AddDynamicSchemas.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Defines an AttributeDefinition with AttributeCode.Create(\"department\") and a ScalarAttributeType string",
+        "Uses BuiltInSchemas.UserProfile.Extend(...) and registers the result with AddInMemoryDataExtensionSchemas([...])",
+        "Notes Extend throws InvalidOperationException if the attribute code already exists (e.g. email, name)",
+        "Shows AddDynamicSchemas() and ISchemaAdmin get-modify-UpdateAsync using the returned Version for optimistic concurrency",
+        "Warns that with AddDynamicSchemas() the in-memory schemas (including the built-in profile) are not used or seeded, so the schema must be created in the database"
       ]
     }
   ]

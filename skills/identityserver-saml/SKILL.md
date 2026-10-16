@@ -236,6 +236,7 @@ SAML signing **requires an X.509 certificate**. OIDC and SAML share the same sig
 
 - **Automatic Key Management (RSA)**: auto-generated RSA keys are auto-wrapped into a self-signed X.509 container. You do **not** need `UseX509Certificate` just to enable SAML.
 - **Manual / raw RSA keys — including `AddDeveloperSigningCredential()`**: **cannot** be auto-wrapped. Register an X.509 certificate **with a private key** instead.
+- **Cloud KMS / remote signing keys** registered for OIDC through a custom `ITokenCreationService` do **not** cover SAML: SAML signing reads the signing credential directly and requires a private key. Use a custom `ISamlSigningService` for KMS-backed SAML signing.
 - The default SAML signing service is **RSA-only**. `UseX509Certificate` is **not** supported for EC keys — implement a custom `ISamlSigningService` for EC (or HSM/Key Vault) scenarios.
 
 ## Service Provider Stores
@@ -260,6 +261,10 @@ SAML signing **requires an X.509 certificate**. OIDC and SAML share the same sig
 ```
 
 Run EF migrations: `dotnet ef migrations add Update_DuendeIdentityServer_v8_0`
+
+### Duende Storage (preview)
+
+`AddStorage(...)` + `AddConfigurationStorage()` registers `ISamlServiceProviderStore` and `AddOperationalStorage()` registers `ISamlSigninStateStore`/`ISamlLogoutSessionStore`. `ISamlServiceProviderAdmin` creates/updates SPs (`SamlServiceProviderConfiguration` with `EntityId`, `AssertionConsumerServiceUrls` as `SamlIndexedEndpointConfiguration`). Data-extension properties on SPs are admin-only metadata: they are not projected onto the runtime `SamlServiceProvider`. See `identityserver-duende-storage`.
 
 ### Custom Store
 
@@ -340,7 +345,7 @@ Call `CreateResponseAsync` from your custom endpoint to generate and return the 
 | Interface | Purpose |
 |-----------|---------|
 | `ISamlNameIdGenerator` | Custom NameID value derivation (e.g., from employee_id claim) |
-| `ISamlSigningService` | HSM/Key Vault signing certificate integration |
+| `ISamlSigningService` | HSM/Key Vault signing certificate integration (needed for KMS: `ITokenCreationService` overrides don't affect SAML) |
 | `ISaml2MetadataResponseGenerator` | Custom metadata extensions (org info, federation) |
 | `ISaml2IssuerNameService` | Multi-tenant: dynamic entity ID per tenant |
 | `ISaml2SsoInteractionResponseGenerator` | Custom step-up auth logic during SSO |

@@ -134,6 +134,21 @@
         "States that AddDeveloperSigningCredential() (raw RSA) cannot be auto-wrapped and an X.509 cert with a private key is required instead",
         "Notes that UseX509Certificate is not required just to enable SAML and is not supported for EC keys (custom ISamlSigningService needed)"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "I'm using Duende Storage and want to attach an 'owner_team' extended property to a SAML service provider and use it when building the SAML assertion. Will that work?",
+      "expected_output": "SAML SP extensions are admin-only; not projected to runtime model.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "States SAML service provider extended properties are validated/stored/returned through ISamlServiceProviderAdmin",
+        "States they are not projected onto the runtime SamlServiceProvider returned by ISamlServiceProviderStore, so they can't be used as input to SAML protocol processing",
+        "Suggests using another mechanism (e.g. your own store/lookup keyed by EntityId) for protocol-time data"
+      ]
     }
   ]
 }

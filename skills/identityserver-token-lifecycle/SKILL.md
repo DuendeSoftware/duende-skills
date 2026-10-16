@@ -92,6 +92,8 @@ Reference tokens are **pointers** to token data stored in the persisted grant st
 client.AccessTokenType = AccessTokenType.Reference;
 ```
 
+**Trade-off — immediate revocation vs network dependency:** because claims live in the persisted grant store, an API cannot validate a reference token on its own; it must call introspection (or hit its introspection cache). Deleting the record revokes immediately (JWTs stay valid until `exp`), but the API needs a live connection to IdentityServer, which is a poor fit for offline/air-gapped/intermittently connected APIs. Reference tokens are not tied to the user session by default: set `CoordinateLifetimeWithUserSession` (client) or `Authentication.CoordinateClientLifetimesWithUserSession` to revoke them at logout / session expiry (see `identityserver-sessions-providers`).
+
 The API consuming reference tokens must have a secret configured on the `ApiResource`:
 
 ```csharp

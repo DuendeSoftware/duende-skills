@@ -147,6 +147,55 @@
         "The admin/support action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants",
         "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Our login page needs tenant branding. Clients send acr_values=tenant:acme. How do I read it, store it in the session, and force re-login if the user switches tenant?",
+      "expected_output": "AuthorizationRequest.Tenant, IdentityServerUser.Tenant, ValidateTenantOnAuthorization; hint untrusted; not Spaces.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Reads the tenant from AuthorizationRequest.Tenant returned by IIdentityServerInteractionService.GetAuthorizationContextAsync",
+        "Issues the tenant claim by setting IdentityServerUser.Tenant when signing in",
+        "Sets IdentityServerOptions.ValidateTenantOnAuthorization = true so a mismatching or missing session tenant shows the login page again",
+        "Warns the tenant value is an untrusted client-supplied hint and the user's membership must be verified server-side",
+        "Notes the tenant claim is only in the session cookie and must be emitted by the profile service to appear in tokens, and that this is not the same as Spaces"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "A client using prompt=none never gets our IdentityServer error page; it just gets login_required in its callback. Which errors go to the client vs the error page, and can I change it?",
+      "expected_output": "Safe codes go to redirect_uri; others show error page; not configurable.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Lists login_required, consent_required, interaction_required, account_selection_required, access_denied, temporarily_unavailable and unmet_authentication_requirements as errors returned to the client redirect_uri",
+        "States errors like invalid_request, unauthorized_client, invalid_scope, invalid_request_object and server_error (and custom codes) show the error page",
+        "States the set of safe codes cannot be configured",
+        "Explains untrusted requests are not redirected to avoid open redirects"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Our SPA knows the user should sign in with Google. How can the client skip the login page and what must the login page do?",
+      "expected_output": "acr_values=idp:Google via OnRedirectToIdentityProvider; login page reads context.IdP and challenges after scheme check.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Sets ProtocolMessage.AcrValues = \"idp:Google\" in OnRedirectToIdentityProvider",
+        "Reads AuthorizationRequest.IdP on the login page and challenges that scheme",
+        "Checks the scheme exists via IAuthenticationSchemeProvider.GetSchemeAsync (which also resolves dynamic providers) because IdentityServer does not redirect or validate by itself",
+        "Notes idp: can be combined with tenant: in acr_values, IdentityProviderRestrictions drop a disallowed idp, and idp:local is reserved"
+      ]
     }
   ]
 }

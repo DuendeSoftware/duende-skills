@@ -22,13 +22,15 @@
     "token-management",
     "duende",
     "dotnet",
-    "security"
+    "security",
+    "multi-tenancy",
+    "user-management"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Duende Skills",
     "shortDescription": "IdentityServer & OAuth skills",
-    "longDescription": "Specialized skills and agents covering Duende IdentityServer configuration, OAuth 2.0 / OpenID Connect protocols, ASP.NET Core authentication and authorization, BFF patterns, token management, SAML, key management, deployment, and security hardening.",
+    "longDescription": "Specialized skills and agents covering Duende IdentityServer configuration, OAuth 2.0 / OpenID Connect protocols, ASP.NET Core authentication and authorization, BFF patterns, token management, SAML, key management, Duende Storage, Spaces (multi-tenancy), User Management, deployment, and security hardening.",
     "developerName": "Duende Software",
     "category": "Developer Tools",
     "capabilities": ["Read"],

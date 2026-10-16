@@ -113,6 +113,20 @@
         "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production",
         "Does NOT claim a new license purchase is required to run v8 core on an existing v7 key"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Our IProfileService uses context.Client.ClientId in both GetProfileDataAsync and IsActiveAsync and compiles on v7. What do I change for v8 and what new runtime case should I handle?",
+      "expected_output": "Application (IConnectedApplication?) on both contexts; SAML callers.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj"
+      ],
+      "assertions": [
+        "Replaces context.Client with context.Application on both ProfileDataRequestContext and IsActiveContext",
+        "Uses context.Application?.Identifier for the client ID / entity ID and pattern-matches on Client or SamlServiceProvider for protocol-specific members",
+        "Warns the profile service can now be invoked for SAML requests, identifiable in IsActiveAsync via context.Caller == IdentityServerConstants.ProfileIsActiveCallers.SamlSsoEndpoint"
+      ]
     }
   ]
 }

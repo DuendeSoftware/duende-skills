@@ -446,6 +446,15 @@ var errorContext = await _interaction.GetErrorContextAsync(errorId);
 
 Errors are commonly due to misconfiguration. The error page should inform the user something went wrong without exposing sensitive details.
 
+### Errors Returned to the Client vs. Error Page
+
+Not every authorize-endpoint error reaches your error page. A fixed set of "safe" codes is sent to the client's `redirect_uri` (honoring the response mode) with `error`, `error_description` and `state`:
+`login_required`, `consent_required`, `interaction_required`, `account_selection_required`, `access_denied`, `temporarily_unavailable`, `unmet_authentication_requirements` (RFC 9470 step-up).
+
+Everything else (`invalid_request`, `unauthorized_client`, `unsupported_response_type`, `invalid_scope`, `invalid_target`, `invalid_request_uri`, `invalid_request_object`, `request_uri_not_supported`, `server_error`, and any custom code) shows the error page, because the request isn't trustworthy enough to redirect to (prevents open redirects). The set of safe codes is not configurable. Clients using `prompt=none` must handle `login_required` in their callback.
+
+A custom `AuthorizeInteractionResponseGenerator` can return an error by setting `InteractionResponse.Error` (and optionally `ErrorDescription`); `IsError` is `Error != null`. It's routed by the same rule, so a custom string shows the error page, while e.g. `unmet_authentication_requirements` goes to the client.
+
 ## Federation Gateway and Home Realm Discovery
 
 ### What Is a Federation Gateway?
@@ -485,6 +494,28 @@ GET /connect/authorize?
 
 Your login page checks `context.IdP` from `GetAuthorizationContextAsync` and can skip the login UI entirely, redirecting straight to the external provider.
 
+Details:
+- `acr_values` is space-separated, so hints combine: `acr_values=idp:Google tenant:acme` → `AuthorizationRequest.IdP` / `.Tenant`. Well-known values are removed from `AcrValues`.
+- IdentityServer does **not** redirect or verify the scheme exists; the login page must challenge `context.IdP` after checking `IAuthenticationSchemeProvider.GetSchemeAsync(context.IdP)` (this also resolves dynamic providers). The quickstart UI does this.
+- If the client has `IdentityProviderRestrictions` and the idp isn't allowed, it's dropped (`context.IdP` null, no error).
+- If the session came from a different idp, the login page is shown again.
+- `idp:local` (`IdentityServerConstants.LocalIdentityProvider`) is reserved: show only the local login form.
+- From the ASP.NET Core OIDC handler / BFF, set it in `OnRedirectToIdentityProvider`: `ctx.ProtocolMessage.AcrValues = "idp:Google";`
+
+### Tenant Hints (`acr_values=tenant:...`)
+
+The client may pass `tenant:acme` in `acr_values`. It's an **untrusted hint** exposed as `AuthorizationRequest.Tenant` (also on CIBA `BackchannelUserLoginRequest.Tenant`, and SAML `AuthnContextClassRef`; not processed at the token endpoint). Use it for branding, scoping user lookup, or HRD; always verify the signed-in user belongs to the tenant.
+
+```csharp
+var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+var tenant = context?.Tenant;   // null when not requested
+
+var isuser = new IdentityServerUser(user.SubjectId) { DisplayName = user.Username, Tenant = tenant };
+await HttpContext.SignInAsync(isuser);   // issues the `tenant` session claim (cookie only; emit via profile service for tokens)
+```
+
+By default a signed-in user is reused even if a different tenant is requested. Set `options.ValidateTenantOnAuthorization = true` to re-show the login page when the requested tenant differs from the session's `tenant` claim (or the session has none). The tenant hint is **not** Spaces: Spaces are selected by the server from origin/path, isolate data and issuers, and are never selected via `acr_values` (see `identityserver-spaces`).
+
 ## Common Anti-Patterns
 
 - ❌ Parsing `returnUrl` manually to extract authorization parameters
@@ -501,6 +532,9 @@ Your login page checks `context.IdP` from `GetAuthorizationContextAsync` and can
 
 - ❌ Issuing the authentication session without a `sub` claim
 - ✅ The `sub` claim is required — it uniquely identifies the user and must never change
+
+- ❌ Trusting the `tenant:` acr value as proof of tenant membership
+- ✅ Treat it as a hint and verify membership server-side (or use Spaces for real isolation)
 
 - ❌ Hardcoding external provider list without checking both static schemes and dynamic providers
 - ✅ Query `IAuthenticationSchemeProvider` for static schemes and `IIdentityProviderStore` for dynamic providers

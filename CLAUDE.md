@@ -74,10 +74,12 @@ color: purple  # optional
 1. Create a folder: `skills/<skill-name>/SKILL.md`
    - Use appropriate prefix for domain-specific skills (see naming convention above)
 2. Add evals for the new skill (see [Adding Evals](#adding-evals) below)
-3. Add the skill path to `.claude-plugin/plugin.json` in the `skills` array (Codex picks up skills from `./skills/` automatically)
+3. Update both plugin manifests:
+   - `.claude-plugin/plugin.json`: add the skill path to the `skills` array
+   - `.codex-plugin/plugin.json`: skills are discovered from `./skills/`, but review and update `interface.longDescription`, `keywords`, and `defaultPrompt` so the Codex listing reflects the new coverage
 4. Run `./scripts/validate-marketplace.sh` to verify
 5. Run `./scripts/generate-skill-index-snippets.sh --update-readme` to regenerate the compressed index
-6. Commit all changes together (SKILL.md, evals, plugin.json, and README.md)
+6. Commit all changes together (SKILL.md, evals, both plugin.json files, and README.md)
 
 ## Sub-Documents
 

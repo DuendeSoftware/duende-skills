@@ -370,15 +370,32 @@ builder.Services.AddAuthentication("token")
     });
 
 // Extend with DPoP processing and validation
-builder.Services.ConfigureDPoPTokensForScheme("token");
+builder.Services.ConfigureDPoPTokensForScheme("token", options =>
+{
+    options.AllowBearerTokens = false;                                   // default
+    options.ProofTokenExpirationMode = DPoPProofExpirationMode.IssuedAt; // default
+});
+
+// Replay detection (enabled by default) needs a KEYED HybridCache
+builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
 ```
 
-DPoP validation requires a distributed cache for replay detection:
+DPoP replay detection is **on by default** and uses a **keyed `HybridCache`** (key `ServiceProviderKeys.ProofTokenReplayHybridCache`), not `IDistributedCache` directly. If it's enabled and the keyed cache isn't registered, an `InvalidOperationException` is thrown when a proof is validated. `HybridCache` is in-memory by default and uses a registered `IDistributedCache` (e.g. Redis) as second level: register one when the API runs on multiple instances so replays are detected across instances. Disable with `EnableReplayDetection = false` only if you don't need it.
 
-```csharp
-// Use any IDistributedCache implementation (Redis, CosmosDB, SQL Server, etc.)
-builder.Services.AddDistributedMemoryCache(); // in-memory for development only
-```
+#### `DPoPOptions` (per auth scheme: `Configure<DPoPOptions>("token", ...)`)
+
+| Option | Default | Notes |
+|--------|---------|-------|
+| `AllowBearerTokens` | `false` | `true` accepts Bearer and DPoP (migration period) |
+| `ProofTokenLifetime` | 5 s | Measured from `iat` and/or nonce |
+| `ProofTokenExpirationMode` | `IssuedAt` | `IssuedAt` (client clock, no extra round trip), `Nonce` (server-issued nonce; `401 use_dpop_nonce` + `DPoP-Nonce` header, client retries), `Both` |
+| `ProofTokenIssuedAtClockSkew` | 25 s | Client-supplied `iat` |
+| `ProofTokenNonceClockSkew` | 5 s | Skew between API instances |
+| `ProofTokenMaxLength` | 4000 | Rejects larger proofs |
+| `ProofTokenValidationParameters` | `dpop+jwt`; RS/PS/ES 256/384/512; no iss/aud/lifetime validation | Restrict `ValidAlgorithms` for FAPI |
+| `EnableReplayDetection` | `true` | `jti` cached for lifetime + skew |
+
+Nonces are Data Protection based: share Data Protection keys across API instances or nonces from one instance are rejected by another. The package name is `Duende.AspNetCore.Authentication.JwtBearer` (capital N).
 
 ### DPoP Validation Steps (handled by the library)
 
@@ -514,21 +531,25 @@ The same key can be shared between client authentication (private_key_jwt) and s
 
 If using `request_uri`, IdentityServer fetches the JWT from the specified URL:
 
+Request URI processing is **disabled by default** (`options.Endpoints.EnableJwtRequestUri = true` to enable) because anyone who knows a client ID can make IdentityServer fetch a URL of their choice before the user signs in: **Server-Side Request Forgery (SSRF)** (RFC 9101 §10.4). Error responses reveal whether hosts/ports exist on your network. **Prefer PAR**, where IdentityServer never fetches a caller-supplied URL.
+
+If you enable it:
+
 ```csharp
 // Program.cs
+using idunno.Security;
+
 idsvrBuilder.AddJwtRequestUriHttpClient(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(30);
+    client.Timeout = TimeSpan.FromSeconds(5);                 // default 10s
+    client.MaxResponseContentBufferSize = 64 * 1024;          // request objects are small
 })
-    .AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(new[]
-    {
-        TimeSpan.FromSeconds(1),
-        TimeSpan.FromSeconds(2),
-        TimeSpan.FromSeconds(3)
-    }));
+    .ConfigurePrimaryHttpMessageHandler(() => SsrfSocketsHttpHandlerFactory.Create()); // idunno.Security.Ssrf
 ```
 
-Request URI processing is disabled by default. Enable it on the `Endpoints` options.
+- Use a handler that validates the IP **when the connection opens** (e.g. `idunno.Security.Ssrf`: blocks loopback/private/link-local, https only, no redirects, no proxy). A `DelegatingHandler` that only checks the URL is **not** enough (`localhost` host names, redirects, DNS rebinding).
+- **Do not add retries** to this HTTP client (the caller controls the URL) and exclude it from global retry policies such as Aspire service defaults.
+- Keep `https`-only (RFC 9101 §5.2); restrict outgoing traffic from IdentityServer hosts; protect cloud metadata endpoints (e.g. IMDSv2 on AWS).
 
 ### Accessing Request Object Data
 
@@ -680,7 +701,7 @@ Start with private key JWTs. mTLS is relatively challenging to maintain in produ
 
 1. **Using `ClientCredentialStyle.AuthorizationHeader` with mTLS** - The default `AuthorizationHeader` style does not work in mTLS scenarios. Use `ClientCredentialStyle.PostBody` instead.
 
-2. **Missing distributed cache for DPoP** - DPoP replay detection requires `IDistributedCache`. Without it, replay attacks are possible. Use Redis, SQL Server, or another durable cache in production.
+2. **Missing keyed HybridCache for DPoP** - DPoP replay detection (on by default) requires `AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache)`; add a distributed cache for multi-instance APIs. Without it, replay attacks are possible. Use Redis, SQL Server, or another durable cache in production.
 
 3. **PAR lifetime too short** - The default 10 minutes balances security (FAPI 2.0 recommendation) with usability. If users take longer to authenticate (MFA, consent), increase the lifetime.
 

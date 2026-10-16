@@ -99,6 +99,14 @@ Audience = "https://identity.example.com"
 
 > CVE-2025-27370 and CVE-2025-27371 were caused by this exact mistake. Authorization servers that accept both values allow token endpoint confusion attacks.
 
+### Client Assertions With OpenID Connect
+
+With `AddOpenIdConnectAccessTokenManagement`, the same `IClientAssertionService` authenticates refresh/revoke requests (client name derived from the OIDC scheme name). The library also hooks the OIDC handler events and automatically adds the client assertion to the **authorization code exchange** and, on .NET 9+, the **pushed authorization request** (`OnPushAuthorization`). `ClientAssertionFactory` (`Func<Task<ClientAssertion>>`) creates a fresh assertion (unique `jti`) per attempt, so retries (PAR, token requests) don't reuse one.
+
+Signed authorization requests (JAR, RFC 9101) are **not** created by the library; sign the `request` object in your own event handler (see `dpop.md`, "Combining DPoP with custom OpenID Connect events").
+
+> ⚠️ The library relies on its own OIDC event handlers: always **wrap** existing handlers instead of replacing them, and never set `OpenIdConnectOptions.EventsType` (it replaces all handlers at runtime).
+
 ### Related Resources
 
 - [Advanced: Client Assertions](https://docs.duendesoftware.com/accesstokenmanagement/advanced/client-assertions/)

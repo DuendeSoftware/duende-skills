@@ -102,6 +102,21 @@
         "Mentions scope claim format inconsistency — space-delimited vs array — as a cause of silent authorization failures",
         "Mentions checking the middleware pipeline ordering (UseAuthentication before UseAuthorization)"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "My API uses ConfigureDPoPTokensForScheme and starts throwing InvalidOperationException when the first DPoP request arrives. I registered AddDistributedMemoryCache. What's missing?",
+      "expected_output": "Keyed HybridCache required.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/WebApi.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Identifies the missing keyed HybridCache registration: AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache)",
+        "Explains replay detection is enabled by default and needs this cache, and can be disabled with EnableReplayDetection = false",
+        "Notes registering a distributed cache (e.g. Redis) as second-level cache for multi-instance APIs"
+      ]
     }
   ]
 }

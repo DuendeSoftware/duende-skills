@@ -146,6 +146,40 @@
         "Uses AllowedCertificateTypes = CertificateTypes.Chained for production PKI certificates",
         "Explains clients read the mTLS token endpoint from disco.MtlsEndpointAliases (mtls_endpoint_aliases in discovery) and that the proxy must strip or overwrite the inbound certificate header"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Configure my API to validate DPoP-bound tokens with nonces, replay detection and only ES256 proofs, and it runs on 3 instances behind a load balancer.",
+      "expected_output": "ConfigureDPoPTokensForScheme with DPoPOptions, keyed HybridCache for replay detection with distributed cache, share Data Protection for nonces.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Calls ConfigureDPoPTokensForScheme(\"token\", options => ...) on IServiceCollection with ProofTokenExpirationMode = DPoPProofExpirationMode.Nonce (or Both)",
+        "Restricts ProofTokenValidationParameters.ValidAlgorithms to ES256 (SecurityAlgorithms.EcdsaSha256)",
+        "Registers AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache) for replay detection and a distributed cache (e.g. Redis) for multi-instance so replays are detected across instances",
+        "Notes nonces are protected with ASP.NET Core Data Protection so keys must be shared across instances",
+        "Mentions use_dpop_nonce 401 with a DPoP-Nonce header and that the client retries"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "We want to enable JAR request_uri support so partners can pass request objects by reference. What are the risks and how do we configure it safely?",
+      "expected_output": "SSRF; disabled by default; prefer PAR; idunno.Security.Ssrf handler; no retries; timeout and size limit.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Explains request_uri is disabled by default and enabled with Endpoints.EnableJwtRequestUri = true",
+        "Identifies SSRF as the risk and recommends PAR as the safer alternative",
+        "Configures AddJwtRequestUriHttpClient with a short timeout and MaxResponseContentBufferSize and a primary handler that validates the IP at connection time (e.g. idunno.Security.Ssrf SsrfSocketsHttpHandlerFactory)",
+        "Warns that a DelegatingHandler that only validates the URL is insufficient (localhost host names, redirects, DNS rebinding)",
+        "Advises not adding retries to that HTTP client and restricting outbound traffic/protecting cloud metadata endpoints"
+      ]
     }
   ]
 }

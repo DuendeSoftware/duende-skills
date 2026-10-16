@@ -90,6 +90,21 @@ services.AddClientCredentialsTokenManagement()
     });
 ```
 
+### Combining DPoP With Custom OpenID Connect Events
+
+`AddOpenIdConnectAccessTokenManagement` registers an `IConfigureNamedOptions<OpenIdConnectOptions>` that wraps these events (your handler runs first, then the library's):
+
+| Event | Purpose |
+|-------|---------|
+| `OnRedirectToIdentityProvider` | Adds `dpop_jkt` and stores the DPoP key in the authentication properties |
+| `OnAuthorizationCodeReceived` | Makes the DPoP key available for the code exchange; adds the client assertion if configured |
+| `OnTokenValidated` | Reserved for DPoP key handling |
+| `OnPushAuthorization` | Adds the client assertion to the PAR request (.NET 9+) |
+
+- **Wrap, don't replace**: assigning `options.Events` handlers (or a new `OpenIdConnectEvents`) after the library configured them, e.g. in an `IPostConfigureOptions<OpenIdConnectOptions>`, discards the DPoP handlers unless you capture and invoke the existing ones.
+- **Don't use `OpenIdConnectOptions.EventsType`**: ASP.NET Core then uses that type instead of `Events`, silently removing all library handlers. Sign-in still succeeds, but `dpop_jkt` isn't sent and the code isn't exchanged with the DPoP key.
+- **JAR + DPoP + PAR**: without PAR, wrap `OnRedirectToIdentityProvider` (call the library's handler first so `dpop_jkt` is added, then sign all parameters and keep `client_id`/`redirect_uri`); only sign there when PAR is not actually used (with `PushedAuthorizationBehavior.UseIfAvailable` the handler falls back to a redirect if discovery has no PAR endpoint). With PAR (.NET 9+), wrap `OnPushAuthorization`: sign all parameters (including `dpop_jkt`) first, then call the library's handler to add the client assertion.
+
 ### Related Resources
 
 - [Advanced: DPoP](https://docs.duendesoftware.com/accesstokenmanagement/advanced/dpop/)

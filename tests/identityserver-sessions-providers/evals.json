@@ -182,6 +182,23 @@
         "The web.app client sets UserSsoLifetime to an 8-hour value (28800 seconds) to force interactive re-authentication",
         "The client sets RefreshTokenExpiration = TokenExpiration.Absolute together with AbsoluteRefreshTokenLifetime to cap refresh-driven session extension"
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "What exactly is cleaned up when a user logs out of IdentityServer, and what happens to refresh tokens, reference tokens and clients when a server-side session just expires?",
+      "expected_output": "Cookie + server-side session; others kept unless coordinated; expiry notifications only to coordinated clients unless ExpiredSessionsTriggerBackchannelLogout.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "States SignOutAsync removes the IdentityServer cookie and the server-side session record but not the external IdP session, client sessions, refresh/reference tokens, or consents by default",
+        "States JWT access tokens are never revoked and expire on their own",
+        "Explains CoordinateLifetimeWithUserSession / Authentication.CoordinateClientLifetimesWithUserSession revokes refresh and reference tokens (client value wins; no server-side sessions required)",
+        "States on server-side session expiry, coordinated-lifetime clients always have tokens revoked and get back-channel logout, and other clients only if ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout is true (default false)",
+        "Mentions ISessionManagementService.RemoveSessionsAsync for admin-initiated termination"
+      ]
     }
   ]
 }
