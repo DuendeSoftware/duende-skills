@@ -1,0 +1,24 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that with AddDynamicSchemas(), ISchemaStore/ISchemaAdmin resolve to the storage-backed implementation so in-memory schemas registered by AddSamlDynamicProvider() are not used",
+      "pass": true,
+      "rationale": "Explains with AddDynamicSchemas() the DB is the only schema source and AddSamlDynamicProvider()'s in-memory idp:saml schema is not used."
+    },
+    {
+      "assertion": "Shows creating the schema in the database with ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ...) and checking IsSuccess",
+      "pass": true,
+      "rationale": "Shows schemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ct) and checks result.IsSuccess."
+    },
+    {
+      "assertion": "Mentions SchemaId.SamlIdentityProvider (\"idp:saml\")",
+      "pass": true,
+      "rationale": "States SchemaId.SamlIdentityProvider is \"idp:saml\"."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

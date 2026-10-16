@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The response identifies the root cause as the API starting before IdentityServer is ready",
+      "pass": true,
+      "rationale": "Says services start in parallel and the API fetches discovery before IdentityServer is up."
+    },
+    {
+      "assertion": "The response recommends using .WaitFor(identityServer) on the API project in the AppHost",
+      "pass": true,
+      "rationale": "Recommends .WaitFor(identityServer) on weather-api."
+    },
+    {
+      "assertion": "The response recommends using .WithReference(identityServer) on the API project to make the endpoint URL available",
+      "pass": true,
+      "rationale": "Recommends .WithReference(identityServer) on the API and explains it supplies the URL."
+    },
+    {
+      "assertion": "The response mentions that IdentityServer needs health checks (e.g., MapHealthChecks or /health endpoint) for WaitFor to work",
+      "pass": true,
+      "rationale": "Says WaitFor depends on health checks and shows AddHealthChecks and MapHealthChecks(\"/health\")."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

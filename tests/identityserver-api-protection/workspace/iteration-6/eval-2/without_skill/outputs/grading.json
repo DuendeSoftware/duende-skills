@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddOAuth2Introspection with Authority set to 'https://auth.mycompany.com'",
+      "pass": true,
+      "rationale": "AddOAuth2Introspection sets Authority = \"https://auth.mycompany.com\"."
+    },
+    {
+      "assertion": "Sets ClientId to 'invoicing' and ClientSecret to 'invoicing_secret'",
+      "pass": true,
+      "rationale": "ClientId = \"invoicing\" and ClientSecret = \"invoicing_secret\" are set."
+    },
+    {
+      "assertion": "Mentions or adds the Duende.AspNetCore.Authentication.OAuth2Introspection or Duende.IdentityServer.AccessTokenValidation package",
+      "pass": false,
+      "rationale": "Uses IdentityModel.AspNetCore.OAuth2Introspection, not the Duende.AspNetCore.Authentication.OAuth2Introspection or Duende.IdentityServer.AccessTokenValidation packages."
+    },
+    {
+      "assertion": "Warns that the ApiResource in IdentityServer must have ApiSecrets configured for introspection to work",
+      "pass": true,
+      "rationale": "Notes the API resource must have an ApiSecret in IdentityServer for the API to authenticate to the introspection endpoint."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

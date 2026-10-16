@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs does not call AddDeveloperSigningCredential()",
+      "pass": true,
+      "rationale": "No AddDeveloperSigningCredential call (only a removal comment)."
+    },
+    {
+      "assertion": "Program.cs configures KeyManagement.SigningAlgorithms with EcdsaSha256 (ES256) before RsaSha256 (RS256)",
+      "pass": true,
+      "rationale": "EcdsaSha256 then RsaSha256 in SigningAlgorithms."
+    },
+    {
+      "assertion": "Program.cs sets KeyManagement.RotationInterval to 90 days and PropagationTime to 14 days",
+      "pass": true,
+      "rationale": "RotationInterval 90 days, PropagationTime 14 days."
+    },
+    {
+      "assertion": "Program.cs configures DataProtectKeys = true for key management",
+      "pass": false,
+      "rationale": "Never sets KeyManagement.DataProtectKeys = true; only prose says keys use Data Protection."
+    },
+    {
+      "assertion": "Program.cs configures AddDataProtection() with PersistKeysToFileSystem and SetApplicationName",
+      "pass": true,
+      "rationale": "AddDataProtection with SetApplicationName and PersistKeysToFileSystem."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

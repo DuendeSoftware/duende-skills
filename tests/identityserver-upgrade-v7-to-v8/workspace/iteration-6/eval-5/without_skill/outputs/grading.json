@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that IAuthorizationParametersMessageStore is removed in v8",
+      "pass": false,
+      "rationale": "Says 'I'm not sure what v8 introduces' and never clearly states the interface is removed."
+    },
+    {
+      "assertion": "Identifies PAR (Pushed Authorization Requests) as the replacement",
+      "pass": true,
+      "rationale": "Identifies PAR as the standards-based replacement ('as far as I know')."
+    },
+    {
+      "assertion": "Mentions configuring clients to use require_pushed_authorization_requests or the PAR endpoint",
+      "pass": true,
+      "rationale": "Mentions enabling PAR via options.Endpoints.EnablePushedAuthorizationEndpoint and having clients use it."
+    },
+    {
+      "assertion": "Does NOT suggest reimplementing IAuthorizationParametersMessageStore",
+      "pass": true,
+      "rationale": "Does not suggest reimplementing the interface; says remove usage or move to replacement."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

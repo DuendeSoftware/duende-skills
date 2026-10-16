@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "Says Data Protection keys differ on each node, causing cookie decryption failure."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Recommends PersistKeysToDbContext / Redis / Azure Blob."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "Shows AddEntityFrameworkServerSideSessions and notes in-memory default."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "AddDataProtection().PersistKeysToDbContext shown."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddServerSideSessions() on the IdentityServer builder chain",
+      "pass": true,
+      "rationale": "AddServerSideSessions() is chained on the AddIdentityServer builder."
+    },
+    {
+      "assertion": "Program.cs configures AddOperationalStore with UseSqlServer using the connection string from configuration",
+      "pass": true,
+      "rationale": "AddOperationalStore with b.UseSqlServer(connectionString) from GetConnectionString."
+    },
+    {
+      "assertion": "Program.cs sets ServerSideSessions.UserDisplayNameClaimType to 'name'",
+      "pass": true,
+      "rationale": "options.ServerSideSessions.UserDisplayNameClaimType = \"name\" is set."
+    },
+    {
+      "assertion": "Program.cs does not rely on the default in-memory session store for production use",
+      "pass": true,
+      "rationale": "Explicitly adds the EF operational store and notes in-memory default is not for production."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

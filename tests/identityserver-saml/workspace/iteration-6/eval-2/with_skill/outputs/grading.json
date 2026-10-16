@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "Opens with 'In-memory is development-only' and recommends EF/custom stores for production."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": true,
+      "rationale": "MySamlSpStore implements FindByEntityIdAsync(string entityId, CancellationToken ct)."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": true,
+      "rationale": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider> with [EnumeratorCancellation]."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": true,
+      "rationale": "Registers with .AddSamlServiceProviderStore<MySamlSpStore>()."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": true,
+      "rationale": "Shows .AddSamlServiceProviderStoreCache<MySamlSpStore>() and describes the HybridCache layer."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

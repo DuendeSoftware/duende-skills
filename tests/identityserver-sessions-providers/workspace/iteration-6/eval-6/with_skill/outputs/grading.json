@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The kiosk.app client AllowedGrantTypes includes Ciba or 'urn:openid:params:grant-type:ciba'",
+      "pass": true,
+      "rationale": "AllowedGrantTypes = GrantTypes.Ciba."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserValidator that processes login_hint",
+      "pass": true,
+      "rationale": "LoginHintUserValidator implements IBackchannelAuthenticationUserValidator using context.LoginHint."
+    },
+    {
+      "assertion": "Code includes an implementation of IBackchannelAuthenticationUserNotificationService",
+      "pass": true,
+      "rationale": "StubUserNotificationService implements IBackchannelAuthenticationUserNotificationService."
+    },
+    {
+      "assertion": "Both CIBA interfaces are registered in the DI container",
+      "pass": true,
+      "rationale": "Registered via AddBackchannelAuthenticationUserValidator<> and AddBackchannelAuthenticationUserNotificationService<>."
+    },
+    {
+      "assertion": "Response mentions that CIBA requires the Enterprise Edition",
+      "pass": true,
+      "rationale": "Heading says CIBA (Enterprise edition)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

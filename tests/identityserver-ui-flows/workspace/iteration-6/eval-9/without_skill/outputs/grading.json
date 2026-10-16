@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The 'profile' IdentityResource sets Required = true and the response explains omitting a required scope returns access_denied and fails the request",
+      "pass": false,
+      "rationale": "Profile Required = true is set, but response never explains that omitting it returns access_denied and fails the request (only suggests manual deny/redisplay)."
+    },
+    {
+      "assertion": "The 'marketing' ApiScope sets Required = false and the response explains optional scopes can be declined while the flow still succeeds",
+      "pass": false,
+      "rationale": "marketing Required = false is set but nothing explains that declining it still lets the flow succeed."
+    },
+    {
+      "assertion": "The signed-in user's revoke action calls IIdentityServerInteractionService.RevokeUserConsentAsync(\"web.app\") to revoke remembered consent and persisted grants for the current user",
+      "pass": true,
+      "rationale": "Calls RevokeUserConsentAsync(\"web.app\") for current user."
+    },
+    {
+      "assertion": "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access",
+      "pass": false,
+      "rationale": "Says no consent for client credentials (no user) but never says AllowedScopes governs access."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

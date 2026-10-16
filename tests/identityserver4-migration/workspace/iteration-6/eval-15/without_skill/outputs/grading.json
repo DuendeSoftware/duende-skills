@@ -1,0 +1,29 @@
+{
+  "eval_id": 15,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that third-party authentication handlers need NuGet package updates for the new .NET version",
+      "pass": true,
+      "rationale": "Says to upgrade Google and other handler packages to net8 versions."
+    },
+    {
+      "assertion": "Response specifically mentions WS-Federation handler needing an update",
+      "pass": true,
+      "rationale": "Says update Microsoft.AspNetCore.Authentication.WsFederation package and test."
+    },
+    {
+      "assertion": "Response mentions SAML2P handler (Sustainsys.Saml2 or equivalent) needing a compatible version for .NET 8+",
+      "pass": true,
+      "rationale": "Says use a Sustainsys.Saml2.AspNetCore2 version targeting the new framework."
+    },
+    {
+      "assertion": "Response recommends testing all external login flows end-to-end after migration",
+      "pass": false,
+      "rationale": "Only advises testing claims mapping and keeping callbacks stable; never recommends testing all external login flows end-to-end."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

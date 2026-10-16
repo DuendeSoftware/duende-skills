@@ -1,0 +1,222 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-upgrade-v7-to-v8",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 37,
+      "passed": 37,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 37,
+      "passed": 14,
+      "failed": 23,
+      "pass_rate": 0.38
+    },
+    "delta": {
+      "assertions_improved": 23,
+      "delta_pass_rate": 0.62
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Adds CancellationToken parameter to FindClientByIdAsync method signature",
+        "Adds GetAllClientsAsync(CancellationToken ct) method returning IAsyncEnumerable<Client>",
+        "Updates TargetFramework to net10.0"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Replaces ICache<T> with HybridCache from Microsoft.Extensions.Caching.Hybrid",
+        "Uses [FromKeyedServices(\"ConfigurationStoreCache\")] or ServiceProviderKeys.ConfigurationStoreCache for keyed injection",
+        "Uses GetOrCreateAsync (not GetOrAddAsync) for the cache retrieval pattern",
+        "Mentions that CachingOptions.CacheLockTimeout is obsolete"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Does NOT reference Duende.IdentityServer.IClock or ICancellationTokenProvider"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Shows the migration command: dotnet ef migrations add Update_DuendeIdentityServer_v8_0",
+        "Mentions that v8 adds SAML-related tables to the schema"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "States that IAuthorizationParametersMessageStore is removed in v8"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Adds CancellationToken parameter to the affected methods",
+        "Mentions this applies to multiple interfaces (IResourceStore, etc.)"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Includes updating TargetFramework to net10.0 as a first step",
+        "Includes adding CancellationToken to all async store/service methods",
+        "Lists at least 8 distinct migration steps"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "States a v7/earlier key still works with v8 core, but a v8 key fails on v7/earlier or the BFF runtime with IDX10503",
+        "States that v8 throws at startup for Server-Side Sessions, Automatic Key Management, and SAML when licensed but lacking the entitlement, while other features only log a warning",
+        "Recommends using the production license key in lower/non-prod environments to surface entitlement gaps before production",
+        "Does NOT claim a new license purchase is required to run v8 core on an existing v7 key"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Replaces context.Client with context.Application on both ProfileDataRequestContext and IsActiveContext",
+        "Uses context.Application?.Identifier for the client ID / entity ID and pattern-matches on Client or SamlServiceProvider for protocol-specific members",
+        "Warns the profile service can now be invoked for SAML requests, identifiable in IsActiveAsync via context.Caller == IdentityServerConstants.ProfileIsActiveCallers.SamlSsoEndpoint"
+      ]
+    }
+  ]
+}

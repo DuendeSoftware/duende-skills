@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that the iss claim is derived from the request host by default, so different host names per region produce different issuers; every instance must resolve the same issuer (same public host/path base, or fixed IssuerUri for a single issuer)",
+      "pass": true,
+      "rationale": "Explains iss derived from request host, so eu/us differ; use one host or fixed IssuerUri."
+    },
+    {
+      "assertion": "States that operational data (grants, codes, refresh tokens) must be visible in every active region almost immediately, otherwise redemption fails with invalid_grant due to replication lag",
+      "pass": true,
+      "rationale": "States operational data must be visible almost immediately; replica lag causes invalid_grant."
+    },
+    {
+      "assertion": "Recommends sharing signing keys across regions via a shared key store",
+      "pass": true,
+      "rationale": "Shares signing keys via shared ISigningKeyStore/EF operational store."
+    },
+    {
+      "assertion": "Recommends sharing ASP.NET Core Data Protection keys and setting the same explicit application name",
+      "pass": true,
+      "rationale": "Shared Data Protection keys with SetApplicationName."
+    },
+    {
+      "assertion": "Mentions synchronized clocks across regions",
+      "pass": true,
+      "rationale": "Says synchronize clocks (NTP)."
+    },
+    {
+      "assertion": "Suggests active-passive/regional failover with defined RPO/RTO if synchronous consistency across regions is not achievable",
+      "pass": true,
+      "rationale": "Suggests active-passive regional failover with defined RPO/RTO."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

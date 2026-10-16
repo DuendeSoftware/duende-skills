@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Injects ISpaceContextAccessor into a scoped UI service and reads the resolved SpaceId",
+      "pass": true,
+      "rationale": "BrandingService injects ISpaceContextAccessor and calls spaces.GetSpaceId() in a scoped UI service."
+    },
+    {
+      "assertion": "States Spaces do not add per-space UI/branding; you load your own space-aware settings",
+      "pass": true,
+      "rationale": "States there is 'no built-in per-space branding' and you load your own settings."
+    },
+    {
+      "assertion": "Advises preferring the resolved space over trusting a client-supplied tenant: acr_values hint",
+      "pass": true,
+      "rationale": "Says do not use acr_values tenant hint (untrusted, client-supplied) and prefer ISpaceContextAccessor."
+    },
+    {
+      "assertion": "Notes space resolution is independent of acr_values and runs before routing",
+      "pass": true,
+      "rationale": "Says space is resolved server-side at the start of each request, not via acr_values, with UseSpaceResolution before UseRouting."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

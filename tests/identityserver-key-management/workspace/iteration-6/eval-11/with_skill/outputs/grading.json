@@ -1,0 +1,39 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds a new signing key and makes it active",
+      "pass": true,
+      "rationale": "Step 2 creates a new key and makes it active (verifying one exists first)."
+    },
+    {
+      "assertion": "Deletes the compromised key from the key store rather than just retiring it, because retired keys stay published for RetentionDuration",
+      "pass": true,
+      "rationale": "Step 3 deletes the compromised key rather than retiring, because retired keys stay published for RetentionDuration."
+    },
+    {
+      "assertion": "Restarts every instance because keys are cached for KeyManagement.KeyCacheDuration, and confirms each instance's JWKS no longer lists the compromised kid",
+      "pass": true,
+      "rationale": "Step 4 restarts all 4 instances due to KeyCacheDuration and verifies each instance's JWKS lacks the kid."
+    },
+    {
+      "assertion": "Revokes persisted grants/refresh tokens issued before removal (all if exposure window is unknown)",
+      "pass": true,
+      "rationale": "Step 6 revokes refresh tokens/persisted grants, all if exposure window unknown."
+    },
+    {
+      "assertion": "Notifies relying parties that cache JWKS and notes tokens signed with the key become invalid",
+      "pass": true,
+      "rationale": "Steps 5 and 7 note tokens become invalid and notify JWKS-caching relying parties."
+    },
+    {
+      "assertion": "Notes backups of signing keys require the matching Data Protection keys and the same application name",
+      "pass": true,
+      "rationale": "Step 9 notes backups need matching Data Protection keys and same SetApplicationName."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

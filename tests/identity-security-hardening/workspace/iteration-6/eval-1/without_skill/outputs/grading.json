@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs contains ForwardedHeaders configuration with XForwardedFor and XForwardedProto",
+      "pass": true,
+      "rationale": "ForwardedHeaders set to XForwardedFor | XForwardedProto."
+    },
+    {
+      "assertion": "Program.cs restricts KnownProxies to the proxy IP address 10.0.0.1 and does not accept forwarded headers from any source",
+      "pass": true,
+      "rationale": "Clears KnownProxies/KnownNetworks and adds only the configured proxy (10.0.0.1)."
+    },
+    {
+      "assertion": "Program.cs configures HSTS with MaxAge of at least 365 days and IncludeSubDomains = true",
+      "pass": true,
+      "rationale": "AddHsts uses 365 days with IncludeSubDomains = true."
+    },
+    {
+      "assertion": "Program.cs calls UseForwardedHeaders() before UseHttpsRedirection() and UseIdentityServer() in the middleware pipeline",
+      "pass": true,
+      "rationale": "UseForwardedHeaders() precedes UseHttpsRedirection() and UseIdentityServer()."
+    },
+    {
+      "assertion": "Program.cs uses StatusCodes.Status308PermanentRedirect or equivalent 308 status code for HTTPS redirection",
+      "pass": false,
+      "rationale": "AddHttpsRedirection only sets HttpsPort = 443; no RedirectStatusCode / 308 is configured."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

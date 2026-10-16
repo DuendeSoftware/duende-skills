@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "A consent page model injects IIdentityServerInteractionService and calls GetAuthorizationContextAsync to get client and scope details",
+      "pass": true,
+      "rationale": "Injects interaction service and calls GetAuthorizationContextAsync; shows client and scopes."
+    },
+    {
+      "assertion": "The consent page calls GrantConsentAsync with a ConsentResponse that includes ScopesValuesConsented and RememberConsent = true",
+      "pass": true,
+      "rationale": "ConsentResponse with RememberConsent = true and ScopesValuesConsented passed to GrantConsentAsync."
+    },
+    {
+      "assertion": "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent",
+      "pass": false,
+      "rationale": "Code denies via GrantConsentAsync with ConsentResponse{Error=AccessDenied}; DenyAuthorizationAsync is only mentioned in a prose aside, not used in the code."
+    },
+    {
+      "assertion": "The consent page validates returnUrl using IsValidReturnUrl or checks that GetAuthorizationContextAsync returns non-null before redirecting",
+      "pass": true,
+      "rationale": "Bails out to /Error when GetAuthorizationContextAsync returns null before redirecting."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

@@ -1,0 +1,24 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing keyed HybridCache registration: AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache)",
+      "pass": true,
+      "rationale": "Identifies the missing keyed HybridCache via AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache) and shows code."
+    },
+    {
+      "assertion": "Explains replay detection is enabled by default and needs this cache, and can be disabled with EnableReplayDetection = false",
+      "pass": true,
+      "rationale": "States replay detection is on by default and requires the cache, and that EnableReplayDetection = false removes the need."
+    },
+    {
+      "assertion": "Notes registering a distributed cache (e.g. Redis) as second-level cache for multi-instance APIs",
+      "pass": true,
+      "rationale": "Advises registering a distributed cache such as Redis (AddStackExchangeRedisCache) as L2 for multi-instance deployments."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

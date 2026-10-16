@@ -1,0 +1,24 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States SAML service provider extended properties are validated/stored/returned through ISamlServiceProviderAdmin",
+      "pass": false,
+      "rationale": "Doesn't mention ISamlServiceProviderAdmin; speculates Properties dictionary may be persisted."
+    },
+    {
+      "assertion": "States they are not projected onto the runtime SamlServiceProvider returned by ISamlServiceProviderStore, so they can't be used as input to SAML protocol processing",
+      "pass": false,
+      "rationale": "Suggests sp.Properties[\"owner_team\"] may work on the runtime SP; opposite of the expected answer."
+    },
+    {
+      "assertion": "Suggests using another mechanism (e.g. your own store/lookup keyed by EntityId) for protocol-time data",
+      "pass": true,
+      "rationale": "Offers custom store/extra column keyed by EntityId as a fallback for assertion-building data."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 3,
+  "score": 0.3333333333333333
+}

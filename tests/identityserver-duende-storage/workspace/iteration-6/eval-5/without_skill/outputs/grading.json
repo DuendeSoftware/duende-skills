@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a named instance with StorageInstanceId.Create(...)",
+      "pass": false,
+      "rationale": "No StorageInstanceId.Create; uses EF contexts."
+    },
+    {
+      "assertion": "Registers the second database with AddStorage(instanceId, storage => ...) and maps operational data with AddOperationalStorage(instanceId)",
+      "pass": false,
+      "rationale": "No AddStorage(instanceId...)/AddOperationalStorage(instanceId)."
+    },
+    {
+      "assertion": "Keeps AddStorage(...)+AddConfigurationStorage() for the default instance",
+      "pass": false,
+      "rationale": "No AddStorage+AddConfigurationStorage for default instance."
+    },
+    {
+      "assertion": "Migrates every instance via IStorageInstanceSchemaFactory.GetStorageInstanceSchema(id, ct).MigrateAsync, noting IStorageInstanceSchema.MigrateAsync only migrates the default instance",
+      "pass": false,
+      "rationale": "No IStorageInstanceSchemaFactory; uses dotnet ef migrations."
+    },
+    {
+      "assertion": "Mentions that mapping one category to two different instances or selecting a second provider for one instance throws InvalidOperationException",
+      "pass": false,
+      "rationale": "No mention of InvalidOperationException for double mapping."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

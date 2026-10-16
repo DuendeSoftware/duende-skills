@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against exposing the DCR endpoint without authentication or authorization",
+      "pass": true,
+      "rationale": "#1 warns about no authentication with RequireAuthorization(\"dcr\")."
+    },
+    {
+      "assertion": "Warns against allowing dynamically registered clients to use any grant type \u2014 should restrict and enforce PKCE",
+      "pass": true,
+      "rationale": "#2 restricts grant types with code and #3 enforces RequirePkce."
+    },
+    {
+      "assertion": "Warns against using in-memory stores for DCR clients in production",
+      "pass": true,
+      "rationale": "#7 warns about in-memory stores in production."
+    },
+    {
+      "assertion": "Mentions that client secrets must be stored securely (hashed, not plaintext)",
+      "pass": true,
+      "rationale": "#8 says generated secrets must be stored hashed."
+    },
+    {
+      "assertion": "Mentions that software statements must be validated against trusted signing keys \u2014 never accept unknown issuers",
+      "pass": true,
+      "rationale": "#6 says validate against trusted signing key and never accept unknown issuers."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

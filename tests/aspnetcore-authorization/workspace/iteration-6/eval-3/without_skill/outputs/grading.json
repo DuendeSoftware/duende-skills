@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "A ScopeRequirement class is created implementing IAuthorizationRequirement with a Scope property",
+      "pass": true,
+      "rationale": "ScopeRequirement : IAuthorizationRequirement with Scope property is defined."
+    },
+    {
+      "assertion": "A ScopeHandler class is created extending AuthorizationHandler<ScopeRequirement>",
+      "pass": true,
+      "rationale": "ScopeHandler : AuthorizationHandler<ScopeRequirement> is defined."
+    },
+    {
+      "assertion": "The handler splits the scope claim value using Split(' ') or similar space-delimiter parsing",
+      "pass": true,
+      "rationale": "Handler splits claim values with Split(' ', RemoveEmptyEntries)."
+    },
+    {
+      "assertion": "The handler calls context.Succeed(requirement) when the scope matches, and does NOT call context.Fail() on mismatch",
+      "pass": true,
+      "rationale": "Succeed on match; no Fail() call, and prose states it doesn't call Fail."
+    },
+    {
+      "assertion": "The ScopeHandler is registered in DI as IAuthorizationHandler",
+      "pass": true,
+      "rationale": "AddSingleton<IAuthorizationHandler, ScopeHandler>() is shown."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

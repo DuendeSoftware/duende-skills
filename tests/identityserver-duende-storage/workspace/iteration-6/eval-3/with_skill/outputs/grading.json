@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses IApiScopeAdmin.CreateAsync with ApiScopeConfiguration before creating the resource/client that references it",
+      "pass": true,
+      "rationale": "Calls scopeAdmin.CreateAsync(new ApiScopeConfiguration{...}) first, before resource and client."
+    },
+    {
+      "assertion": "Uses IApiResourceAdmin and IClientAdmin.CreateAsync with CreateClient and CreateClientSecret { PlaintextValue = ... }",
+      "pass": true,
+      "rationale": "Uses IApiResourceAdmin and clientAdmin.CreateAsync(new CreateClient{... ClientSecrets=[new CreateClientSecret{PlaintextValue=...}]})."
+    },
+    {
+      "assertion": "Checks SaveResult.IsSuccess and GetResult.Found",
+      "pass": true,
+      "rationale": "Checks result.IsSuccess after each create and got.Found after GetAsync."
+    },
+    {
+      "assertion": "Updates via GetAsync then UpdateAsync(id, item, current.Version, ct) to get optimistic concurrency",
+      "pass": true,
+      "rationale": "GetAsync then UpdateAsync(id, item, got.Version, ct) with conflict handling."
+    },
+    {
+      "assertion": "Warns to protect/authorize the admin APIs (they are .NET service APIs, not preconfigured HTTP endpoints) and to load secrets from a secure source",
+      "pass": true,
+      "rationale": "Says admin services are .NET APIs not HTTP endpoints to be put behind authN/authZ, and secret taken from vault."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

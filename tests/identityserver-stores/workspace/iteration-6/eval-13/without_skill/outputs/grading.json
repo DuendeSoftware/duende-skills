@@ -1,0 +1,24 @@
+{
+  "eval_id": 13,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that starting with 8.1.0-preview.4 the registrations are AddEntityFrameworkConfigurationStore and AddEntityFrameworkOperationalStore",
+      "pass": false,
+      "rationale": "Says it cannot verify the 8.1 API and never names AddEntityFrameworkConfigurationStore/AddEntityFrameworkOperationalStore."
+    },
+    {
+      "assertion": "States the old AddConfigurationStore/AddOperationalStore still work but are marked obsolete",
+      "pass": false,
+      "rationale": "Only says the obsolete method 'still works' generically, without identifying AddConfigurationStore/AddOperationalStore as the obsolete ones in the stated way."
+    },
+    {
+      "assertion": "States Entity Framework Core remains fully supported and the rename only avoids confusion with Duende Storage's AddConfigurationStorage/AddOperationalStorage",
+      "pass": false,
+      "rationale": "Says EF Core is not deprecated but never mentions the Duende Storage AddConfigurationStorage/AddOperationalStorage naming conflict."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 3,
+  "score": 0.0
+}

@@ -1,0 +1,24 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States deleting a space is a soft delete: pool data is blocked from reads and writes but retained",
+      "pass": false,
+      "rationale": "Hedges between soft and hard delete and says it cannot confirm Spaces semantics."
+    },
+    {
+      "assertion": "Mentions ISpaceAdmin.UndeleteAsync restores the space and its matching rules",
+      "pass": false,
+      "rationale": "No mention of ISpaceAdmin.UndeleteAsync."
+    },
+    {
+      "assertion": "Advises authorizing and auditing pool reassignment and deletion as security-boundary changes, reserved for deliberate procedures",
+      "pass": true,
+      "rationale": "Advises restricting to platform operators, strong auth, approval and audit logging of every action, though it does not mention pool reassignment."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 3,
+  "score": 0.3333333333333333
+}

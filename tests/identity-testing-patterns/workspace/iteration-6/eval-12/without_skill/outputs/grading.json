@@ -1,0 +1,39 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses a CookieContainer with HttpClientHandler so cookies flow across requests",
+      "pass": true,
+      "rationale": "HttpClientHandler with CookieContainer = new CookieContainer() and UseCookies."
+    },
+    {
+      "assertion": "Uses AngleSharp (HtmlParser().ParseDocumentAsync) to parse the login page HTML",
+      "pass": false,
+      "rationale": "Parses the HTML with Regex.Match, not AngleSharp HtmlParser."
+    },
+    {
+      "assertion": "Reads the antiforgery token from input[name='__RequestVerificationToken'] via GetAttribute(\"value\")",
+      "pass": false,
+      "rationale": "Token extracted via regex on name=\"__RequestVerificationToken\", not input[name=...] with GetAttribute(\"value\")."
+    },
+    {
+      "assertion": "POSTs FormUrlEncodedContent with Username, Password, __RequestVerificationToken, and button=login to the form's resolved action URL",
+      "pass": false,
+      "rationale": "Posts Input.Username/Input.Password/Input.Button fields to loginUrl, not Username/Password/button=login to a resolved form action."
+    },
+    {
+      "assertion": "Asserts success by comparing the final RequestMessage.RequestUri.Host to the original protected host",
+      "pass": false,
+      "rationale": "Success is judged by redirect status codes and an authorization code/token response, not by comparing final RequestUri.Host."
+    },
+    {
+      "assertion": "Does NOT require Playwright, Selenium, or another headless browser",
+      "pass": true,
+      "rationale": "Pure HttpClient; Playwright is only mentioned as an alternative for unsupported scenarios."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 6,
+  "score": 0.3333333333333333
+}

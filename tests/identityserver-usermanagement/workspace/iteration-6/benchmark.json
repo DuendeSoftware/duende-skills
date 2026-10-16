@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-usermanagement",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 39,
+      "passed": 39,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 39,
+      "passed": 7,
+      "failed": 32,
+      "pass_rate": 0.18
+    },
+    "delta": {
+      "assertions_improved": 32,
+      "delta_pass_rate": 0.82
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+        "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+        "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+        "Selects the SQLite provider with AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder (not inside the AddUserManagement lambda)",
+        "Creates the database schema with IStorageInstanceSchema.MigrateAsync() resolved from IStorageInstanceSchemaFactory.GetStorageInstanceSchema(...)"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Uses options.Authentication(auth => auth.UseSmtpOtpDispatcher(...)) inside the AddUserManagement options lambda",
+        "Configures SMTP host and port",
+        "Sets the required FromEmail and FromName options (not invented Username/Password/FromAddress)"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Registers an NpgsqlDataSource singleton from the connection string and selects PostgreSQL with AddStorage(storage => storage.AddPostgreSql())",
+        "Adds Duende.Storage.PostgreSql package (or references it)",
+        "Explains that no EF Core migrations are needed (document-based storage) but the common storage schema must still be created",
+        "Shows IStorageInstanceSchema.MigrateAsync() resolved via IStorageInstanceSchemaFactory, and notes that in production it should run as a controlled deployment step rather than app startup"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Reads the source ASP.NET Identity DB and calls IUserImporter.ImportAsync with UserImportRecord(s) (does not use a non-existent AddAspNetIdentityMigration option)",
+        "Stores existing hashes via PasswordImport(HashedPasswordData) and registers a custom IPasswordHashAlgorithm (AddPasswordHashAlgorithm<T>) to verify them, with re-hash on first successful login",
+        "Mentions re-runs skip existing users by default, and an IUserImportConflictResolver can overwrite",
+        "Mentions that after migration users can enroll in passwordless methods"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Explains that AddUserManagement() automatically registers IProfileService",
+        "Mentions that claims mapping is based on requested scopes (openid → sub, email → email)"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Notes that OTP (email/SMS) is the default passwordless flow"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Identifies that the storage provider is selected with AddStorage(...) on the IdentityServer builder, not inside the AddUserManagement lambda",
+        "Shows the correct pattern: .AddStorage(storage => storage.AddSqlite(options => options.ConnectionString = ...)).AddUserManagement(...)",
+        "Mentions the schema must be created/migrated with IStorageInstanceSchema.MigrateAsync()",
+        "Does NOT suggest using EF Core migrations as a fix"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Creates a StorageInstanceId (e.g. StorageInstanceId.Create(\"user-management\"))",
+        "Registers the second database with AddStorage(storageInstanceId, storage => storage.AddPostgreSql(...))",
+        "Maps User Management to it with AddUserManagement(storageInstanceId, ...)",
+        "Migrates the named instance explicitly using IStorageInstanceSchemaFactory.GetStorageInstanceSchema(storageInstanceId, ct).MigrateAsync"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Defines an AttributeDefinition with AttributeCode.Create(\"department\") and a ScalarAttributeType string",
+        "Uses BuiltInSchemas.UserProfile.Extend(...) and registers the result with AddInMemoryDataExtensionSchemas([...])",
+        "Notes Extend throws InvalidOperationException if the attribute code already exists (e.g. email, name)",
+        "Shows AddDynamicSchemas() and ISchemaAdmin get-modify-UpdateAsync using the returned Version for optimistic concurrency",
+        "Warns that with AddDynamicSchemas() the in-memory schemas (including the built-in profile) are not used or seeded, so the schema must be created in the database"
+      ]
+    }
+  ]
+}

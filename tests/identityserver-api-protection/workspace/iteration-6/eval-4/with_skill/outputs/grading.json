@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Defines authorization policies that use RequireClaim with 'scope' claim type for 'api1.read' and 'api1.write'",
+      "pass": true,
+      "rationale": "Defines read and write policies with RequireClaim(\"scope\", \"api1.read\") and RequireClaim(\"scope\", \"api1.write\")."
+    },
+    {
+      "assertion": "Applies the read policy to the GET endpoint and the write policy to the POST endpoint using RequireAuthorization",
+      "pass": true,
+      "rationale": "MapGet uses RequireAuthorization(\"read\") and MapPost uses RequireAuthorization(\"write\")."
+    },
+    {
+      "assertion": "Implements a custom IClaimsTransformation that splits space-delimited scope claims into individual claims",
+      "pass": true,
+      "rationale": "ScopeClaimsTransformation implements IClaimsTransformation and splits the space-delimited scope claim into separate claims."
+    },
+    {
+      "assertion": "Registers the IClaimsTransformation implementation in the DI container",
+      "pass": true,
+      "rationale": "Registers it with AddTransient<IClaimsTransformation, ScopeClaimsTransformation>()."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

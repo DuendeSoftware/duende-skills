@@ -1,0 +1,34 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a StorageInstanceId (e.g. StorageInstanceId.Create(\"user-management\"))",
+      "pass": false,
+      "rationale": "No StorageInstanceId; uses invented AddPostgreSqlStore."
+    },
+    {
+      "assertion": "Registers the second database with AddStorage(storageInstanceId, storage => storage.AddPostgreSql(...))",
+      "pass": false,
+      "rationale": "No AddStorage(storageInstanceId, ...) registration."
+    },
+    {
+      "assertion": "Maps User Management to it with AddUserManagement(storageInstanceId, ...)",
+      "pass": false,
+      "rationale": "AddUserManagement() takes no storage instance ID."
+    },
+    {
+      "assertion": "Migrates the named instance explicitly using IStorageInstanceSchemaFactory.GetStorageInstanceSchema(storageInstanceId, ct).MigrateAsync",
+      "pass": false,
+      "rationale": "Suggests EF Core migrations instead of GetStorageInstanceSchema(...).MigrateAsync."
+    },
+    {
+      "assertion": "Does NOT call AddStorage twice for the default instance (selecting a second provider for the same instance throws InvalidOperationException)",
+      "pass": true,
+      "rationale": "Does not call AddStorage twice for the default instance (only one existing AddStorage)."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

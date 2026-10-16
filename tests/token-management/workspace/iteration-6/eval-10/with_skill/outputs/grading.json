@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IClientAssertionService with a GetClientAssertionAsync method",
+      "pass": true,
+      "rationale": "JwtClientAssertionService implements IClientAssertionService.GetClientAssertionAsync."
+    },
+    {
+      "assertion": "Sets the JWT Audience to the authorization server's issuer URL, NOT the token endpoint URL",
+      "pass": true,
+      "rationale": "Audience = \"https://identity.example.com\" with comment 'issuer URL, NOT the token endpoint'."
+    },
+    {
+      "assertion": "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
+      "pass": true,
+      "rationale": "Cites CVE-2025-27370 / CVE-2025-27371 and the token endpoint audience problem."
+    },
+    {
+      "assertion": "Returns a ClientAssertion with Type set to OidcConstants.ClientAssertionTypes.JwtBearer (or the equivalent string 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')",
+      "pass": true,
+      "rationale": "Returns ClientAssertion with Type = OidcConstants.ClientAssertionTypes.JwtBearer."
+    },
+    {
+      "assertion": "Registers the IClientAssertionService implementation with DI (e.g., AddSingleton or AddTransient)",
+      "pass": true,
+      "rationale": "builder.Services.AddSingleton<IClientAssertionService, JwtClientAssertionService>()"
+    },
+    {
+      "assertion": "Sets the JWT 'typ' header to 'client-authentication+jwt' (e.g. via AdditionalHeaderClaims) to opt into strict audience validation (RFC 7523bis / StrictClientAssertionAudienceValidation)",
+      "pass": true,
+      "rationale": "AdditionalHeaderClaims sets typ to \"client-authentication+jwt\" and mentions StrictClientAssertionAudienceValidation."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

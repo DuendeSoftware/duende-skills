@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Replaces Duende.IdentityServer.IClock with System.TimeProvider",
+      "pass": true,
+      "rationale": "States v8 removes IClock in favour of TimeProvider with before/after code."
+    },
+    {
+      "assertion": "Uses GetUtcNow() method instead of UtcNow property",
+      "pass": true,
+      "rationale": "Explicitly: GetUtcNow() method replaces UtcNow property; code uses _timeProvider.GetUtcNow()."
+    },
+    {
+      "assertion": "TimeProvider is injected via constructor (standard DI)",
+      "pass": true,
+      "rationale": "MyTokenValidation takes TimeProvider in its constructor."
+    },
+    {
+      "assertion": "Does NOT reference Duende.IdentityServer.IClock or ICancellationTokenProvider",
+      "pass": true,
+      "rationale": "v8 code uses only TimeProvider; IClock appears only as removed/\u274c v7 contrast and ICancellationTokenProvider is not mentioned."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

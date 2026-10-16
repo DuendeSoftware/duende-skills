@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Code fetches the discovery document to resolve the introspection endpoint rather than hardcoding it",
+      "pass": true,
+      "rationale": "Manual code fetches discovery and uses disco.IntrospectionEndpoint."
+    },
+    {
+      "assertion": "Code calls IntrospectTokenAsync (or POSTs to the introspection endpoint) with the API's ClientId and ClientSecret for authentication",
+      "pass": true,
+      "rationale": "IntrospectTokenAsync with ClientId catalog-api / ClientSecret api-secret."
+    },
+    {
+      "assertion": "Code checks the IsActive property (or 'active' field) of the introspection response to determine if the token is valid",
+      "pass": true,
+      "rationale": "Checks `!result.IsActive`."
+    },
+    {
+      "assertion": "Response explains that reference tokens are opaque identifiers (not self-contained JWTs) and require server-side validation via introspection",
+      "pass": false,
+      "rationale": "Only says reference tokens can't be validated locally; never describes them as opaque identifiers versus self-contained JWTs."
+    },
+    {
+      "assertion": "Response mentions that reference tokens enable immediate revocation unlike JWTs which are valid until expiry",
+      "pass": false,
+      "rationale": "No mention of immediate revocation versus JWT validity until expiry."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 5,
+  "score": 0.6
+}

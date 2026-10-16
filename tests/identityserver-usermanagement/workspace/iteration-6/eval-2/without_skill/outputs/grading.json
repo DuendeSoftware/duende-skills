@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses options.Authentication(auth => auth.UseSmtpOtpDispatcher(...)) inside the AddUserManagement options lambda",
+      "pass": false,
+      "rationale": "Writes a hand-rolled custom dispatcher with `IOtpDispatcher // interface name approximate`, not options.Authentication(auth => auth.UseSmtpOtpDispatcher(...))."
+    },
+    {
+      "assertion": "Configures SMTP host and port",
+      "pass": false,
+      "rationale": "Sets Host/Port via custom SmtpOptions, not the built-in SMTP dispatcher configuration."
+    },
+    {
+      "assertion": "Sets the required FromEmail and FromName options (not invented Username/Password/FromAddress)",
+      "pass": false,
+      "rationale": "Uses invented o.User/o.Password/o.From, not FromEmail/FromName."
+    },
+    {
+      "assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)",
+      "pass": true,
+      "rationale": "Does not use ConsoleOtpDispatcher and gives production tips (TLS, secrets, no logging codes)."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

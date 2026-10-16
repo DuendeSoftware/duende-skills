@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that by default unmatched requests (and requests with the /t prefix but no match) return 404",
+      "pass": false,
+      "rationale": "Says 404 is correct but does not explain the default behaviour for unmatched requests or the /t prefix case."
+    },
+    {
+      "assertion": "Warns FallbackToDefault should only be enabled when serving unmatched host/path from the default space is an intentional part of the isolation model",
+      "pass": true,
+      "rationale": "Says only use fallback if the default space is intentionally a public/single-tenant-compatible space."
+    },
+    {
+      "assertion": "States a strict 404 is safer for multi-tenant deployments",
+      "pass": true,
+      "rationale": "Recommends keeping FallbackToDefault=false and 404 as the safe behaviour."
+    },
+    {
+      "assertion": "Mentions the default space uses data pool 0",
+      "pass": false,
+      "rationale": "No mention of data pool 0."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

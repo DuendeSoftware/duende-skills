@@ -1,0 +1,34 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains request_uri is disabled by default and enabled with Endpoints.EnableJwtRequestUri = true",
+      "pass": true,
+      "rationale": "EnableJwtRequestUri = true with comment 'off by default'."
+    },
+    {
+      "assertion": "Identifies SSRF as the risk and recommends PAR as the safer alternative",
+      "pass": true,
+      "rationale": "Identifies SSRF and recommends PAR."
+    },
+    {
+      "assertion": "Configures AddJwtRequestUriHttpClient with a short timeout and MaxResponseContentBufferSize and a primary handler that validates the IP at connection time (e.g. idunno.Security.Ssrf SsrfSocketsHttpHandlerFactory)",
+      "pass": false,
+      "rationale": "AddJwtRequestUriHttpClient sets only Timeout; no MaxResponseContentBufferSize and no IP-validating primary handler (only prose)."
+    },
+    {
+      "assertion": "Warns that a DelegatingHandler that only validates the URL is insufficient (localhost host names, redirects, DNS rebinding)",
+      "pass": false,
+      "rationale": "No warning about DelegatingHandler/URL-only validation insufficiency."
+    },
+    {
+      "assertion": "Advises not adding retries to that HTTP client and restricting outbound traffic/protecting cloud metadata endpoints",
+      "pass": false,
+      "rationale": "No advice against retries; metadata endpoint mentioned only as a risk, no egress restriction."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

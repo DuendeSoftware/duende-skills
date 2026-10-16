@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls ConfigureDPoPTokensForScheme with the scheme name 'token' on builder.Services (IServiceCollection), NOT inside AddJwtBearer lambda",
+      "pass": true,
+      "rationale": "ConfigureDPoPTokensForScheme(\"token\") called on builder.Services, outside AddJwtBearer."
+    },
+    {
+      "assertion": "Registers the keyed HybridCache for DPoP replay detection and mentions a distributed cache (e.g. Redis) as L2 for multi-instance deployments",
+      "pass": false,
+      "rationale": "No keyed HybridCache registration; only a passing mention of an IDistributedCache for replay cache."
+    },
+    {
+      "assertion": "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'",
+      "pass": false,
+      "rationale": "AddJwtBearer lacks ValidTypes / at+jwt."
+    },
+    {
+      "assertion": "Mentions the Duende.AspNetCore.Authentication.JwtBearer NuGet package",
+      "pass": true,
+      "rationale": "Names Duende.AspNetCore.Authentication.JwtBearer package."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

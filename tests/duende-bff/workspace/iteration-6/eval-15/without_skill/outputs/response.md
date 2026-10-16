@@ -1,0 +1,3 @@
+**Where tokens live:** With server-side sessions the tokens (access, refresh, id token) and claims are stored server-side in the session store; the cookie holds only a session identifier (the cookie ticket is minimal). Without server-side sessions, the tokens are inside the encrypted cookie (SaveTokens), which gets large.
+
+**In-memory store in a 3-node cluster:** No. `InMemoryUserSessionStore` is per process, so sessions vanish on restart and aren't visible on other nodes → random logouts. Use the EF Core store (`AddEntityFrameworkServerSideSessions`) or implement `IUserSessionStore` with Redis/SQL. Also share Data Protection keys across nodes (key ring in DB/Redis/blob) so every node can decrypt the cookie. Enable session cleanup.

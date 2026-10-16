@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ProfileDataRequestContext with a subject ClaimsPrincipal containing a sub claim",
+      "pass": true,
+      "rationale": "ProfileDataRequestContext built with Subject = Subject(\"123\") containing a sub claim."
+    },
+    {
+      "assertion": "Mocks an IUserRepository (or equivalent) to return known role values",
+      "pass": true,
+      "rationale": "Mock<IUserRepository> returns roles via GetRolesAsync(\"123\") setup (admin, editor)."
+    },
+    {
+      "assertion": "Calls GetProfileDataAsync and asserts that context.IssuedClaims contains the expected role claims",
+      "pass": true,
+      "rationale": "Calls GetProfileDataAsync and asserts IssuedClaims role values equal admin, editor."
+    },
+    {
+      "assertion": "Tests IsActiveAsync and asserts context.IsActive is set correctly based on the mock",
+      "pass": true,
+      "rationale": "IsActive_true/false tests build IsActiveContext with mocked FindByIdAsync and assert ctx.IsActive."
+    },
+    {
+      "assertion": "Does NOT require a running IdentityServer \u2014 tests the service in isolation",
+      "pass": true,
+      "rationale": "Tests instantiate the service with a mock directly; no IdentityServer host."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

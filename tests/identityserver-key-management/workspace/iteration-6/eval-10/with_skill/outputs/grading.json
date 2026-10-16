@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States IdentityServer has no built-in HSM/KMS provider and a custom ISigningKeyStore does not give non-exportable keys",
+      "pass": true,
+      "rationale": "States no built-in HSM/KMS provider and that a custom ISigningKeyStore is not the answer."
+    },
+    {
+      "assertion": "Subclasses DefaultTokenCreationService and overrides CreateJwtAsync to call the KMS async sign API, registering it as ITokenCreationService",
+      "pass": true,
+      "rationale": "KeyVaultTokenCreationService : DefaultTokenCreationService overrides CreateJwtAsync with SignDataAsync, registered as ITokenCreationService."
+    },
+    {
+      "assertion": "Registers the KMS public key as the signing credential with AddSigningCredential and disables automatic key management (KeyManagement.Enabled = false)",
+      "pass": true,
+      "rationale": "Registers public key via AddSigningCredential and sets KeyManagement.Enabled = false."
+    },
+    {
+      "assertion": "Takes alg and kid from the registered signing credential so the header matches discovery/JWKS",
+      "pass": true,
+      "rationale": "Sets header alg and kid from the credential from GetSigningCredentialsAsync."
+    },
+    {
+      "assertion": "Notes SAML signing does not go through ITokenCreationService and requires a private key, so this approach doesn't cover SAML",
+      "pass": true,
+      "rationale": "States SAML doesn't use ITokenCreationService and needs a private key, so this approach doesn't cover it."
+    },
+    {
+      "assertion": "Mentions rotation is the developer's responsibility (publish new key via AddValidationKey ahead of time) and each token costs a KMS call",
+      "pass": true,
+      "rationale": "Notes manual rotation via AddValidationKey ahead of time and a network call per token."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

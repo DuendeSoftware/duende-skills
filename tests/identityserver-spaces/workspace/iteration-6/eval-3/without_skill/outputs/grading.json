@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains setting IssuerUri forces the same issuer/iss for every space",
+      "pass": true,
+      "rationale": "Explains static IssuerUri overrides the issuer/iss for every request regardless of host or path."
+    },
+    {
+      "assertion": "Recommends leaving IssuerUri unset so the issuer is inferred from each request's origin and path base",
+      "pass": true,
+      "rationale": "Says remove IssuerUri so the issuer is derived from scheme, host and path base."
+    },
+    {
+      "assertion": "Notes that data and discovery endpoints remain separate per space even with a fixed IssuerUri",
+      "pass": false,
+      "rationale": "Does not say data/discovery endpoints stay separate per space."
+    },
+    {
+      "assertion": "Mentions the same applies to Multi-Issuer",
+      "pass": false,
+      "rationale": "No mention of Multi-Issuer."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

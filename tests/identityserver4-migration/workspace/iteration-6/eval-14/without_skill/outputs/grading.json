@@ -1,0 +1,29 @@
+{
+  "eval_id": 14,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response warns that the issuer URI (iss claim) must remain the same after migration",
+      "pass": true,
+      "rationale": "Says options.IssuerUri should match the value existing tokens carry, i.e. issuer must not change."
+    },
+    {
+      "assertion": "Response explains that changing the issuer breaks existing tokens and/or client trust relationships",
+      "pass": true,
+      "rationale": "Notes iss mismatch breaks validation by APIs/clients."
+    },
+    {
+      "assertion": "Response recommends setting options.IssuerUri explicitly in the Duende IdentityServer configuration",
+      "pass": true,
+      "rationale": "Recommends options.IssuerUri = \"https://login.example.com\"."
+    },
+    {
+      "assertion": "Response suggests checking the current /.well-known/openid-configuration discovery document to find the existing issuer value",
+      "pass": true,
+      "rationale": "Says check old discovery doc for the value."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

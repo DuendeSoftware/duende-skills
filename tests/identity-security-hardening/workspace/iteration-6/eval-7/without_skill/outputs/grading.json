@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "No client uses GrantTypes.Implicit and no client has RequirePkce = false",
+      "pass": true,
+      "rationale": "No Implicit; spa.legacy Code with PKCE; web.app RequirePkce true."
+    },
+    {
+      "assertion": "No redirect URI contains wildcard characters (* or regex patterns)",
+      "pass": true,
+      "rationale": "Exact https redirect URIs, no wildcards."
+    },
+    {
+      "assertion": "AddDeveloperSigningCredential is removed and replaced with automatic key management or proper signing credentials",
+      "pass": true,
+      "rationale": "AddDeveloperSigningCredential removed; KeyManagement.Enabled with ES256/RS256."
+    },
+    {
+      "assertion": "All access token lifetimes are 900 seconds or less for interactive clients",
+      "pass": true,
+      "rationale": "Interactive clients (web.app, spa.legacy, native) 300s or less; 3600 only on M2M clients."
+    },
+    {
+      "assertion": "The output includes a summary or explanation listing the security issues found and how they were remediated",
+      "pass": true,
+      "rationale": "Findings table with fixes and notes on appsettings changes."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

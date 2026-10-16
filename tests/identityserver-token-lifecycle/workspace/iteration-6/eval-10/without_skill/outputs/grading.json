@@ -1,0 +1,24 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains reference tokens allow immediate revocation by deleting the persisted grant record while JWTs remain valid until expiry",
+      "pass": false,
+      "rationale": "Says revocation is 'instant' but never explains deleting the persisted grant record or that JWTs remain valid until expiry."
+    },
+    {
+      "assertion": "Explains the trade-off that APIs must call the introspection endpoint (or use its cache), so they need connectivity to IdentityServer, a poor fit for offline/air-gapped scenarios",
+      "pass": true,
+      "rationale": "Explains API must call introspection endpoint, failing when IdentityServer unreachable/offline."
+    },
+    {
+      "assertion": "Suggests short-lived JWTs with refresh tokens as an alternative for offline scenarios",
+      "pass": true,
+      "rationale": "Recommends short-lived JWTs (5-15 min) with refresh tokens."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 3,
+  "score": 0.6666666666666666
+}

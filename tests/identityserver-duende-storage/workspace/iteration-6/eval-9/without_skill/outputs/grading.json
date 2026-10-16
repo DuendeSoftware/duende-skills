@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Installs Duende.Cli (preview) and runs duende storage migrate --provider postgresql, using --dry-run to generate SQL for review",
+      "pass": false,
+      "rationale": "Uses EF migrations scripts, not Duende.Cli or duende storage migrate/--dry-run."
+    },
+    {
+      "assertion": "Passes the connection string via DUENDE_STORAGE_CONNECTION_STRING",
+      "pass": false,
+      "rationale": "No DUENDE_STORAGE_CONNECTION_STRING."
+    },
+    {
+      "assertion": "States the preview CLI does not support Oracle and recommends IStorageInstanceSchema.BuildMigrationScript for DBA review",
+      "pass": false,
+      "rationale": "No statement about CLI Oracle support or BuildMigrationScript."
+    },
+    {
+      "assertion": "Mentions running one migration process at a time and running the CLI once per storage instance's connection string",
+      "pass": false,
+      "rationale": "No mention of one migration process at a time or per-instance CLI runs."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

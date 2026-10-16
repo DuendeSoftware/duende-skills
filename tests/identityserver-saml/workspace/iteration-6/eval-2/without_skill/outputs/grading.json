@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Warns against using in-memory stores in production",
+      "pass": true,
+      "rationale": "Says to replace AddInMemorySamlServiceProviders with a persistent store for production, which implies in-memory is unsuitable, though the warning is brief."
+    },
+    {
+      "assertion": "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+      "pass": false,
+      "rationale": "FindByEntityIdAsync(string entityId) has no CancellationToken parameter."
+    },
+    {
+      "assertion": "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+      "pass": false,
+      "rationale": "No GetAllSamlServiceProvidersAsync / IAsyncEnumerable implemented."
+    },
+    {
+      "assertion": "Uses AddSamlServiceProviderStore<T>() for registration",
+      "pass": true,
+      "rationale": "Uses builder.Services.AddSamlServiceProviderStore<CachingSamlServiceProviderStore>()."
+    },
+    {
+      "assertion": "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer",
+      "pass": false,
+      "rationale": "Hand-rolls IMemoryCache decorator; no AddSamlServiceProviderStoreCache<T>() or HybridCache."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

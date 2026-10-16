@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends a separate dedicated host for IdentityServer rather than co-hosting with the API",
+      "pass": true,
+      "rationale": "Recommends separate ASP.NET Core app instead of co-hosting."
+    },
+    {
+      "assertion": "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs",
+      "pass": false,
+      "rationale": "Mentions security boundary and middleware/auth conflicts but never attack surface."
+    },
+    {
+      "assertion": "Response advises against explicitly setting IssuerUri and recommends letting it be inferred from request URLs by default",
+      "pass": true,
+      "rationale": "Says let it be inferred from request host in general."
+    },
+    {
+      "assertion": "Response explains that setting IssuerUri manually is only needed when IdentityServer is accessed on a different address than the expected issuer (e.g., internal Kubernetes address)",
+      "pass": true,
+      "rationale": "Says explicit only needed when public URL differs from what the server sees (e.g. behind proxies)."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

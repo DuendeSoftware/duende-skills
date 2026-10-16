@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-hosting-setup",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 36,
+      "passed": 36,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 36,
+      "passed": 32,
+      "failed": 4,
+      "pass_rate": 0.89
+    },
+    "delta": {
+      "assertions_improved": 4,
+      "delta_pass_rate": 0.11
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Response mentions that UseAuthorization() must not be omitted as it is required by the Duende UI template"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Response explains that AddAspNetIdentity registers IProfileService for adding claims to tokens"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "A CustomProfileService class inherits from ProfileService<ApplicationUser> and overrides IsUserActiveAsync"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Response explains that co-hosting with an API increases the attack surface and creates conflicting middleware needs"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Lists passkeys/WebAuthn/FIDO2 as a supported authentication method",
+      "pass": true,
+      "rationale": "Table lists Passkeys as WebAuthn/FIDO2."
+    },
+    {
+      "assertion": "Lists TOTP (authenticator apps) as a supported method",
+      "pass": true,
+      "rationale": "Table lists TOTP authenticator apps (RFC 6238)."
+    },
+    {
+      "assertion": "Mentions that multiple authentication methods can coexist for the same user",
+      "pass": true,
+      "rationale": "Table shows several methods coexisting and advises enrolling TOTP plus recovery codes alongside passkeys, with passkeys also usable as second factor."
+    },
+    {
+      "assertion": "Notes that OTP (email/SMS) is the default passwordless flow",
+      "pass": true,
+      "rationale": "Table marks OTP (default) email/SMS and says passwordless-first."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

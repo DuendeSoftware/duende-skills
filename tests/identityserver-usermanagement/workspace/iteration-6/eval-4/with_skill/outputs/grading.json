@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Reads the source ASP.NET Identity DB and calls IUserImporter.ImportAsync with UserImportRecord(s) (does not use a non-existent AddAspNetIdentityMigration option)",
+      "pass": true,
+      "rationale": "Reads source via a legacy IdentityDbContext, builds UserImportRecord and calls IUserImporter.ImportAsync; no AddAspNetIdentityMigration."
+    },
+    {
+      "assertion": "Stores existing hashes via PasswordImport(HashedPasswordData) and registers a custom IPasswordHashAlgorithm (AddPasswordHashAlgorithm<T>) to verify them, with re-hash on first successful login",
+      "pass": true,
+      "rationale": "Uses PasswordImport(HashedPasswordData), registers AddPasswordHashAlgorithm<AspNetIdentityPasswordHashAlgorithm>, with NeedsRehash => true for rehash on first login."
+    },
+    {
+      "assertion": "Mentions re-runs skip existing users by default, and an IUserImportConflictResolver can overwrite",
+      "pass": true,
+      "rationale": "States existing records are skipped by default and registers an IUserImportConflictResolver (OverwriteConflictResolver) to overwrite."
+    },
+    {
+      "assertion": "Mentions that after migration users can enroll in passwordless methods",
+      "pass": true,
+      "rationale": "Ends with 'Afterwards users can enroll in passwordless methods.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

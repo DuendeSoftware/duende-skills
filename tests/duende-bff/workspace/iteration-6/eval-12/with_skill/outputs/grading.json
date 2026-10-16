@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+      "pass": true,
+      "rationale": "AddFrontend(\"admin\") with MatchingPath=/admin and CdnIndexHtmlUrl admin CDN."
+    },
+    {
+      "assertion": "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL",
+      "pass": true,
+      "rationale": "AddFrontend(\"portal\") with MatchingPath=/portal and portal CdnIndexHtmlUrl."
+    },
+    {
+      "assertion": "Each frontend has its own ConfigureOpenIdConnect with distinct client configuration",
+      "pass": true,
+      "rationale": "Each frontend has own ConfigureOpenIdConnect with admin-client / portal-client."
+    },
+    {
+      "assertion": "Each frontend has AddRemoteApi or equivalent remote API proxying configuration",
+      "pass": true,
+      "rationale": "Each frontend calls AddRemoteApi to its own API target."
+    },
+    {
+      "assertion": "Uses AddBff() as the base builder",
+      "pass": true,
+      "rationale": "Uses AddBff() as base builder."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

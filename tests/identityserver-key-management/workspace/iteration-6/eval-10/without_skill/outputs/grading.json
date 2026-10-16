@@ -1,0 +1,39 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States IdentityServer has no built-in HSM/KMS provider and a custom ISigningKeyStore does not give non-exportable keys",
+      "pass": false,
+      "rationale": "Never states no built-in KMS provider; its approach is a custom ISigningCredentialStore, the opposite of the claim."
+    },
+    {
+      "assertion": "Subclasses DefaultTokenCreationService and overrides CreateJwtAsync to call the KMS async sign API, registering it as ITokenCreationService",
+      "pass": false,
+      "rationale": "No DefaultTokenCreationService subclass or ITokenCreationService; uses ISigningCredentialStore/IValidationKeysStore."
+    },
+    {
+      "assertion": "Registers the KMS public key as the signing credential with AddSigningCredential and disables automatic key management (KeyManagement.Enabled = false)",
+      "pass": false,
+      "rationale": "Disables key management but doesn't use AddSigningCredential with the public key; uses custom stores."
+    },
+    {
+      "assertion": "Takes alg and kid from the registered signing credential so the header matches discovery/JWKS",
+      "pass": false,
+      "rationale": "Doesn't take alg/kid from the registered credential in a token creation override."
+    },
+    {
+      "assertion": "Notes SAML signing does not go through ITokenCreationService and requires a private key, so this approach doesn't cover SAML",
+      "pass": false,
+      "rationale": "Says SAML needs an X.509 cert but not that it bypasses ITokenCreationService; admits uncertainty."
+    },
+    {
+      "assertion": "Mentions rotation is the developer's responsibility (publish new key via AddValidationKey ahead of time) and each token costs a KMS call",
+      "pass": false,
+      "rationale": "Doesn't mention developer-managed rotation via AddValidationKey or per-token KMS call cost."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 6,
+  "score": 0.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "AddOperationalStore options set EnableTokenCleanup to false",
+      "pass": true,
+      "rationale": "The web-node snippet sets o.EnableTokenCleanup = false in AddOperationalStore."
+    },
+    {
+      "assertion": "A class inheriting from BackgroundService (or IHostedService) is created named TokenCleanupWorker or similar",
+      "pass": true,
+      "rationale": "TokenCleanupWorker : BackgroundService is defined."
+    },
+    {
+      "assertion": "The worker class injects or resolves TokenCleanupService from Duende.IdentityServer.EntityFramework",
+      "pass": true,
+      "rationale": "Resolves TokenCleanupService via scope.ServiceProvider.GetRequiredService<TokenCleanupService>() from an injected IServiceScopeFactory."
+    },
+    {
+      "assertion": "The ExecuteAsync method calls CleanupGrantsAsync() in a while loop that respects the CancellationToken",
+      "pass": true,
+      "rationale": "ExecuteAsync runs a do { ... } while (await timer.WaitForNextTickAsync(ct)) loop and calls cleanup.CleanupGrantsAsync(ct); the loop is bound to the CancellationToken."
+    },
+    {
+      "assertion": "The delay between cleanup runs is 2 hours (TimeSpan.FromHours(2) or equivalent)",
+      "pass": true,
+      "rationale": "The PeriodicTimer interval is TimeSpan.FromHours(2)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

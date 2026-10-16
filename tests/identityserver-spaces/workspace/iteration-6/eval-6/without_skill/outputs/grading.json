@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Injects ISpaceContextAccessor into a scoped UI service and reads the resolved SpaceId",
+      "pass": false,
+      "rationale": "Uses hypothetical ITenantContext, not ISpaceContextAccessor/SpaceId."
+    },
+    {
+      "assertion": "States Spaces do not add per-space UI/branding; you load your own space-aware settings",
+      "pass": false,
+      "rationale": "Does not state Spaces provide no per-space branding."
+    },
+    {
+      "assertion": "Advises preferring the resolved space over trusting a client-supplied tenant: acr_values hint",
+      "pass": true,
+      "rationale": "Says acr_values tenant is client-supplied and spoofable, and the URL tenant should be preferred."
+    },
+    {
+      "assertion": "Notes space resolution is independent of acr_values and runs before routing",
+      "pass": false,
+      "rationale": "Does not say space resolution is independent of acr_values or runs before routing."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

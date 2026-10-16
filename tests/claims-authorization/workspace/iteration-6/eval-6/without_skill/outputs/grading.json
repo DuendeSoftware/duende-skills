@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements IExtensionGrantValidator with the GrantType set to 'urn:ietf:params:oauth:grant-type:token-exchange'",
+      "pass": true,
+      "rationale": "IExtensionGrantValidator with GrantType => \"urn:ietf:params:oauth:grant-type:token-exchange\"."
+    },
+    {
+      "assertion": "Extracts and validates the subject_token from the request",
+      "pass": true,
+      "rationale": "Reads context.Request.Raw.Get(\"subject_token\") and validates it with ITokenValidator.ValidateAccessTokenAsync."
+    },
+    {
+      "assertion": "Returns a GrantValidationResult with a subject ID and custom claims array",
+      "pass": true,
+      "rationale": "Returns new GrantValidationResult(subject, authenticationMethod, claims) with original_client_id claim array."
+    },
+    {
+      "assertion": "Registers the validator with AddExtensionGrantValidator<T>() on the IdentityServer builder",
+      "pass": true,
+      "rationale": "Registers with .AddExtensionGrantValidator<TokenExchangeGrantValidator>()."
+    },
+    {
+      "assertion": "Mentions that IProfileService is called after the grant validator and can augment claims further",
+      "pass": false,
+      "rationale": "Only says 'make your profile service pass context.Subject.Claims through'; never states IProfileService is invoked after the grant validator and can augment claims."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

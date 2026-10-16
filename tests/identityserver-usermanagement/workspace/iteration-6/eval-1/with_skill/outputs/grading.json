@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+      "pass": true,
+      "rationale": "Shows `dotnet add package Duende.UserManagement.IdentityServer8`."
+    },
+    {
+      "assertion": "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+      "pass": true,
+      "rationale": "Shows `dotnet add package Duende.Storage.Sqlite`."
+    },
+    {
+      "assertion": "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+      "pass": true,
+      "rationale": "Calls `.AddUserManagement()` and shows the lambda form `.AddUserManagement(o => o.Authentication(a => a.UseSmtpOtpDispatcher(...)))` for email delivery."
+    },
+    {
+      "assertion": "Selects the SQLite provider with AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder (not inside the AddUserManagement lambda)",
+      "pass": true,
+      "rationale": "Uses `.AddStorage(storage => storage.AddSqlite(o => o.ConnectionString = ...))` on the IdentityServer builder and explicitly warns against placing it in AddUserManagement."
+    },
+    {
+      "assertion": "Creates the database schema with IStorageInstanceSchema.MigrateAsync() resolved from IStorageInstanceSchemaFactory.GetStorageInstanceSchema(...)",
+      "pass": true,
+      "rationale": "Resolves IStorageInstanceSchemaFactory, calls GetStorageInstanceSchema(ct) then schema.MigrateAsync(ct)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions> is shown in full."
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": true,
+      "rationale": "ITestClaimsProvider with TestClaimsProvider.SetClaims/ClearClaims lets tests set claims per test."
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "ApiFactory uses ConfigureTestServices with AddAuthentication(...).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>."
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "InitializeAsync calls ClearClaims and GetProducts_Unauthenticated_ShouldReturn401 asserts HttpStatusCode.Unauthorized."
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely \u2014 authorization policies remain active",
+      "pass": true,
+      "rationale": "Authorization is untouched; text says not to disable it and tests assert 403 from policy."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

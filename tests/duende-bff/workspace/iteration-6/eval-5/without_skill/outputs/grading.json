@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures UseForwardedHeaders with ForwardedHeaders.XForwardedFor and ForwardedHeaders.XForwardedProto",
+      "pass": true,
+      "rationale": "ForwardedHeadersOptions includes XForwardedFor and XForwardedProto (plus Host), applied via UseForwardedHeaders."
+    },
+    {
+      "assertion": "Places UseForwardedHeaders before UseAuthentication in the middleware pipeline",
+      "pass": true,
+      "rationale": "UseForwardedHeaders is first, before UseAuthentication."
+    },
+    {
+      "assertion": "Configures UsePathBase('/app') for the sub-path mount",
+      "pass": true,
+      "rationale": "UsePathBase(\"/app\") present."
+    },
+    {
+      "assertion": "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor",
+      "pass": false,
+      "rationale": "Only vaguely mentions Secure/SameSite on correlation cookies; no SameSite=Lax guidance for cross-site IDP."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

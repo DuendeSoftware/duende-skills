@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls ConfigureDPoPTokensForScheme(\"token\", options => ...) on IServiceCollection with ProofTokenExpirationMode = DPoPProofExpirationMode.Nonce (or Both)",
+      "pass": false,
+      "rationale": "Uses nonexistent options (ValidationMode = ExpirationValidationMode.Nonce) rather than ProofTokenExpirationMode = DPoPProofExpirationMode."
+    },
+    {
+      "assertion": "Restricts ProofTokenValidationParameters.ValidAlgorithms to ES256 (SecurityAlgorithms.EcdsaSha256)",
+      "pass": false,
+      "rationale": "Uses AllowedProofAlgorithms = [\"ES256\"], not ProofTokenValidationParameters.ValidAlgorithms."
+    },
+    {
+      "assertion": "Registers AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache) for replay detection and a distributed cache (e.g. Redis) for multi-instance so replays are detected across instances",
+      "pass": false,
+      "rationale": "No AddKeyedHybridCache(ProofTokenReplayHybridCache); only Redis IDistributedCache."
+    },
+    {
+      "assertion": "Notes nonces are protected with ASP.NET Core Data Protection so keys must be shared across instances",
+      "pass": true,
+      "rationale": "Explains nonces use Data Protection and key ring must be shared."
+    },
+    {
+      "assertion": "Mentions use_dpop_nonce 401 with a DPoP-Nonce header and that the client retries",
+      "pass": true,
+      "rationale": "Describes 401 use_dpop_nonce with DPoP-Nonce header and client retry."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

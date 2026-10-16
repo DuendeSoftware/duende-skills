@@ -1,0 +1,24 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Replaces context.Client with context.Application on both ProfileDataRequestContext and IsActiveContext",
+      "pass": true,
+      "rationale": "States Client replaced by IConnectedApplication? Application on both contexts and shows context.Application in both methods."
+    },
+    {
+      "assertion": "Uses context.Application?.Identifier for the client ID / entity ID and pattern-matches on Client or SamlServiceProvider for protocol-specific members",
+      "pass": true,
+      "rationale": "Uses context.Application?.Identifier and pattern matches 'is Client client' / 'is SamlServiceProvider sp'."
+    },
+    {
+      "assertion": "Warns the profile service can now be invoked for SAML requests, identifiable in IsActiveAsync via context.Caller == IdentityServerConstants.ProfileIsActiveCallers.SamlSsoEndpoint",
+      "pass": true,
+      "rationale": "Warns profile service may be invoked for SAML; shows Caller == IdentityServerConstants.ProfileIsActiveCallers.SamlSsoEndpoint."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

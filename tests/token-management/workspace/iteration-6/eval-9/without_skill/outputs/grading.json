@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+      "pass": true,
+      "rationale": "Explains HttpContext is only valid during the initial request and cookie can't be updated over SignalR."
+    },
+    {
+      "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+      "pass": false,
+      "rationale": "Registers AddSingleton<IUserTokenStore, ServerSideTokenStore>() and never calls AddBlazorServerAccessTokenManagement<T>()."
+    },
+    {
+      "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+      "pass": false,
+      "rationale": "ServerSideTokenStore is not implemented; no GetTokenAsync/StoreTokenAsync/ClearTokenAsync shown."
+    },
+    {
+      "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store",
+      "pass": false,
+      "rationale": "OnTokenValidated is mentioned only in prose; no handler code persists tokens."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

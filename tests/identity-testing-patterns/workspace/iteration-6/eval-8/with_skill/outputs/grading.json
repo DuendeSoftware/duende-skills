@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends setting options.KeyManagement.Enabled = false in test configuration",
+      "pass": true,
+      "rationale": "Shows options.KeyManagement.Enabled = false in the AddIdentityServer options."
+    },
+    {
+      "assertion": "Recommends AddDeveloperSigningCredential(persistKey: false) to avoid disk writes",
+      "pass": true,
+      "rationale": "Shows .AddDeveloperSigningCredential(persistKey: false) as in-memory, nothing written."
+    },
+    {
+      "assertion": "Warns against hard-coding localhost ports \u2014 use factory.CreateClient() BaseAddress instead",
+      "pass": true,
+      "rationale": "Section 2 contrasts hard-coded localhost:5001 with new Uri(client.BaseAddress!, \"connect/token\") from factory.CreateClient()."
+    },
+    {
+      "assertion": "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests",
+      "pass": true,
+      "rationale": "Section 4 explicitly warns a shared HttpClient/ClaimsProvider lets identity bleed between tests under parallelism."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

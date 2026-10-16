@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)",
+      "pass": false,
+      "rationale": "No KeyManagement.SigningAlgorithms config; only a note about AddSigningCredential(key,\"PS256\")."
+    },
+    {
+      "assertion": "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms",
+      "pass": false,
+      "rationale": "No DPoP.SupportedDPoPSigningAlgorithms; uses AllowedJwtAlgorithms instead."
+    },
+    {
+      "assertion": "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0",
+      "pass": false,
+      "rationale": "Sets DPoP.ServerClockSkew, not JwtValidationClockSkew."
+    },
+    {
+      "assertion": "Client has RequireDPoP = true AND RequirePushedAuthorization = true",
+      "pass": true,
+      "rationale": "RequirePushedAuthorization = true and RequireDPoP = true."
+    },
+    {
+      "assertion": "Client uses a JsonWebKey secret (not shared secret) for authentication, consistent with FAPI 2.0 requirement for private_key_jwt or mTLS",
+      "pass": true,
+      "rationale": "JsonWebKey secret with private_key_jwt noted."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

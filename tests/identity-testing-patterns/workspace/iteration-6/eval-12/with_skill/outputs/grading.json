@@ -1,0 +1,39 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses a CookieContainer with HttpClientHandler so cookies flow across requests",
+      "pass": true,
+      "rationale": "new HttpClientHandler { CookieContainer = cookies } is used to build the HttpClient."
+    },
+    {
+      "assertion": "Uses AngleSharp (HtmlParser().ParseDocumentAsync) to parse the login page HTML",
+      "pass": true,
+      "rationale": "Uses new HtmlParser().ParseDocumentAsync(html) from AngleSharp."
+    },
+    {
+      "assertion": "Reads the antiforgery token from input[name='__RequestVerificationToken'] via GetAttribute(\"value\")",
+      "pass": true,
+      "rationale": "form.QuerySelector(\"input[name='__RequestVerificationToken']\")!.GetAttribute(\"value\")."
+    },
+    {
+      "assertion": "POSTs FormUrlEncodedContent with Username, Password, __RequestVerificationToken, and button=login to the form's resolved action URL",
+      "pass": true,
+      "rationale": "PostAsync(action, new FormUrlEncodedContent) with Username, Password, __RequestVerificationToken, button=login, where action = new Uri(RequestUri, form.GetAttribute(\"action\"))."
+    },
+    {
+      "assertion": "Asserts success by comparing the final RequestMessage.RequestUri.Host to the original protected host",
+      "pass": true,
+      "rationale": "Asserts result.RequestMessage.RequestUri.Host equals the original app host."
+    },
+    {
+      "assertion": "Does NOT require Playwright, Selenium, or another headless browser",
+      "pass": true,
+      "rationale": "Uses only HttpClient and AngleSharp; says no Playwright/Selenium needed."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

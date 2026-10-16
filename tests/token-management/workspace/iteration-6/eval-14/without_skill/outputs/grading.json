@@ -1,0 +1,34 @@
+{
+  "eval_id": 14,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the library registers IConfigureNamedOptions<OpenIdConnectOptions> wrapping OnRedirectToIdentityProvider, OnAuthorizationCodeReceived, OnTokenValidated and OnPushAuthorization",
+      "pass": false,
+      "rationale": "Doesn't state the IConfigureNamedOptions wrapping or list all four events; mentions only OnAuthorizationCodeReceived/OnRedirectToIdentityProvider."
+    },
+    {
+      "assertion": "States assigning new event handlers/OpenIdConnectEvents replaces the DPoP handlers; capture the existing handler and invoke it from yours",
+      "pass": true,
+      "rationale": "States assigning new OpenIdConnectEvents replaces the library's handlers; shows capturing 'previous' and calling it."
+    },
+    {
+      "assertion": "States OpenIdConnectOptions.EventsType must not be used because it silently removes all library handlers",
+      "pass": false,
+      "rationale": "Never mentions EventsType."
+    },
+    {
+      "assertion": "With PAR, signs the request in OnPushAuthorization before invoking the library handler (so dpop_jkt is included in the signed request and the client assertion is added afterwards); without PAR signs in OnRedirectToIdentityProvider after the library handler",
+      "pass": false,
+      "rationale": "Calls the original handler first in OnRedirectToIdentityProvider and says to call original first in OnPushAuthorization, reversing the required sign-before-library order for PAR."
+    },
+    {
+      "assertion": "Notes the library adds the client assertion from IClientAssertionService to the code exchange and, on .NET 9+, the PAR request, but does not create JAR request objects",
+      "pass": false,
+      "rationale": "Doesn't state the library adds client assertions to code exchange/PAR or that it doesn't create JAR objects."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

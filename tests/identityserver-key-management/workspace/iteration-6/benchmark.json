@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-key-management",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 49,
+      "passed": 49,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 49,
+      "passed": 36,
+      "failed": 13,
+      "pass_rate": 0.73
+    },
+    "delta": {
+      "assertions_improved": 13,
+      "delta_pass_rate": 0.27
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 6,
+        "total": 6,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "States IdentityServer has no built-in HSM/KMS provider and a custom ISigningKeyStore does not give non-exportable keys",
+        "Subclasses DefaultTokenCreationService and overrides CreateJwtAsync to call the KMS async sign API, registering it as ITokenCreationService",
+        "Registers the KMS public key as the signing credential with AddSigningCredential and disables automatic key management (KeyManagement.Enabled = false)",
+        "Takes alg and kid from the registered signing credential so the header matches discovery/JWKS",
+        "Notes SAML signing does not go through ITokenCreationService and requires a private key, so this approach doesn't cover SAML",
+        "Mentions rotation is the developer's responsibility (publish new key via AddValidationKey ahead of time) and each token costs a KMS call"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 3,
+        "total": 6,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Restarts every instance because keys are cached for KeyManagement.KeyCacheDuration, and confirms each instance's JWKS no longer lists the compromised kid",
+        "Notifies relying parties that cache JWKS and notes tokens signed with the key become invalid",
+        "Notes backups of signing keys require the matching Data Protection keys and the same application name"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Program.cs contains 'options.KeyManagement.RsaKeySize = 4096'"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "States that a manually registered raw RSA key, including one from AddDeveloperSigningCredential(), cannot be auto-wrapped into an X.509 certificate for SAML",
+        "Mentions that PropagationTime and RetentionDuration control how long keys/certs are published before signing and retained for validation during rollover",
+        "Notes that under Automatic Key Management the SAML component auto-wraps managed RSA keys in self-signed X.509 certificates, so UseX509Certificate is not required just to enable SAML"
+      ]
+    }
+  ]
+}

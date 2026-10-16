@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies Data Protection key ring as the root cause \u2014 each instance generates its own keys",
+      "pass": true,
+      "rationale": "States default in-memory key ring makes each node generate its own keys."
+    },
+    {
+      "assertion": "Recommends configuring a shared key store (e.g., PersistKeysToDbContext, PersistKeysToAzureBlobStorage, or Redis)",
+      "pass": true,
+      "rationale": "Shows PersistKeysToDbContext and mentions Azure Blob + Key Vault."
+    },
+    {
+      "assertion": "Recommends server-side sessions with a shared store (AddEntityFrameworkServerSideSessions) instead of in-memory sessions",
+      "pass": true,
+      "rationale": "Shows AddEntityFrameworkServerSideSessions with shared SQL store."
+    },
+    {
+      "assertion": "Shows code for AddDataProtection() with a persistent key store",
+      "pass": true,
+      "rationale": "AddDataProtection().SetApplicationName().PersistKeysToDbContext shown."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

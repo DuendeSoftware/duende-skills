@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends RequiredTokenType.UserOrNone",
+      "pass": true,
+      "rationale": "Recommends RequiredTokenType.UserOrNone."
+    },
+    {
+      "assertion": "Explains that UserOrNone forwards user token if available, no token if anonymous, without triggering a challenge",
+      "pass": true,
+      "rationale": "Says user token if logged in, otherwise none attached and request still forwarded; not explicit about no challenge but implied by forwarding."
+    },
+    {
+      "assertion": "Does NOT recommend RequiredTokenType.User (which would challenge anonymous users)",
+      "pass": true,
+      "rationale": "Does not recommend User; only lists it as requiring login."
+    },
+    {
+      "assertion": "Shows MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrNone)",
+      "pass": true,
+      "rationale": "Shows MapRemoteBffApiEndpoint with .WithAccessToken(RequiredTokenType.UserOrNone)."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

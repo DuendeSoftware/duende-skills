@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets ForwardLimit to 2 (or the correct number matching the proxy chain depth), explaining that the default of 1 only processes headers from a single proxy",
+      "pass": true,
+      "rationale": "Sets ForwardLimit = 2 and explains default is 1."
+    },
+    {
+      "assertion": "Output adds both proxy IP addresses to KnownProxies or their network ranges to KnownNetworks",
+      "pass": false,
+      "rationale": "Adds only Nginx to KnownProxies; Cloudflare ranges only a comment 'if Nginx isn't overriding'."
+    },
+    {
+      "assertion": "Output includes ForwardedHeaders.XForwardedHost in addition to XForwardedProto to fix the incorrect host name",
+      "pass": true,
+      "rationale": "Includes XForwardedHost with XForwardedProto."
+    },
+    {
+      "assertion": "Output explains that each proxy in the chain must be trusted (added to KnownProxies/KnownNetworks) for the forwarded headers to be processed",
+      "pass": false,
+      "rationale": "Only says Nginx must be trusted; doesn't state each proxy in the chain must be trusted."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

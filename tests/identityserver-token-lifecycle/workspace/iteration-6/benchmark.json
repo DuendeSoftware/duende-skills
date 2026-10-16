@@ -1,0 +1,218 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-token-lifecycle",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 43,
+      "passed": 43,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 43,
+      "passed": 38,
+      "failed": 5,
+      "pass_rate": 0.88
+    },
+    "delta": {
+      "assertions_improved": 5,
+      "delta_pass_rate": 0.12
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666
+      },
+      "delta": 0.33333333333333337,
+      "without_skill_failures": [
+        "Explains reference tokens allow immediate revocation by deleting the persisted grant record while JWTs remain valid until expiry"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Explains that JWT access tokens cannot be revoked (RFC 7009 revocation applies only to reference access tokens and refresh tokens), which is why reference tokens are used here for immediate revocation"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "The validator creates an 'act' claim using JwtClaimTypes.Actor containing the calling client's client_id for delegation"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "The implementation checks for token exchange authentication method and forwards the JwtClaimTypes.Actor claim when present"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "DeleteOneTimeOnlyRefreshTokensOnUse is set to false in the persistent grant options or operational store options"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    }
+  ]
+}

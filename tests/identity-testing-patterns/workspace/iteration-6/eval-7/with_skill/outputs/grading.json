@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ProfileDataRequestContext with a subject ClaimsPrincipal containing a sub claim",
+      "pass": true,
+      "rationale": "Subject(\"user-123\") builds a ClaimsPrincipal with a JwtClaimTypes.Subject claim and is passed to new ProfileDataRequestContext(...)."
+    },
+    {
+      "assertion": "Mocks an IUserRepository (or equivalent) to return known role values",
+      "pass": true,
+      "rationale": "Mock<IUserRepository> with Setup(r => r.GetRolesAsync(\"user-123\", ...)).ReturnsAsync([\"admin\",\"billing\"])."
+    },
+    {
+      "assertion": "Calls GetProfileDataAsync and asserts that context.IssuedClaims contains the expected role claims",
+      "pass": true,
+      "rationale": "Calls _sut.GetProfileDataAsync(context) and asserts context.IssuedClaims role values contain admin and billing."
+    },
+    {
+      "assertion": "Tests IsActiveAsync and asserts context.IsActive is set correctly based on the mock",
+      "pass": true,
+      "rationale": "IsActive tests build IsActiveContext, mock IsActiveAsync true/false and assert context.IsActive."
+    },
+    {
+      "assertion": "Does NOT require a running IdentityServer \u2014 tests the service in isolation",
+      "pass": true,
+      "rationale": "Pure unit tests with mocks; no WebApplicationFactory or server (integration only mentioned as fallback)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

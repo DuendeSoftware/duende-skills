@@ -1,0 +1,24 @@
+{
+  "eval_id": 17,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the BFF removes the Cookie header after YARP copies headers and after the route's configured transforms run, so a route transform that sets Cookie has no effect while removal is on",
+      "pass": true,
+      "rationale": "Says removal occurs after YARP header copy and after route transforms, so Cookie transform is overwritten."
+    },
+    {
+      "assertion": "Notes transforms/transform providers registered after AddBffExtensions (e.g. AddTransforms on the returned IReverseProxyBuilder) run later and can set a specific Cookie",
+      "pass": true,
+      "rationale": "Shows AddTransforms after AddBffExtensions running later and able to set Cookie."
+    },
+    {
+      "assertion": "Warns not to copy the browser's cookies back onto the request",
+      "pass": true,
+      "rationale": "Says set only the specific cookie; don't copy browser's cookies."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

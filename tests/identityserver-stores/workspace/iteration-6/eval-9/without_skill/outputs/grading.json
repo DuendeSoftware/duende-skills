@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs registers RedisPersistedGrantStore as IPersistedGrantStore using AddTransient or AddScoped",
+      "pass": false,
+      "rationale": "Registers RedisPersistedGrantStore via AddPersistedGrantStore<T>() rather than AddTransient/AddScoped as the assertion specifies."
+    },
+    {
+      "assertion": "Program.cs registers RedisDeviceFlowStore as IDeviceFlowStore using AddTransient or AddScoped",
+      "pass": false,
+      "rationale": "Registers RedisDeviceFlowStore via AddDeviceFlowStore<T>() rather than AddTransient/AddScoped as the assertion specifies."
+    },
+    {
+      "assertion": "Program.cs does not call AddOperationalStore for EF Core since custom stores replace it",
+      "pass": true,
+      "rationale": "The snippet comment says 'don't call AddOperationalStore' and the chain does not call it."
+    },
+    {
+      "assertion": "Program.cs still calls AddIdentityServer() for the core IdentityServer registration",
+      "pass": true,
+      "rationale": "builder.Services.AddIdentityServer() is called with in-memory clients, scopes and identity resources."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

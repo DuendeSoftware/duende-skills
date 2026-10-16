@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains setting IssuerUri forces the same issuer/iss for every space",
+      "pass": true,
+      "rationale": "States the fixed IssuerUri bypasses inference so every space returns the same issuer/iss."
+    },
+    {
+      "assertion": "Recommends leaving IssuerUri unset so the issuer is inferred from each request's origin and path base",
+      "pass": true,
+      "rationale": "Says leave IssuerUri unset so issuer is inferred from request origin plus path base."
+    },
+    {
+      "assertion": "Notes that data and discovery endpoints remain separate per space even with a fixed IssuerUri",
+      "pass": true,
+      "rationale": "Parenthetical: 'Data and discovery endpoints still differ per space; only the issuer value is identical.'"
+    },
+    {
+      "assertion": "Mentions the same applies to Multi-Issuer",
+      "pass": true,
+      "rationale": "States 'The same rule applies to Multi-Issuer.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output sets SaveTokens = true on the OpenIdConnect handler options",
+      "pass": true,
+      "rationale": "options.SaveTokens = true is set."
+    },
+    {
+      "assertion": "Output includes 'offline_access' in the OIDC scope list to enable refresh tokens",
+      "pass": true,
+      "rationale": "Scope list includes offline_access."
+    },
+    {
+      "assertion": "Output wires up RevokeRefreshTokenAsync() in the cookie OnSigningOut event handler",
+      "pass": false,
+      "rationale": "RevokeRefreshTokenAsync is called in a /logout endpoint, not in the cookie OnSigningOut event, so the sign-out event is not wired."
+    },
+    {
+      "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to register user token management services",
+      "pass": true,
+      "rationale": "AddOpenIdConnectAccessTokenManagement() is called."
+    },
+    {
+      "assertion": "Output registers a named HTTP client using AddUserAccessTokenHttpClient with the user's access token",
+      "pass": true,
+      "rationale": "AddUserAccessTokenHttpClient(\"invoices\", ...) is registered."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 12,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States SignOutAsync removes the IdentityServer cookie and the server-side session record but not the external IdP session, client sessions, refresh/reference tokens, or consents by default",
+      "pass": false,
+      "rationale": "Claims clients are notified and refresh/reference tokens revoked on logout, contradicting default of not cleaning them."
+    },
+    {
+      "assertion": "States JWT access tokens are never revoked and expire on their own",
+      "pass": true,
+      "rationale": "States JWT access tokens are not revocable and expire."
+    },
+    {
+      "assertion": "Explains CoordinateLifetimeWithUserSession / Authentication.CoordinateClientLifetimesWithUserSession revokes refresh and reference tokens (client value wins; no server-side sessions required)",
+      "pass": false,
+      "rationale": "Mentions coordination setting but not client-wins/no-server-side-sessions-required explanation."
+    },
+    {
+      "assertion": "States on server-side session expiry, coordinated-lifetime clients always have tokens revoked and get back-channel logout, and other clients only if ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout is true (default false)",
+      "pass": false,
+      "rationale": "Does not state coordinated-lifetime clients always get back-channel logout on expiry."
+    },
+    {
+      "assertion": "Mentions ISessionManagementService.RemoveSessionsAsync for admin-initiated termination",
+      "pass": false,
+      "rationale": "No mention of RemoveSessionsAsync."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 12,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Sets ProtocolMessage.AcrValues = \"idp:Google\" in OnRedirectToIdentityProvider",
+      "pass": true,
+      "rationale": "OnRedirectToIdentityProvider sets ProtocolMessage.AcrValues = \"idp:Google\"."
+    },
+    {
+      "assertion": "Reads AuthorizationRequest.IdP on the login page and challenges that scheme",
+      "pass": true,
+      "rationale": "Reads context.IdP and redirects to challenge page for that scheme."
+    },
+    {
+      "assertion": "Checks the scheme exists via IAuthenticationSchemeProvider.GetSchemeAsync (which also resolves dynamic providers) because IdentityServer does not redirect or validate by itself",
+      "pass": true,
+      "rationale": "Says IdentityServer doesn't redirect/verify and uses _schemes.GetSchemeAsync(idp), noting dynamic providers."
+    },
+    {
+      "assertion": "Notes idp: can be combined with tenant: in acr_values, IdentityProviderRestrictions drop a disallowed idp, and idp:local is reserved",
+      "pass": true,
+      "rationale": "Notes idp+tenant combine, restrictions drop hint, idp:local reserved."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

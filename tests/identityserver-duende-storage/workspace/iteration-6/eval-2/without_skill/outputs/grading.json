@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States Duende Storage does not replace the Entity Framework Core provider, which remains fully supported",
+      "pass": false,
+      "rationale": "Says it does not know Duende Storage; never states EF Core stays supported versus replaced beyond generic 'supported'."
+    },
+    {
+      "assertion": "States that no action is required if the application already uses EF Core and is satisfied",
+      "pass": false,
+      "rationale": "Says do not migrate just because something new exists, but does not state no action is required in that framing for Duende Storage."
+    },
+    {
+      "assertion": "Lists reasons to adopt Duende Storage (admin APIs, schema-validated custom properties, optimistic concurrency, storage pools for Spaces, shared model across Duende products)",
+      "pass": false,
+      "rationale": "Lists no Duende Storage benefits (admin APIs, schemas, concurrency, pools)."
+    },
+    {
+      "assertion": "States there is no automated or in-place migration; the schemas and persistence models differ",
+      "pass": false,
+      "rationale": "Does not state there is no in-place migration; only generic 'check whether a path exists'."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

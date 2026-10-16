@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+      "pass": true,
+      "rationale": "Lists ISamlSigninStateStore with SigninStateLifetime."
+    },
+    {
+      "assertion": "Mentions ISamlLogoutSessionStore for distributed SLO session tracking",
+      "pass": true,
+      "rationale": "Lists ISamlLogoutSessionStore for SLO tracking."
+    },
+    {
+      "assertion": "Recommends persistent storage (EF Core, Redis) instead of in-memory for multi-node",
+      "pass": true,
+      "rationale": "Recommends AddOperationalStore (EF) or Redis implementations instead of in-memory."
+    },
+    {
+      "assertion": "Notes that without distributed stores, SSO/SLO state is lost across nodes",
+      "pass": true,
+      "rationale": "States 'Without them SSO/SLO state is lost when a request lands on a different node.'"
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

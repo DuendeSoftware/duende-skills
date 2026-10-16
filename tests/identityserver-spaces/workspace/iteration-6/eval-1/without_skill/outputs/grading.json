@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Recommends Spaces for isolating configuration and operational data per tenant on top of Duende Storage",
+      "pass": false,
+      "rationale": "Never mentions Spaces; recommends per-customer deployments or hand-built tenant stores."
+    },
+    {
+      "assertion": "States Multi-Issuer only changes the iss claim and does not separate data",
+      "pass": true,
+      "rationale": "Says multi-issuer 'only changes the iss value' and that clients, grants and keys remain in one shared store."
+    },
+    {
+      "assertion": "States the tenant: acr_values hint is an untrusted client-supplied hint that cannot select a space",
+      "pass": false,
+      "rationale": "No mention of the acr_values tenant hint."
+    },
+    {
+      "assertion": "Notes Spaces are a licensed add-on in preview and require Duende Storage",
+      "pass": false,
+      "rationale": "No mention of Spaces being a licensed preview add-on or requiring Duende Storage."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}
