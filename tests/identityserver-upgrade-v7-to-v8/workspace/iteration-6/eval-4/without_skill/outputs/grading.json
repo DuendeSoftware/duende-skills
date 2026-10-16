@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that EF migrations are required even if not using SAML",
+      "pass": true,
+      "rationale": "States 'Yes, run the migrations' regardless of SAML use."
+    },
+    {
+      "assertion": "Shows the migration command: dotnet ef migrations add Update_DuendeIdentityServer_v8_0",
+      "pass": false,
+      "rationale": "Uses migration name Upgrade_v8, not Update_DuendeIdentityServer_v8_0."
+    },
+    {
+      "assertion": "Mentions that v8 adds SAML-related tables to the schema",
+      "pass": false,
+      "rationale": "Only speculates v8 'possibly' added SAML tables among other guesses."
+    },
+    {
+      "assertion": "Includes dotnet ef database update or equivalent to apply the migration",
+      "pass": true,
+      "rationale": "Mentions applying with dotnet ef database update."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

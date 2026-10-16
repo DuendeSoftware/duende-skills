@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers a user token HTTP client for the invoice API using AddUserAccessTokenHttpClient or AddHttpClient with AddUserAccessTokenHandler",
+      "pass": true,
+      "rationale": "AddUserAccessTokenHttpClient(\"invoices\", ...) is registered."
+    },
+    {
+      "assertion": "Output registers a client credentials HTTP client for the master data API using AddClientAccessTokenHttpClient or AddHttpClient with AddClientAccessTokenHandler",
+      "pass": true,
+      "rationale": "AddClientCredentialsHttpClient(\"masterdata\", ...) registers the machine client (equivalent client-token client; AddClientAccessTokenHttpClient is mentioned as alternative)."
+    },
+    {
+      "assertion": "Output calls AddOpenIdConnectAccessTokenManagement() to enable both user and client token management",
+      "pass": true,
+      "rationale": "AddOpenIdConnectAccessTokenManagement() is called."
+    },
+    {
+      "assertion": "Output sets distinct named or typed clients for each API with the correct BaseAddress",
+      "pass": true,
+      "rationale": "Distinct \"invoices\" and \"masterdata\" clients with the correct BaseAddress each."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

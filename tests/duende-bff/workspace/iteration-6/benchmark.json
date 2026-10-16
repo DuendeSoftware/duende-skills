@@ -1,0 +1,360 @@
+{
+  "metadata": {
+    "skill_name": "duende-bff",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 75,
+      "passed": 75,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 75,
+      "passed": 59,
+      "failed": 16,
+      "pass_rate": 0.79
+    },
+    "delta": {
+      "assertions_improved": 16,
+      "delta_pass_rate": 0.21
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Program.cs contains '.WithAccessToken(TokenType.User)' on the RouteConfig (YARP uses TokenType, not RequiredTokenType)",
+        "Program.cs contains 'MapReverseProxy' with a pipeline that calls 'UseAntiforgeryCheck()'"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Code contains AddFrontend for 'admin' with MatchingPath '/admin' and CdnIndexHtmlUrl pointing to the CDN URL",
+        "Code contains AddFrontend for 'portal' with MatchingPath '/portal' and CdnIndexHtmlUrl pointing to the portal CDN URL"
+      ]
+    },
+    {
+      "eval_id": 13,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Explains that DefaultAccessTokenRetriever is internal in v4 and cannot be inherited"
+      ]
+    },
+    {
+      "eval_id": 14,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Endpoint still uses .AsBffApiEndpoint() for CSRF protection"
+      ]
+    },
+    {
+      "eval_id": 15,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 16,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Mentions BffOptions.RemoveCookieHeaderFromYarpRequests = false as an opt-out, warns it forwards the session cookie, and suggests RequestHeaderRemove/WithTransformRequestHeaderRemove(\"Cookie\") per route",
+        "Explains remote APIs defined on a frontend (WithRemoteApis or configuration) now require the X-CSRF: 1 anti-forgery header, otherwise the BFF returns 401",
+        "Mentions there is no per-API opt-out and that BffOptions.DisableAntiForgeryCheck is the only delegate-based way to skip the check"
+      ]
+    },
+    {
+      "eval_id": 17,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333
+      },
+      "delta": 0.6666666666666667,
+      "without_skill_failures": [
+        "Notes transforms/transform providers registered after AddBffExtensions (e.g. AddTransforms on the returned IReverseProxyBuilder) run later and can set a specific Cookie",
+        "Warns not to copy the browser's cookies back onto the request"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Calls AddSessionCleanupBackgroundProcess()",
+        "Warns against or does NOT use in-memory sessions for production"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions SameSite cookie configuration (Lax for cross-site IDP) as a potential contributing factor"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Does not call app.MapBffManagementEndpoints() (management endpoints are auto-registered in v4)"
+      ]
+    }
+  ]
+}

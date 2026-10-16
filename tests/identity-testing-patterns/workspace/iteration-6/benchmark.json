@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "skill_name": "identity-testing-patterns",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 59,
+      "passed": 59,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 59,
+      "passed": 45,
+      "failed": 14,
+      "pass_rate": 0.76
+    },
+    "delta": {
+      "assertions_improved": 14,
+      "delta_pass_rate": 0.24
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Uses WebApplicationFactory<Program> with ConfigureTestServices to override IdentityServer registration"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 3,
+        "total": 6,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Changes the test project SDK from Microsoft.NET.Sdk to Microsoft.NET.Sdk.Web",
+        "Calls RequestClientCredentialsTokenAsync against 'connect/token' and asserts the token is not an error",
+        "Notes that mutating shared static Config collections can cause cross-test interference under parallel test execution"
+      ]
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "pass_rate": 0.3333333333333333
+      },
+      "delta": 0.6666666666666667,
+      "without_skill_failures": [
+        "Uses AngleSharp (HtmlParser().ParseDocumentAsync) to parse the login page HTML",
+        "Reads the antiforgery token from input[name='__RequestVerificationToken'] via GetAttribute(\"value\")",
+        "POSTs FormUrlEncodedContent with Username, Password, __RequestVerificationToken, and button=login to the form's resolved action URL",
+        "Asserts success by comparing the final RequestMessage.RequestUri.Host to the original protected host"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "The CreateAccessToken method accepts subject, audience, and claims parameters",
+        "Uses SecurityTokenDescriptor and JsonWebTokenHandler (or JwtSecurityTokenHandler) to create the token"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Each test sets distinct claims via the TestClaimsProvider before making the request"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions the risk of sharing HttpClient or ClaimsProvider state across parallel tests"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Uses CookieContainer and HttpClientHandler with AllowAutoRedirect = false for cookie-based session simulation"
+      ]
+    }
+  ]
+}

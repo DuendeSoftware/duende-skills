@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output uses WebApplication.CreateBuilder (minimal hosting) instead of the Startup class pattern",
+      "pass": true,
+      "rationale": "Uses WebApplication.CreateBuilder(args); Startup removed."
+    },
+    {
+      "assertion": "Output calls builder.Services.AddIdentityServer() with Duende namespace instead of IdentityServer4",
+      "pass": true,
+      "rationale": "AddIdentityServer in builder.Services with Duende namespaces."
+    },
+    {
+      "assertion": "Output calls AddConfigurationStore and AddOperationalStore with UseSqlServer and MigrationsAssembly configuration",
+      "pass": true,
+      "rationale": "Both stores use UseSqlServer with MigrationsAssembly."
+    },
+    {
+      "assertion": "Output includes UseIdentityServer() in the middleware pipeline after UseRouting() and before UseAuthorization()",
+      "pass": true,
+      "rationale": "UseRouting, UseIdentityServer, UseAuthorization in order."
+    },
+    {
+      "assertion": "Output removes AddDeveloperSigningCredential() or replaces it with Duende key management",
+      "pass": true,
+      "rationale": "Removes AddDeveloperSigningCredential and cites Duende automatic key management."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

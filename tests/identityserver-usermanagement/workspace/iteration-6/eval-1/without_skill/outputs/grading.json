@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.UserManagement.IdentityServer8 NuGet package",
+      "pass": false,
+      "rationale": "Package is guessed as `Duende.UserManagement`, not the IdentityServer8 package."
+    },
+    {
+      "assertion": "Adds Duende.Storage.Sqlite NuGet package (or references it)",
+      "pass": false,
+      "rationale": "Uses invented `Duende.UserManagement.Sqlite` package, not Duende.Storage.Sqlite."
+    },
+    {
+      "assertion": "Calls AddUserManagement() on the IdentityServer builder with a configuration lambda",
+      "pass": false,
+      "rationale": "Calls AddUserManagement with an invented `options.Authentication.Otp.Enabled` property instead of the real options lambda pattern."
+    },
+    {
+      "assertion": "Selects the SQLite provider with AddStorage(storage => storage.AddSqlite(...)) on the IdentityServer builder (not inside the AddUserManagement lambda)",
+      "pass": false,
+      "rationale": "Uses invented `.AddSqliteStore(...)` chained on AddUserManagement, not AddStorage/AddSqlite on the IdentityServer builder."
+    },
+    {
+      "assertion": "Creates the database schema with IStorageInstanceSchema.MigrateAsync() resolved from IStorageInstanceSchemaFactory.GetStorageInstanceSchema(...)",
+      "pass": false,
+      "rationale": "No IStorageInstanceSchema/MigrateAsync; only vague 'apply any provided migrations'."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

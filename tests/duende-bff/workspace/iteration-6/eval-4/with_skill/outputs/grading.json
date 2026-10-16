@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies the missing X-CSRF: 1 header as the root cause",
+      "pass": true,
+      "rationale": "States missing X-CSRF: 1 header is the most likely cause."
+    },
+    {
+      "assertion": "Provides a fetch wrapper or interceptor that adds the X-CSRF: 1 header automatically",
+      "pass": true,
+      "rationale": "bffFetch wrapper adds X-CSRF: 1 header to every call."
+    },
+    {
+      "assertion": "Shows 401 response handling that redirects to /bff/login",
+      "pass": true,
+      "rationale": "401 triggers window.location.href to /bff/login."
+    },
+    {
+      "assertion": "Mentions that /bff/login and /bff/logout must be browser navigations (window.location.href), not fetch calls",
+      "pass": true,
+      "rationale": "States 'Login/logout must be navigations', shown with window.location.href."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

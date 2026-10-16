@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Changes return types from IEnumerable<T> to IReadOnlyCollection<T>",
+      "pass": true,
+      "rationale": "Changes returns to Task<IReadOnlyCollection<ApiScope>> in code."
+    },
+    {
+      "assertion": "Shows using .ToList() or .ToArray() to convert query results",
+      "pass": true,
+      "rationale": "Uses .ToListAsync() and mentions .ToList()/.ToArray()."
+    },
+    {
+      "assertion": "Adds CancellationToken parameter to the affected methods",
+      "pass": false,
+      "rationale": "No CancellationToken added to signatures."
+    },
+    {
+      "assertion": "Mentions this applies to multiple interfaces (IResourceStore, etc.)",
+      "pass": false,
+      "rationale": "Only says 'any other IResourceStore members' and wrapper stores; does not say multiple interfaces are affected."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

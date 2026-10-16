@@ -365,9 +365,11 @@ builder.Services.AddAuthentication("token")
 // Configure DPoP on the service collection, NOT inside AddJwtBearer
 builder.Services.ConfigureDPoPTokensForScheme("token");
 
-// DPoP replay detection requires a distributed cache
-builder.Services.AddDistributedMemoryCache();
+// DPoP replay detection (on by default) requires a keyed HybridCache
+builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
 ```
+
+Register a distributed cache (e.g. Redis) as well when the API runs on multiple instances, so `HybridCache` can detect replayed proofs across instances. Options (`DPoPOptions`, per scheme): `AllowBearerTokens`, `ProofTokenLifetime` (5 s), `ProofTokenExpirationMode` (`IssuedAt`/`Nonce`/`Both`), `ProofTokenIssuedAtClockSkew` (25 s), `ProofTokenNonceClockSkew` (5 s), `ProofTokenMaxLength`, `ProofTokenValidationParameters`, `EnableReplayDetection`. With `Nonce` mode share Data Protection keys across instances. See `identityserver-token-security` for the full table. The NuGet package id is `Duende.AspNetCore.Authentication.JwtBearer`.
 
 #### DPoP Validation Details
 
@@ -376,7 +378,7 @@ The `ConfigureDPoPTokensForScheme` extension is called on `IServiceCollection`, 
 1. Validates the `DPoP` proof JWT in the request header
 2. Confirms the `jkt` (JWK thumbprint) in the access token's `cnf` claim matches the proof key
 3. Verifies the proof is bound to the correct HTTP method and URL
-4. Uses `IDistributedCache` for nonce/replay detection
+4. Uses a keyed `HybridCache` (`ServiceProviderKeys.ProofTokenReplayHybridCache`) for replay detection; nonces use Data Protection
 
 ```csharp
 // ❌ WRONG: DPoP configured inside AddJwtBearer lambda — this is not valid
@@ -386,8 +388,8 @@ builder.Services.AddAuthentication("token")
         options.ConfigureDPoPTokensForScheme("token"); // ← wrong location
     });
 
-// ✅ CORRECT: ConfigureDPoPTokensForScheme on IServiceCollection, plus distributed cache
-builder.Services.AddDistributedMemoryCache(); // or Redis, SQL, etc.
+// ✅ CORRECT: ConfigureDPoPTokensForScheme on IServiceCollection, plus keyed HybridCache
+builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
@@ -530,8 +532,8 @@ app.Run();
 - ❌ Hardcoding scope checks against a space-delimited string without normalization
 - ✅ Implement a custom `IClaimsTransformation` to split space-delimited scope claims into individual claims
 
-- ❌ Configuring DPoP validation without registering `IDistributedCache`
-- ✅ Always register a distributed cache implementation for DPoP replay detection
+- ❌ Configuring DPoP validation without registering the keyed `HybridCache` (throws `InvalidOperationException` on first proof when replay detection is enabled)
+- ✅ `AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache)` plus a distributed cache for multi-instance APIs
 
 - ❌ Using local API authentication but forgetting to add `IdentityServerApi` to client scopes
 - ✅ Clients accessing local APIs must request the `IdentityServerApi` scope

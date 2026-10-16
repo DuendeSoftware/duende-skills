@@ -114,8 +114,7 @@
         "Response configures RefreshTokenUsage = TokenUsage.OneTimeOnly on the client to enable refresh token rotation",
         "Response sets AllowOfflineAccess = true on the client so that the offline_access scope can be requested",
         "Response explains that with OneTimeOnly, each refresh token exchange returns a new refresh token and invalidates the old one",
-        "Response mentions that the default changed to ReUse in IdentityServer v7.0, so OneTimeOnly must be set explicitly for rotation",
-        "Response includes offline_access in the client's AllowedScopes"
+        "Response mentions that the default changed to ReUse in IdentityServer v7.0, so OneTimeOnly must be set explicitly for rotation"
       ]
     },
     {

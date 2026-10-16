@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs calls AddConfigurationStore with options that include ConfigureDbContext using UseSqlServer",
+      "pass": true,
+      "rationale": "AddConfigurationStore sets options.ConfigureDbContext = b => b.UseSqlServer(...) using the IdentityServer connection string."
+    },
+    {
+      "assertion": "Program.cs calls AddOperationalStore with options that include ConfigureDbContext using UseSqlServer",
+      "pass": true,
+      "rationale": "AddOperationalStore likewise sets ConfigureDbContext with b.UseSqlServer(...)."
+    },
+    {
+      "assertion": "Both store registrations include MigrationsAssembly set to the host project assembly name (e.g. typeof(Program).Assembly.GetName().Name or equivalent)",
+      "pass": true,
+      "rationale": "Both UseSqlServer calls pass sql => sql.MigrationsAssembly(migrationsAssembly), where migrationsAssembly = typeof(Program).Assembly.GetName().Name."
+    },
+    {
+      "assertion": "AddOperationalStore options set EnableTokenCleanup to true and TokenCleanupInterval to 1800",
+      "pass": true,
+      "rationale": "The operational options set EnableTokenCleanup = true and TokenCleanupInterval = 1800, commented as seconds (30 minutes)."
+    },
+    {
+      "assertion": "The connection string is read from configuration via builder.Configuration.GetConnectionString(\"IdentityServer\") or equivalent",
+      "pass": true,
+      "rationale": "The connection string comes from builder.Configuration.GetConnectionString(\"IdentityServer\")."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that HttpContext is not available in Blazor Server circuits after the initial HTTP request",
+      "pass": true,
+      "rationale": "States HttpContext exists only for the initial HTTP request and is null/stale in the circuit."
+    },
+    {
+      "assertion": "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+      "pass": true,
+      "rationale": "Chains .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>() with a custom IUserTokenStore."
+    },
+    {
+      "assertion": "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+      "pass": true,
+      "rationale": "ServerSideTokenStore implements GetTokenAsync, StoreTokenAsync and ClearTokenAsync."
+    },
+    {
+      "assertion": "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store",
+      "pass": true,
+      "rationale": "OnTokenValidated handler stores the token via store.StoreTokenAsync."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -12,6 +12,7 @@ MANIFESTS=(
   "$REPO_ROOT/.claude-plugin/plugin.json"
   "$REPO_ROOT/.claude-plugin/marketplace.json"
   "$REPO_ROOT/.codex-plugin/plugin.json"
+  "$REPO_ROOT/.cursor-plugin/plugin.json"
 )
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'

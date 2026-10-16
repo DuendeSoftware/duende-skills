@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Program.cs or an authentication setup file registers an OpenIdConnect handler with scheme name 'AAD' and SignInScheme set to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": true,
+      "rationale": "AddOpenIdConnect(\"AAD\", \"Corporate Login\") with SignInScheme = ExternalCookie scheme."
+    },
+    {
+      "assertion": "The external login trigger calls Challenge with 'AAD' and stores returnUrl in AuthenticationProperties.Items",
+      "pass": true,
+      "rationale": "Challenge(props, scheme) with returnUrl in Items; link uses scheme parameter."
+    },
+    {
+      "assertion": "The callback handler calls HttpContext.AuthenticateAsync with IdentityServerConstants.ExternalCookieAuthenticationScheme to read the external identity",
+      "pass": true,
+      "rationale": "AuthenticateAsync with ExternalCookieAuthenticationScheme in callback."
+    },
+    {
+      "assertion": "The callback handler calls HttpContext.SignOutAsync with IdentityServerConstants.ExternalCookieAuthenticationScheme to clean up the temporary cookie",
+      "pass": true,
+      "rationale": "SignOutAsync(ExternalCookieAuthenticationScheme) after SignInAsync."
+    },
+    {
+      "assertion": "The callback handler creates an IdentityServerUser or ClaimsPrincipal with IdentityProvider set to the external scheme name",
+      "pass": true,
+      "rationale": "IdentityServerUser { IdentityProvider = provider } where provider comes from Items[\"scheme\"]."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

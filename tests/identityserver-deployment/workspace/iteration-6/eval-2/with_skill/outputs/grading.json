@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output identifies the root cause as Data Protection keys not being shared across replicated instances",
+      "pass": true,
+      "rationale": "Identifies per-instance Data Protection key rings ('key not found in key ring') as cause of CryptographicException."
+    },
+    {
+      "assertion": "Output includes a call to a .PersistKeysTo*() method (e.g., PersistKeysToStackExchangeRedis, PersistKeysToDbContext, or another durable shared store)",
+      "pass": true,
+      "rationale": "Includes .PersistKeysToDbContext<DataProtectionKeysContext>()."
+    },
+    {
+      "assertion": "Output includes .SetApplicationName() with a consistent explicit name across all instances",
+      "pass": true,
+      "rationale": "Includes .SetApplicationName(\"My.IdentityServer\") and says identical name on all replicas."
+    },
+    {
+      "assertion": "Output mentions that the signing key store must also be shared (e.g., EF operational store instead of default file-system) for multi-instance deployments",
+      "pass": true,
+      "rationale": "Says signing keys must be shared via EF operational store (ISigningKeyStore); default file-system store is per pod."
+    },
+    {
+      "assertion": "Output does NOT recommend using the default ephemeral or file-system-based Data Protection keys for multi-instance",
+      "pass": true,
+      "rationale": "Warns against ephemeral/local keys and requires durable shared storage."
+    },
+    {
+      "assertion": "Output references the general data protection documentation or mentions this is a cross-cutting concern for all Duende SDKs",
+      "pass": true,
+      "rationale": "Links the general data-protection docs and calls it a cross-cutting concern for all Duende SDKs."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

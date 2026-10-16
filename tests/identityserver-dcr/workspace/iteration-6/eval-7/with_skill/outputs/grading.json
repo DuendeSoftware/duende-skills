@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddIdentityServerConfiguration with options.IdentityServerBaseUrl set to 'https://identity.example.com'",
+      "pass": true,
+      "rationale": "`options.IdentityServerBaseUrl = \"https://identity.example.com\"` in AddIdentityServerConfiguration."
+    },
+    {
+      "assertion": "Sets up JWT bearer authentication pointing to the main IdentityServer as Authority",
+      "pass": true,
+      "rationale": "AddJwtBearer with Authority = https://identity.example.com."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() with RequireAuthorization()",
+      "pass": true,
+      "rationale": "MapDynamicClientRegistration().RequireAuthorization(\"dcr\")."
+    },
+    {
+      "assertion": "Does NOT call AddIdentityServer() \u2014 this is a separate host, not an IdentityServer instance",
+      "pass": true,
+      "rationale": "No AddIdentityServer() in the host Program.cs."
+    },
+    {
+      "assertion": "Mentions that the IClientConfigurationStore must be backed by the same database IdentityServer reads from",
+      "pass": true,
+      "rationale": "Says host must write to same database IdentityServer reads from."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

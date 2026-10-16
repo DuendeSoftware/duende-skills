@@ -1,0 +1,329 @@
+{
+  "metadata": {
+    "skill_name": "token-management",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 65,
+      "passed": 65,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 65,
+      "passed": 44,
+      "failed": 21,
+      "pass_rate": 0.68
+    },
+    "delta": {
+      "assertions_improved": 21,
+      "delta_pass_rate": 0.32
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "pass_rate": 0.6666666666666666
+      },
+      "delta": 0.33333333333333337,
+      "without_skill_failures": [
+        "Warns about CVE-2025-27370 or CVE-2025-27371 related to incorrect audience values",
+        "Sets the JWT 'typ' header to 'client-authentication+jwt' (e.g. via AdditionalHeaderClaims) to opt into strict audience validation (RFC 7523bis / StrictClientAssertionAudienceValidation)"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Implements ITokenRequestCustomizer interface with a Customize method",
+        "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+        "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+        "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler"
+      ]
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 13,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Notes that explicit AddDistributedMemoryCache() registration is no longer required in v4"
+      ]
+    },
+    {
+      "eval_id": 14,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Explains the library registers IConfigureNamedOptions<OpenIdConnectOptions> wrapping OnRedirectToIdentityProvider, OnAuthorizationCodeReceived, OnTokenValidated and OnPushAuthorization",
+        "States OpenIdConnectOptions.EventsType must not be used because it silently removes all library handlers",
+        "With PAR, signs the request in OnPushAuthorization before invoking the library handler (so dpop_jkt is included in the signed request and the client assertion is added afterwards); without PAR signs in OnRedirectToIdentityProvider after the library handler",
+        "Notes the library adds the client assertion from IClientAssertionService to the code exchange and, on .NET 9+, the PAR request, but does not create JAR request objects"
+      ]
+    },
+    {
+      "eval_id": 15,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 2,
+        "total": 2,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "States UseCacheAutoTuning defaults to false",
+        "Explains when enabled the cache entry lifetime uses the actual token expiration, with the first request using DefaultCacheLifetime (5 minutes default)"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Output wires up RevokeRefreshTokenAsync() in the cookie OnSigningOut event handler"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Output checks tokenResult.Succeeded before calling .GetToken() instead of directly accessing .Value"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Output implements IHybridCacheSerializer<ClientCredentialsToken> using IDataProtector for encryption",
+        "Output registers the custom serializer via AddHybridCache().AddSerializer<ClientCredentialsToken, ...>()"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Output identifies that AddClientCredentialsTokenHandler is used without AddDefaultAccessTokenResiliency(), meaning 401 responses won't be retried"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Calls AddBlazorServerAccessTokenManagement<T>() with a custom IUserTokenStore implementation",
+        "The custom IUserTokenStore implements GetTokenAsync, StoreTokenAsync, and ClearTokenAsync methods",
+        "Shows capturing tokens during the OnTokenValidated OIDC event to persist them to the custom store"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output explains that the OIDC state data formatter stores external provider state in IDistributedCache, and without a shared cache, state created on instance A cannot be validated on instance B",
+      "pass": false,
+      "rationale": "Only vaguely says IDistributedCache is used 'in some setups' for state; does not clearly state the OIDC state formatter uses IDistributedCache and cross-instance validation fails for that reason."
+    },
+    {
+      "assertion": "Output configures a distributed cache implementation such as AddStackExchangeRedisCache or AddSqlServerCache",
+      "pass": true,
+      "rationale": "Configures AddStackExchangeRedisCache."
+    },
+    {
+      "assertion": "Output mentions at least two of the four features that require distributed cache: OIDC state data, JWT replay cache, device flow throttling, or PAR authorization parameter store",
+      "pass": true,
+      "rationale": "Mentions PAR, device flow throttling and JWT client assertion replay cache."
+    },
+    {
+      "assertion": "Output does NOT suggest using the default in-memory DistributedCache for multi-instance deployments",
+      "pass": true,
+      "rationale": "Says default is per-instance in-memory and recommends Redis/SQL Server."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

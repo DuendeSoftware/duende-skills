@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Registers an NpgsqlDataSource singleton from the connection string and selects PostgreSQL with AddStorage(storage => storage.AddPostgreSql())",
+      "pass": false,
+      "rationale": "No NpgsqlDataSource registration; invents `.AddPostgreSqlStore(connString)`."
+    },
+    {
+      "assertion": "Adds Duende.Storage.PostgreSql package (or references it)",
+      "pass": false,
+      "rationale": "Package is invented `Duende.UserManagement.PostgreSql`, not Duende.Storage.PostgreSql."
+    },
+    {
+      "assertion": "Explains that no EF Core migrations are needed (document-based storage) but the common storage schema must still be created",
+      "pass": false,
+      "rationale": "Says migrations are needed if EF-based (dotnet ef), the opposite of the document-based no-EF-migrations point."
+    },
+    {
+      "assertion": "Shows IStorageInstanceSchema.MigrateAsync() resolved via IStorageInstanceSchemaFactory, and notes that in production it should run as a controlled deployment step rather than app startup",
+      "pass": false,
+      "rationale": "No IStorageInstanceSchema.MigrateAsync or factory; only EF migration bundle advice."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

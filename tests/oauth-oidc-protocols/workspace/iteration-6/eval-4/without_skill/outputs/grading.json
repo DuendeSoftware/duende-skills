@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response states that the implicit flow is deprecated and should not be used, explaining tokens are exposed in URL fragments",
+      "pass": true,
+      "rationale": "Says deprecated, and tokens are returned in the URL fragment."
+    },
+    {
+      "assertion": "Response recommends the Backend-for-Frontend (BFF) pattern as the correct approach for SPAs",
+      "pass": true,
+      "rationale": "Option 1 (best): BFF pattern."
+    },
+    {
+      "assertion": "Response explains that authorization code flow with PKCE should be used instead of implicit flow",
+      "pass": true,
+      "rationale": "Option 2 recommends response_type=code with PKCE and GrantTypes.Code."
+    },
+    {
+      "assertion": "Response mentions that with BFF, tokens are kept server-side and the SPA uses session cookies to communicate with its backend",
+      "pass": true,
+      "rationale": "BFF stores tokens server side and issues HttpOnly cookie to SPA, proxying API calls."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

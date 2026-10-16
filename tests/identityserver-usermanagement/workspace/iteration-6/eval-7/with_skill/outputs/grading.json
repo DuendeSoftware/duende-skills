@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Identifies that the storage provider is selected with AddStorage(...) on the IdentityServer builder, not inside the AddUserManagement lambda",
+      "pass": true,
+      "rationale": "Says storage is selected via AddStorage(...) on the IdentityServer builder, not inside AddUserManagement."
+    },
+    {
+      "assertion": "Shows the correct pattern: .AddStorage(storage => storage.AddSqlite(options => options.ConnectionString = ...)).AddUserManagement(...)",
+      "pass": true,
+      "rationale": "Shows .AddStorage(storage => storage.AddSqlite(o => o.ConnectionString = ...)).AddUserManagement(...)."
+    },
+    {
+      "assertion": "Mentions the schema must be created/migrated with IStorageInstanceSchema.MigrateAsync()",
+      "pass": true,
+      "rationale": "Says schema isn't auto-created and shows IStorageInstanceSchema.MigrateAsync() via factory."
+    },
+    {
+      "assertion": "Does NOT suggest using EF Core migrations as a fix",
+      "pass": true,
+      "rationale": "Explicitly says no EF migrations; document-based."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output loads the DPoP JWK from configuration or secure storage rather than generating a new RSA key at startup",
+      "pass": true,
+      "rationale": "Loads the key from builder.Configuration[\"DPoP:JsonWebKey\"] and explains why a persisted key is needed."
+    },
+    {
+      "assertion": "Output sets the DPoPJsonWebKey property on the client credentials client configuration",
+      "pass": true,
+      "rationale": "Sets client.DPoPJsonWebKey = DPoPProofKey.Parse(...)."
+    },
+    {
+      "assertion": "Output warns against or avoids generating ephemeral keys with RSA.Create() on every process restart",
+      "pass": true,
+      "rationale": "Never generates RSA.Create keys and explains a per-process generated key would invalidate bound tokens on restart, satisfying 'warns against or avoids'."
+    },
+    {
+      "assertion": "Output registers the client via AddClientCredentialsTokenManagement().AddClient() with the DPoP key configured",
+      "pass": true,
+      "rationale": "Registers via AddClientCredentialsTokenManagement().AddClient with DPoPJsonWebKey set."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

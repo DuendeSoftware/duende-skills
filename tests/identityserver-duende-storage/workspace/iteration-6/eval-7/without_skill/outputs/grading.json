@@ -1,0 +1,24 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that with AddDynamicSchemas(), ISchemaStore/ISchemaAdmin resolve to the storage-backed implementation so in-memory schemas registered by AddSamlDynamicProvider() are not used",
+      "pass": false,
+      "rationale": "Only a hedged guess that stored schema is used; does not name ISchemaStore/ISchemaAdmin storage-backed resolution and says it is not familiar."
+    },
+    {
+      "assertion": "Shows creating the schema in the database with ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ...) and checking IsSuccess",
+      "pass": false,
+      "rationale": "Does not show ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider) or IsSuccess check."
+    },
+    {
+      "assertion": "Mentions SchemaId.SamlIdentityProvider (\"idp:saml\")",
+      "pass": false,
+      "rationale": "Does not mention SchemaId.SamlIdentityProvider or \"idp:saml\"."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 3,
+  "score": 0.0
+}

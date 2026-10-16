@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a named instance with StorageInstanceId.Create(...)",
+      "pass": true,
+      "rationale": "Uses StorageInstanceId.Create(\"operational\")."
+    },
+    {
+      "assertion": "Registers the second database with AddStorage(instanceId, storage => ...) and maps operational data with AddOperationalStorage(instanceId)",
+      "pass": true,
+      "rationale": "AddStorage(operationalInstanceId, ...) plus AddOperationalStorage(operationalInstanceId)."
+    },
+    {
+      "assertion": "Keeps AddStorage(...)+AddConfigurationStorage() for the default instance",
+      "pass": true,
+      "rationale": "Default instance keeps AddStorage(...).AddConfigurationStorage()."
+    },
+    {
+      "assertion": "Migrates every instance via IStorageInstanceSchemaFactory.GetStorageInstanceSchema(id, ct).MigrateAsync, noting IStorageInstanceSchema.MigrateAsync only migrates the default instance",
+      "pass": true,
+      "rationale": "Uses IStorageInstanceSchemaFactory.GetStorageInstanceSchema(id, ct).MigrateAsync for each instance and notes IStorageInstanceSchema.MigrateAsync only covers default."
+    },
+    {
+      "assertion": "Mentions that mapping one category to two different instances or selecting a second provider for one instance throws InvalidOperationException",
+      "pass": true,
+      "rationale": "States mapping a category twice to different instances or selecting a second provider for one instance throws InvalidOperationException."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

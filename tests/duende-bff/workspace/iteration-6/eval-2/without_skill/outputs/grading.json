@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Local /api/orders endpoint uses .AsBffApiEndpoint() for CSRF protection",
+      "pass": true,
+      "rationale": "/api/orders uses .AsBffApiEndpoint()."
+    },
+    {
+      "assertion": "Local endpoint uses .RequireAuthorization()",
+      "pass": true,
+      "rationale": "Uses .RequireAuthorization()."
+    },
+    {
+      "assertion": "Calls AddRemoteApis() on the BFF builder",
+      "pass": true,
+      "rationale": ".AddRemoteApis() is chained on AddBff()."
+    },
+    {
+      "assertion": "Uses MapRemoteBffApiEndpoint for /api/catalog pointing to https://catalog-service.internal/api",
+      "pass": true,
+      "rationale": "MapRemoteBffApiEndpoint to the catalog-service URI is shown."
+    },
+    {
+      "assertion": "Remote endpoint uses .WithAccessToken(RequiredTokenType.User)",
+      "pass": true,
+      "rationale": ".WithAccessToken(RequiredTokenType.User) present."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options",
+      "pass": false,
+      "rationale": "Sets AlwaysEmitConfirmationClaim on the Client, not on options.MutualTls."
+    },
+    {
+      "assertion": "Client uses standard shared secret authentication (not certificate-based authentication)",
+      "pass": true,
+      "rationale": "Shared secret kept for authentication."
+    },
+    {
+      "assertion": "Explains that the cnf claim with x5t#S256 will be embedded in the access token",
+      "pass": true,
+      "rationale": "Explains cnf with x5t#S256 emitted into token."
+    },
+    {
+      "assertion": "Mentions that the client must use a TLS client certificate when calling the token endpoint (even though the certificate is not used for authentication)",
+      "pass": true,
+      "rationale": "Says client must call mTLS endpoint so a certificate is presented while sending client_secret."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

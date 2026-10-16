@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Creates a ClaimsPrincipal with a ClaimsIdentity containing a birthdate claim",
+      "pass": true,
+      "rationale": "CreateContext builds ClaimsPrincipal/ClaimsIdentity with a \"birthdate\" claim."
+    },
+    {
+      "assertion": "Constructs an AuthorizationHandlerContext with the requirement, user principal, and resource",
+      "pass": true,
+      "rationale": "Constructs new AuthorizationHandlerContext(new[] { req }, user, resource: null)."
+    },
+    {
+      "assertion": "Calls HandleAsync on the handler directly",
+      "pass": true,
+      "rationale": "Calls new MinimumAgeHandler().HandleAsync(ctx) directly."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is true for a user meeting the age requirement",
+      "pass": true,
+      "rationale": "Succeeds_when_user_is_old_enough asserts Assert.True(ctx.HasSucceeded)."
+    },
+    {
+      "assertion": "Asserts context.HasSucceeded is false for a user not meeting the age requirement",
+      "pass": true,
+      "rationale": "Does_not_succeed_when_user_is_too_young asserts Assert.False(ctx.HasSucceeded)."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

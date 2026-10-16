@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Server-side code contains '.AddBffBlazorClient()' in the service configuration",
+      "pass": true,
+      "rationale": "builder.Services.AddBffBlazorClient() in server config."
+    },
+    {
+      "assertion": "Client-side code contains 'AddBffBlazorClient' with polling interval set to 30 seconds (TimeSpan.FromSeconds(30))",
+      "pass": true,
+      "rationale": "Client AddBffBlazorClient with StateProviderPollingInterval = TimeSpan.FromSeconds(30)."
+    },
+    {
+      "assertion": "Client-side code contains 'AddLocalApiHttpClient<WeatherClient>()'",
+      "pass": true,
+      "rationale": "AddLocalApiHttpClient<WeatherClient>() present."
+    },
+    {
+      "assertion": "Server-side code contains 'AddBff()' with '.ConfigureOpenIdConnect'",
+      "pass": true,
+      "rationale": "Server uses AddBff().ConfigureOpenIdConnect."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

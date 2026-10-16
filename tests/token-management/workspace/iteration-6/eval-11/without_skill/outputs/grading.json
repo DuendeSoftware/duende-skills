@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ITokenRequestCustomizer interface with a Customize method",
+      "pass": false,
+      "rationale": "No ITokenRequestCustomizer is implemented; uses per-call parameters and per-tenant clients."
+    },
+    {
+      "assertion": "The Customize method accepts HttpRequestMessage, TokenRequestParameters, and CancellationToken",
+      "pass": false,
+      "rationale": "No Customize method with HttpRequestMessage/TokenRequestParameters/CancellationToken."
+    },
+    {
+      "assertion": "Uses the 'with' expression or equivalent to create modified TokenRequestParameters (e.g., setting Resource or Scope per tenant)",
+      "pass": false,
+      "rationale": "No 'with' expression; UserTokenRequestParameters are built with object initializers."
+    },
+    {
+      "assertion": "Passes the customizer instance to AddClientCredentialsTokenHandler or AddUserAccessTokenHandler",
+      "pass": false,
+      "rationale": "No customizer is passed to any token handler registration."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

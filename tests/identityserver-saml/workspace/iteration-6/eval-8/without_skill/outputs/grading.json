@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+      "pass": false,
+      "rationale": "Says ACS binding HTTP-POST or Artifact; does not say HTTP-Redirect is unsupported."
+    },
+    {
+      "assertion": "States that AllowedScopes must contain at least one entry",
+      "pass": false,
+      "rationale": "AllowedScopes never mentioned."
+    },
+    {
+      "assertion": "Mentions that EntityId is required",
+      "pass": true,
+      "rationale": "'EntityId required, unique, absolute URI'."
+    },
+    {
+      "assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)",
+      "pass": false,
+      "rationale": "No mention that invalid SPs are treated as non-existent."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

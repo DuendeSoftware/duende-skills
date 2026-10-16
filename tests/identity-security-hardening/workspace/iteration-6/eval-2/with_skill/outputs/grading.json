@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "The web.app client has RequirePkce = true and does not set it to false",
+      "pass": true,
+      "rationale": "Sets RequirePkce = true."
+    },
+    {
+      "assertion": "The web.app client redirect URIs contain no wildcards - all URIs are exact-match fully-qualified HTTPS URIs",
+      "pass": true,
+      "rationale": "Redirect and post-logout URIs are single exact https://app.example.com URIs; wildcard removed."
+    },
+    {
+      "assertion": "The web.app client uses GrantTypes.Code (not CodeAndClientCredentials or Implicit)",
+      "pass": true,
+      "rationale": "AllowedGrantTypes = GrantTypes.Code."
+    },
+    {
+      "assertion": "The web.app client has AccessTokenLifetime of 900 or less (15 minutes maximum)",
+      "pass": true,
+      "rationale": "AccessTokenLifetime = 300."
+    },
+    {
+      "assertion": "The web.app client has RefreshTokenUsage = TokenUsage.OneTimeOnly",
+      "pass": true,
+      "rationale": "RefreshTokenUsage = TokenUsage.OneTimeOnly."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

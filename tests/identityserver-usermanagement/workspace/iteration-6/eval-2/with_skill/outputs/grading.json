@@ -1,0 +1,29 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Uses options.Authentication(auth => auth.UseSmtpOtpDispatcher(...)) inside the AddUserManagement options lambda",
+      "pass": true,
+      "rationale": "Uses `.AddUserManagement(options => options.Authentication(auth => auth.UseSmtpOtpDispatcher(x => ...)))`."
+    },
+    {
+      "assertion": "Configures SMTP host and port",
+      "pass": true,
+      "rationale": "Sets x.Host = \"smtp.example.com\" and x.Port = 587."
+    },
+    {
+      "assertion": "Sets the required FromEmail and FromName options (not invented Username/Password/FromAddress)",
+      "pass": true,
+      "rationale": "Sets required FromEmail and FromName; no invented Username/Password/FromAddress."
+    },
+    {
+      "assertion": "Does NOT use ConsoleOtpDispatcher for production (or warns against it)",
+      "pass": true,
+      "rationale": "Does not use ConsoleOtpDispatcher; uses SMTP dispatcher and notes the default port 1025 is dev-style."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

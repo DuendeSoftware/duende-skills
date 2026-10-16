@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddLocalApiAuthentication() to set up local API authentication",
+      "pass": true,
+      "rationale": "Calls builder.Services.AddLocalApiAuthentication()."
+    },
+    {
+      "assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+      "pass": true,
+      "rationale": "Uses IdentityServerConstants.LocalApi.PolicyName in the policy and RequireAuthorization."
+    },
+    {
+      "assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+      "pass": false,
+      "rationale": "Only says to register an IdentityServerApi ApiScope and 'allow clients to request it'; it never mentions AllowedScopes explicitly."
+    },
+    {
+      "assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts",
+      "pass": false,
+      "rationale": "Never warns that local API authentication works only when co-hosted with IdentityServer and not for separate API hosts."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

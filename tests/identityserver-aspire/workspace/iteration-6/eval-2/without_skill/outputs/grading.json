@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\")) or an equivalent expression using GetEndpoint",
+      "pass": true,
+      "rationale": "Web app uses WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))."
+    },
+    {
+      "assertion": "The web app uses .WithEnvironment(\"Authentication__ClientId\", ...) with a client ID value",
+      "pass": true,
+      "rationale": "Web app has WithEnvironment(\"Authentication__ClientId\", \"webapp\")."
+    },
+    {
+      "assertion": "The web app passes at least one scope via .WithEnvironment(\"Authentication__Scopes__0\", ...) using the double-underscore array indexing convention",
+      "pass": false,
+      "rationale": "Scopes are passed as a single \"Authentication__Scopes\" string (\"openid profile weather.read\"), not the Authentication__Scopes__0 indexed convention."
+    },
+    {
+      "assertion": "The API uses .WithEnvironment(\"Authentication__Authority\", ...) with GetEndpoint for the authority URL",
+      "pass": true,
+      "rationale": "API uses WithEnvironment(\"Authentication__Authority\", identityServer.GetEndpoint(\"https\"))."
+    },
+    {
+      "assertion": "The code does NOT set IssuerUri unless explicitly needed",
+      "pass": true,
+      "rationale": "No IssuerUri is set anywhere."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

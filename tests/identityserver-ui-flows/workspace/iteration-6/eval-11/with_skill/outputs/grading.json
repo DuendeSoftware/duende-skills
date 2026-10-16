@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Lists login_required, consent_required, interaction_required, account_selection_required, access_denied, temporarily_unavailable and unmet_authentication_requirements as errors returned to the client redirect_uri",
+      "pass": true,
+      "rationale": "Lists all seven safe codes."
+    },
+    {
+      "assertion": "States errors like invalid_request, unauthorized_client, invalid_scope, invalid_request_object and server_error (and custom codes) show the error page",
+      "pass": true,
+      "rationale": "Lists invalid_request, unauthorized_client, invalid_scope, invalid_request_object, server_error and custom codes as error page."
+    },
+    {
+      "assertion": "States the set of safe codes cannot be configured",
+      "pass": true,
+      "rationale": "States safe codes set is not configurable."
+    },
+    {
+      "assertion": "Explains untrusted requests are not redirected to avoid open redirects",
+      "pass": true,
+      "rationale": "Says untrusted requests are not redirected, would be open redirect."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

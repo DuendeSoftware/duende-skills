@@ -141,6 +141,42 @@
         "Mentions that PropagationTime and RetentionDuration control how long keys/certs are published before signing and retained for validation during rollover",
         "Notes that under Automatic Key Management the SAML component auto-wraps managed RSA keys in self-signed X.509 certificates, so UseX509Certificate is not required just to enable SAML"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "We want to sign tokens with a key in Azure Key Vault that never leaves the vault. How do we integrate it with IdentityServer, including SAML?",
+      "expected_output": "No built-in KMS; override DefaultTokenCreationService.CreateJwtAsync; register public key with AddSigningCredential; disable automatic key management; SAML not covered.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "States IdentityServer has no built-in HSM/KMS provider and a custom ISigningKeyStore does not give non-exportable keys",
+        "Subclasses DefaultTokenCreationService and overrides CreateJwtAsync to call the KMS async sign API, registering it as ITokenCreationService",
+        "Registers the KMS public key as the signing credential with AddSigningCredential and disables automatic key management (KeyManagement.Enabled = false)",
+        "Takes alg and kid from the registered signing credential so the header matches discovery/JWKS",
+        "Notes SAML signing does not go through ITokenCreationService and requires a private key, so this approach doesn't cover SAML",
+        "Mentions rotation is the developer's responsibility (publish new key via AddValidationKey ahead of time) and each token costs a KMS call"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "We think a signing key was leaked. Walk me through the response with automatic key management on 4 instances.",
+      "expected_output": "Create new key, delete compromised key (not just retire), restart instances, confirm JWKS, revoke grants, notify.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Adds a new signing key and makes it active",
+        "Deletes the compromised key from the key store rather than just retiring it, because retired keys stay published for RetentionDuration",
+        "Restarts every instance because keys are cached for KeyManagement.KeyCacheDuration, and confirms each instance's JWKS no longer lists the compromised kid",
+        "Revokes persisted grants/refresh tokens issued before removal (all if exposure window is unknown)",
+        "Notifies relying parties that cache JWKS and notes tokens signed with the key become invalid",
+        "Notes backups of signing keys require the matching Data Protection keys and the same application name"
+      ]
     }
   ]
 }

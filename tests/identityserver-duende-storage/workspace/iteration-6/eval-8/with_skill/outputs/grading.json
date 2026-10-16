@@ -1,0 +1,39 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Says there is no automated migration and to rehearse on a production-like copy",
+      "pass": true,
+      "rationale": "States no automated or in-place migration and to rehearse on production-like copy."
+    },
+    {
+      "assertion": "Migrates configuration through the admin APIs (not direct writes), importing scopes and identity resources before resources and clients",
+      "pass": true,
+      "rationale": "Imports through admin APIs never direct writes, scopes and identity resources first."
+    },
+    {
+      "assertion": "Explains EF secrets are one-way hashes and must be re-provisioned from a secure source or rotated, not imported as plaintext",
+      "pass": true,
+      "rationale": "Explains EF secrets are one-way hashes, not to import as plaintext; re-provision from vault or rotate."
+    },
+    {
+      "assertion": "Recommends a controlled reset of operational data (grants, refresh/reference tokens, sessions) because there is no supported transfer tool, noting users must re-authenticate",
+      "pass": true,
+      "rationale": "Recommends controlled reset of operational data in maintenance window; users re-authenticate."
+    },
+    {
+      "assertion": "Mentions signing key continuity so JWT access tokens issued before cutover remain valid, and not removing old validation keys until tokens expire",
+      "pass": true,
+      "rationale": "Says JWT tokens stay valid with signing key continuity and not to remove old validation keys until tokens expire."
+    },
+    {
+      "assertion": "Recommends keeping the EF database read-only as a rollback path and not dual-writing",
+      "pass": true,
+      "rationale": "Keep EF DB read-only for rollback and don't dual-write."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

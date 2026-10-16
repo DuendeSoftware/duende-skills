@@ -1,0 +1,29 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses ClaimMappings dictionary on SamlServiceProvider for per-SP attribute mapping",
+      "pass": true,
+      "rationale": "Uses ClaimMappings on the SamlServiceProvider with the two requested entries."
+    },
+    {
+      "assertion": "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings",
+      "pass": false,
+      "rationale": "Mentions the email identity resource and IProfileService but never AllowedScopes as prerequisite."
+    },
+    {
+      "assertion": "Shows how to set DefaultClaimMappings on SamlOptions for global defaults",
+      "pass": false,
+      "rationale": "No DefaultClaimMappings / SamlOptions global defaults mentioned."
+    },
+    {
+      "assertion": "The mapping correctly associates OIDC claim names (keys) to SAML attribute URIs (values)",
+      "pass": true,
+      "rationale": "Keys are claim names (email, department), values are the SAML URIs."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 103,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Defines separate ApiScope instances for service-specific scopes (e.g. invoice.read, customer.read) and shared scopes (manage, enumerate)",
+      "pass": true,
+      "rationale": "Separate ApiScopes for manage, enumerate, invoice.*, customer.*."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'invoice' with a Scopes collection referencing invoice-specific and shared scopes",
+      "pass": true,
+      "rationale": "ApiResource(\"invoice\") with Scopes { manage, enumerate, invoice.read, invoice.write }."
+    },
+    {
+      "assertion": "Defines an ApiResource named 'customer' with a Scopes collection referencing customer-specific and shared scopes",
+      "pass": true,
+      "rationale": "ApiResource(\"customer\") with Scopes { manage, enumerate, customer.read, customer.write }."
+    },
+    {
+      "assertion": "Explains that the aud claim in the token is derived from the ApiResource Name property",
+      "pass": true,
+      "rationale": "Says API resources group scopes and determine aud, tokens get invoice/customer audiences, each API validates aud with its own name."
+    },
+    {
+      "assertion": "Registers both API Resources and API Scopes with AddInMemoryApiResources and AddInMemoryApiScopes",
+      "pass": true,
+      "rationale": "Both AddInMemoryApiScopes and AddInMemoryApiResources called."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

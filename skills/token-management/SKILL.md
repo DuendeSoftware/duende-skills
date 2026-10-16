@@ -338,6 +338,8 @@ services.AddClientCredentialsTokenManagement(options =>
 });
 ```
 
+v4 also has `DefaultCacheLifetime` (5 min; used for the first request, before the real expiry is known), `UseCacheAutoTuning` (**defaults to `false`**; when `true` the cache entry lifetime follows the actual token expiration), `LocalCacheExpiration` (1 min) and `NonceStoreKeyPrefix` (DPoP nonces).
+
 Default cache key format:
 
 ```

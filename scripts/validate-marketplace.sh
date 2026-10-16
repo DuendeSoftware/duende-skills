@@ -32,6 +32,43 @@ if ! jq . "$PLUGIN_JSON" > /dev/null 2>&1; then
 fi
 echo -e "${GREEN}plugin.json syntax: OK${NC}"
 
+# Check the other manifests (Codex, Cursor, Codex marketplace)
+CODEX_JSON="$REPO_ROOT/.codex-plugin/plugin.json"
+CODEX_MARKETPLACE_JSON="$REPO_ROOT/.agents/plugins/marketplace.json"
+CURSOR_JSON="$REPO_ROOT/.cursor-plugin/plugin.json"
+for f in "$CODEX_JSON" "$CODEX_MARKETPLACE_JSON" "$CURSOR_JSON"; do
+    rel="${f#$REPO_ROOT/}"
+    if [ ! -f "$f" ]; then
+        echo -e "${RED}ERROR: Missing manifest: $rel${NC}"
+        exit 1
+    fi
+    if ! jq . "$f" > /dev/null 2>&1; then
+        echo -e "${RED}ERROR: Invalid JSON syntax in $rel${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}$rel syntax: OK${NC}"
+done
+
+# Directory-based manifests must point at ./skills/ so every skill is discovered
+for f in "$CODEX_JSON" "$CURSOR_JSON"; do
+    rel="${f#$REPO_ROOT/}"
+    if [ "$(jq -r '.skills' "$f")" != "./skills/" ]; then
+        echo -e "${RED}ERROR: $rel must set \"skills\": \"./skills/\"${NC}"
+        ((++errors))
+    fi
+done
+
+# Versions must match across all manifests
+expected_version=$(jq -r '.version' "$PLUGIN_JSON")
+for f in "$MARKETPLACE_JSON:.plugins[0].version" "$CODEX_JSON:.version" "$CURSOR_JSON:.version"; do
+    file="${f%%:*}"; query="${f#*:}"
+    v=$(jq -r "$query" "$file")
+    if [ "$v" != "$expected_version" ]; then
+        echo -e "${RED}ERROR: Version mismatch in ${file#$REPO_ROOT/}: $v (expected $expected_version)${NC}"
+        ((++errors))
+    fi
+done
+
 # Check skill references (now folders with SKILL.md)
 echo ""
 echo "Checking skills..."
@@ -89,6 +126,19 @@ elif [ "$agents_type" = "array" ]; then
         fi
     done < <(jq -r '.agents[]' "$PLUGIN_JSON")
 fi
+
+# Every skills/*/SKILL.md must exist as a directory (flat layout for npx skills / Copilot / Cursor discovery)
+# and the 'name' frontmatter must match its directory name.
+echo ""
+echo "Checking skill directory names match frontmatter..."
+while IFS= read -r file; do
+    dir_name=$(basename "$(dirname "$file")")
+    skill_name=$(grep -m1 "^name:" "$file" | sed 's/^name: *//' | tr -d '"'"'"'\r')
+    if [ "$dir_name" != "$skill_name" ]; then
+        echo -e "${RED}ERROR: Directory '$dir_name' does not match frontmatter name '$skill_name'${NC}"
+        ((++errors))
+    fi
+done < <(find "$REPO_ROOT/skills" -name "SKILL.md" 2>/dev/null)
 
 # Check for unregistered skills (find all SKILL.md files)
 echo ""

@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.Storage.Sqlite (and Duende.IdentityServer) packages with --prerelease and notes Duende Storage is a preview",
+      "pass": true,
+      "rationale": "Packages added with --prerelease and states preview."
+    },
+    {
+      "assertion": "Calls AddStorage(storage => storage.AddSqlite(...)) with a connection string on the IdentityServer builder",
+      "pass": true,
+      "rationale": "AddStorage(storage => storage.AddSqlite(options => options.ConnectionString=...)) chained on AddIdentityServer."
+    },
+    {
+      "assertion": "Calls both AddConfigurationStorage() and AddOperationalStorage() (AddStorage alone does not store IdentityServer data)",
+      "pass": true,
+      "rationale": "Chains both AddConfigurationStorage() and AddOperationalStorage() and warns AddStorage alone stores nothing."
+    },
+    {
+      "assertion": "Runs IStorageInstanceSchema.MigrateAsync (development) and does not hide a missing connection string",
+      "pass": true,
+      "rationale": "Calls IStorageInstanceSchema.MigrateAsync in Development and throws InvalidOperationException on missing connection string."
+    },
+    {
+      "assertion": "Notes AddServerSideSessions() must still be called separately to use server-side sessions",
+      "pass": true,
+      "rationale": "Chains AddServerSideSessions() with comment that it is needed to enable server-side sessions."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

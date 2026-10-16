@@ -1,0 +1,255 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-token-security",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 51,
+      "passed": 51,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 51,
+      "passed": 32,
+      "failed": 19,
+      "pass_rate": 0.63
+    },
+    "delta": {
+      "assertions_improved": 19,
+      "delta_pass_rate": 0.37
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      },
+      "delta": 0.19999999999999996,
+      "without_skill_failures": [
+        "Mentions that DPoP requires Enterprise Edition and version >= 6.3"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Calls ConfigureDPoPTokensForScheme(\"token\", options => ...) on IServiceCollection with ProofTokenExpirationMode = DPoPProofExpirationMode.Nonce (or Both)",
+        "Restricts ProofTokenValidationParameters.ValidAlgorithms to ES256 (SecurityAlgorithms.EcdsaSha256)",
+        "Registers AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache) for replay detection and a distributed cache (e.g. Redis) for multi-instance so replays are detected across instances"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Configures AddJwtRequestUriHttpClient with a short timeout and MaxResponseContentBufferSize and a primary handler that validates the IP at connection time (e.g. idunno.Security.Ssrf SsrfSocketsHttpHandlerFactory)",
+        "Warns that a DelegatingHandler that only validates the URL is insufficient (localhost host names, redirects, DNS rebinding)",
+        "Advises not adding retries to that HTTP client and restricting outbound traffic/protecting cloud metadata endpoints"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Registers the keyed HybridCache for DPoP replay detection and mentions a distributed cache (e.g. Redis) as L2 for multi-instance deployments",
+        "Configures AddJwtBearer with Authority and ValidTypes including 'at+jwt'"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Sets options.PushedAuthorization.Lifetime = 300 (5 minutes in seconds, as int not TimeSpan)",
+        "Mentions PAR requires Business or Enterprise edition (version >= 7.0)"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Mentions that the same key can be shared between client authentication (private_key_jwt) and JAR"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Configures KeyManagement.SigningAlgorithms to include PS256 (RsaSsaPssSha256)",
+        "Sets DPoP.SupportedDPoPSigningAlgorithms with PS256/PS384/PS512 and ES256/ES384/ES512 algorithms",
+        "Sets JwtValidationClockSkew to TimeSpan.FromSeconds(10) as required by FAPI 2.0"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Sets options.MutualTls.AlwaysEmitConfirmationClaim = true in AddIdentityServer options"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "Warns that the DPoPJsonWebKey is a critical secret — losing it makes bound tokens unusable, leaking it nullifies DPoP security"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      },
+      "delta": 0.4,
+      "without_skill_failures": [
+        "Sets Kestrel ClientCertificateMode.NoCertificate because the reverse proxy terminates TLS",
+        "Uses AllowedCertificateTypes = CertificateTypes.Chained for production PKI certificates"
+      ]
+    }
+  ]
+}

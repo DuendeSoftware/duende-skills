@@ -275,6 +275,24 @@ app.MapRemoteBffApiEndpoint("/api/internal", new Uri("https://internal-service/a
     .WithAccessToken(RequiredTokenType.Client);  // Client credentials token (machine-to-machine)
 ```
 
+### Cookie Header Removal
+
+The BFF removes the browser's `Cookie` request header before forwarding to a remote API (the API authenticates via the access token the BFF attaches; the BFF session cookie must never leave the BFF). `MapRemoteBffApiEndpoint` has always done this; **YARP routes now do too** (every route, with or without token metadata; both `AddYarpConfig` in 4.x and `AddReverseProxy().AddBffExtensions()`). Behavior change in patch releases **2.2.1, 2.3.1, 3.0.1, 3.1.1, 4.0.4, 4.1.3, 4.2.1, 4.3.1** (security fix).
+
+The header is removed *after* YARP copies request headers and after the route's own transforms run, so a route transform that sets `Cookie` has no effect while removal is on. Transforms registered after `AddBffExtensions` (e.g. `.AddTransforms(...)` on the returned `IReverseProxyBuilder`) run later and can still set a specific `Cookie` (intentional); don't copy the browser's cookies back.
+
+To opt out (not recommended):
+
+```csharp
+builder.Services.AddBff(options =>
+{
+    // WARNING: forwards the BFF session cookie to every API proxied through YARP
+    options.RemoveCookieHeaderFromYarpRequests = false;   // default true
+});
+```
+
+then remove it per route with YARP: `"Transforms": [ { "RequestHeaderRemove": "Cookie" } ]` or `.WithTransformRequestHeaderRemove("Cookie")`. (In 2.x/3.x `BffOptions` is in `Duende.Bff`; in 4.x `Duende.Bff.Configuration`.)
+
 ### Token Type Options
 
 | `RequiredTokenType` | Behavior |
@@ -807,6 +825,12 @@ builder.Services.AddBff(options =>
 
 ---
 
+### Anti-Forgery for Frontend Remote APIs
+
+Calls to a frontend's remote APIs (`WithRemoteApis`/`AddRemoteApi`, or `Frontends:<name>:RemoteApis` in configuration) **must include the anti-forgery header** (`X-CSRF: 1` by default) or the BFF returns `401` (and logs a warning) **before** attaching an access token. Applies from **4.0.4, 4.1.3, 4.2.1, 4.3.1**; earlier 4.x forwarded these with a token without checking, so frontends that don't send the header yet will start failing. Header name/value come from `AntiForgeryHeaderName`/`AntiForgeryHeaderValue`. There is no per-API opt-out like `SkipAntiforgery()` on `MapRemoteBffApiEndpoint`; use `BffOptions.DisableAntiForgeryCheck` (delegate; also respected by this check from those versions).
+
+---
+
 ## Pattern 11: Blazor Integration
 
 ### Blazor Server
@@ -892,6 +916,7 @@ builder.Services.AddLocalApiHttpClient<WeatherClient>();
 | `AutomaticallyRegisterBffMiddleware`| `true`      | V4: Auto-register BFF middleware; set `false` for multi-frontend manual control |
 | `DisableAntiForgeryCheck`           | (null)      | V4: Delegate to conditionally skip anti-forgery per-request |
 | `IndexHtmlDefaultCacheDuration`     | 5 minutes   | V4: CDN index.html cache duration                    |
+| `RemoveCookieHeaderFromYarpRequests`| `true`      | Strip the `Cookie` header on YARP-proxied requests (2.2.1/2.3.1/3.0.1/3.1.1/4.0.4/4.1.3/4.2.1/4.3.1+) |
 | `Diagnostics.LogFrequency`          | (default)   | V4: How often BFF logs diagnostic information        |
 | `Diagnostics.ChunkSize`             | (default)   | V4: Size of diagnostic log chunks                    |
 
@@ -969,6 +994,10 @@ Session cleanup is a separate concern — implement `IUserSessionStoreCleanup` a
 - **Forgetting to revoke the refresh token on logout** — BFF does this automatically, but if `RevokeRefreshTokenOnLogout = false` is set, abandoned sessions retain valid refresh tokens indefinitely.
 
 - **Not configuring Data Protection in multi-instance deployments** — Cookie decryption failures manifest as users being perpetually logged out in load-balanced environments.
+
+- **Expecting YARP routes to receive the browser's cookies** — Since the security patch releases (see Cookie Header Removal) the BFF strips `Cookie` on all YARP routes; authenticate remote APIs with the attached access token.
+
+- **Frontend remote API calls without `X-CSRF: 1`** — 401 since 4.0.4/4.1.3/4.2.1/4.3.1.
 
 - **YARP metadata key typos** — When using appsettings.json configuration for YARP, the metadata keys (`Duende.Bff.Yarp.TokenType`, `Duende.Bff.Yarp.AntiforgeryCheck`) are case-sensitive strings. A typo causes silent failure: no token is attached and no anti-forgery check is performed.
 

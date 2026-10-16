@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.Storage.Sqlite (and Duende.IdentityServer) packages with --prerelease and notes Duende Storage is a preview",
+      "pass": false,
+      "rationale": "Uses EF Core stores; never mentions Duende.Storage.Sqlite or preview status, says it does not know Duende Storage."
+    },
+    {
+      "assertion": "Calls AddStorage(storage => storage.AddSqlite(...)) with a connection string on the IdentityServer builder",
+      "pass": false,
+      "rationale": "No AddStorage/AddSqlite; uses AddConfigurationStore/AddOperationalStore with UseSqlite."
+    },
+    {
+      "assertion": "Calls both AddConfigurationStorage() and AddOperationalStorage() (AddStorage alone does not store IdentityServer data)",
+      "pass": false,
+      "rationale": "No AddConfigurationStorage/AddOperationalStorage; EF-based approach."
+    },
+    {
+      "assertion": "Runs IStorageInstanceSchema.MigrateAsync (development) and does not hide a missing connection string",
+      "pass": false,
+      "rationale": "Uses EF Database.Migrate(), not IStorageInstanceSchema.MigrateAsync; connection string falls back to a default silently."
+    },
+    {
+      "assertion": "Notes AddServerSideSessions() must still be called separately to use server-side sessions",
+      "pass": false,
+      "rationale": "Mentions AddServerSideSessions() but only as an EF-store note (Business edition), not in the Duende Storage context; does not state it must be called separately for Storage."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

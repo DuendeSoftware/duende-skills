@@ -76,6 +76,8 @@ By default, `KnownNetworks` and `KnownProxies` support localhost (`127.0.0.1/8` 
 
 ## ASP.NET Core Data Protection
 
+> When answering Data Protection questions, **explicitly cite the general documentation** (<https://docs.duendesoftware.com/general/data-protection/>) and state that Data Protection is a cross-cutting concern for *all* Duende SDKs (IdentityServer, BFF, etc.).
+
 > **Cross-cutting concern:** Data protection is critical for all Duende products — both IdentityServer and BFF. See [ASP.NET Core Data Protection](https://docs.duendesoftware.com/general/data-protection/) for comprehensive guidance covering all Duende SDKs.
 
 ### Why It Matters
@@ -163,6 +165,15 @@ Operational data must always be shared in multi-instance deployments:
 
 Use Entity Framework Core or a persistent cache like Redis.
 
+### High Availability and Multi-Region
+
+- Keep the IdentityServer runtime **stateless**; runtime state (grants, consent, automatic signing keys, sessions) lives in external stores. In-memory config is fine if every instance runs the same build.
+- Configuration data (clients/resources) tolerates delayed replication, but disabling a client or rotating a secret only takes effect once caches/replicas catch up. Operational data must be visible to every instance almost immediately, or codes/refresh tokens fail with `invalid_grant`.
+- **Consistent issuer**: `iss` is derived from the request host by default. Every instance/region must resolve the same issuer for a given request (same public host name and path base from the proxy; with a single issuer you may fix `IssuerUri`). With Multi-Issuer or Spaces the issuer legitimately varies per host/space, but must still resolve identically on every instance.
+- Share signing keys (shared key store) and Data Protection keys (with the same explicit application name) across all nodes/regions; synchronize clocks.
+- Active-active needs: consistent issuer, operational store visibility across regions, shared signing + DP keys, synchronized clocks. If synchronous consistency across regions isn't achievable, prefer active-passive/regional failover with defined RPO/RTO over silently accepting eventual consistency for operational data.
+- User accounts live outside IdentityServer's stores; plan their replication separately.
+
 ## Distributed Caching
 
 Some optional features require ASP.NET Core's `IDistributedCache`:
@@ -186,101 +197,36 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 ## Health Checks
 
-### Discovery Endpoint Health Check
+Use ASP.NET Core health checks so load balancers/orchestrators can tell whether IdentityServer is healthy. The docs no longer recommend custom `IHealthCheck` classes that invoke the discovery/JWKS endpoint handlers; use a **liveness** probe (middleware is up, no dependency checks) plus a **readiness** probe (tagged dependency checks).
 
-Tests that IdentityServer can process requests and communicate with the configuration store:
-
-```csharp
-public class DiscoveryHealthCheck : IHealthCheck
-{
-    private readonly IEnumerable<Hosting.Endpoint> _endpoints;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public DiscoveryHealthCheck(IEnumerable<Hosting.Endpoint> endpoints,
-        IHttpContextAccessor httpContextAccessor)
-    {
-        _endpoints = endpoints;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    public async Task<HealthCheckResult> CheckHealthAsync(
-        HealthCheckContext context,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var endpoint = _endpoints.FirstOrDefault(
-                x => x.Name == IdentityServerConstants.EndpointNames.Discovery);
-            if (endpoint != null)
-            {
-                var handler = _httpContextAccessor.HttpContext.RequestServices
-                    .GetRequiredService(endpoint.Handler) as IEndpointHandler;
-                if (handler != null)
-                {
-                    var result = await handler.ProcessAsync(
-                        _httpContextAccessor.HttpContext);
-                    if (result is DiscoveryDocumentResult)
-                    {
-                        return HealthCheckResult.Healthy();
-                    }
-                }
-            }
-        }
-        catch { }
-
-        return new HealthCheckResult(context.Registration.FailureStatus);
-    }
-}
-```
-
-### JWKS Health Check
-
-Tests that IdentityServer can access its signing keys:
+### Liveness
 
 ```csharp
-public class DiscoveryKeysHealthCheck : IHealthCheck
-{
-    private readonly IEnumerable<Hosting.Endpoint> _endpoints;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public DiscoveryKeysHealthCheck(IEnumerable<Hosting.Endpoint> endpoints,
-        IHttpContextAccessor httpContextAccessor)
-    {
-        _endpoints = endpoints;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    public async Task<HealthCheckResult> CheckHealthAsync(
-        HealthCheckContext context,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var endpoint = _endpoints.FirstOrDefault(
-                x => x.Name == IdentityServerConstants.EndpointNames.Jwks);
-            if (endpoint != null)
-            {
-                var handler = _httpContextAccessor.HttpContext.RequestServices
-                    .GetRequiredService(endpoint.Handler) as IEndpointHandler;
-                if (handler != null)
-                {
-                    var result = await handler.ProcessAsync(
-                        _httpContextAccessor.HttpContext);
-                    if (result is JsonWebKeysResult)
-                    {
-                        return HealthCheckResult.Healthy();
-                    }
-                }
-            }
-        }
-        catch { }
-
-        return new HealthCheckResult(context.Registration.FailureStatus);
-    }
-}
+// Program.cs
+builder.Services.AddHealthChecks();
+var app = builder.Build();
+app.MapHealthChecks("/health/live");
 ```
 
-**Note**: Finding endpoints by name requires IdentityServer v6.3+.
+### Liveness + Readiness (database dependencies)
+
+```csharp
+// Program.cs
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ConfigurationDbContext>(tags: ["db", "ready"])
+    .AddDbContextCheck<PersistedGrantDbContext>(tags: ["db", "ready"]);
+
+app.MapHealthChecks("/health/live", new() { Predicate = _ => false }); // runs no checks: only proves the pipeline responds
+app.MapHealthChecks("/health/ready", new() { Predicate = x => x.Tags.Contains("ready") });
+```
+
+Use tags to build multiple endpoints that check different aspects (config store, signing key store, operational store).
+
+### Docker
+
+```dockerfile
+HEALTHCHECK CMD curl --fail http://localhost:5000/health/live || exit 1
+```
 
 ## OpenTelemetry Integration
 
@@ -378,14 +324,15 @@ IdentityServer uses ASP.NET Core's standard `ILogger`. Logs are written under th
 {
   "Logging": {
     "LogLevel": {
-      "Default": "Information",
-      "Duende.IdentityServer": "Information"
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning",
+      "Duende.IdentityServer": "Warning"
     }
   }
 }
 ```
 
-In production, default to `Warning` to avoid excessive log volume.
+**Production appsettings (e.g. `appsettings.Production.json`): set `Default` and `Duende.IdentityServer` to `Warning` (or higher).** Raise `Duende.IdentityServer` to `Information` only temporarily when troubleshooting. `Trace` and `Debug` expose sensitive data such as tokens and must never be used in production.
 
 ### Filtering Exceptions
 
@@ -473,6 +420,10 @@ public class SeqEventSink : IEventSink
 }
 ```
 
+Register it: `builder.Services.AddTransient<IEventSink, SeqEventSink>();`
+
+> **A custom `IEventSink` replaces the default sink.** `IEventService` sends each event to one sink, so events are no longer forwarded to the standard ASP.NET Core logger unless your custom sink does that too. If you still want events in `ILogger` output, forward to it in the sink (inject `ILogger<SeqEventSink>`) or fan out to both. Also account for destination failures and restrict write/delete access to the audit store.
+
 Events work well with structured logging stores like ELK, Seq, or Splunk.
 
 ## Rate Limiting
@@ -556,7 +507,7 @@ public class RateLimitingTokenRequestValidator : ICustomTokenRequestValidator
 | Token cleanup enabled                                 | Recommended                            | `EnableTokenCleanup = true`             |
 | Configuration store cache enabled                     | Recommended                            | `AddConfigurationStoreCache()`          |
 | Distributed cache configured (if multi-instance)      | Recommended                            | Redis, SQL, etc.                        |
-| Health checks implemented                             | Recommended                            | Discovery + JWKS endpoints              |
+| Health checks implemented                             | Recommended                            | `/health/live` + tagged `/health/ready` |
 | OpenTelemetry configured                              | Recommended                            | Metrics + traces for monitoring         |
 | Events enabled                                        | Recommended                            | For auditing and APM                    |
 | Signing key store uses durable storage                | Required for multi-instance            | EF operational store or custom          |

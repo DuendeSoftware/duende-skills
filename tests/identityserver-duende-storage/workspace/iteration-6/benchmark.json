@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-duende-storage",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 41,
+      "passed": 41,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 41,
+      "passed": 0,
+      "failed": 41,
+      "pass_rate": 0
+    },
+    "delta": {
+      "assertions_improved": 41,
+      "delta_pass_rate": 1
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Adds Duende.Storage.Sqlite (and Duende.IdentityServer) packages with --prerelease and notes Duende Storage is a preview",
+        "Calls AddStorage(storage => storage.AddSqlite(...)) with a connection string on the IdentityServer builder",
+        "Calls both AddConfigurationStorage() and AddOperationalStorage() (AddStorage alone does not store IdentityServer data)",
+        "Runs IStorageInstanceSchema.MigrateAsync (development) and does not hide a missing connection string",
+        "Notes AddServerSideSessions() must still be called separately to use server-side sessions"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "States Duende Storage does not replace the Entity Framework Core provider, which remains fully supported",
+        "States that no action is required if the application already uses EF Core and is satisfied",
+        "Lists reasons to adopt Duende Storage (admin APIs, schema-validated custom properties, optimistic concurrency, storage pools for Spaces, shared model across Duende products)",
+        "States there is no automated or in-place migration; the schemas and persistence models differ"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Uses IApiScopeAdmin.CreateAsync with ApiScopeConfiguration before creating the resource/client that references it",
+        "Uses IApiResourceAdmin and IClientAdmin.CreateAsync with CreateClient and CreateClientSecret { PlaintextValue = ... }",
+        "Checks SaveResult.IsSuccess and GetResult.Found",
+        "Updates via GetAsync then UpdateAsync(id, item, current.Version, ct) to get optimistic concurrency",
+        "Warns to protect/authorize the admin APIs (they are .NET service APIs, not preconfigured HTTP endpoints) and to load secrets from a secure source"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "States client and API resource secrets are one-way hashed but dynamic identity provider properties such as ClientSecret are stored without hashing or Duende Storage field-level encryption",
+        "Recommends encrypted DB connections, encryption at rest, restricted DB access and protected backups",
+        "Advises not to grant direct read access to the configuration store as a substitute for an authorized admin API",
+        "Mentions the corresponding dynamic provider type must be registered (AddOidcDynamicProvider())"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Creates a named instance with StorageInstanceId.Create(...)",
+        "Registers the second database with AddStorage(instanceId, storage => ...) and maps operational data with AddOperationalStorage(instanceId)",
+        "Keeps AddStorage(...)+AddConfigurationStorage() for the default instance",
+        "Migrates every instance via IStorageInstanceSchemaFactory.GetStorageInstanceSchema(id, ct).MigrateAsync, noting IStorageInstanceSchema.MigrateAsync only migrates the default instance",
+        "Mentions that mapping one category to two different instances or selecting a second provider for one instance throws InvalidOperationException"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 5,
+        "total": 5,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Defines a TypedAttributeDefinition<int> with AttributeCode.Create(\"cost_center\") and ScalarDataType.Integer",
+        "Creates a SchemaConfiguration with SchemaId.Client and registers it with AddInMemoryDataExtensionSchemas",
+        "Sets the value through an AttributeValueCollection assigned to CreateClient.ExtendedProperties",
+        "Explains that schema changes do not require new SQL migrations and that unknown/wrong-typed values are rejected",
+        "Mentions IsQueryable should only be set when filtering/sorting is needed because it adds indexing cost"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 3,
+        "total": 3,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Explains that with AddDynamicSchemas(), ISchemaStore/ISchemaAdmin resolve to the storage-backed implementation so in-memory schemas registered by AddSamlDynamicProvider() are not used",
+        "Shows creating the schema in the database with ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ...) and checking IsSuccess",
+        "Mentions SchemaId.SamlIdentityProvider (\"idp:saml\")"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 6,
+        "total": 6,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Says there is no automated migration and to rehearse on a production-like copy",
+        "Migrates configuration through the admin APIs (not direct writes), importing scopes and identity resources before resources and clients",
+        "Explains EF secrets are one-way hashes and must be re-provisioned from a secure source or rotated, not imported as plaintext",
+        "Recommends a controlled reset of operational data (grants, refresh/reference tokens, sessions) because there is no supported transfer tool, noting users must re-authenticate",
+        "Mentions signing key continuity so JWT access tokens issued before cutover remain valid, and not removing old validation keys until tokens expire",
+        "Recommends keeping the EF database read-only as a rollback path and not dual-writing"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Installs Duende.Cli (preview) and runs duende storage migrate --provider postgresql, using --dry-run to generate SQL for review",
+        "Passes the connection string via DUENDE_STORAGE_CONNECTION_STRING",
+        "States the preview CLI does not support Oracle and recommends IStorageInstanceSchema.BuildMigrationScript for DBA review",
+        "Mentions running one migration process at a time and running the CLI once per storage instance's connection string"
+      ]
+    }
+  ]
+}

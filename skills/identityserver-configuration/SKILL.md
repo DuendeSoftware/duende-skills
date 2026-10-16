@@ -27,6 +27,9 @@ Use this skill when:
 
 ## Related Skills
 
+- `identityserver-duende-storage` — opt-in Duende Storage provider (preview), admin APIs for clients/resources
+- `identityserver-spaces` — multi-tenancy with isolated data per space (preview)
+
 - `identityserver-stores` — EF Core persistence for configuration and operational data
 - `oauth-oidc-protocols` — Protocol fundamentals that underpin these configuration choices
 - `identity-security-hardening` — Production hardening of IdentityServer deployments
@@ -449,7 +452,7 @@ var idsvrBuilder = builder.Services.AddIdentityServer(options =>
 |--------|---------|---------|
 | `ServerSideSessions.RemoveExpiredSessionsFrequency` | 10 min | Cleanup interval |
 | `ServerSideSessions.RemoveExpiredSessions` | `true` | Enable automatic cleanup |
-| `ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout` | `true` | Notify clients on session expiry |
+| `ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout` | `false` | Notify all session clients on expiry (clients with coordinated token lifetime are always notified) |
 
 > **Tip:** Combine server-side sessions with `CoordinateClientLifetimesWithUserSession = true` to ensure refresh tokens are revoked when a user's session ends.
 
@@ -587,9 +590,12 @@ var client = new Client
 // ❌ IdentityServer behind Nginx but IssuerUri defaults to internal hostname
 // Tokens contain iss: "http://internal-host:5000" — clients reject them
 
-// ✅ Set IssuerUri to the external URL
+// ✅ Preferred: forward the public host (ForwardedHeaders) so the issuer is inferred correctly
+// ✅ Or, with a single issuer, set IssuerUri to the external URL
 options.IssuerUri = "https://identity.example.com";
 ```
+
+> **Exception — Multi-Issuer and Spaces:** leave `IssuerUri` **unset**. IdentityServer infers the issuer from each request's origin/path base, giving each domain or [space](../identityserver-spaces/SKILL.md) its own `iss`. A fixed `IssuerUri` makes every domain/space return the same issuer (and disables Multi-Issuer). Multi-Issuer changes only `iss`; for isolated per-tenant configuration and operational data use Spaces (`identityserver-spaces`, preview, requires Duende Storage). Other tenant option: `ValidateTenantOnAuthorization` (default `false`) compares the `tenant:` acr value with the session's `tenant` claim (see `identityserver-ui-flows`).
 
 ---
 

@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Adds or references the Duende.IdentityServer.Configuration NuGet package",
+      "pass": true,
+      "rationale": "Shows `dotnet add package Duende.IdentityServer.Configuration` and a PackageReference."
+    },
+    {
+      "assertion": "Calls AddIdentityServerConfiguration() on the service collection",
+      "pass": true,
+      "rationale": "`builder.Services.AddIdentityServerConfiguration();` in code."
+    },
+    {
+      "assertion": "Calls MapDynamicClientRegistration() to map the DCR endpoint",
+      "pass": true,
+      "rationale": "`app.MapDynamicClientRegistration().RequireAuthorization(\"dcr\")` shown."
+    },
+    {
+      "assertion": "Notes that MapDynamicClientRegistration() is an endpoint-routing call from the Duende.IdentityServer.Configuration package, placed in the pipeline/endpoint routing (e.g. ConfigurePipeline) alongside UseIdentityServer()",
+      "pass": true,
+      "rationale": "Code places MapDynamicClientRegistration after UseRouting/UseIdentityServer and notes both calls are required, from the Configuration package."
+    },
+    {
+      "assertion": "Mentions that DCR requires Business Edition or higher license",
+      "pass": true,
+      "rationale": "States it requires Business Edition or higher license."
+    },
+    {
+      "assertion": "The MapDynamicClientRegistration() call includes RequireAuthorization() or the response warns about securing the endpoint",
+      "pass": true,
+      "rationale": "Uses RequireAuthorization(\"dcr\") and says 'Never leave it unauthenticated'."
+    }
+  ],
+  "pass_count": 6,
+  "total_count": 6,
+  "score": 1.0
+}

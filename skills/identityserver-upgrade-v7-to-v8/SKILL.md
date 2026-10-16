@@ -262,15 +262,23 @@ await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDeni
 await _interaction.DenyAuthenticationAsync(context, InteractionError.AccessDenied);
 ```
 
-### 16. Rename ProfileDataRequestContext.Client → .Application
+### 16. Rename `Client` → `Application` on Profile Service Contexts
+
+Both `ProfileDataRequestContext` **and `IsActiveContext`** replaced `Client Client` with `IConnectedApplication? Application` (v8 can serve SAML service providers). `Client` and `SamlServiceProvider` both implement `IConnectedApplication`; `Identifier` (client ID for OIDC, entity ID for SAML), `DisplayName` and `Enabled` are on the interface.
 
 ```csharp
 // ❌ Before (v7)
-var client = context.Client;
+var clientId = context.Client.ClientId;
 
 // ✅ After (v8)
-var client = context.Application;
+var clientId = context.Application?.Identifier;
+
+// OIDC-specific members: pattern-match
+if (context.Application is Client client) { /* client.Properties, AllowedGrantTypes ... */ }
+else if (context.Application is SamlServiceProvider sp) { /* SAML */ }
 ```
+
+Your profile service may now be invoked for SAML requests: don't cast `Application` to `Client` unchecked. In `IsActiveAsync` those calls have `context.Caller == IdentityServerConstants.ProfileIsActiveCallers.SamlSsoEndpoint`.
 
 ### 17. Update ITokenValidator.ValidateAccessTokenAsync
 
@@ -329,7 +337,7 @@ options.StrictClientAssertionAudienceValidation = true;  // default changed to f
 13. ☐ Update licensing references (`IdentityServerLicense` → `LicenseInformation`)
 14. ☐ Rename `AuthorizationError` → `InteractionError`
 15. ☐ Rename `DenyAuthorizationAsync` → `DenyAuthenticationAsync`
-16. ☐ Rename `ProfileDataRequestContext.Client` → `.Application`
+16. ☐ Rename `ProfileDataRequestContext.Client` / `IsActiveContext.Client` → `.Application` (`IConnectedApplication?`), handle SAML callers
 17. ☐ Update `ITokenValidator.ValidateAccessTokenAsync` calls (add `expectedScope` param)
 18. ☐ Relocate `PreviewFeatureOptions` settings
 19. ☐ Fix nullable reference type warnings

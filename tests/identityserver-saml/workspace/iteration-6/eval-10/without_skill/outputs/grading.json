@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States that SAML signing requires an X.509 certificate",
+      "pass": true,
+      "rationale": "Says SAML XML signatures need an X.509 certificate with private key."
+    },
+    {
+      "assertion": "Explains that Automatic Key Management RSA keys are auto-wrapped into a self-signed X.509 container",
+      "pass": false,
+      "rationale": "Doesn't explain ARM auto-wrapping; only vaguely says to check ARM produces X.509-backed keys."
+    },
+    {
+      "assertion": "States that AddDeveloperSigningCredential() (raw RSA) cannot be auto-wrapped and an X.509 cert with a private key is required instead",
+      "pass": true,
+      "rationale": "Explains bare RSA/JWK from AddDeveloperSigningCredential has no certificate so can't be used; X.509 needed (no 'auto-wrap' wording)."
+    },
+    {
+      "assertion": "Notes that UseX509Certificate is not required just to enable SAML and is not supported for EC keys (custom ISamlSigningService needed)",
+      "pass": false,
+      "rationale": "No mention of UseX509Certificate being unnecessary or EC/ISamlSigningService."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

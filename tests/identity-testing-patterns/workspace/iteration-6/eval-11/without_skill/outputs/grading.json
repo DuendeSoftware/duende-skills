@@ -1,0 +1,39 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Changes the test project SDK from Microsoft.NET.Sdk to Microsoft.NET.Sdk.Web",
+      "pass": false,
+      "rationale": "The csproj keeps Sdk=\"Microsoft.NET.Sdk\" and adds a FrameworkReference; Sdk.Web is only an offhand alternative, not the change made."
+    },
+    {
+      "assertion": "Adds Microsoft.AspNetCore.Mvc.Testing (for WebApplicationFactory<T>) and Duende.IdentityModel packages to the test project",
+      "pass": true,
+      "rationale": "Includes PackageReference for Microsoft.AspNetCore.Mvc.Testing and Duende.IdentityModel."
+    },
+    {
+      "assertion": "Uses a test class with IClassFixture<WebApplicationFactory<Program>> and factory.CreateClient()",
+      "pass": true,
+      "rationale": "IdentityServerTests : IClassFixture<WebApplicationFactory<Program>> and factory.CreateClient()."
+    },
+    {
+      "assertion": "Calls GetDiscoveryDocumentAsync and asserts disco.IsError is false",
+      "pass": true,
+      "rationale": "Calls GetDiscoveryDocumentAsync and Assert.False(disco.IsError, disco.Error)."
+    },
+    {
+      "assertion": "Calls RequestClientCredentialsTokenAsync against 'connect/token' and asserts the token is not an error",
+      "pass": false,
+      "rationale": "Token request uses Address = disco.TokenEndpoint rather than 'connect/token' (though it asserts IsError false)."
+    },
+    {
+      "assertion": "Notes that mutating shared static Config collections can cause cross-test interference under parallel test execution",
+      "pass": false,
+      "rationale": "No mention of mutating shared static Config collections causing parallel interference; only a Serilog shared-fixture note."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 6,
+  "score": 0.5
+}

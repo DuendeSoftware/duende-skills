@@ -1,0 +1,34 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Defines a TypedAttributeDefinition<int> with AttributeCode.Create(\"cost_center\") and ScalarDataType.Integer",
+      "pass": true,
+      "rationale": "TypedAttributeDefinition<int>(AttributeCode.Create(\"cost_center\"), new ScalarAttributeType(ScalarDataType.Integer))."
+    },
+    {
+      "assertion": "Creates a SchemaConfiguration with SchemaId.Client and registers it with AddInMemoryDataExtensionSchemas",
+      "pass": true,
+      "rationale": "SchemaConfiguration with SchemaId.Client registered via AddInMemoryDataExtensionSchemas([clientSchema])."
+    },
+    {
+      "assertion": "Sets the value through an AttributeValueCollection assigned to CreateClient.ExtendedProperties",
+      "pass": true,
+      "rationale": "AttributeValueCollection ext set with Set(costCenter, 4210) assigned to CreateClient.ExtendedProperties."
+    },
+    {
+      "assertion": "Explains that schema changes do not require new SQL migrations and that unknown/wrong-typed values are rejected",
+      "pass": true,
+      "rationale": "States no SQL migration needed and admin API rejects unknown properties and wrong types."
+    },
+    {
+      "assertion": "Mentions IsQueryable should only be set when filtering/sorting is needed because it adds indexing cost",
+      "pass": true,
+      "rationale": "Says set IsQueryable only when filtering/sorting needed because of indexing cost."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Configures AddJwtBearer with an Authority and Audience for the DCR scheme",
+      "pass": false,
+      "rationale": "AddJwtBearer sets Authority but no Audience; it sets ValidateAudience = false with only a comment 'or set a real audience'."
+    },
+    {
+      "assertion": "Creates an authorization policy that requires an authenticated user and a specific scope claim",
+      "pass": true,
+      "rationale": "Policy RequireAuthenticatedUser + RequireClaim(\"scope\", \"IdentityServer.Configuration\")."
+    },
+    {
+      "assertion": "Applies RequireAuthorization with the named policy to MapDynamicClientRegistration()",
+      "pass": true,
+      "rationale": "`MapDynamicClientRegistration().RequireAuthorization(\"DCR\")`."
+    },
+    {
+      "assertion": "Uses AddAuthentication() and AddAuthorization() with proper policy configuration",
+      "pass": true,
+      "rationale": "AddAuthentication(\"token\") and AddAuthorization with AddPolicy shown."
+    },
+    {
+      "assertion": "Does NOT expose MapDynamicClientRegistration() without authorization",
+      "pass": true,
+      "rationale": "Mapping always has RequireAuthorization(\"DCR\")."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

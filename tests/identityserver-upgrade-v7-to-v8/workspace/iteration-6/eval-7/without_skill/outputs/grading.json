@@ -1,0 +1,34 @@
+{
+  "eval_id": 7,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Includes updating TargetFramework to net10.0 as a first step",
+      "pass": false,
+      "rationale": "Only says 'update target framework if v8 requires newer .NET'; no net10.0."
+    },
+    {
+      "assertion": "Includes replacing IClock with TimeProvider",
+      "pass": true,
+      "rationale": "Section 5 says IClock likely replaced with TimeProvider subclass."
+    },
+    {
+      "assertion": "Includes adding CancellationToken to all async store/service methods",
+      "pass": false,
+      "rationale": "CancellationToken only mentioned as 'expect signature changes', not a directive for all methods."
+    },
+    {
+      "assertion": "Includes running EF database migration",
+      "pass": true,
+      "rationale": "Section 7 generates migrations and applies them."
+    },
+    {
+      "assertion": "Lists at least 8 distinct migration steps",
+      "pass": false,
+      "rationale": "Steps are vague and hedged; fewer than 8 concrete distinct migration steps."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

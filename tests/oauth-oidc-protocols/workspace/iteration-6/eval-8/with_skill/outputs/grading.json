@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that PAR moves authorization parameters from the query string to a backchannel POST to the /connect/par endpoint, returning a request_uri that the client uses in the authorize redirect",
+      "pass": true,
+      "rationale": "Describes POST of authorize parameters to /connect/par returning request_uri used in /authorize redirect."
+    },
+    {
+      "assertion": "Response explains that DPoP binds access tokens to a client's cryptographic key pair via a 'cnf' claim, preventing stolen tokens from being used by attackers",
+      "pass": true,
+      "rationale": "DPoP steps: key pair, proof, IdentityServer binds token via cnf claim; stolen token useless."
+    },
+    {
+      "assertion": "Response mentions that PAR prevents parameter tampering and URL length issues with authorization requests",
+      "pass": true,
+      "rationale": "States parameters can't be tampered with and no URL length limits."
+    },
+    {
+      "assertion": "Response mentions FAPI 2.0 as a financial-grade API profile that requires PAR and DPoP (or mTLS) for enhanced security",
+      "pass": true,
+      "rationale": "Says FAPI 2.0 requires PAR plus DPoP or mTLS."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

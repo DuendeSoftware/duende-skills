@@ -183,6 +183,23 @@ await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
 
 Internally, this uses `IServerSideTicketStore`, `IPersistedGrantStore`, and `IBackChannelLogoutService`.
 
+### What Logout Does and Doesn't Clean Up
+
+`SignOutAsync` removes the IdentityServer cookie (and the server-side session record when enabled). By default it does **not** sign out of the external IdP, notify clients, or revoke tokens:
+
+| Artifact | Default at logout | How to clean up |
+| -------- | ----------------- | --------------- |
+| IdentityServer cookie | Removed by `SignOutAsync` | - |
+| Server-side session record | Removed automatically when enabled | - |
+| External IdP session | Not signed out | External logout flow |
+| Client app sessions | Not cleaned unless notified | Front/back-channel notification |
+| Refresh tokens & reference access tokens | Kept | `CoordinateLifetimeWithUserSession` on the client, or global `Authentication.CoordinateClientLifetimesWithUserSession` (a client's own value wins; no server-side sessions required) |
+| JWT access tokens | Never revoked, expire on their own | Keep lifetime short |
+| Consents / other grants | Kept | `ISessionManagementService` / `IPersistedGrantService` (coordination does not revoke consents) |
+| BFF session + refresh token | Refresh token revoked by default on BFF logout | - |
+
+When a server-side session **expires** (no explicit logout), clients with a coordinated lifetime have tokens revoked and get a back-channel logout; other clients are only notified when `ExpiredSessionsTriggerBackchannelLogout = true` (default `false`). `ISessionManagementService.RemoveSessionsAsync` (admin-initiated termination) removes the session, sends back-channel logout, revokes tokens and consents by default; each step can be turned off.
+
 ## Server-Side Session Custom Metadata
 
 Store per-sign-in metadata (device name, auth method, region) in the `AuthenticationTicket`'s `AuthenticationProperties.Items`. It stays inside IdentityServer and is **NOT** issued as claims.
@@ -250,13 +267,14 @@ builder.Services.AddIdentityServer(options =>
     // 2. Coordinate client token lifetimes with the user session
     options.Authentication.CoordinateClientLifetimesWithUserSession = true;
 
-    // 3. Trigger back-channel logout when sessions expire
-    // This is already true by default, shown here for explicitness
+    // 3. Also notify clients WITHOUT coordinated lifetimes when sessions expire
+    // Defaults to false. Clients with a coordinated token lifetime are always
+    // notified on expiry, regardless of this flag.
     options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
 }).AddServerSideSessions();
 ```
 
-**Note**: `ExpiredSessionsTriggerBackchannelLogout` defaults to `true`, so step 3 is technically optional. The only setting you must explicitly enable is `CoordinateClientLifetimesWithUserSession` (step 2).
+**Note**: `ExpiredSessionsTriggerBackchannelLogout` defaults to `false`. When a server-side session expires, IdentityServer always revokes refresh/reference tokens and sends a back-channel logout notification to clients with a coordinated token lifetime (`CoordinateLifetimeWithUserSession`, or the global `CoordinateClientLifetimesWithUserSession`). Other clients in the session are only notified when you set the flag to `true`.
 
 Alternatively, enable coordination per-client:
 
@@ -291,7 +309,7 @@ All options are on `options.ServerSideSessions`:
 | `RemoveExpiredSessions` | `true` | Enables periodic cleanup of expired sessions |
 | `RemoveExpiredSessionsFrequency` | 10 minutes | How often the cleanup job runs |
 | `RemoveExpiredSessionsBatchSize` | 100 | Number of expired records removed per batch |
-| `ExpiredSessionsTriggerBackchannelLogout` | `true` | Send back-channel logout notifications when expired sessions are cleaned up |
+| `ExpiredSessionsTriggerBackchannelLogout` | `false` | Send back-channel logout to all clients in the session when it expires (coordinated-lifetime clients are always notified regardless) |
 | `FuzzExpiredSessionRemovalStart` | `true` | Randomize the first cleanup run to avoid multi-instance conflicts |
 
 ### Customizing the Cleanup Interval
@@ -357,7 +375,12 @@ Dynamic providers are loaded from a store at runtime, avoiding DI overhead and e
 | --------------------- | ---------------------------------- |
 | In-memory             | `AddInMemoryIdentityProviders()`   |
 | Entity Framework Core | Via `ConfigurationDbContext`       |
+| Duende Storage (preview) | `AddConfigurationStorage()`; includes `IIdentityProviderAdmin` for create/update/delete |
 | Custom                | Implement `IIdentityProviderStore` |
+
+The `IIdentityProviderStore` interface is read-only; EF Core and custom stores need your own mechanism to add/update/delete providers. Duende Storage ships `IIdentityProviderAdmin` for that (see `identityserver-duende-storage`).
+
+With Duende Storage, call `AddOidcDynamicProvider()` / `AddSamlDynamicProvider()`: they register the built-in `idp:oidc` / `idp:saml` data-extension schema (required to validate `ExtendedProperties`). This only applies to the default in-memory schema store; with `AddDynamicSchemas()` create the schema yourself via `ISchemaAdmin`. Dynamic SAML providers take a single `SigningCertificateBase64`; for rollover, update the record with the new certificate. Provider secrets (e.g. `ClientSecret`) are stored recoverably, not hashed or field-encrypted: protect the database.
 
 ### Adding a Dynamic OIDC Provider (In-Memory)
 

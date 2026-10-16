@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Output registers health checks using builder.Services.AddHealthChecks()",
+      "pass": true,
+      "rationale": "Calls builder.Services.AddHealthChecks()."
+    },
+    {
+      "assertion": "Output adds AddDbContextCheck<ConfigurationDbContext> and AddDbContextCheck<PersistedGrantDbContext> tagged with a 'ready' tag",
+      "pass": true,
+      "rationale": "AddDbContextCheck<ConfigurationDbContext> and <PersistedGrantDbContext> with tags [\"db\",\"ready\"]."
+    },
+    {
+      "assertion": "Output maps /health/live with a Predicate that runs no checks (_ => false) so the liveness probe only confirms IdentityServer middleware is running",
+      "pass": true,
+      "rationale": "MapHealthChecks(\"/health/live\", new() { Predicate = _ => false })."
+    },
+    {
+      "assertion": "Output maps /health/ready with a Predicate filtering on the 'ready' tag",
+      "pass": true,
+      "rationale": "MapHealthChecks(\"/health/ready\") with Predicate = x => x.Tags.Contains(\"ready\")."
+    },
+    {
+      "assertion": "Output does NOT rely on custom IHealthCheck classes that invoke the discovery/JWKS endpoint handlers via IEnumerable<Hosting.Endpoint>",
+      "pass": true,
+      "rationale": "Uses only built-in DbContext checks; explicitly advises against custom IHealthCheck calling discovery handlers."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

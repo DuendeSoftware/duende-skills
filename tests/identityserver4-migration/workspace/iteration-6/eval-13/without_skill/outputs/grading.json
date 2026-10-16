@@ -1,0 +1,34 @@
+{
+  "eval_id": 13,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response mentions a migration analysis tool or controller (MigrationAnalysisController) that can be added to the existing IS4 project",
+      "pass": false,
+      "rationale": "Says it is not certain of a specific tool; no MigrationAnalysisController."
+    },
+    {
+      "assertion": "Response mentions that the tool inspects the running IdentityServer4 instance to provide recommendations",
+      "pass": false,
+      "rationale": "Does not mention a tool that inspects the running instance."
+    },
+    {
+      "assertion": "Response mentions that the tool checks client counts (interactive vs non-interactive) which helps determine the Duende license edition needed",
+      "pass": false,
+      "rationale": "Mentions license edition generically but not a tool counting interactive/non-interactive clients."
+    },
+    {
+      "assertion": "Response mentions that the tool checks data protection configuration (application discriminator and/or key repository)",
+      "pass": false,
+      "rationale": "No tool-based data protection check mentioned."
+    },
+    {
+      "assertion": "Response mentions that the tool checks authentication schemes for compatibility",
+      "pass": false,
+      "rationale": "No tool-based authentication scheme check mentioned."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}

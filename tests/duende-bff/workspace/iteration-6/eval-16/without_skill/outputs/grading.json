@@ -1,0 +1,34 @@
+{
+  "eval_id": 16,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the BFF now removes the Cookie request header on every YARP-proxied route so the BFF session cookie never reaches remote APIs",
+      "pass": true,
+      "rationale": "Explains BFF stopped forwarding Cookie header to upstream APIs for security."
+    },
+    {
+      "assertion": "Recommends authenticating the remote API with the access token the BFF attaches instead of cookies",
+      "pass": true,
+      "rationale": "Recommends bearer token authentication instead of cookies."
+    },
+    {
+      "assertion": "Mentions BffOptions.RemoveCookieHeaderFromYarpRequests = false as an opt-out, warns it forwards the session cookie, and suggests RequestHeaderRemove/WithTransformRequestHeaderRemove(\"Cookie\") per route",
+      "pass": false,
+      "rationale": "Admits not knowing the opt-out option; no RemoveCookieHeaderFromYarpRequests."
+    },
+    {
+      "assertion": "Explains remote APIs defined on a frontend (WithRemoteApis or configuration) now require the X-CSRF: 1 anti-forgery header, otherwise the BFF returns 401",
+      "pass": false,
+      "rationale": "Does not mention the X-CSRF requirement on frontend remote APIs."
+    },
+    {
+      "assertion": "Mentions there is no per-API opt-out and that BffOptions.DisableAntiForgeryCheck is the only delegate-based way to skip the check",
+      "pass": false,
+      "rationale": "No mention of DisableAntiForgeryCheck or lack of per-API opt-out."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

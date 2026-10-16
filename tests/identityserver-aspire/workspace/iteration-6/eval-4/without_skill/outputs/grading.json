@@ -1,0 +1,34 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "The code uses .WithReplicas(3) on the IdentityServer project resource",
+      "pass": true,
+      "rationale": "Identity server resource has .WithReplicas(3)."
+    },
+    {
+      "assertion": "The response mentions shared signing keys (ISigningKeyStore or equivalent) as a requirement",
+      "pass": true,
+      "rationale": "Says signing keys must be the same across instances (shared operational store or shared certificate)."
+    },
+    {
+      "assertion": "The response mentions shared ASP.NET Data Protection keys as a requirement",
+      "pass": true,
+      "rationale": "Data Protection keys must be persisted to a shared store, with a PersistKeysToDbContext example."
+    },
+    {
+      "assertion": "The response mentions shared operational store (persisted grants, device codes, or server-side sessions) as a requirement",
+      "pass": true,
+      "rationale": "Persisted grants, device codes and keys must be in the shared EF database."
+    },
+    {
+      "assertion": "The response warns against using file-based signing keys or in-memory stores with multiple replicas",
+      "pass": true,
+      "rationale": "Warns the operational store must be in the shared database 'not in memory' and to use a distributed cache rather than in-memory, which covers the in-memory half of the assertion."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

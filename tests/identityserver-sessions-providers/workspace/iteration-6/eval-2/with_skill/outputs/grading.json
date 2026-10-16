@@ -1,0 +1,34 @@
+{
+  "eval_id": 2,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Code uses ISessionManagementService with QuerySessionsAsync and CountRequested = 10 for the first page",
+      "pass": true,
+      "rationale": "QuerySessionsAsync with SessionQuery { CountRequested = 10 }."
+    },
+    {
+      "assertion": "Code uses ResultsToken from the first query result to fetch the next page",
+      "pass": true,
+      "rationale": "Second query passes ResultsToken = page1.ResultsToken."
+    },
+    {
+      "assertion": "Code uses RemoveSessionsAsync with RevokeConsents = false to preserve consent grants",
+      "pass": true,
+      "rationale": "RemoveSessionsAsync with RevokeConsents = false."
+    },
+    {
+      "assertion": "Code sets SendBackchannelLogoutNotification = true (explicitly or by relying on the default) in RemoveSessionsContext",
+      "pass": true,
+      "rationale": "SendBackchannelLogoutNotification = true set explicitly."
+    },
+    {
+      "assertion": "Response mentions preferring GetSessionsAsync over QuerySessionsAsync for simple session listing",
+      "pass": true,
+      "rationale": "Notes that for plain listing the filter-based GetSessionsAsync is preferred over QuerySessionsAsync."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

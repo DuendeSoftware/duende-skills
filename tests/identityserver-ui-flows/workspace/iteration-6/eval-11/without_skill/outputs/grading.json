@@ -1,0 +1,29 @@
+{
+  "eval_id": 11,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Lists login_required, consent_required, interaction_required, account_selection_required, access_denied, temporarily_unavailable and unmet_authentication_requirements as errors returned to the client redirect_uri",
+      "pass": false,
+      "rationale": "List omits temporarily_unavailable and unmet_authentication_requirements and wrongly includes invalid_request, invalid_scope, unauthorized_client."
+    },
+    {
+      "assertion": "States errors like invalid_request, unauthorized_client, invalid_scope, invalid_request_object and server_error (and custom codes) show the error page",
+      "pass": false,
+      "rationale": "Wrongly says invalid_request, unauthorized_client, invalid_scope go to the client; error page examples differ."
+    },
+    {
+      "assertion": "States the set of safe codes cannot be configured",
+      "pass": false,
+      "rationale": "Says spec-mandated cases can't change but suggests ICustomAuthorizeRequestValidator; never states the set is fixed."
+    },
+    {
+      "assertion": "Explains untrusted requests are not redirected to avoid open redirects",
+      "pass": true,
+      "rationale": "Says redirecting on untrusted client/redirect_uri would risk an open redirect."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 4,
+  "score": 0.25
+}

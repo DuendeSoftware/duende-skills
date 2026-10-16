@@ -1,0 +1,29 @@
+{
+  "eval_id": 4,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "States client and API resource secrets are one-way hashed but dynamic identity provider properties such as ClientSecret are stored without hashing or Duende Storage field-level encryption",
+      "pass": false,
+      "rationale": "Does not state client secrets are hashed and IdP properties unhashed/unencrypted in Duende Storage; recommends Data Protection encryption instead."
+    },
+    {
+      "assertion": "Recommends encrypted DB connections, encryption at rest, restricted DB access and protected backups",
+      "pass": false,
+      "rationale": "Does not recommend encrypted DB connections, encryption at rest or protected backups explicitly (only mentions backups as risk)."
+    },
+    {
+      "assertion": "Advises not to grant direct read access to the configuration store as a substitute for an authorized admin API",
+      "pass": false,
+      "rationale": "Does not advise against direct DB read access as a substitute for an admin API."
+    },
+    {
+      "assertion": "Mentions the corresponding dynamic provider type must be registered (AddOidcDynamicProvider())",
+      "pass": false,
+      "rationale": "Does not mention AddOidcDynamicProvider()."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 4,
+  "score": 0.0
+}

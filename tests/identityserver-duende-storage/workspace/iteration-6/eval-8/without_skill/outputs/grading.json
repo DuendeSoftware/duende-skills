@@ -1,0 +1,39 @@
+{
+  "eval_id": 8,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Says there is no automated migration and to rehearse on a production-like copy",
+      "pass": false,
+      "rationale": "Recommends staging rehearsal but never states there is no automated migration (suggests checking for an official tool)."
+    },
+    {
+      "assertion": "Migrates configuration through the admin APIs (not direct writes), importing scopes and identity resources before resources and clients",
+      "pass": false,
+      "rationale": "Says export/import via admin API vaguely, without ordering scopes and identity resources before clients; also suggests copying rows."
+    },
+    {
+      "assertion": "Explains EF secrets are one-way hashes and must be re-provisioned from a secure source or rotated, not imported as plaintext",
+      "pass": false,
+      "rationale": "Recommends copying secret hashes as-is rather than re-provisioning or rotating."
+    },
+    {
+      "assertion": "Recommends a controlled reset of operational data (grants, refresh/reference tokens, sessions) because there is no supported transfer tool, noting users must re-authenticate",
+      "pass": false,
+      "rationale": "Suggests copying PersistedGrants rows if compatible rather than recommending a controlled reset; no clear no-transfer-tool statement."
+    },
+    {
+      "assertion": "Mentions signing key continuity so JWT access tokens issued before cutover remain valid, and not removing old validation keys until tokens expire",
+      "pass": false,
+      "rationale": "Mentions migrating signing keys for JWKS continuity but not keeping old validation keys until tokens expire; mostly different approach."
+    },
+    {
+      "assertion": "Recommends keeping the EF database read-only as a rollback path and not dual-writing",
+      "pass": false,
+      "rationale": "Keeps old DB untouched for rollback but recommends dual-write, contradicting the criterion."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 6,
+  "score": 0.0
+}

@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Reads the tenant from AuthorizationRequest.Tenant returned by IIdentityServerInteractionService.GetAuthorizationContextAsync",
+      "pass": true,
+      "rationale": "Reads context?.Tenant from GetAuthorizationContextAsync."
+    },
+    {
+      "assertion": "Issues the tenant claim by setting IdentityServerUser.Tenant when signing in",
+      "pass": false,
+      "rationale": "Uses AdditionalClaims tenant claim and an auth property instead of IdentityServerUser.Tenant."
+    },
+    {
+      "assertion": "Sets IdentityServerOptions.ValidateTenantOnAuthorization = true so a mismatching or missing session tenant shows the login page again",
+      "pass": false,
+      "rationale": "Uses custom AuthorizeInteractionResponseGenerator rather than ValidateTenantOnAuthorization."
+    },
+    {
+      "assertion": "Warns the tenant value is an untrusted client-supplied hint and the user's membership must be verified server-side",
+      "pass": false,
+      "rationale": "Only advises a whitelist for branding paths; no warning to verify user membership server-side."
+    },
+    {
+      "assertion": "Notes the tenant claim is only in the session cookie and must be emitted by the profile service to appear in tokens, and that this is not the same as Spaces",
+      "pass": false,
+      "rationale": "No mention of profile service for tokens or Spaces distinction."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 5,
+  "score": 0.2
+}

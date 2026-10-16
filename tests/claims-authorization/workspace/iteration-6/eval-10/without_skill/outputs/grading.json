@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains the id_token is minimal by default and profile claims are available at the userinfo endpoint",
+      "pass": true,
+      "rationale": "States the id_token is minimal by default (includeAllIdentityClaims false / AlwaysIncludeUserClaimsInIdToken false) and claims come from userinfo."
+    },
+    {
+      "assertion": "Recommends GetClaimsFromUserInfoEndpoint = true on the client OIDC handler (or AlwaysIncludeUserClaimsInIdToken = true to embed claims in the id_token, noting the size tradeoff)",
+      "pass": true,
+      "rationale": "Recommends GetClaimsFromUserInfoEndpoint = true and AlwaysIncludeUserClaimsInIdToken = true with size/staleness tradeoffs."
+    },
+    {
+      "assertion": "Suggests enabling Duende.IdentityServer debug logging, noting the default profile service logs requested vs issued claim types",
+      "pass": false,
+      "rationale": "Suggests debug logging and inspecting RequestedClaimTypes/Caller, but never notes that the default profile service logs requested vs issued claim types."
+    },
+    {
+      "assertion": "Does NOT conclude the claim is missing from the profile service or from token issuance",
+      "pass": true,
+      "rationale": "Says userinfo returning department proves the profile service works; no rewrite needed."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

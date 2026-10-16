@@ -1,0 +1,29 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Output contains configuration of ForwardedHeaders with either ForwardedHeaders.XForwardedProto or the ASPNETCORE_FORWARDEDHEADERS_ENABLED environment variable approach",
+      "pass": true,
+      "rationale": "Configures ForwardedHeadersOptions with XForwardedProto and also mentions ASPNETCORE_FORWARDEDHEADERS_ENABLED."
+    },
+    {
+      "assertion": "Output mentions that the ForwardedHeaders middleware must run before IdentityServer middleware in the pipeline",
+      "pass": true,
+      "rationale": "Says middleware goes before UseIdentityServer and shows app.UseForwardedHeaders() first."
+    },
+    {
+      "assertion": "Output includes adding proxy IP addresses to KnownProxies or KnownNetworks for production, or explains the default localhost-only trust",
+      "pass": true,
+      "rationale": "Shows KnownProxies/KnownNetworks and notes only loopback trusted by default."
+    },
+    {
+      "assertion": "If explicit configuration is shown, ForwardedHeaders option includes XForwardedProto (to fix the http vs https issue)",
+      "pass": true,
+      "rationale": "ForwardedHeaders flags include XForwardedProto."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

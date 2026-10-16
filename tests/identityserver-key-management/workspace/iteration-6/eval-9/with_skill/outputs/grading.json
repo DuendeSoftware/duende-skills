@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that with static key management SAML requires an X.509 signing certificate that includes a private key",
+      "pass": true,
+      "rationale": "States static key management needs an X.509 signing certificate with private key (LoadPkcs12FromFile example)."
+    },
+    {
+      "assertion": "States that a manually registered raw RSA key, including one from AddDeveloperSigningCredential(), cannot be auto-wrapped into an X.509 certificate for SAML",
+      "pass": true,
+      "rationale": "Says a manually registered raw RSA key like the developer credential cannot be auto-wrapped into a certificate for SAML."
+    },
+    {
+      "assertion": "Notes that OIDC tokens and SAML messages share the same signing credentials and rotation schedule, published via the OIDC JWKS endpoint and SAML IdP metadata",
+      "pass": true,
+      "rationale": "Says same signing credentials and one rotation schedule published in OIDC JWKS and SAML IdP metadata."
+    },
+    {
+      "assertion": "Mentions that PropagationTime and RetentionDuration control how long keys/certs are published before signing and retained for validation during rollover",
+      "pass": true,
+      "rationale": "Explains PropagationTime (published before signing) and RetentionDuration (kept in metadata for validation)."
+    },
+    {
+      "assertion": "Notes that under Automatic Key Management the SAML component auto-wraps managed RSA keys in self-signed X.509 certificates, so UseX509Certificate is not required just to enable SAML",
+      "pass": true,
+      "rationale": "States under automatic key management SAML auto-wraps managed RSA keys in self-signed certs so UseX509Certificate isn't needed."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

@@ -1,0 +1,24 @@
+{
+  "eval_id": 11,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States SAML service provider extended properties are validated/stored/returned through ISamlServiceProviderAdmin",
+      "pass": true,
+      "rationale": "Says extension properties are stored through ISamlServiceProviderAdmin."
+    },
+    {
+      "assertion": "States they are not projected onto the runtime SamlServiceProvider returned by ISamlServiceProviderStore, so they can't be used as input to SAML protocol processing",
+      "pass": true,
+      "rationale": "Says they are not projected onto the runtime SamlServiceProvider."
+    },
+    {
+      "assertion": "Suggests using another mechanism (e.g. your own store/lookup keyed by EntityId) for protocol-time data",
+      "pass": true,
+      "rationale": "Suggests lookup by EntityId via admin API/own table or custom store."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 3,
+  "score": 1.0
+}

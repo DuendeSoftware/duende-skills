@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements ISamlNameIdGenerator interface",
+      "pass": true,
+      "rationale": "Implements ISamlNameIdGenerator."
+    },
+    {
+      "assertion": "The GenerateAsync method receives a NameIdGenerationContext with Subject claims",
+      "pass": false,
+      "rationale": "Signature uses invented SamlNameIdContext, not NameIdGenerationContext."
+    },
+    {
+      "assertion": "Extracts the employee_id claim from context.Subject",
+      "pass": true,
+      "rationale": "Reads ctx.Subject.FindFirst(\"employee_id\")?.Value."
+    },
+    {
+      "assertion": "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value",
+      "pass": false,
+      "rationale": "Returns SamlNameId, not NameIdGenerationResult.Success."
+    },
+    {
+      "assertion": "Handles the missing claim case with NameIdGenerationResult.Failure",
+      "pass": false,
+      "rationale": "Throws InvalidOperationException on missing claim; no NameIdGenerationResult.Failure."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 5,
+  "score": 0.4
+}

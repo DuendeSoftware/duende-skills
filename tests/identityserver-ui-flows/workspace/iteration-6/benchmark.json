@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-ui-flows",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 52,
+      "passed": 52,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 52,
+      "passed": 36,
+      "failed": 16,
+      "pass_rate": 0.69
+    },
+    "delta": {
+      "assertions_improved": 16,
+      "delta_pass_rate": 0.31
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Issues the tenant claim by setting IdentityServerUser.Tenant when signing in",
+        "Sets IdentityServerOptions.ValidateTenantOnAuthorization = true so a mismatching or missing session tenant shows the login page again",
+        "Warns the tenant value is an untrusted client-supplied hint and the user's membership must be verified server-side",
+        "Notes the tenant claim is only in the session cookie and must be emitted by the profile service to appear in tokens, and that this is not the same as Spaces"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Lists login_required, consent_required, interaction_required, account_selection_required, access_denied, temporarily_unavailable and unmet_authentication_requirements as errors returned to the client redirect_uri",
+        "States errors like invalid_request, unauthorized_client, invalid_scope, invalid_request_object and server_error (and custom codes) show the error page",
+        "States the set of safe codes cannot be configured"
+      ]
+    },
+    {
+      "eval_id": 12,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Checks the scheme exists via IAuthenticationSchemeProvider.GetSchemeAsync (which also resolves dynamic providers) because IdentityServer does not redirect or validate by itself",
+        "Notes idp: can be combined with tenant: in acr_values, IdentityProviderRestrictions drop a disallowed idp, and idp:local is reserved"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "pass_rate": 0.75
+      },
+      "delta": 0.25,
+      "without_skill_failures": [
+        "The consent page calls DenyAuthorizationAsync with AuthorizationError.AccessDenied when the user denies consent"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "delta": 0,
+      "without_skill_failures": []
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Response notes that this makes IdentityServer advertise 'create' in prompt_values_supported (discovery) and that prompt=create is ignored if CreateAccountUrl is unset",
+        "The client triggers the flow with Results.Challenge using OpenIdConnectChallengeProperties with Prompt = 'create'",
+        "The registration handler calls GetAuthorizationContextAsync(returnUrl) and redirects away when it returns null to prevent open redirect"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "The 'profile' IdentityResource sets Required = true and the response explains omitting a required scope returns access_denied and fails the request",
+        "The 'marketing' ApiScope sets Required = false and the response explains optional scopes can be declined while the flow still succeeds",
+        "The response states that client-credentials (M2M) flows never show a consent prompt and that AllowedScopes alone governs access"
+      ]
+    }
+  ]
+}

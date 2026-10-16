@@ -1,0 +1,34 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States Spaces isolate persisted data but not process-level dependencies",
+      "pass": true,
+      "rationale": "Opens with 'Spaces isolate persisted data only' with same process and infrastructure not isolated."
+    },
+    {
+      "assertion": "Lists signing credentials, ASP.NET Core Data Protection, external caches, telemetry, rate limits and custom services as things to review",
+      "pass": true,
+      "rationale": "Lists signing credentials, Data Protection, external caches, telemetry, rate limits, custom services, email."
+    },
+    {
+      "assertion": "Notes shared signing credentials reduce cryptographic separation between spaces",
+      "pass": true,
+      "rationale": "Says shared signing keys reduce cryptographic separation and key compromise affects every space."
+    },
+    {
+      "assertion": "Notes user databases are not space-aware unless they use the shared IStorageFactory, while Duende User Management data is routed per space by default",
+      "pass": true,
+      "rationale": "Says user DBs not using IStorageFactory are not space-aware while Duende User Management is per space by default."
+    },
+    {
+      "assertion": "Suggests a deliberately separate architecture if users must be shared across spaces",
+      "pass": true,
+      "rationale": "Says a shared global directory needs a deliberately separate architecture."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

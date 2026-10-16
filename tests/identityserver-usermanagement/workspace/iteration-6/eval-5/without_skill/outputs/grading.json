@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Explains that AddUserManagement() automatically registers IProfileService",
+      "pass": false,
+      "rationale": "Instead has you write a custom IProfileService via AddProfileService; does not say AddUserManagement registers it."
+    },
+    {
+      "assertion": "Mentions that claims mapping is based on requested scopes (openid \u2192 sub, email \u2192 email)",
+      "pass": false,
+      "rationale": "No explanation of scope-based claim mapping (openid\u2192sub, email\u2192email)."
+    },
+    {
+      "assertion": "Notes that custom user attributes can be exposed via custom identity resources",
+      "pass": true,
+      "rationale": "Says to define an IdentityResource containing department and add it to client AllowedScopes."
+    },
+    {
+      "assertion": "Sets LoginUrl and LogoutUrl in IdentityServer options to point to account pages",
+      "pass": true,
+      "rationale": "Sets UserInteraction.LoginUrl and LogoutUrl to /Account/Login and /Account/Logout."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 4,
+  "score": 0.5
+}

@@ -1,0 +1,29 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States that SAML signing requires an X.509 certificate",
+      "pass": true,
+      "rationale": "'SAML signing requires an X.509 certificate with a private key'."
+    },
+    {
+      "assertion": "Explains that Automatic Key Management RSA keys are auto-wrapped into a self-signed X.509 container",
+      "pass": true,
+      "rationale": "ARM RSA keys 'are wrapped in a self-signed X.509 container for you'."
+    },
+    {
+      "assertion": "States that AddDeveloperSigningCredential() (raw RSA) cannot be auto-wrapped and an X.509 cert with a private key is required instead",
+      "pass": true,
+      "rationale": "'raw RSA key... cannot be auto-wrapped' for AddDeveloperSigningCredential; X.509 cert with private key needed."
+    },
+    {
+      "assertion": "Notes that UseX509Certificate is not required just to enable SAML and is not supported for EC keys (custom ISamlSigningService needed)",
+      "pass": true,
+      "rationale": "Notes UseX509Certificate not needed just to enable SAML; EC unsupported, custom ISamlSigningService."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

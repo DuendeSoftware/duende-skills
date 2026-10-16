@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Defines an AttributeDefinition with AttributeCode.Create(\"department\") and a ScalarAttributeType string",
+      "pass": true,
+      "rationale": "Defines AttributeDefinition with AttributeCode.Create(\"department\") and ScalarAttributeType(ScalarDataType.String)."
+    },
+    {
+      "assertion": "Uses BuiltInSchemas.UserProfile.Extend(...) and registers the result with AddInMemoryDataExtensionSchemas([...])",
+      "pass": true,
+      "rationale": "Uses BuiltInSchemas.UserProfile.Extend(department) with AddInMemoryDataExtensionSchemas([...])."
+    },
+    {
+      "assertion": "Notes Extend throws InvalidOperationException if the attribute code already exists (e.g. email, name)",
+      "pass": true,
+      "rationale": "States Extend throws InvalidOperationException if an attribute code already exists."
+    },
+    {
+      "assertion": "Shows AddDynamicSchemas() and ISchemaAdmin get-modify-UpdateAsync using the returned Version for optimistic concurrency",
+      "pass": true,
+      "rationale": "Shows AddDynamicSchemas() and describes ISchemaAdmin get \u2192 modify \u2192 UpdateAsync with version for optimistic concurrency."
+    },
+    {
+      "assertion": "Warns that with AddDynamicSchemas() the in-memory schemas (including the built-in profile) are not used or seeded, so the schema must be created in the database",
+      "pass": true,
+      "rationale": "Warns in dynamic mode in-memory schemas incl. built-in profile are not used or seeded; must create the schema."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

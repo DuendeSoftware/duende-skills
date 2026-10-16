@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response recommends removing AddDeveloperSigningCredential",
+      "pass": true,
+      "rationale": "Says it is not for production and not to just drop it, replacing with a real signing credential / automatic key management."
+    },
+    {
+      "assertion": "Response mentions Duende's automatic key management as the recommended replacement",
+      "pass": true,
+      "rationale": "Mentions Duende automatic key management as the (default) approach."
+    },
+    {
+      "assertion": "Response addresses the concern about existing tokens by suggesting a transitional period where the old key remains available for validation",
+      "pass": true,
+      "rationale": "Keeps old key via AddValidationKey while old tokens expire."
+    },
+    {
+      "assertion": "Response suggests that if all clients and APIs can be restarted, they will pick up the new key from the discovery document automatically",
+      "pass": false,
+      "rationale": "Never says clients/APIs that restart will pick up the new key from the discovery document; only notes APIs cache JWKS."
+    }
+  ],
+  "pass_count": 3,
+  "total_count": 4,
+  "score": 0.75
+}

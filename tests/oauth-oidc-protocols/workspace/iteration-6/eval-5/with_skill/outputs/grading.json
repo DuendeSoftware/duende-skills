@@ -1,0 +1,29 @@
+{
+  "eval_id": 5,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Response explains that clients should treat access tokens as opaque and never parse them, since only the resource server (API) should validate access tokens",
+      "pass": true,
+      "rationale": "States access tokens are opaque to clients, meant for the API, and clients should not parse them; API validates."
+    },
+    {
+      "assertion": "Response recommends using the ID token for user identity claims (name, email) in the client application",
+      "pass": true,
+      "rationale": "Recommends the ID token (always a JWT) and User principal for name/email."
+    },
+    {
+      "assertion": "Response mentions the userinfo endpoint as an alternative for retrieving user claims",
+      "pass": true,
+      "rationale": "Covers the UserInfo endpoint with GetUserInfoAsync and GetClaimsFromUserInfoEndpoint."
+    },
+    {
+      "assertion": "Response explains the distinction: ID tokens prove user identity (consumed by clients), access tokens authorize API calls (consumed by APIs)",
+      "pass": true,
+      "rationale": "Rule of thumb: ID token for authentication, access token only forwarded to API which validates it."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

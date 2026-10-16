@@ -1,0 +1,138 @@
+{
+  "skill_name": "identityserver-duende-storage",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to store IdentityServer clients, resources, grants and sessions in a SQL database using Duende Storage with SQLite for local dev. Show me the packages and Program.cs.",
+      "expected_output": "Install Duende.Storage.Sqlite with --prerelease, AddStorage(storage => storage.AddSqlite(...)), AddConfigurationStorage(), AddOperationalStorage(), AddServerSideSessions separately, MigrateAsync in development; mention preview status.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/IdentityServer.csproj",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Adds Duende.Storage.Sqlite (and Duende.IdentityServer) packages with --prerelease and notes Duende Storage is a preview",
+        "Calls AddStorage(storage => storage.AddSqlite(...)) with a connection string on the IdentityServer builder",
+        "Calls both AddConfigurationStorage() and AddOperationalStorage() (AddStorage alone does not store IdentityServer data)",
+        "Runs IStorageInstanceSchema.MigrateAsync (development) and does not hide a missing connection string",
+        "Notes AddServerSideSessions() must still be called separately to use server-side sessions"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Is Duende Storage replacing Entity Framework Core in IdentityServer? Our app already uses AddConfigurationStore/AddOperationalStore and works fine. Should we migrate?",
+      "expected_output": "No: Duende Storage is an opt-in preview alternative; EF Core remains fully supported; migrating is optional and there is no automated in-place migration.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "States Duende Storage does not replace the Entity Framework Core provider, which remains fully supported",
+        "States that no action is required if the application already uses EF Core and is satisfied",
+        "Lists reasons to adopt Duende Storage (admin APIs, schema-validated custom properties, optimistic concurrency, storage pools for Spaces, shared model across Duende products)",
+        "States there is no automated or in-place migration; the schemas and persistence models differ"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Show me how to create an API scope, an API resource and a client_credentials client programmatically with Duende Storage, and how to update the scope safely when two admins might edit it at once.",
+      "expected_output": "Use IApiScopeAdmin, IApiResourceAdmin, IClientAdmin; create scopes first; SaveResult/GetResult; UpdateAsync with version for optimistic concurrency; secrets plaintext hashed on write.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Uses IApiScopeAdmin.CreateAsync with ApiScopeConfiguration before creating the resource/client that references it",
+        "Uses IApiResourceAdmin and IClientAdmin.CreateAsync with CreateClient and CreateClientSecret { PlaintextValue = ... }",
+        "Checks SaveResult.IsSuccess and GetResult.Found",
+        "Updates via GetAsync then UpdateAsync(id, item, current.Version, ct) to get optimistic concurrency",
+        "Warns to protect/authorize the admin APIs (they are .NET service APIs, not preconfigured HTTP endpoints) and to load secrets from a secure source"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'll register dynamic OIDC identity providers through IIdentityProviderAdmin with a ClientSecret property. Any security concerns with how that secret is stored?",
+      "expected_output": "Dynamic IdP properties are stored recoverably (not hashed or field-encrypted), unlike client/API secrets; protect DB, connections, backups.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "States client and API resource secrets are one-way hashed but dynamic identity provider properties such as ClientSecret are stored without hashing or Duende Storage field-level encryption",
+        "Recommends encrypted DB connections, encryption at rest, restricted DB access and protected backups",
+        "Advises not to grant direct read access to the configuration store as a substitute for an authorized admin API",
+        "Mentions the corresponding dynamic provider type must be registered (AddOidcDynamicProvider())"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want IdentityServer configuration in one database and operational data (grants, sessions, keys) in a separate database using Duende Storage. How do I register that and migrate both?",
+      "expected_output": "StorageInstanceId.Create, AddStorage(instanceId, ...), AddOperationalStorage(instanceId); migrate every instance with IStorageInstanceSchemaFactory.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Creates a named instance with StorageInstanceId.Create(...)",
+        "Registers the second database with AddStorage(instanceId, storage => ...) and maps operational data with AddOperationalStorage(instanceId)",
+        "Keeps AddStorage(...)+AddConfigurationStorage() for the default instance",
+        "Migrates every instance via IStorageInstanceSchemaFactory.GetStorageInstanceSchema(id, ct).MigrateAsync, noting IStorageInstanceSchema.MigrateAsync only migrates the default instance",
+        "Mentions that mapping one category to two different instances or selecting a second provider for one instance throws InvalidOperationException"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We need a 'cost_center' integer property on clients, validated by schema, and managed through the admin API. Show how, with the schema defined in code.",
+      "expected_output": "TypedAttributeDefinition<int>, SchemaConfiguration with SchemaId.Client, AddInMemoryDataExtensionSchemas, AttributeValueCollection.Set, ExtendedProperties on CreateClient.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Defines a TypedAttributeDefinition<int> with AttributeCode.Create(\"cost_center\") and ScalarDataType.Integer",
+        "Creates a SchemaConfiguration with SchemaId.Client and registers it with AddInMemoryDataExtensionSchemas",
+        "Sets the value through an AttributeValueCollection assigned to CreateClient.ExtendedProperties",
+        "Explains that schema changes do not require new SQL migrations and that unknown/wrong-typed values are rejected",
+        "Mentions IsQueryable should only be set when filtering/sorting is needed because it adds indexing cost"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "We switched to AddDynamicSchemas() so admins can edit schemas at runtime, but now creating a SAML identity provider with extended properties fails validation even though we call AddSamlDynamicProvider(). Why?",
+      "expected_output": "With AddDynamicSchemas the in-memory idp:saml schema is not used; create it in the DB via ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider).",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains that with AddDynamicSchemas(), ISchemaStore/ISchemaAdmin resolve to the storage-backed implementation so in-memory schemas registered by AddSamlDynamicProvider() are not used",
+        "Shows creating the schema in the database with ISchemaAdmin.CreateAsync(BuiltInSchemas.SamlProvider, ...) and checking IsSuccess",
+        "Mentions SchemaId.SamlIdentityProvider (\"idp:saml\")"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "We're moving production from EF Core operational + configuration stores to Duende Storage. Plan the migration, including secrets and active tokens/sessions.",
+      "expected_output": "Configuration via admin APIs with ordering, secret rotation, operational data reset, signing key continuity, rollback.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Says there is no automated migration and to rehearse on a production-like copy",
+        "Migrates configuration through the admin APIs (not direct writes), importing scopes and identity resources before resources and clients",
+        "Explains EF secrets are one-way hashes and must be re-provisioned from a secure source or rotated, not imported as plaintext",
+        "Recommends a controlled reset of operational data (grants, refresh/reference tokens, sessions) because there is no supported transfer tool, noting users must re-authenticate",
+        "Mentions signing key continuity so JWT access tokens issued before cutover remain valid, and not removing old validation keys until tokens expire",
+        "Recommends keeping the EF database read-only as a rollback path and not dual-writing"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "How do I apply the Duende Storage schema in CI/CD against PostgreSQL and Oracle without giving the app DDL rights?",
+      "expected_output": "Duende CLI storage migrate with --dry-run for PostgreSQL; Oracle not supported by CLI -> BuildMigrationScript.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Installs Duende.Cli (preview) and runs duende storage migrate --provider postgresql, using --dry-run to generate SQL for review",
+        "Passes the connection string via DUENDE_STORAGE_CONNECTION_STRING",
+        "States the preview CLI does not support Oracle and recommends IStorageInstanceSchema.BuildMigrationScript for DBA review",
+        "Mentions running one migration process at a time and running the CLI once per storage instance's connection string"
+      ]
+    }
+  ]
+}

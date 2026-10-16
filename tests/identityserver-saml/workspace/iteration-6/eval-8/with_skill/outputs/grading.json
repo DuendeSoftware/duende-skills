@@ -1,0 +1,29 @@
+{
+  "eval_id": 8,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+      "pass": true,
+      "rationale": "'HTTP-POST binding only (HTTP-Redirect fails)'."
+    },
+    {
+      "assertion": "States that AllowedScopes must contain at least one entry",
+      "pass": true,
+      "rationale": "'\u2265 1 AllowedScopes' listed and set in the fixed SP."
+    },
+    {
+      "assertion": "Mentions that EntityId is required",
+      "pass": true,
+      "rationale": "'EntityId is present' listed."
+    },
+    {
+      "assertion": "Explains that invalid SPs are treated as non-existent (returns null from store)",
+      "pass": true,
+      "rationale": "'An SP failing validation is treated as non-existent'."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

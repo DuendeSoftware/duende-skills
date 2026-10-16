@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Implements a TestAuthHandler that extends AuthenticationHandler<AuthenticationSchemeOptions>",
+      "pass": true,
+      "rationale": "TestAuthHandler extends AuthenticationHandler<AuthenticationSchemeOptions>."
+    },
+    {
+      "assertion": "Includes an ITestClaimsProvider (or equivalent) interface that allows setting claims per-test",
+      "pass": false,
+      "rationale": "No claims-provider interface exists; claims are passed via an X-Test-Claims header built by CreateClientWithClaims, not an interface abstraction."
+    },
+    {
+      "assertion": "The WebApplicationFactory registers the test auth scheme via AddAuthentication and AddScheme",
+      "pass": true,
+      "rationale": "Factory calls AddAuthentication(...).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(...) in ConfigureTestServices."
+    },
+    {
+      "assertion": "Shows a test that calls ClearClaims (or equivalent) and asserts 401 Unauthorized",
+      "pass": true,
+      "rationale": "No_credentials_returns_401 uses a client with no claims header (equivalent of cleared claims) and asserts Unauthorized."
+    },
+    {
+      "assertion": "Does NOT disable authorization entirely \u2014 authorization policies remain active",
+      "pass": true,
+      "rationale": "Authorization policies remain; a 403 test shows the policy still evaluates."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 5,
+  "score": 0.8
+}

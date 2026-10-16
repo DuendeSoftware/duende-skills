@@ -10,7 +10,7 @@
       ],
       "assertions": [
         "The web_app client has AllowOfflineAccess = true",
-        "The web_app client AllowedScopes includes 'offline_access'",
+        "The web_app client sets AllowOfflineAccess = true (which enables refresh tokens)",
         "AbsoluteRefreshTokenLifetime is set to 2592000 (30 days)",
         "SlidingRefreshTokenLifetime is set to 86400 (1 day)",
         "RefreshTokenExpiration is set to TokenExpiration.Sliding"
@@ -129,6 +129,19 @@
         "Explains that by default IdentityServer derives the iss claim from the incoming request's host/origin, so different domains yield different issuers",
         "States that setting options.IssuerUri pins a single fixed issuer value and disables the dynamic multi-issuer behavior",
         "Clarifies that multi-issuer is NOT multi-tenancy and does not isolate users, grants, or keys per domain"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Should our offline-capable field apps use reference access tokens so we can revoke them instantly?",
+      "expected_output": "Reference tokens need introspection (network dependency).",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains reference tokens allow immediate revocation by deleting the persisted grant record while JWTs remain valid until expiry",
+        "Explains the trade-off that APIs must call the introspection endpoint (or use its cache), so they need connectivity to IdentityServer, a poor fit for offline/air-gapped scenarios",
+        "Suggests short-lived JWTs with refresh tokens as an alternative for offline scenarios"
       ]
     }
   ]

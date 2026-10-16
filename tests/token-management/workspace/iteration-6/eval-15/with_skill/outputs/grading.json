@@ -1,0 +1,19 @@
+{
+  "eval_id": 15,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "States UseCacheAutoTuning defaults to false",
+      "pass": true,
+      "rationale": "States 'Default: false'."
+    },
+    {
+      "assertion": "Explains when enabled the cache entry lifetime uses the actual token expiration, with the first request using DefaultCacheLifetime (5 minutes default)",
+      "pass": true,
+      "rationale": "Explains entry lifetime follows actual token expiration when true, and with false the first request uses DefaultCacheLifetime (5 minutes)."
+    }
+  ],
+  "pass_count": 2,
+  "total_count": 2,
+  "score": 1.0
+}

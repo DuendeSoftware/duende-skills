@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Adds Duende.Spaces and Duende.Storage.Sqlite with --prerelease",
+      "pass": false,
+      "rationale": "No package install commands; no Duende.Spaces/Storage.Sqlite --prerelease."
+    },
+    {
+      "assertion": "Registers AddStorage(...), AddConfigurationStorage(), AddOperationalStorage() and builder.Services.AddSpaces()",
+      "pass": false,
+      "rationale": "Uses AddConfigurationStore/AddOperationalStore (EF) and an invented AddSpaces(o=>o.UseSqlite); no AddStorage/AddConfigurationStorage."
+    },
+    {
+      "assertion": "Creates the space with ISpaceAdmin.CreateAsync using CreateSpaceConfiguration and SpaceMatchPattern { Origin, Path = \"/acme\" } after querying by name first",
+      "pass": false,
+      "rationale": "Uses assumed ISpaceManager.ExistsAsync/Space type, not ISpaceAdmin.CreateAsync with CreateSpaceConfiguration/SpaceMatchPattern."
+    },
+    {
+      "assertion": "Orders middleware UseForwardedHeaders, UseSpaceResolution, then UseRouting before UseIdentityServer",
+      "pass": false,
+      "rationale": "Uses assumed UseSpaces() and no UseForwardedHeaders at all."
+    },
+    {
+      "assertion": "Configures ForwardedHeaders with known proxies/networks rather than trusting all sources",
+      "pass": false,
+      "rationale": "No ForwardedHeaders configuration."
+    },
+    {
+      "assertion": "Does not set IdentityServerOptions.IssuerUri",
+      "pass": true,
+      "rationale": "IssuerUri is not set and the notes say not to set a fixed IssuerUri."
+    }
+  ],
+  "pass_count": 1,
+  "total_count": 6,
+  "score": 0.16666666666666666
+}

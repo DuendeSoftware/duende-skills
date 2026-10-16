@@ -97,11 +97,40 @@ jobs:
           echo "Validating .agents/plugins/marketplace.json..."
           jq . .agents/plugins/marketplace.json > /dev/null
 
+      - name: Validate Cursor plugin.json
+        run: |
+          echo "Validating .cursor-plugin/plugin.json..."
+          jq . .cursor-plugin/plugin.json > /dev/null
+
+      - name: Validate manifest parity (versions, skill registration)
+        run: |
+          V=$(jq -r '.version' .claude-plugin/plugin.json)
+          for q in ".claude-plugin/marketplace.json:.plugins[0].version" ".codex-plugin/plugin.json:.version" ".cursor-plugin/plugin.json:.version"; do
+            f="${q%%:*}"; expr="${q#*:}"
+            if [ "$(jq -r "$expr" "$f")" != "$V" ]; then
+              echo "ERROR: version mismatch in $f (expected $V)"; exit 1
+            fi
+          done
+          for f in .codex-plugin/plugin.json .cursor-plugin/plugin.json; do
+            if [ "$(jq -r '.skills' "$f")" != "./skills/" ]; then
+              echo "ERROR: $f must set skills to ./skills/"; exit 1
+            fi
+          done
+          # Every skill directory must be registered in .claude-plugin/plugin.json
+          for d in skills/*/; do
+            d="./${d%/}"
+            if ! jq -e --arg d "$d" '.skills[] | select(. == $d)' .claude-plugin/plugin.json > /dev/null; then
+              echo "ERROR: $d not registered in .claude-plugin/plugin.json"; exit 1
+            fi
+          done
+          echo "Manifests in sync at $V"
+
       - name: Summary
         run: |
           echo "=== Marketplace Summary ==="
           echo "Plugin version: $(jq -r '.version' .claude-plugin/plugin.json)"
           echo "Codex version:  $(jq -r '.version' .codex-plugin/plugin.json)"
+          echo "Cursor version: $(jq -r '.version' .cursor-plugin/plugin.json)"
           echo "Skills: $(jq '.skills | length' .claude-plugin/plugin.json)"
           echo "Agents: $(jq '.agents | length' .claude-plugin/plugin.json)"
 
@@ -194,6 +223,9 @@ jobs:
           # Install the plugin (includes all skills and agents)
           /plugin install duende-skills
           ```
+
+          Other agents (Copilot, Cursor, Codex, OpenCode, ...): `npx skills add DuendeSoftware/duende-skills`
+          See the README for details.
           INSTALL
 
           # Changes since last tag

@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "skill_name": "identityserver-saml",
+    "iteration": 6,
+    "model": "claude-opus-5.5",
+    "date": "2026-10-16"
+  },
+  "summary": {
+    "with_skill": {
+      "total_assertions": 46,
+      "passed": 46,
+      "failed": 0,
+      "pass_rate": 1
+    },
+    "without_skill": {
+      "total_assertions": 46,
+      "passed": 17,
+      "failed": 29,
+      "pass_rate": 0.37
+    },
+    "delta": {
+      "assertions_improved": 29,
+      "delta_pass_rate": 0.63
+    }
+  },
+  "evals": [
+    {
+      "eval_id": 1,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "No separate NuGet package is added — SAML is built into Duende.IdentityServer",
+        "AssertionConsumerServiceUrls uses IndexedEndpoint with Location 'https://crm.contoso.com/saml/acs' and Binding = SamlBinding.HttpPost",
+        "AllowedScopes is configured on the SamlServiceProvider (not empty)"
+      ]
+    },
+    {
+      "eval_id": 10,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Explains that Automatic Key Management RSA keys are auto-wrapped into a self-signed X.509 container",
+        "Notes that UseX509Certificate is not required just to enable SAML and is not supported for EC keys (custom ISamlSigningService needed)"
+      ]
+    },
+    {
+      "eval_id": 11,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "pass_rate": 0.3333333333333333
+      },
+      "delta": 0.6666666666666667,
+      "without_skill_failures": [
+        "States SAML service provider extended properties are validated/stored/returned through ISamlServiceProviderAdmin",
+        "States they are not projected onto the runtime SamlServiceProvider returned by ISamlServiceProviderStore, so they can't be used as input to SAML protocol processing"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "Implements ISamlServiceProviderStore with FindByEntityIdAsync(string entityId, CancellationToken ct)",
+        "Implements GetAllSamlServiceProvidersAsync returning IAsyncEnumerable<SamlServiceProvider>",
+        "Shows AddSamlServiceProviderStoreCache<T>() for adding HybridCache layer"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Explains or shows AllowedScopes as a prerequisite for claims reaching ClaimMappings",
+        "Shows how to set DefaultClaimMappings on SamlOptions for global defaults"
+      ]
+    },
+    {
+      "eval_id": 4,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 0,
+        "failed": 4,
+        "total": 4,
+        "pass_rate": 0
+      },
+      "delta": 1,
+      "without_skill_failures": [
+        "Explains that SLO uses front-channel logout via iframes (not redirect chains)",
+        "Shows SingleLogoutServiceUrls configuration with SamlEndpointType and SamlBinding.HttpRedirect",
+        "Mentions that partial logout is normal/expected when some SPs don't respond",
+        "Mentions ISamlLogoutSessionStore for distributed/multi-node deployments"
+      ]
+    },
+    {
+      "eval_id": 5,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "pass_rate": 0.4
+      },
+      "delta": 0.6,
+      "without_skill_failures": [
+        "The GenerateAsync method receives a NameIdGenerationContext with Subject claims",
+        "Returns NameIdGenerationResult.Success with a NameId containing the employee_id value",
+        "Handles the missing claim case with NameIdGenerationResult.Failure"
+      ]
+    },
+    {
+      "eval_id": 6,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "pass_rate": 0.5
+      },
+      "delta": 0.5,
+      "without_skill_failures": [
+        "Mentions ISamlSigninStateStore for distributed sign-in state persistence",
+        "Mentions ISamlLogoutSessionStore for distributed SLO session tracking"
+      ]
+    },
+    {
+      "eval_id": 7,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "pass_rate": 0.6666666666666666
+      },
+      "delta": 0.33333333333333337,
+      "without_skill_failures": [
+        "States that Standard (add-on), Advanced, or Custom Edition license is required"
+      ]
+    },
+    {
+      "eval_id": 8,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 3,
+        "total": 4,
+        "pass_rate": 0.25
+      },
+      "delta": 0.75,
+      "without_skill_failures": [
+        "Mentions that ACS URLs must use HTTP-POST binding (HTTP-Redirect is not supported for ACS)",
+        "States that AllowedScopes must contain at least one entry",
+        "Explains that invalid SPs are treated as non-existent (returns null from store)"
+      ]
+    },
+    {
+      "eval_id": 9,
+      "prompt_summary": null,
+      "with_skill": {
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "pass_rate": 1
+      },
+      "without_skill": {
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "pass_rate": 0.2
+      },
+      "delta": 0.8,
+      "without_skill_failures": [
+        "Registers the handler with AddSamlServiceProvider on the AddAuthentication builder",
+        "Sets AllowUnsolicitedAuthnResponse = true and also sets IdpInitiatedCallbackUrl (required when unsolicited responses are allowed)",
+        "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+        "Callback authenticates against the external cookie scheme and reads RelayState from AuthenticationProperties.Items[\"relayState\"]"
+      ]
+    }
+  ]
+}

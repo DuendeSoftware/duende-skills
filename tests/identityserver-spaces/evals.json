@@ -1,0 +1,106 @@
+{
+  "skill_name": "identityserver-spaces",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're a SaaS vendor and want each customer isolated in one IdentityServer deployment: separate clients, grants, and issuer. Should I use Multi-Issuer or something else?",
+      "expected_output": "Spaces (licensed preview add-on) isolate config + operational data per tenant; Multi-Issuer only varies iss; tenant acr hint is only a hint.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Recommends Spaces for isolating configuration and operational data per tenant on top of Duende Storage",
+        "States Multi-Issuer only changes the iss claim and does not separate data",
+        "States the tenant: acr_values hint is an untrusted client-supplied hint that cannot select a space",
+        "Notes Spaces are a licensed add-on in preview and require Duende Storage"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set up Duende.Spaces with SQLite so tenant 'Acme' is served at https://login.example.com/t/acme. Include the middleware order and provisioning code.",
+      "expected_output": "AddSpaces, SpacesOptions, ForwardedHeaders, MigrateAsync, ISpaceAdmin idempotent create with SpaceMatchPattern, UseForwardedHeaders -> UseSpaceResolution -> UseRouting -> UseIdentityServer.",
+      "files": [
+        "files/begin-state/Program.cs",
+        "files/begin-state/appsettings.json"
+      ],
+      "assertions": [
+        "Adds Duende.Spaces and Duende.Storage.Sqlite with --prerelease",
+        "Registers AddStorage(...), AddConfigurationStorage(), AddOperationalStorage() and builder.Services.AddSpaces()",
+        "Creates the space with ISpaceAdmin.CreateAsync using CreateSpaceConfiguration and SpaceMatchPattern { Origin, Path = \"/acme\" } after querying by name first",
+        "Orders middleware UseForwardedHeaders, UseSpaceResolution, then UseRouting before UseIdentityServer",
+        "Configures ForwardedHeaders with known proxies/networks rather than trusting all sources",
+        "Does not set IdentityServerOptions.IssuerUri"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "After enabling Spaces, all spaces return the same issuer in discovery. We set options.IssuerUri = \"https://login.example.com\". Why and how to fix?",
+      "expected_output": "A fixed IssuerUri makes every space return the same iss; leave unset so issuer is inferred from origin + path base.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains setting IssuerUri forces the same issuer/iss for every space",
+        "Recommends leaving IssuerUri unset so the issuer is inferred from each request's origin and path base",
+        "Notes that data and discovery endpoints remain separate per space even with a fixed IssuerUri",
+        "Mentions the same applies to Multi-Issuer"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Requests to unknown tenant paths return 404 in our Spaces deployment and a colleague wants to set FallbackToDefault = true so they go to the default space. Is that wise?",
+      "expected_output": "Strict 404 is safer; enable fallback only intentionally; default space uses pool 0.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Explains that by default unmatched requests (and requests with the /t prefix but no match) return 404",
+        "Warns FallbackToDefault should only be enabled when serving unmatched host/path from the default space is an intentional part of the isolation model",
+        "States a strict 404 is safer for multi-tenant deployments",
+        "Mentions the default space uses data pool 0"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What does Spaces NOT isolate? We plan to share signing keys, Data Protection keys and a Redis cache across spaces and keep one shared user database.",
+      "expected_output": "Spaces isolate persisted data only; review signing credentials, Data Protection, caches, telemetry, rate limits, custom services, user databases not using IStorageFactory; User Management is space-aware by default.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "States Spaces isolate persisted data but not process-level dependencies",
+        "Lists signing credentials, ASP.NET Core Data Protection, external caches, telemetry, rate limits and custom services as things to review",
+        "Notes shared signing credentials reduce cryptographic separation between spaces",
+        "Notes user databases are not space-aware unless they use the shared IStorageFactory, while Duende User Management data is routed per space by default",
+        "Suggests a deliberately separate architecture if users must be shared across spaces"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Our login page should show tenant-specific branding in a Spaces deployment. How do I know which space a request is for and should I read acr_values tenant?",
+      "expected_output": "Inject ISpaceContextAccessor, GetSpaceId(); don't trust client tenant hint when space determines tenant.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "Injects ISpaceContextAccessor into a scoped UI service and reads the resolved SpaceId",
+        "States Spaces do not add per-space UI/branding; you load your own space-aware settings",
+        "Advises preferring the resolved space over trusting a client-supplied tenant: acr_values hint",
+        "Notes space resolution is independent of acr_values and runs before routing"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "A customer asks us to delete a tenant's space and later restore it. What happens to the data, and who should be allowed to do this?",
+      "expected_output": "Soft delete via ISpaceAdmin; pool data blocked but retained; UndeleteAsync restores; authorize and audit.",
+      "files": [
+        "files/begin-state/Program.cs"
+      ],
+      "assertions": [
+        "States deleting a space is a soft delete: pool data is blocked from reads and writes but retained",
+        "Mentions ISpaceAdmin.UndeleteAsync restores the space and its matching rules",
+        "Advises authorizing and auditing pool reassignment and deletion as security-boundary changes, reserved for deliberate procedures"
+      ]
+    }
+  ]
+}

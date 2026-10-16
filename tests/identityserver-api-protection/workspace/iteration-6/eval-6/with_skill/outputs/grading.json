@@ -1,0 +1,29 @@
+{
+  "eval_id": 6,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Calls AddLocalApiAuthentication() to set up local API authentication",
+      "pass": true,
+      "rationale": "Shows builder.Services.AddLocalApiAuthentication()."
+    },
+    {
+      "assertion": "Uses IdentityServerConstants.LocalApi.PolicyName to protect endpoints",
+      "pass": true,
+      "rationale": "Uses RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName) and [Authorize(Policy = ...)]."
+    },
+    {
+      "assertion": "Mentions that clients must include 'IdentityServerApi' in their AllowedScopes",
+      "pass": true,
+      "rationale": "Client example has AllowedScopes including \"IdentityServerApi\", and the text says clients must request it."
+    },
+    {
+      "assertion": "Warns that local API authentication only works when the API is co-hosted with IdentityServer, not for separate API hosts",
+      "pass": true,
+      "rationale": "States it only works when the API is co-hosted with IdentityServer; use JWT bearer or introspection for separate hosts."
+    }
+  ],
+  "pass_count": 4,
+  "total_count": 4,
+  "score": 1.0
+}

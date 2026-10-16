@@ -1,0 +1,34 @@
+{
+  "eval_id": 10,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Metadata is stored in AuthenticationProperties.Items and passed to HttpContext.SignInAsync(user, properties)",
+      "pass": true,
+      "rationale": "properties.Items set and passed to HttpContext.SignInAsync."
+    },
+    {
+      "assertion": "The ASP.NET Identity path passes properties to SignInManager.SignInWithClaimsAsync (and notes overriding it in a custom SignInManager when PasswordSignInAsync is used)",
+      "pass": true,
+      "rationale": "SignInWithClaimsAsync with properties plus custom SignInManager override for PasswordSignInAsync."
+    },
+    {
+      "assertion": "Reading back uses ISessionManagementService.QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue",
+      "pass": true,
+      "rationale": "QuerySessionsAsync and session.AuthenticationTicket.Properties.Items.TryGetValue."
+    },
+    {
+      "assertion": "Response states the metadata is NOT issued as claims",
+      "pass": true,
+      "rationale": "States metadata is not issued as claims."
+    },
+    {
+      "assertion": "Response notes custom metadata is not indexed and cannot be filtered via SessionQuery \u2014 query by subject/session/display name first, then inspect tickets",
+      "pass": true,
+      "rationale": "States metadata not indexed; query by subject/session/display name then inspect tickets."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

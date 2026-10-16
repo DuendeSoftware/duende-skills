@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# build.sh — Package duende-skills for Claude Code and ChatGPT/Codex marketplaces.
+# build.sh — Package duende-skills for Claude Code (also read by GitHub Copilot CLI / VS Code),
+# ChatGPT/Codex and Cursor.
 #
 # Usage:
 #   ./scripts/build.sh                  # validate + package both targets
 #   ./scripts/build.sh --target claude   # Claude Code only
 #   ./scripts/build.sh --target codex    # ChatGPT/Codex only
+#   ./scripts/build.sh --target cursor   # Cursor only
 #   ./scripts/build.sh --skip-validate   # skip validation step
 #   ./scripts/build.sh --output-dir dir  # custom output directory (default: dist/)
 
@@ -21,7 +23,7 @@ while [[ $# -gt 0 ]]; do
     --output-dir)  OUTPUT_DIR="$2"; shift 2 ;;
     --skip-validate) SKIP_VALIDATE=true; shift ;;
     -h|--help)
-      echo "Usage: $0 [--target claude|codex|all] [--output-dir DIR] [--skip-validate]"
+      echo "Usage: $0 [--target claude|codex|cursor|all] [--output-dir DIR] [--skip-validate]"
       exit 0
       ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
@@ -54,9 +56,10 @@ fi
 CLAUDE_VERSION=$(json_version "$REPO_ROOT/.claude-plugin/plugin.json")
 CLAUDE_MARKETPLACE_VERSION=$(json_version "$REPO_ROOT/.claude-plugin/marketplace.json")
 CODEX_VERSION=$(json_version "$REPO_ROOT/.codex-plugin/plugin.json")
+CURSOR_VERSION=$(json_version "$REPO_ROOT/.cursor-plugin/plugin.json")
 
-if [[ "$CLAUDE_VERSION" != "$CLAUDE_MARKETPLACE_VERSION" || "$CLAUDE_VERSION" != "$CODEX_VERSION" ]]; then
-  error "Version mismatch: Claude plugin ($CLAUDE_VERSION), Claude marketplace ($CLAUDE_MARKETPLACE_VERSION), Codex plugin ($CODEX_VERSION)"
+if [[ "$CLAUDE_VERSION" != "$CLAUDE_MARKETPLACE_VERSION" || "$CLAUDE_VERSION" != "$CODEX_VERSION" || "$CLAUDE_VERSION" != "$CURSOR_VERSION" ]]; then
+  error "Version mismatch: Claude plugin ($CLAUDE_VERSION), Claude marketplace ($CLAUDE_MARKETPLACE_VERSION), Codex plugin ($CODEX_VERSION), Cursor plugin ($CURSOR_VERSION)"
   exit 1
 fi
 
@@ -111,10 +114,26 @@ package_codex() {
   info "  -> dist/duende-skills-codex-v${VERSION}.zip"
 }
 
+package_cursor() {
+  info "Packaging for Cursor..."
+  local dest="$OUTPUT_DIR/cursor/duende-skills"
+  mkdir -p "$dest/.cursor-plugin"
+
+  cp "$REPO_ROOT/.cursor-plugin/plugin.json" "$dest/.cursor-plugin/"
+
+  for item in "${COMMON_INCLUDES[@]}"; do
+    cp -R "$REPO_ROOT/$item" "$dest/$item"
+  done
+
+  (cd "$OUTPUT_DIR/cursor" && zip -qr "$OUTPUT_DIR/duende-skills-cursor-v${VERSION}.zip" duende-skills/)
+  info "  -> dist/duende-skills-cursor-v${VERSION}.zip"
+}
+
 case "$TARGET" in
   claude) package_claude ;;
   codex)  package_codex ;;
-  all)    package_claude; package_codex ;;
+  cursor) package_cursor ;;
+  all)    package_claude; package_codex; package_cursor ;;
   *)      error "Unknown target: $TARGET"; exit 1 ;;
 esac
 

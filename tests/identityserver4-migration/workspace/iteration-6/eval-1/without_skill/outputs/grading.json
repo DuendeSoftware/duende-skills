@@ -1,0 +1,34 @@
+{
+  "eval_id": 1,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Response replaces IdentityServer4.EntityFramework with Duende.IdentityServer.EntityFramework",
+      "pass": true,
+      "rationale": "csproj and bullet replace IdentityServer4.EntityFramework with Duende.IdentityServer.EntityFramework."
+    },
+    {
+      "assertion": "Response specifies upgrading the target framework from netcoreapp3.1 to net8.0, net9.0 or net10.0 (or later)",
+      "pass": true,
+      "rationale": "Uses net8.0 and says netcoreapp3.1 is unsupported."
+    },
+    {
+      "assertion": "Response updates Microsoft.EntityFrameworkCore.SqlServer to a version compatible with the new target framework (8.0+ or 9.0+)",
+      "pass": true,
+      "rationale": "csproj includes Microsoft.EntityFrameworkCore.SqlServer 8.0.0 and says EF must move to 8.x."
+    },
+    {
+      "assertion": "Response mentions replacing IdentityModel with Duende.IdentityModel if used",
+      "pass": true,
+      "rationale": "States IdentityModel -> Duende.IdentityModel if referenced."
+    },
+    {
+      "assertion": "Response mentions that Duende.IdentityServer requires a license key for production use",
+      "pass": true,
+      "rationale": "Notes 'a license is required for production'."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

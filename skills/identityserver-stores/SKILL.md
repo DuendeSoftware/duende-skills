@@ -1,6 +1,6 @@
 ---
 name: identityserver-stores
-description: Implement and customize Duende IdentityServer stores including configuration store, operational store, and Entity Framework Core integration. Covers migrations, custom store implementations, caching strategies, server-side sessions, signing key storage, token cleanup, and multi-tenant patterns.
+description: Implement and customize Duende IdentityServer stores including configuration store, operational store, and Entity Framework Core integration. Covers the opt-in Duende Storage provider (preview, see `identityserver-duende-storage`), migrations, custom store implementations, caching strategies, server-side sessions, signing key storage, token cleanup, and multi-tenant patterns.
 invocable: false
 ---
 
@@ -25,6 +25,8 @@ invocable: false
 **Operational data is protected at rest.** The `Data` payload of persisted grants and serialized signing keys is encrypted using the ASP.NET Core Data Protection API. Key rotation and Data Protection configuration must be coordinated — a lost Data Protection key makes stored grants and signing keys unreadable.
 
 **Consumed grants are soft-deleted, not immediately removed.** One-time-use grants (e.g., authorization codes, one-time refresh tokens) are marked with a `ConsumedTime` rather than deleted. This enables threat detection in custom `IRefreshTokenService` implementations. Do not confuse consumed with expired — the token cleanup service only removes records past their `Expiration`, not consumed ones (unless `RemoveConsumedTokens` is enabled).
+
+**Store interfaces are runtime contracts, not storage backends.** `IResourceStore`, `IClientStore` etc. define *how* IdentityServer loads data, not *where* it lives. Providers: Entity Framework Core (classic `ApiResources`/`ApiScopes`/`ApiResourceScopes` tables, fully supported), In-Memory, **Duende Storage (preview, opt-in alternative, versioned documents; it does *not* replace EF Core)**, and custom.
 
 **EF Core schema changes are your responsibility.** Duende does not ship automatic migration scripts or schema upgrade tooling. You own migration creation, application, and data migration between IdentityServer versions.
 
@@ -103,6 +105,8 @@ The `Duende.IdentityServer.EntityFramework` NuGet package provides EF Core-backe
 - **`PersistedGrantDbContext`** — backs `IPersistedGrantStore`, `IDeviceFlowStore`, `ISigningKeyStore`, `IServerSideSessionStore`
 
 ### Registering Both Stores
+
+> **IdentityServer 8.1 preview:** starting with 8.1.0-preview.4 the EF registrations are named `AddEntityFrameworkConfigurationStore` and `AddEntityFrameworkOperationalStore` so they can't be confused with Duende Storage's `AddConfigurationStorage`/`AddOperationalStorage`. `AddConfigurationStore`/`AddOperationalStore` still work but are `[Obsolete]`. Examples below use the classic names that work on all versions.
 
 ```csharp
 // ✅ Correct: register both stores with explicit migration assembly
@@ -652,7 +656,13 @@ This service abstracts and aggregates different grant types (authorization codes
 
 ---
 
+## Duende Storage (preview) and Spaces
+
+Duende Storage is an opt-in relational persistence layer (SQL Server, PostgreSQL, Oracle, SQLite) with configuration admin APIs, data extension schemas and storage pools. Migrating from EF Core is a planned data transfer, not an in-place upgrade (no automated tool). See `identityserver-duende-storage`. For built-in multi-tenancy (isolated config + operational data per tenant, per-space issuer) see `identityserver-spaces`.
+
 ## Multi-Tenant Patterns
+
+> For a managed multi-tenant model prefer **Spaces** (`identityserver-spaces`, requires Duende Storage). The patterns below are for hand-rolled tenancy on EF Core/custom stores. Multi-Issuer alone only varies `iss`; it does not separate data.
 
 Multi-tenant IdentityServer deployments require careful consideration of store boundaries.
 
@@ -747,7 +757,9 @@ builder.Services.AddOperationalStore(options =>
 | Production with relational database            | EF Core stores with `AddConfigurationStoreCache()` |
 | High-traffic production                        | EF Core stores + caching + tuned cleanup intervals |
 | Non-relational database (Redis, Cosmos, etc.)  | Custom store implementations                       |
-| SaaS with dynamic configuration                | EF Core or custom stores with API for management   |
+| SaaS with dynamic configuration                | EF Core or custom stores with API for management, or Duende Storage with `IClientAdmin` etc. (preview) |
+| Admin APIs + schema-validated custom properties | Duende Storage (preview)                           |
+| Isolated tenants in one deployment             | Duende Storage + Spaces (preview)                  |
 
 ---
 

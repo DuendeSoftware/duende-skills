@@ -1,0 +1,34 @@
+{
+  "eval_id": 9,
+  "variant": "with_skill",
+  "assertions": [
+    {
+      "assertion": "Registers the handler with AddSamlServiceProvider on the AddAuthentication builder",
+      "pass": true,
+      "rationale": "Uses AddAuthentication().AddSamlServiceProvider(\"corporate-idp\", ...)."
+    },
+    {
+      "assertion": "Sets AllowUnsolicitedAuthnResponse = true and also sets IdpInitiatedCallbackUrl (required when unsolicited responses are allowed)",
+      "pass": true,
+      "rationale": "Sets AllowUnsolicitedAuthnResponse = true and IdpInitiatedCallbackUrl, noted REQUIRED."
+    },
+    {
+      "assertion": "Sets SignInScheme to IdentityServerConstants.ExternalCookieAuthenticationScheme",
+      "pass": true,
+      "rationale": "options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme."
+    },
+    {
+      "assertion": "Callback authenticates against the external cookie scheme and reads RelayState from AuthenticationProperties.Items[\"relayState\"]",
+      "pass": true,
+      "rationale": "AuthenticateAsync(ExternalCookieAuthenticationScheme) and Properties.Items.TryGetValue(\"relayState\")."
+    },
+    {
+      "assertion": "Warns that RelayState is untrusted input and must be validated before being used as a redirect target",
+      "pass": true,
+      "rationale": "Comment 'RelayState is UNTRUSTED' with Url.IsLocalUrl/allow-list; 'never use as open redirect'."
+    }
+  ],
+  "pass_count": 5,
+  "total_count": 5,
+  "score": 1.0
+}

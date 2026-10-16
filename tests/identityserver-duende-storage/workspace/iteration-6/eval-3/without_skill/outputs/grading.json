@@ -1,0 +1,34 @@
+{
+  "eval_id": 3,
+  "variant": "without_skill",
+  "assertions": [
+    {
+      "assertion": "Uses IApiScopeAdmin.CreateAsync with ApiScopeConfiguration before creating the resource/client that references it",
+      "pass": false,
+      "rationale": "Uses EF ConfigurationDbContext, not IApiScopeAdmin."
+    },
+    {
+      "assertion": "Uses IApiResourceAdmin and IClientAdmin.CreateAsync with CreateClient and CreateClientSecret { PlaintextValue = ... }",
+      "pass": false,
+      "rationale": "Uses EF entities and Secret Sha256, not IApiResourceAdmin/IClientAdmin or CreateClientSecret."
+    },
+    {
+      "assertion": "Checks SaveResult.IsSuccess and GetResult.Found",
+      "pass": false,
+      "rationale": "No SaveResult.IsSuccess or GetResult.Found; only SaveChangesAsync."
+    },
+    {
+      "assertion": "Updates via GetAsync then UpdateAsync(id, item, current.Version, ct) to get optimistic concurrency",
+      "pass": false,
+      "rationale": "Does not use GetAsync/UpdateAsync with Version; only suggests custom row-version."
+    },
+    {
+      "assertion": "Warns to protect/authorize the admin APIs (they are .NET service APIs, not preconfigured HTTP endpoints) and to load secrets from a secure source",
+      "pass": false,
+      "rationale": "No warning about protecting admin APIs or secure secret source; hardcodes \"s3cret\"."
+    }
+  ],
+  "pass_count": 0,
+  "total_count": 5,
+  "score": 0.0
+}
